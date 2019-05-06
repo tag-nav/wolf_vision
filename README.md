@@ -37,15 +37,22 @@ Dependencies
 
 ! Please notice that we are detailing two installation procedures below. If you are familiar with `ROS` and more especially the [`catkin_tools`](https://catkin-tools.readthedocs.io/en/latest/index.html) package then you may jump directly to the 'Using the `catkin_tools` package' section.
 
+#### CMake 
+Building tool used by Wolf and by some of its dependencies. In order to install *cmake* please follow the instructions at [cmake site](https://cmake.org/install/)
+
+#### Autoreconf
+
+    $ sudo apt install dh-autoreconf
+
 #### Eigen
 
 [Eigen](http://eigen.tuxfamily.org). Linear algebra, header library. Eigen 3.2 is also a depencency of ROS-Hydro. In case you don't have ROS in your machine, you can install Eigen by typing:
 
     $ sudo apt-get install libeigen3-dev
-    
+
 #### Ceres (5 steps)
 
-[Ceres](http://www.ceres-solver.org/) is an optimization library. Currently, this dependency is optional, so the build procedure of Wolf skips part of compilation in case this dependency is not found on the system. **Installation** is desctibed at [Ceres site](http://www.ceres-solver.org/building.html). However we report here an alternative step by step procedure to install Ceres.
+[Ceres](http://www.ceres-solver.org/) is an optimization library. Currently, this dependency is optional, so the build procedure of Wolf skips part of compilation in case this dependency is not found on the system. **Installation** is described at [Ceres site](http://www.ceres-solver.org/building.html). However we report here an alternative step by step procedure to install Ceres.
 
 **(1)** Skip this step if Cmake 2.8.0+ and Eigen3.0+ are already installed. Otherwise install them with *apt-get*.
 
@@ -74,6 +81,7 @@ libgflags.a will be installed at **/usr/local/lib**
     
 -   Build and install with:
 
+        $ cd glog
         $ ./autogen.sh
         $ ./configure --with-gflags=/usr/local/
         $ make
@@ -81,7 +89,7 @@ libgflags.a will be installed at **/usr/local/lib**
 
 libglog.so will be installed at **/usr/local/lib**
 
--   Tourbleshooting:
+-   Troubleshooting:
 
     * If ./autogen.sh fails with './autogen.sh: autoreconf: not found'
 
@@ -157,9 +165,11 @@ Wolf uses spdlog macros. Right now Wolf is only compatible with spdlog version 0
 
 #### Optional: Vision Utils (Install only if you want to use IRI's vision utils)
 
+This library requires OpenCV. If it is not installed in your system or you are unsure, please follow the installation steps at https://gitlab.iri.upc.edu/mobile_robotics/vision_utils
+
 **(1)** Git clone the source:
 
-        $ git clone ssh://git@gitlab.iri.upc.edu:2202/asantamaria/vision_utils.git
+        $ git clone https://gitlab.iri.upc.edu/mobile_robotics/vision_utils.git
     
 **(2)** Build and install:
 
@@ -180,7 +190,8 @@ Wolf uses spdlog macros. Right now Wolf is only compatible with spdlog version 0
     
 **(2)** Build and install:
 
-        $ cd laser_scan_utils/build
+        $ cd laser_scan_utils
+        $ mkdir build && cd build
         $ cmake ..
         $ make
         $ sudo make install
@@ -193,7 +204,8 @@ Wolf uses spdlog macros. Right now Wolf is only compatible with spdlog version 0
     
 **(2)** Build and install:
 
-    $ cd raw_gps_utils/build
+    $ cd raw_gps_utils
+    $ mkdir build && cd build
     $ cmake ..
     $ make
     $ sudo make install
@@ -203,9 +215,9 @@ Download and build
 
 #### Wolf C++ Library
 
-**Download:**
+**Clone:**
     
-    $ git clone https://gitlab.iri.upc.edu/mobile_robotics/wolf.git
+    $ git clone https://gitlab.iri.upc.edu/mobile_robotics/wolf_projects/wolf_lib/wolf.git
     
 **Build:**
 

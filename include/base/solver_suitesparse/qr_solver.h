@@ -13,11 +13,11 @@
 #include <ctime>
 
 //Wolf includes
-#include "base/state_block.h"
-#include "../constraint_sparse.h"
-#include "base/constraint/constraint_odom_2D.h"
-#include "base/constraint/constraint_corner_2D.h"
-#include "base/constraint/constraint_container.h"
+#include "base/state_block/state_block.h"
+#include "../factor_sparse.h"
+#include "base/factor/factor_odom_2D.h"
+#include "base/factor/factor_corner_2D.h"
+#include "base/factor/factor_container.h"
 #include "base/solver_suitesparse/sparse_utils.h"
 
 // wolf solver
@@ -28,7 +28,7 @@
 #include <eigen3/Eigen/OrderingMethods>
 #include <eigen3/Eigen/SparseQR>
 #include <Eigen/StdVector>
-#include "base/constraint/constraint_pose_2D.h"
+#include "base/factor/factor_pose_2D.h"
 
 namespace wolf
 {
@@ -41,7 +41,7 @@ class SolverQR
         Eigen::SparseMatrix<double> A_, R_;
         Eigen::VectorXd b_, x_incr_;
         std::vector<StateBlockPtr> nodes_;
-        std::vector<ConstraintBasePtr> constraints_;
+        std::vector<FactorBasePtr> factors_;
         std::vector<CostFunctionBasePtr> cost_functions_;
 
         // ordering
@@ -51,8 +51,8 @@ class SolverQR
         Eigen::CCOLAMDOrdering<int> orderer_;
         Eigen::VectorXi node_ordering_restrictions_;
         Eigen::ArrayXi node_locations_;
-        std::vector<unsigned int> constraint_locations_;
-        unsigned int n_new_constraints_;
+        std::vector<unsigned int> factor_locations_;
+        unsigned int n_new_factors_;
 
         // time
         clock_t t_ordering_, t_solving_, t_managing_;
@@ -60,11 +60,11 @@ class SolverQR
 
     public:
         SolverQR(ProblemPtr problem_ptr_) :
-                problem_ptr_(problem_ptr_), A_(0, 0), R_(0, 0), A_nodes_(0, 0), acc_node_permutation_(0), n_new_constraints_(
+                problem_ptr_(problem_ptr_), A_(0, 0), R_(0, 0), A_nodes_(0, 0), acc_node_permutation_(0), n_new_factors_(
                         0), time_ordering_(0), time_solving_(0), time_managing_(0)
         {
             node_locations_.resize(0);
-            constraint_locations_.resize(0);
+            factor_locations_.resize(0);
         }
 
         virtual ~SolverQR()
@@ -99,25 +99,25 @@ class SolverQR
                 }
                 problem_ptr_->getStateBlockNotificationList().pop_front();
             }
-            // UPDATE CONSTRAINTS
-            while (!problem_ptr_->getConstraintNotificationList().empty())
+            // UPDATE FACTORS
+            while (!problem_ptr_->getFactorNotificationList().empty())
             {
-                switch (problem_ptr_->getConstraintNotificationList().front().notification_)
+                switch (problem_ptr_->getFactorNotificationList().front().notification_)
                 {
                     case ADD:
                     {
-                        addConstraint(problem_ptr_->getConstraintNotificationList().front().constraint_ptr_);
+                        addFactor(problem_ptr_->getFactorNotificationList().front().factor_ptr_);
                         break;
                     }
                     case REMOVE:
                     {
-                        // TODO: removeConstraint(problem_ptr_->getConstraintNotificationList().front().id_);
+                        // TODO: removeFactor(problem_ptr_->getFactorNotificationList().front().id_);
                         break;
                     }
                     default:
-                        throw std::runtime_error("SolverQR::update: Constraint notification must be ADD or REMOVE.");
+                        throw std::runtime_error("SolverQR::update: Factor notification must be ADD or REMOVE.");
                 }
-                problem_ptr_->getConstraintNotificationList().pop_front();
+                problem_ptr_->getFactorNotificationList().pop_front();
             }
         }
 
@@ -125,13 +125,13 @@ class SolverQR
         {
             t_managing_ = clock();
 
-            std::cout << "adding state unit " << _state_ptr->getPtr() << std::endl;
+            std::cout << "adding state unit " << _state_ptr->get() << std::endl;
             if (!_state_ptr->isFixed())
             {
                 nodes_.push_back(_state_ptr);
-                id_2_idx_[_state_ptr->getPtr()] = nodes_.size() - 1;
+                id_2_idx_[_state_ptr->get()] = nodes_.size() - 1;
 
-                std::cout << "idx " << id_2_idx_[_state_ptr->getPtr()] << std::endl;
+                std::cout << "idx " << id_2_idx_[_state_ptr->get()] << std::endl;
 
                 // Resize accumulated permutations
                 augmentPermutation(acc_node_permutation_, nNodes());
@@ -152,17 +152,17 @@ class SolverQR
             //TODO
         }
 
-        void addConstraint(ConstraintBasePtr _constraint_ptr)
+        void addFactor(FactorBasePtr _factor_ptr)
         {
-            std::cout << "adding constraint " << _constraint_ptr->id() << std::endl;
+            std::cout << "adding factor " << _factor_ptr->id() << std::endl;
             t_managing_ = clock();
 
-            constraints_.push_back(_constraint_ptr);
-            cost_functions_.push_back(createCostFunction(_constraint_ptr));
+            factors_.push_back(_factor_ptr);
+            cost_functions_.push_back(createCostFunction(_factor_ptr));
 
-            unsigned int meas_dim = _constraint_ptr->getSize();
+            unsigned int meas_dim = _factor_ptr->getSize();
 
-            std::vector<Eigen::MatrixXs> jacobians(_constraint_ptr->getStateBlockPtrVector().size());
+            std::vector<Eigen::MatrixXs> jacobians(_factor_ptr->getStateBlockPtrVector().size());
             Eigen::VectorXs error(meas_dim);
 
             cost_functions_.back()->evaluateResidualJacobians();
@@ -170,17 +170,17 @@ class SolverQR
             cost_functions_.back()->getJacobians(jacobians);
 
             std::vector<unsigned int> idxs;
-            for (unsigned int i = 0; i < _constraint_ptr->getStateBlockPtrVector().size(); i++)
-                if (!_constraint_ptr->getStateBlockPtrVector().at(i)->isFixed())
-                    idxs.push_back(id_2_idx_[_constraint_ptr->getStateBlockPtrVector().at(i)->getPtr()]);
+            for (unsigned int i = 0; i < _factor_ptr->getStateBlockPtrVector().size(); i++)
+                if (!_factor_ptr->getStateBlockPtrVector().at(i)->isFixed())
+                    idxs.push_back(id_2_idx_[_factor_ptr->getStateBlockPtrVector().at(i)->get()]);
 
-            n_new_constraints_++;
-            constraint_locations_.push_back(A_.rows());
+            n_new_factors_++;
+            factor_locations_.push_back(A_.rows());
 
             // Resize problem
             A_.conservativeResize(A_.rows() + meas_dim, A_.cols());
             b_.conservativeResize(b_.size() + meas_dim);
-            A_nodes_.conservativeResize(constraints_.size(), nNodes());
+            A_nodes_.conservativeResize(factors_.size(), nNodes());
 
             // ADD MEASUREMENTS
             for (unsigned int j = 0; j < idxs.size(); j++)
@@ -208,7 +208,7 @@ class SolverQR
             // full problem ordering
             if (_first_ordered_idx == -1)
             {
-                // ordering ordering constraints
+                // ordering ordering factors
                 node_ordering_restrictions_.resize(nNodes());
                 node_ordering_restrictions_ = A_nodes_.bottomRows(1).transpose();
 
@@ -241,7 +241,7 @@ class SolverQR
                     //std::cout << "ordering partial_ordering problem: " << _first_ordered_node << " to "<< n_nodes_ - 1 << std::endl;
                     Eigen::SparseMatrix<int> sub_A_nodes_ = A_nodes_.rightCols(ordered_nodes);
 
-                    // _partial_ordering ordering_ constraints
+                    // _partial_ordering ordering_ factors
                     node_ordering_restrictions_.resize(ordered_nodes);
                     node_ordering_restrictions_ = sub_A_nodes_.bottomRows(1).transpose();
 
@@ -278,16 +278,16 @@ class SolverQR
         {
             unsigned int first_ordered_node = nNodes();
             unsigned int first_ordered_idx;
-            for (unsigned int i = 0; i < n_new_constraints_; i++)
+            for (unsigned int i = 0; i < n_new_factors_; i++)
             {
-                ConstraintBasePtr ct_ptr = constraints_.at(constraints_.size() - 1 - i);
-                std::cout << "constraint: " << i << " id: " << constraints_.at(constraints_.size() - 1 - i)->id()
+                FactorBasePtr ct_ptr = factors_.at(factors_.size() - 1 - i);
+                std::cout << "factor: " << i << " id: " << factors_.at(factors_.size() - 1 - i)->id()
                         << std::endl;
                 for (unsigned int j = 0; j < ct_ptr->getStateBlockPtrVector().size(); j++)
                 {
                     if (!ct_ptr->getStateBlockPtrVector().at(j)->isFixed())
                     {
-                        unsigned int idx = id_2_idx_[ct_ptr->getStateBlockPtrVector().at(j)->getPtr()];
+                        unsigned int idx = id_2_idx_[ct_ptr->getStateBlockPtrVector().at(j)->get()];
                         //std::cout << "estimated idx " << idx << std::endl;
                         //std::cout << "node_order(idx) " << node_order(idx) << std::endl;
                         //std::cout << "first_ordered_node " << first_ordered_node << std::endl;
@@ -309,7 +309,7 @@ class SolverQR
 
         bool solve(const unsigned int mode)
         {
-            if (n_new_constraints_ == 0)
+            if (n_new_factors_ == 0)
                 return 1;
 
             std::cout << "solving mode " << mode << std::endl;
@@ -377,10 +377,10 @@ class SolverQR
                 // finding measurements block
                 Eigen::SparseMatrix<int> measurements_to_initial = A_nodes_.col(nodeOrder(first_ordered_idx));
                 //std::cout << "measurements_to_initial " << measurements_to_initial << std::endl;
-                //std::cout << "measurements_to_initial.innerIndexPtr()[measurements_to_initial.outerIndexPtr()[0]] " << measurements_to_initial.innerIndexPtr()[measurements_to_initial.outerIndexPtr()[0]] << std::endl;
+                //std::cout << "measurements_to_initial.innerIndex()[measurements_to_initial.outerIndex()[0]] " << measurements_to_initial.innerIndex()[measurements_to_initial.outerIndex()[0]] << std::endl;
                 unsigned int first_ordered_measurement =
-                        measurements_to_initial.innerIndexPtr()[measurements_to_initial.outerIndexPtr()[0]];
-                unsigned int ordered_measurements = A_.rows() - constraint_locations_.at(first_ordered_measurement);
+                        measurements_to_initial.innerIndex()[measurements_to_initial.outerIndex()[0]];
+                unsigned int ordered_measurements = A_.rows() - factor_locations_.at(first_ordered_measurement);
                 unsigned int ordered_variables = A_.cols() - nodeLocation(first_ordered_idx); //nodes_.at(first_ordered_idx).location;
                 unsigned int unordered_variables = nodeLocation(first_ordered_idx); //nodes_.at(first_ordered_idx).location;
 
@@ -423,14 +423,14 @@ class SolverQR
             // UPDATE X VALUE
             for (unsigned int i = 0; i < nodes_.size(); i++)
             {
-                Eigen::Map < Eigen::VectorXs > x_i(nodes_.at(i)->getPtr(), nodes_.at(i)->getSize());
+                Eigen::Map < Eigen::VectorXs > x_i(nodes_.at(i)->get(), nodes_.at(i)->getSize());
                 x_i += x_incr_.segment(nodeLocation(i), nodes_.at(i)->getSize());
             }
             // Zero the error
             b_.setZero();
 
             time_solving_ += ((double)clock() - t_solving_) / CLOCKS_PER_SEC;
-            n_new_constraints_ = 0;
+            n_new_factors_ = 0;
             return 1;
         }
 
@@ -528,37 +528,37 @@ class SolverQR
             return nodes_.size();
         }
 
-        CostFunctionBasePtr createCostFunction(ConstraintBasePtr _corrPtr)
+        CostFunctionBasePtr createCostFunction(FactorBasePtr _fac_ptr)
         {
-            //std::cout << "adding ctr " << _corrPtr->id() << std::endl;
-            //_corrPtr->print();
+            //std::cout << "adding fac " << _fac_ptr->id() << std::endl;
+            //_fac_ptr->print();
 
-            switch (_corrPtr->getTypeId())
+            switch (_fac_ptr->getTypeId())
             {
-                case CTR_GPS_FIX_2D:
+                case FAC_GPS_FIX_2D:
                 {
-                    ConstraintGPS2D* specific_ptr = (ConstraintGPS2D*)(_corrPtr);
-                    return (CostFunctionBasePtr)(new CostFunctionSparse<ConstraintGPS2D, specific_ptr->residualSize,
+                    FactorGPS2D* specific_ptr = (FactorGPS2D*)(_fac_ptr);
+                    return (CostFunctionBasePtr)(new CostFunctionSparse<FactorGPS2D, specific_ptr->residualSize,
                             specific_ptr->block0Size, specific_ptr->block1Size, specific_ptr->block2Size,
                             specific_ptr->block3Size, specific_ptr->block4Size, specific_ptr->block5Size,
                             specific_ptr->block6Size, specific_ptr->block7Size, specific_ptr->block8Size,
                             specific_ptr->block9Size>(specific_ptr));
                     break;
                 }
-                case CTR_ODOM_2D:
+                case FAC_ODOM_2D:
                 {
-                    ConstraintOdom2D* specific_ptr = (ConstraintOdom2D*)(_corrPtr);
-                    return (CostFunctionBasePtr)new CostFunctionSparse<ConstraintOdom2D, specific_ptr->residualSize,
+                    FactorOdom2D* specific_ptr = (FactorOdom2D*)(_fac_ptr);
+                    return (CostFunctionBasePtr)new CostFunctionSparse<FactorOdom2D, specific_ptr->residualSize,
                             specific_ptr->block0Size, specific_ptr->block1Size, specific_ptr->block2Size,
                             specific_ptr->block3Size, specific_ptr->block4Size, specific_ptr->block5Size,
                             specific_ptr->block6Size, specific_ptr->block7Size, specific_ptr->block8Size,
                             specific_ptr->block9Size>(specific_ptr);
                     break;
                 }
-                case CTR_CORNER_2D:
+                case FAC_CORNER_2D:
                 {
-                    ConstraintCorner2D* specific_ptr = (ConstraintCorner2D*)(_corrPtr);
-                    return (CostFunctionBasePtr)new CostFunctionSparse<ConstraintCorner2D, specific_ptr->residualSize,
+                    FactorCorner2D* specific_ptr = (FactorCorner2D*)(_fac_ptr);
+                    return (CostFunctionBasePtr)new CostFunctionSparse<FactorCorner2D, specific_ptr->residualSize,
                             specific_ptr->block0Size, specific_ptr->block1Size, specific_ptr->block2Size,
                             specific_ptr->block3Size, specific_ptr->block4Size, specific_ptr->block5Size,
                             specific_ptr->block6Size, specific_ptr->block7Size, specific_ptr->block8Size,
@@ -566,7 +566,7 @@ class SolverQR
                     break;
                 }
                 default:
-                    std::cout << "Unknown constraint type! Please add it in the CeresWrapper::createCostFunction()"
+                    std::cout << "Unknown factor type! Please add it in the CeresWrapper::createCostFunction()"
                             << std::endl;
 
                     return nullptr;

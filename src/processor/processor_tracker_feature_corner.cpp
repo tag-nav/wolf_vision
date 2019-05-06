@@ -46,11 +46,11 @@ void ProcessorTrackerFeatureCorner::preProcess()
     R_world_robot.topLeftCorner<2, 2>() = Eigen::Rotation2Ds(t_world_robot_(2)).matrix();
 
     // robot_sensor (to be computed once if extrinsics are fixed and not dynamic)
-    if (getSensorPtr()->extrinsicsInCaptures() || !getSensorPtr()->getPPtr()->isFixed()
-            || !getSensorPtr()->getOPtr()->isFixed() || !extrinsics_transformation_computed_)
+    if (getSensor()->extrinsicsInCaptures() || !getSensor()->getP()->isFixed()
+            || !getSensor()->getO()->isFixed() || !extrinsics_transformation_computed_)
     {
-        t_robot_sensor_.head<2>() = getSensorPtr()->getPPtr()->getState();
-        t_robot_sensor_(2) = getSensorPtr()->getOPtr()->getState()(0);
+        t_robot_sensor_.head<2>() = getSensor()->getP()->getState();
+        t_robot_sensor_(2) = getSensor()->getO()->getState()(0);
         R_robot_sensor_.topLeftCorner<2, 2>() = Eigen::Rotation2Ds(t_robot_sensor_(2)).matrix();
         extrinsics_transformation_computed_ = true;
     }
@@ -70,8 +70,8 @@ void ProcessorTrackerFeatureCorner::advanceDerived()
     corners_last_ = std::move(corners_incoming_);
 }
 
-unsigned int ProcessorTrackerFeatureCorner::trackFeatures(const FeatureBaseList& _features_last_in,
-                                                         FeatureBaseList& _features_incoming_out,
+unsigned int ProcessorTrackerFeatureCorner::trackFeatures(const FeatureBasePtrList& _features_last_in,
+                                                         FeatureBasePtrList& _features_incoming_out,
                                                          FeatureMatchMap& _feature_correspondences)
 {
     std::cout << "tracking " << _features_last_in.size() << " features..." << std::endl;
@@ -107,21 +107,24 @@ bool ProcessorTrackerFeatureCorner::voteForKeyFrame()
     return incoming_ptr_->getFeatureList().size() < params_tracker_feature_corner_->n_corners_th;
 }
 
-unsigned int ProcessorTrackerFeatureCorner::detectNewFeatures(const unsigned int& _max_features, FeatureBaseList& _features_last_out)
+unsigned int ProcessorTrackerFeatureCorner::detectNewFeatures(const int& _max_features, FeatureBasePtrList& _features_incoming_out)
 {
     // in corners_last_ remain all not tracked corners
-    _features_last_out = std::move(corners_last_);
-    return _features_last_out.size();
+    _features_incoming_out = std::move(corners_last_);
+    if (_max_features != -1 && _features_incoming_out.size() > _max_features)
+        _features_incoming_out.resize(_max_features);
+
+    return _features_incoming_out.size();
 }
 
-ConstraintBasePtr ProcessorTrackerFeatureCorner::createConstraint(FeatureBasePtr _feature_ptr,
+FactorBasePtr ProcessorTrackerFeatureCorner::createFactor(FeatureBasePtr _feature_ptr,
                                                                 FeatureBasePtr _feature_other_ptr)
 {
     // Getting landmark ptr
     LandmarkCorner2DPtr landmark_ptr = nullptr;
-    for (auto constraint : _feature_other_ptr->getConstraintList())
-        if (constraint->getLandmarkOtherPtr() != nullptr && constraint->getLandmarkOtherPtr()->getType() == "CORNER 2D")
-            landmark_ptr = std::static_pointer_cast<LandmarkCorner2D>(constraint->getLandmarkOtherPtr());
+    for (auto factor : _feature_other_ptr->getFactorList())
+        if (factor->getLandmarkOther() != nullptr && factor->getLandmarkOther()->getType() == "CORNER 2D")
+            landmark_ptr = std::static_pointer_cast<LandmarkCorner2D>(factor->getLandmarkOther());
 
     if (landmark_ptr == nullptr)
     {
@@ -131,25 +134,25 @@ ConstraintBasePtr ProcessorTrackerFeatureCorner::createConstraint(FeatureBasePtr
                                                           std::make_shared<StateBlock>(feature_global_pose.tail(1)),
                                                           _feature_ptr->getMeasurement()(3));
 
-        // Add landmark constraint to the other feature
-        _feature_other_ptr->addConstraint(std::make_shared<ConstraintCorner2D>(_feature_other_ptr, landmark_ptr, shared_from_this()));
+        // Add landmark factor to the other feature
+        _feature_other_ptr->addFactor(std::make_shared<FactorCorner2D>(_feature_other_ptr, landmark_ptr, shared_from_this()));
     }
 
-//    std::cout << "creating constraint: last feature " << _feature_ptr->getMeasurement()
+//    std::cout << "creating factor: last feature " << _feature_ptr->getMeasurement()
 //              << " with origin feature " << _feature_other_ptr->getMeasurement() << std::endl
 //              << " corresponding to landmark " << landmark_ptr->id() << std::endl;
-    return std::make_shared<ConstraintCorner2D>(_feature_ptr, landmark_ptr, shared_from_this());
+    return std::make_shared<FactorCorner2D>(_feature_ptr, landmark_ptr, shared_from_this());
 }
 
 void ProcessorTrackerFeatureCorner::extractCorners(CaptureLaser2DPtr _capture_laser_ptr,
-                                                   FeatureBaseList& _corner_list)
+                                                   FeatureBasePtrList& _corner_list)
 {
     // TODO: sort corners by bearing
     std::list<laserscanutils::CornerPoint> corners;
 
     std::cout << "Extracting corners..." << std::endl;
     corner_finder_.findCorners(_capture_laser_ptr->getScan(),
-                               (std::static_pointer_cast<SensorLaser2D>(getSensorPtr()))->getScanParams(),
+                               (std::static_pointer_cast<SensorLaser2D>(getSensor()))->getScanParams(),
                                line_finder_,
                                corners);
 

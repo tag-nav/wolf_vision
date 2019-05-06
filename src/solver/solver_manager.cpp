@@ -1,6 +1,6 @@
 #include "base/solver/solver_manager.h"
-#include "base/trajectory_base.h"
-#include "base/map_base.h"
+#include "base/trajectory/trajectory_base.h"
+#include "base/map/map_base.h"
 #include "base/landmark/landmark_base.h"
 
 namespace wolf {
@@ -13,26 +13,30 @@ SolverManager::SolverManager(const ProblemPtr& _wolf_problem) :
 
 void SolverManager::update()
 {
+    // Consume notification maps
+    auto fac_notification_map = wolf_problem_->consumeFactorNotificationMap();
+    auto sb_notification_map = wolf_problem_->consumeStateBlockNotificationMap();
+
     // REMOVE CONSTRAINTS
-    auto ctr_notification_it = wolf_problem_->getConstraintNotificationMap().begin();
-    while ( ctr_notification_it != wolf_problem_->getConstraintNotificationMap().end() )
+    for (auto fac_notification_it = fac_notification_map.begin();
+         fac_notification_it != fac_notification_map.end();
+         /* nothing, next is handled within the for */)
     {
-        if (ctr_notification_it->second == REMOVE)
+        if (fac_notification_it->second == REMOVE)
         {
-            removeConstraint(ctr_notification_it->first);
-            ctr_notification_it = wolf_problem_->getConstraintNotificationMap().erase(ctr_notification_it);
+            removeFactor(fac_notification_it->first);
+            fac_notification_it = fac_notification_map.erase(fac_notification_it);
         }
         else
-            ctr_notification_it++;
+            fac_notification_it++;
     }
 
     // ADD/REMOVE STATE BLOCS
-    auto sb_notification_it = wolf_problem_->getStateBlockNotificationMap().begin();
-    while ( sb_notification_it != wolf_problem_->getStateBlockNotificationMap().end() )
+    while ( !sb_notification_map.empty() )
     {
-        StateBlockPtr state_ptr = sb_notification_it->first;
+        StateBlockPtr state_ptr = sb_notification_map.begin()->first;
 
-        if (sb_notification_it->second == ADD)
+        if (sb_notification_map.begin()->second == ADD)
         {
             // only add if not added
             if (state_blocks_.find(state_ptr) == state_blocks_.end())
@@ -46,7 +50,7 @@ void SolverManager::update()
             }
             else
             {
-                WOLF_DEBUG("Tried adding an already registered StateBlock.");
+                WOLF_DEBUG("Tried to add an already added !");
             }
         }
         else
@@ -63,23 +67,24 @@ void SolverManager::update()
             }
         }
         // next notification
-        sb_notification_it = wolf_problem_->getStateBlockNotificationMap().erase(sb_notification_it);
+        sb_notification_map.erase(sb_notification_map.begin());
     }
 
     // ADD CONSTRAINTS
-    ctr_notification_it = wolf_problem_->getConstraintNotificationMap().begin();
-    while (ctr_notification_it != wolf_problem_->getConstraintNotificationMap().end())
+    while (!fac_notification_map.empty())
     {
-        assert(wolf_problem_->getConstraintNotificationMap().begin()->second == ADD && "unexpected constraint notification value after all REMOVE have been processed, this should be ADD");
+        assert(fac_notification_map.begin()->second == ADD && "unexpected factor notification value after all REMOVE have been processed, this should be ADD");
 
-        addConstraint(wolf_problem_->getConstraintNotificationMap().begin()->first);
-        ctr_notification_it = wolf_problem_->getConstraintNotificationMap().erase(ctr_notification_it);
+        // add factor
+        addFactor(fac_notification_map.begin()->first);
+        // remove notification
+        fac_notification_map.erase(fac_notification_map.begin());
     }
 
     // UPDATE STATE BLOCKS (state, fix or local parameterization)
-    for (auto state_ptr : wolf_problem_->getStateBlockList())
+    for (auto state_pair : state_blocks_)
     {
-        assert(state_blocks_.find(state_ptr)!=state_blocks_.end() && "Updating the state of an unregistered StateBlock !");
+        auto state_ptr = state_pair.first;
 
         // state update
         if (state_ptr->stateUpdated())
@@ -105,12 +110,9 @@ void SolverManager::update()
             state_ptr->resetLocalParamUpdated();
         }
     }
-
-    assert(wolf_problem_->getConstraintNotificationMap().empty() && "wolf problem's constraints notification map not empty after update");
-    assert(wolf_problem_->getStateBlockNotificationMap().empty() && "wolf problem's state_blocks notification map not empty after update");
 }
 
-wolf::ProblemPtr SolverManager::getProblemPtr()
+wolf::ProblemPtr SolverManager::getProblem()
 {
     return wolf_problem_;
 }
@@ -124,7 +126,7 @@ std::string SolverManager::solve(const ReportVerbosity report_level)
 
     // update StateBlocks with optimized state value.
     /// @todo whatif someone has changed the state notification during opti ??
-    /// JV: I do not see a problem here, the solver provides the optimal state given the constraints, if someone changed the state during optimization, it will be overwritten by the optimal one.
+    /// JV: I do not see a problem here, the solver provides the optimal state given the factors, if someone changed the state during optimization, it will be overwritten by the optimal one.
 
     std::map<StateBlockPtr, Eigen::VectorXs>::iterator it = state_blocks_.begin(),
             it_end = state_blocks_.end();

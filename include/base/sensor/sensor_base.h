@@ -9,9 +9,9 @@ class StateBlock;
 }
 
 //Wolf includes
-#include "base/wolf.h"
-#include "base/node_base.h"
-#include "base/time_stamp.h"
+#include "base/common/wolf.h"
+#include "base/common/node_base.h"
+#include "base/common/time_stamp.h"
 
 //std includes
 
@@ -30,7 +30,7 @@ class SensorBase : public NodeBase, public std::enable_shared_from_this<SensorBa
 {
     private:
         HardwareBaseWPtr hardware_ptr_;
-        ProcessorBaseList processor_list_;
+        ProcessorBasePtrList processor_list_;
         std::vector<StateBlockPtr> state_block_vec_; ///< vector of state blocks, in the order P, O, intrinsic.
         SizeEigen calib_size_;
 
@@ -93,11 +93,11 @@ class SensorBase : public NodeBase, public std::enable_shared_from_this<SensorBa
 
         virtual void setProblem(ProblemPtr _problem) final;
 
-        HardwareBasePtr getHardwarePtr();
-        void setHardwarePtr(const HardwareBasePtr _hw_ptr);
+        HardwareBasePtr getHardware();
+        void setHardware(const HardwareBasePtr _hw_ptr);
 
         ProcessorBasePtr addProcessor(ProcessorBasePtr _proc_ptr);
-        ProcessorBaseList& getProcessorList();
+        ProcessorBasePtrList& getProcessorList();
 
         CaptureBasePtr lastKeyCapture(void);
         CaptureBasePtr lastCapture(const TimeStamp& _ts);
@@ -108,8 +108,8 @@ class SensorBase : public NodeBase, public std::enable_shared_from_this<SensorBa
         const std::vector<StateBlockPtr>& getStateBlockVec() const;
         std::vector<StateBlockPtr>& getStateBlockVec();
         StateBlockPtr getStateBlockPtrStatic(unsigned int _i) const;
-        StateBlockPtr getStateBlockPtr(unsigned int _i);
-        StateBlockPtr getStateBlockPtr(unsigned int _i, const TimeStamp& _ts);
+        StateBlockPtr getStateBlock(unsigned int _i);
+        StateBlockPtr getStateBlock(unsigned int _i, const TimeStamp& _ts);
         void setStateBlockPtrStatic(unsigned int _i, const StateBlockPtr _sb_ptr);
         void resizeStateBlockVec(unsigned int _size);
 
@@ -118,15 +118,15 @@ class SensorBase : public NodeBase, public std::enable_shared_from_this<SensorBa
         bool isStateBlockDynamic(unsigned int _i, const TimeStamp& _ts);
         bool isStateBlockDynamic(unsigned int _i);
 
-        StateBlockPtr getPPtr(const TimeStamp _ts);
-        StateBlockPtr getOPtr(const TimeStamp _ts);
-        StateBlockPtr getIntrinsicPtr(const TimeStamp _ts);
-        StateBlockPtr getPPtr() ;
-        StateBlockPtr getOPtr();
-        StateBlockPtr getIntrinsicPtr();
-        void setPPtr(const StateBlockPtr _p_ptr);
-        void setOPtr(const StateBlockPtr _o_ptr);
-        void setIntrinsicPtr(const StateBlockPtr _intr_ptr);
+        StateBlockPtr getP(const TimeStamp _ts);
+        StateBlockPtr getO(const TimeStamp _ts);
+        StateBlockPtr getIntrinsic(const TimeStamp _ts);
+        StateBlockPtr getP() ;
+        StateBlockPtr getO();
+        StateBlockPtr getIntrinsic();
+        void setP(const StateBlockPtr _p_ptr);
+        void setO(const StateBlockPtr _o_ptr);
+        void setIntrinsic(const StateBlockPtr _intr_ptr);
         void removeStateBlocks();
 
         void fix();
@@ -136,9 +136,9 @@ class SensorBase : public NodeBase, public std::enable_shared_from_this<SensorBa
         void fixIntrinsics();
         void unfixIntrinsics();
 
-        /** \brief Add an absolute constraint to a parameter
+        /** \brief Add an absolute factor to a parameter
          *
-         * Add an absolute constraint to a parameter
+         * Add an absolute factor to a parameter
          * \param _i state block index (in state_block_vec_) of the parameter to be constrained
          * \param _x prior value
          * \param _cov covariance
@@ -190,8 +190,8 @@ class SensorBase : public NodeBase, public std::enable_shared_from_this<SensorBa
 
 }
 
-#include "base/problem.h"
-#include "base/hardware_base.h"
+#include "base/problem/problem.h"
+#include "base/hardware/hardware_base.h"
 #include "base/capture/capture_base.h"
 #include "base/processor/processor_base.h"
 
@@ -202,7 +202,7 @@ inline unsigned int SensorBase::id()
     return sensor_id_;
 }
 
-inline ProcessorBaseList& SensorBase::getProcessorList()
+inline ProcessorBasePtrList& SensorBase::getProcessorList()
 {
     return processor_list_;
 }
@@ -226,7 +226,7 @@ inline StateBlockPtr SensorBase::getStateBlockPtrStatic(unsigned int _i) const
 inline void SensorBase::setStateBlockPtrStatic(unsigned int _i, const StateBlockPtr _sb_ptr)
 {
     assert (_i < state_block_vec_.size() && "Setting a state block pointer out of the vector range!");
-    assert((params_prior_map_.find(_i) == params_prior_map_.end() || _sb_ptr == nullptr) && "overwriting a state block that has an absolute constraint");
+    assert((params_prior_map_.find(_i) == params_prior_map_.end() || _sb_ptr == nullptr) && "overwriting a state block that has an absolute factor");
     state_block_vec_[_i] = _sb_ptr;
 }
 
@@ -258,27 +258,27 @@ inline Eigen::MatrixXs SensorBase::getNoiseCov()
     return noise_cov_;
 }
 
-inline HardwareBasePtr SensorBase::getHardwarePtr()
+inline HardwareBasePtr SensorBase::getHardware()
 {
     return hardware_ptr_.lock();
 }
 
-inline void SensorBase::setPPtr(const StateBlockPtr _p_ptr)
+inline void SensorBase::setP(const StateBlockPtr _p_ptr)
 {
     setStateBlockPtrStatic(0, _p_ptr);
 }
 
-inline void SensorBase::setOPtr(const StateBlockPtr _o_ptr)
+inline void SensorBase::setO(const StateBlockPtr _o_ptr)
 {
     setStateBlockPtrStatic(1, _o_ptr);
 }
 
-inline void SensorBase::setIntrinsicPtr(const StateBlockPtr _intr_ptr)
+inline void SensorBase::setIntrinsic(const StateBlockPtr _intr_ptr)
 {
     setStateBlockPtrStatic(2, _intr_ptr);
 }
 
-inline void SensorBase::setHardwarePtr(const HardwareBasePtr _hw_ptr)
+inline void SensorBase::setHardware(const HardwareBasePtr _hw_ptr)
 {
     hardware_ptr_ = _hw_ptr;
 }

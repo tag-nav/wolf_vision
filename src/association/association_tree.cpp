@@ -113,7 +113,7 @@ void AssociationTree::solve(std::map<unsigned int, unsigned int> & _pairs, std::
             _associated_mask.at(anPtr->getDetectionIndex()) = true; 
             _pairs[anPtr->getDetectionIndex()] = anPtr->getTargetIndex();
         }
-        anPtr = anPtr->upNodePtr();
+        anPtr = anPtr->upNode();
     }        
 }
 
@@ -159,7 +159,7 @@ void AssociationTree::solve(std::vector<std::pair<unsigned int, unsigned int> > 
             _associated_mask.at(anPtr->getDetectionIndex()) = true;
             _pairs.push_back( std::pair<unsigned int, unsigned int>(anPtr->getDetectionIndex(), anPtr->getTargetIndex()) );
         }
-        anPtr = anPtr->upNodePtr();
+        anPtr = anPtr->upNode();
     }
 }
     

@@ -1,8 +1,8 @@
 
 #include "base/landmark/landmark_base.h"
-#include "base/constraint/constraint_base.h"
-#include "base/map_base.h"
-#include "base/state_block.h"
+#include "base/factor/factor_base.h"
+#include "base/map/map_base.h"
+#include "base/state_block/state_block.h"
 #include "base/yaml/yaml_conversion.h"
 
 namespace wolf {
@@ -94,11 +94,6 @@ void LandmarkBase::registerNewStateBlocks()
     }
 }
 
-Eigen::MatrixXs LandmarkBase::getCovariance() const
-{
-    return getProblem()->getLandmarkCovariance(shared_from_this());
-}
-
 bool LandmarkBase::getCovariance(Eigen::MatrixXs& _cov) const
 {
     return getProblem()->getLandmarkCovariance(shared_from_this(), _cov);
@@ -108,25 +103,21 @@ void LandmarkBase::removeStateBlocks()
 {
     for (unsigned int i = 0; i < state_block_vec_.size(); i++)
     {
-        auto sbp = getStateBlockPtr(i);
+        auto sbp = getStateBlock(i);
         if (sbp != nullptr)
         {
             if (getProblem() != nullptr)
             {
                 getProblem()->removeStateBlock(sbp);
             }
-            setStateBlockPtr(i, nullptr);
+            setStateBlock(i, nullptr);
         }
     }
 }
 
 Eigen::VectorXs LandmarkBase::getState() const
 {
-    SizeEigen size = 0;
-    for (StateBlockPtr sb : state_block_vec_)
-        if (sb)
-            size += sb->getSize();
-    Eigen::VectorXs state(size);
+    Eigen::VectorXs state;
 
     getState(state);
 
@@ -140,10 +131,9 @@ void LandmarkBase::getState(Eigen::VectorXs& _state) const
         if (sb)
             size += sb->getSize();
 
-    assert(_state.size() == size && "Wrong state vector size");
+    _state = Eigen::VectorXs(size);
 
     SizeEigen index = 0;
-
     for (StateBlockPtr sb : state_block_vec_)
         if (sb)
         {
@@ -157,24 +147,24 @@ YAML::Node LandmarkBase::saveToYaml() const
     YAML::Node node;
     node["id"] = landmark_id_;
     node["type"] = node_type_;
-    if (getPPtr() != nullptr)
+    if (getP() != nullptr)
     {
-        node["position"] = getPPtr()->getState();
-        node["position fixed"] = getPPtr()->isFixed();
+        node["position"] = getP()->getState();
+        node["position fixed"] = getP()->isFixed();
     }
-    if (getOPtr() != nullptr)
+    if (getO() != nullptr)
     {
-        node["orientation"] = getOPtr()->getState();
-        node["orientation fixed"] = getOPtr()->isFixed();
+        node["orientation"] = getO()->getState();
+        node["orientation fixed"] = getO()->isFixed();
     }
     return node;
 }
 
-ConstraintBasePtr LandmarkBase::addConstrainedBy(ConstraintBasePtr _ctr_ptr)
+FactorBasePtr LandmarkBase::addConstrainedBy(FactorBasePtr _fac_ptr)
 {
-    constrained_by_list_.push_back(_ctr_ptr);
-    _ctr_ptr->setLandmarkOtherPtr(shared_from_this());
-    return _ctr_ptr;
+    constrained_by_list_.push_back(_fac_ptr);
+    _fac_ptr->setLandmarkOther(shared_from_this());
+    return _fac_ptr;
 }
 
 } // namespace wolf

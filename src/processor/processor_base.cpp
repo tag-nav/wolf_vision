@@ -1,7 +1,7 @@
 #include "base/processor/processor_base.h"
 #include "base/processor/processor_motion.h"
 #include "base/capture/capture_base.h"
-#include "base/frame_base.h"
+#include "base/frame/frame_base.h"
 
 namespace wolf {
 
@@ -62,7 +62,7 @@ void ProcessorBase::remove()
         if (isMotion())
         {
             ProblemPtr P = getProblem();
-            if(P && P->getProcessorMotionPtr()->id() == this->id())
+            if(P && P->getProcessorMotion()->id() == this->id())
                 P->clearProcessorMotion();
         }
 

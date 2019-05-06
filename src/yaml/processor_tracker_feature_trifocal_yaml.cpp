@@ -10,7 +10,7 @@
 #include "base/yaml/yaml_conversion.h"
 
 // wolf
-#include "base/factory.h"
+#include "base/common/factory.h"
 
 // yaml-cpp library
 #include <yaml-cpp/yaml.h>
@@ -51,7 +51,7 @@ static ProcessorParamsBasePtr createProcessorParamsTrackerFeatureTrifocal(const 
         params->n_cells_h                       = algorithm["grid horiz cells"]               .as<int>();
         params->n_cells_v                       = algorithm["grid vert cells"]                .as<int>();
         params->min_response_new_feature        = algorithm["min response new features"]      .as<int>();
-        params->min_track_length_for_constraint = algorithm["min track length for constraint"].as<int>();
+        params->min_track_length_for_factor     = algorithm["min track length for factor"].as<int>();
 
         YAML::Node noise                      = config["noise"];
         params->pixel_noise_std               = noise ["pixel noise std"].as<Scalar>();

@@ -25,7 +25,7 @@ struct ProcessorParamsTrackerFeatureTrifocal : public ProcessorParamsTrackerFeat
         int n_cells_v;
         int min_response_new_feature;
         Scalar pixel_noise_std; ///< std noise of the pixel
-        int min_track_length_for_constraint; ///< Minimum track length of a matched feature to create a constraint
+        int min_track_length_for_factor; ///< Minimum track length of a matched feature to create a factor
 };
 
 WOLF_PTR_TYPEDEFS(ProcessorTrackerFeatureTrifocal);
@@ -66,7 +66,7 @@ class ProcessorTrackerFeatureTrifocal : public ProcessorTrackerFeature
          * \param _features_incoming_out returned list of features found in \b incoming
          * \param _feature_matches returned map of correspondences: _feature_matches[feature_out_ptr] = feature_in_ptr
          */
-        virtual unsigned int trackFeatures(const FeatureBaseList& _features_last_in, FeatureBaseList& _features_incoming_out, FeatureMatchMap& _feature_matches) override;
+        virtual unsigned int trackFeatures(const FeatureBasePtrList& _features_last_in, FeatureBasePtrList& _features_incoming_out, FeatureMatchMap& _feature_matches) override;
 
         /** \brief Correct the drift in incoming feature by re-comparing against the corresponding feature in origin.
          * \param _origin_feature input feature in origin capture tracked
@@ -85,24 +85,26 @@ class ProcessorTrackerFeatureTrifocal : public ProcessorTrackerFeature
         virtual bool voteForKeyFrame() override;
 
         /** \brief Detect new Features
-         * \param _max_features maximum number of features detected
+         * \param _max_features maximum number of features detected (-1: unlimited. 0: none)
+         * \param _features_last_out The list of detected Features.
          * \return The number of detected Features.
          *
          * This function detects Features that do not correspond to known Features/Landmarks in the system.
          *
-         * The function sets the member new_features_last_, the list of newly detected features.
+         * The function is called in ProcessorTrackerFeature::processNew() to set the member new_features_last_,
+         * the list of newly detected features of the capture last_ptr_.
          */
-        virtual unsigned int detectNewFeatures(const unsigned int& _max_new_features, FeatureBaseList& _features_last_out) override;
+        virtual unsigned int detectNewFeatures(const int& _max_new_features, FeatureBasePtrList& _features_last_out) override;
 
-        /** \brief Create a new constraint and link it to the wolf tree
+        /** \brief Create a new factor and link it to the wolf tree
          * \param _feature_ptr pointer to the parent Feature
          * \param _feature_other_ptr pointer to the other feature constrained.
          *
          * Implement this method in derived classes.
          *
-         * This function creates a constraint of the appropriate type for the derived processor.
+         * This function creates a factor of the appropriate type for the derived processor.
          */
-        virtual ConstraintBasePtr createConstraint(FeatureBasePtr _feature_ptr, FeatureBasePtr _feature_other_ptr) override;
+        virtual FactorBasePtr createFactor(FeatureBasePtr _feature_ptr, FeatureBasePtr _feature_other_ptr) override;
 
         //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -116,7 +118,7 @@ class ProcessorTrackerFeatureTrifocal : public ProcessorTrackerFeature
          */
         virtual void resetDerived() override;
 
-        /** \brief Pre-process: check if all captures (prev-origin, origin, last) are initialized to allow constraints creation
+        /** \brief Pre-process: check if all captures (prev-origin, origin, last) are initialized to allow factors creation
          *
          */
         virtual void preProcess() override;
@@ -126,11 +128,11 @@ class ProcessorTrackerFeatureTrifocal : public ProcessorTrackerFeature
          */
         virtual void postProcess() override;
 
-        /** \brief Establish constraints between features in Captures \b last and \b origin
+        /** \brief Establish factors between features in Captures \b last and \b origin
          */
-        virtual void establishConstraints() override;
+        virtual void establishFactors() override;
 
-        CaptureBasePtr getPrevOriginPtr();
+        CaptureBasePtr getPrevOrigin();
 
         bool isInlier(const cv::KeyPoint& _kp_incoming, const cv::KeyPoint& _kp_last);
 
@@ -157,7 +159,7 @@ class ProcessorTrackerFeatureTrifocal : public ProcessorTrackerFeature
         const Matrix2s& pixelCov() const;
 };
 
-inline CaptureBasePtr ProcessorTrackerFeatureTrifocal::getPrevOriginPtr()
+inline CaptureBasePtr ProcessorTrackerFeatureTrifocal::getPrevOrigin()
 {
     return prev_origin_ptr_;
 }

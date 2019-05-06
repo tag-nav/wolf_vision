@@ -9,10 +9,10 @@
 #include <iostream>
 
 //Wolf
-#include "base/wolf.h"
-#include "base/problem.h"
+#include "base/common/wolf.h"
+#include "base/problem/problem.h"
 #include "base/sensor/sensor_base.h"
-#include "base/state_block.h"
+#include "base/state_block/state_block.h"
 #include "base/processor/processor_tracker_landmark_dummy.h"
 #include "base/capture/capture_void.h"
 
@@ -20,8 +20,8 @@ void print_problem_pointers(wolf::ProblemPtr wolf_problem_ptr_)
 {
     using namespace wolf;
     std::cout << "\n-----------\nWolf tree begin" << std::endl;
-    std::cout << "Hrd: " << wolf_problem_ptr_->getHardwarePtr()->getProblem() << std::endl;
-    for (SensorBasePtr sen : wolf_problem_ptr_->getHardwarePtr()->getSensorList())
+    std::cout << "Hrd: " << wolf_problem_ptr_->getHardware()->getProblem() << std::endl;
+    for (SensorBasePtr sen : wolf_problem_ptr_->getHardware()->getSensorList())
     {
         std::cout << "\tSen: " << sen->getProblem() << std::endl;
         for (ProcessorBasePtr prc : sen->getProcessorList())
@@ -29,8 +29,8 @@ void print_problem_pointers(wolf::ProblemPtr wolf_problem_ptr_)
             std::cout << "\t\tPrc: " << prc->getProblem() << std::endl;
         }
     }
-    std::cout << "Trj: " << wolf_problem_ptr_->getTrajectoryPtr()->getProblem() << std::endl;
-    for (FrameBasePtr frm : wolf_problem_ptr_->getTrajectoryPtr()->getFrameList())
+    std::cout << "Trj: " << wolf_problem_ptr_->getTrajectory()->getProblem() << std::endl;
+    for (FrameBasePtr frm : wolf_problem_ptr_->getTrajectory()->getFrameList())
     {
         std::cout << "\tFrm: " << frm->getProblem() << std::endl;
         for (CaptureBasePtr cap : frm->getCaptureList())
@@ -39,15 +39,15 @@ void print_problem_pointers(wolf::ProblemPtr wolf_problem_ptr_)
             for (FeatureBasePtr ftr : cap->getFeatureList())
             {
                 std::cout << "\t\t\tFtr: " << ftr->getProblem() << std::endl;
-                for (ConstraintBasePtr ctr : ftr->getConstraintList())
+                for (FactorBasePtr ctr : ftr->getFactorList())
                 {
                     std::cout << "\t\t\t\tCtr: " << ctr->getProblem() << std::endl;
                 }
             }
         }
     }
-    std::cout << "Map: " << wolf_problem_ptr_->getMapPtr()->getProblem() << std::endl;
-    for (LandmarkBasePtr lmk : wolf_problem_ptr_->getMapPtr()->getLandmarkList())
+    std::cout << "Map: " << wolf_problem_ptr_->getMap()->getProblem() << std::endl;
+    for (LandmarkBasePtr lmk : wolf_problem_ptr_->getMap()->getLandmarkList())
     {
         std::cout << "\tLmk: " << lmk->getProblem() << std::endl;
     }

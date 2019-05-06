@@ -8,9 +8,9 @@
 #ifndef PROCESSOR_TRACKER_FEATURE_DUMMY_H_
 #define PROCESSOR_TRACKER_FEATURE_DUMMY_H_
 
-#include "base/wolf.h"
+#include "base/common/wolf.h"
 #include "base/processor/processor_tracker_feature.h"
-#include "base/constraint/constraint_epipolar.h"
+#include "base/factor/factor_epipolar.h"
 
 namespace wolf
 {
@@ -36,7 +36,7 @@ class ProcessorTrackerFeatureDummy : public ProcessorTrackerFeature
          * \param _features_incoming_out returned list of features found in \b incoming
          * \param _feature_correspondences returned map of correspondences: _feature_correspondences[feature_out_ptr] = feature_in_ptr
          */
-        virtual unsigned int trackFeatures(const FeatureBaseList& _features_last_in, FeatureBaseList& _features_incoming_out,
+        virtual unsigned int trackFeatures(const FeatureBasePtrList& _features_last_in, FeatureBasePtrList& _features_incoming_out,
                                            FeatureMatchMap& _feature_correspondences);
 
         /** \brief Correct the drift in incoming feature by re-comparing against the corresponding feature in origin.
@@ -56,18 +56,18 @@ class ProcessorTrackerFeatureDummy : public ProcessorTrackerFeature
         virtual bool voteForKeyFrame();
 
         /** \brief Detect new Features
-         * \param _capture_ptr Capture for feature detection. Defaults to incoming_ptr_.
-         * \param _new_features_list The list of detected Features. Defaults to member new_features_list_.
+         * \param _max_features maximum number of features detected (-1: unlimited. 0: none)
+         * \param _features_last_out The list of detected Features.
          * \return The number of detected Features.
          *
          * This function detects Features that do not correspond to known Features/Landmarks in the system.
          *
-         * The function sets the _features_last_out, the list of newly detected features,
-         * to be used for landmark initialization.
+         * The function is called in ProcessorTrackerFeature::processNew() to set the member new_features_last_,
+         * the list of newly detected features of the capture last_ptr_.
          */
-        virtual unsigned int detectNewFeatures(const unsigned int& _max_features, FeatureBaseList& _features_last_out);
+        virtual unsigned int detectNewFeatures(const int& _max_features, FeatureBasePtrList& _features_last_out);
 
-        virtual ConstraintBasePtr createConstraint(FeatureBasePtr _feature_ptr, FeatureBasePtr _feature_other_ptr);
+        virtual FactorBasePtr createFactor(FeatureBasePtr _feature_ptr, FeatureBasePtr _feature_other_ptr);
 
 };
 

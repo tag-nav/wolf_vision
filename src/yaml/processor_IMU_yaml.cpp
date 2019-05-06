@@ -10,7 +10,7 @@
 #include "base/yaml/yaml_conversion.h"
 
 // wolf
-#include "base/factory.h"
+#include "base/common/factory.h"
 
 // yaml-cpp library
 #include <yaml-cpp/yaml.h>
@@ -31,7 +31,7 @@ static ProcessorParamsBasePtr createProcessorIMUParams(const std::string & _file
         ProcessorParamsIMUPtr params = std::make_shared<ProcessorParamsIMU>();
 
         params->time_tolerance      = config["time tolerance"].as<Scalar>();
-
+        params->unmeasured_perturbation_std = config["unmeasured perturbation std"].as<Scalar>();
         params->max_time_span       = kf_vote["max time span"]      .as<Scalar>();
         params->max_buff_length     = kf_vote["max buffer length"]  .as<SizeEigen  >();
         params->dist_traveled       = kf_vote["dist traveled"]      .as<Scalar>();

@@ -10,7 +10,7 @@
 
 // Wolf includes
 #include "base/capture/capture_base.h"
-#include "base/motion_buffer.h"
+#include "base/processor/motion_buffer.h"
 
 // STL includes
 #include <list>
@@ -96,8 +96,8 @@ class CaptureMotion : public CaptureBase
         virtual VectorXs correctDelta(const VectorXs& _delta, const VectorXs& _delta_error);
 
         // Origin frame
-        FrameBasePtr getOriginFramePtr();
-        void setOriginFramePtr(FrameBasePtr _frame_ptr);
+        FrameBasePtr getOriginFrame();
+        void setOriginFrame(FrameBasePtr _frame_ptr);
 
         // member data:
     private:
@@ -156,12 +156,12 @@ inline Eigen::VectorXs CaptureMotion::correctDelta(const VectorXs& _delta, const
     return _delta + _delta_error;
 }
 
-inline FrameBasePtr CaptureMotion::getOriginFramePtr()
+inline FrameBasePtr CaptureMotion::getOriginFrame()
 {
     return origin_frame_ptr_.lock();
 }
 
-inline void CaptureMotion::setOriginFramePtr(FrameBasePtr _frame_ptr)
+inline void CaptureMotion::setOriginFrame(FrameBasePtr _frame_ptr)
 {
     origin_frame_ptr_ = _frame_ptr;
 }

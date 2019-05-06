@@ -4,12 +4,12 @@
 // Forward declarations for node templates
 namespace wolf{
 class CaptureBase;
-class ConstraintBase;
+class FactorBase;
 }
 
 //Wolf includes
-#include "base/wolf.h"
-#include "base/node_base.h"
+#include "base/common/wolf.h"
+#include "base/common/node_base.h"
 
 //std includes
 
@@ -20,8 +20,8 @@ class FeatureBase : public NodeBase, public std::enable_shared_from_this<Feature
 {
     private:
         CaptureBaseWPtr capture_ptr_;
-        ConstraintBaseList constraint_list_;
-        ConstraintBaseList constrained_by_list_;
+        FactorBasePtrList factor_list_;
+        FactorBasePtrList constrained_by_list_;
 
         static unsigned int feature_id_count_;
 
@@ -73,20 +73,20 @@ class FeatureBase : public NodeBase, public std::enable_shared_from_this<Feature
         void setExpectation(const Eigen::VectorXs& expectation);
 
         // wolf tree access
-        FrameBasePtr getFramePtr() const;
+        FrameBasePtr getFrame() const;
 
-        CaptureBasePtr getCapturePtr() const;
-        void setCapturePtr(CaptureBasePtr _cap_ptr){capture_ptr_ = _cap_ptr;}
+        CaptureBasePtr getCapture() const;
+        void setCapture(CaptureBasePtr _cap_ptr){capture_ptr_ = _cap_ptr;}
 
-        ConstraintBasePtr addConstraint(ConstraintBasePtr _co_ptr);
-        ConstraintBaseList& getConstraintList();
+        FactorBasePtr addFactor(FactorBasePtr _co_ptr);
+        FactorBasePtrList& getFactorList();
 
-        virtual ConstraintBasePtr addConstrainedBy(ConstraintBasePtr _ctr_ptr);
+        virtual FactorBasePtr addConstrainedBy(FactorBasePtr _fac_ptr);
         unsigned int getHits() const;
-        ConstraintBaseList& getConstrainedByList();
+        FactorBasePtrList& getConstrainedByList();
 
-        // all constraints
-        void getConstraintList(ConstraintBaseList & _ctr_list);
+        // all factors
+        void getFactorList(FactorBasePtrList & _fac_list);
 
     private:
         Eigen::MatrixXs computeSqrtUpper(const Eigen::MatrixXs& _M) const;
@@ -96,7 +96,7 @@ class FeatureBase : public NodeBase, public std::enable_shared_from_this<Feature
 
 // IMPLEMENTATION
 
-#include "base/constraint/constraint_base.h"
+#include "base/factor/factor_base.h"
 
 namespace wolf{
 
@@ -105,7 +105,7 @@ inline unsigned int FeatureBase::getHits() const
     return constrained_by_list_.size();
 }
 
-inline ConstraintBaseList& FeatureBase::getConstrainedByList()
+inline FactorBasePtrList& FeatureBase::getConstrainedByList()
 {
     return constrained_by_list_;
 }
@@ -115,7 +115,7 @@ inline unsigned int FeatureBase::id()
     return feature_id_;
 }
 
-inline CaptureBasePtr FeatureBase::getCapturePtr() const
+inline CaptureBasePtr FeatureBase::getCapture() const
 {
     return capture_ptr_.lock();
 }

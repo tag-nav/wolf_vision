@@ -9,12 +9,12 @@
 
 // Classes under test
 #include "base/processor/processor_odom_2D.h"
-#include "base/constraint/constraint_odom_2D.h"
+#include "base/factor/factor_odom_2D.h"
 
 // Wolf includes
 #include "base/sensor/sensor_odom_2D.h"
-#include "base/state_block.h"
-#include "base/wolf.h"
+#include "base/state_block/state_block.h"
+#include "base/common/wolf.h"
 #include "base/ceres_wrapper/ceres_manager.h"
 
 // STL includes
@@ -73,7 +73,7 @@ void show(const ProblemPtr& problem)
     using std::endl;
     cout << std::setprecision(4);
 
-    for (FrameBasePtr F : problem->getTrajectoryPtr()->getFrameList())
+    for (FrameBasePtr F : problem->getTrajectory()->getFrameList())
     {
         if (F->isKey())
         {
@@ -92,12 +92,14 @@ void show(const ProblemPtr& problem)
                 }
             }
             cout << "  state: \n" << F->getState().transpose() << endl;
-            cout << "  covariance: \n" << problem->getFrameCovariance(F) << endl;
+            Eigen::MatrixXs cov;
+            problem->getFrameCovariance(F,cov);
+            cout << "  covariance: \n" << cov << endl;
         }
     }
 }
 
-TEST(Odom2D, ConstraintFix_and_ConstraintOdom2D)
+TEST(Odom2D, FactorFix_and_FactorOdom2D)
 {
     using std::cout;
     using std::endl;
@@ -109,8 +111,8 @@ TEST(Odom2D, ConstraintFix_and_ConstraintOdom2D)
     //  a
     //  |
     // GND
-    // `absolute` is made with ConstraintFix
-    // `motion`   is made with ConstraintOdom2D
+    // `absolute` is made with FactorFix
+    // `motion`   is made with FactorOdom2D
 
     std::cout << std::setprecision(4);
 
@@ -132,7 +134,7 @@ TEST(Odom2D, ConstraintFix_and_ConstraintOdom2D)
     FrameBasePtr        F1 = Pr->emplaceFrame(KEY_FRAME, Vector3s::Zero(), t);
     CaptureBasePtr      C1 = F1->addCapture(std::make_shared<CaptureBase>("ODOM 2D", t));
     FeatureBasePtr      f1 = C1->addFeature(std::make_shared<FeatureBase>("ODOM 2D", delta, delta_cov));
-    ConstraintBasePtr   c1 = f1->addConstraint(std::make_shared<ConstraintOdom2D>(f1, F0, nullptr));
+    FactorBasePtr   c1 = f1->addFactor(std::make_shared<FactorOdom2D>(f1, F0, nullptr));
     F0->addConstrainedBy(c1);
 
     // KF2 and motion from KF1
@@ -140,7 +142,7 @@ TEST(Odom2D, ConstraintFix_and_ConstraintOdom2D)
     FrameBasePtr        F2 = Pr->emplaceFrame(KEY_FRAME, Vector3s::Zero(), t);
     CaptureBasePtr      C2 = F2->addCapture(std::make_shared<CaptureBase>("ODOM 2D", t));
     FeatureBasePtr      f2 = C2->addFeature(std::make_shared<FeatureBase>("ODOM 2D", delta, delta_cov));
-    ConstraintBasePtr   c2 = f2->addConstraint(std::make_shared<ConstraintOdom2D>(f2, F1, nullptr));
+    FactorBasePtr   c2 = f2->addFactor(std::make_shared<FactorOdom2D>(f2, F1, nullptr));
     F1->addConstrainedBy(c2);
 
     ASSERT_TRUE(Pr->check(0));
@@ -163,12 +165,18 @@ TEST(Odom2D, ConstraintFix_and_ConstraintOdom2D)
           0,    1.91, 0.48,
           0,    0.48, 0.14;
 
+    // get covariances
+    MatrixXs P0_solver, P1_solver, P2_solver;
+    ASSERT_TRUE(Pr->getFrameCovariance(F0, P0_solver));
+    ASSERT_TRUE(Pr->getFrameCovariance(F1, P1_solver));
+    ASSERT_TRUE(Pr->getFrameCovariance(F2, P2_solver));
+
     ASSERT_POSE2D_APPROX(F0->getState(), Vector3s(0,0,0), 1e-6);
-    ASSERT_MATRIX_APPROX(Pr->getFrameCovariance(F0), P0, 1e-6);
+    ASSERT_MATRIX_APPROX(P0_solver, P0, 1e-6);
     ASSERT_POSE2D_APPROX(F1->getState(), Vector3s(2,0,0), 1e-6);
-    ASSERT_MATRIX_APPROX(Pr->getFrameCovariance(F1), P1, 1e-6);
+    ASSERT_MATRIX_APPROX(P1_solver, P1, 1e-6);
     ASSERT_POSE2D_APPROX(F2->getState(), Vector3s(4,0,0), 1e-6);
-    ASSERT_MATRIX_APPROX(Pr->getFrameCovariance(F2), P2, 1e-6);
+    ASSERT_MATRIX_APPROX(P2_solver, P2, 1e-6);
 }
 
 TEST(Odom2D, VoteForKfAndSolve)
@@ -285,7 +293,9 @@ TEST(Odom2D, VoteForKfAndSolve)
 //    std::cout << report << std::endl;
     ceres_manager.computeCovariances(SolverManager::CovarianceBlocksToBeComputed::ALL_MARGINALS);
 
-    ASSERT_MATRIX_APPROX(problem->getLastKeyFrameCovariance() , integrated_cov_vector[5], 1e-6);
+    MatrixXs computed_cov;
+    ASSERT_TRUE(problem->getLastKeyFrameCovariance(computed_cov));
+    ASSERT_MATRIX_APPROX(computed_cov , integrated_cov_vector[5], 1e-6);
 }
 
 TEST(Odom2D, KF_callback)
@@ -319,7 +329,7 @@ TEST(Odom2D, KF_callback)
     params->angle_turned    = 6.28;
     params->max_time_span   = 100;
     params->cov_det         = 100;
-    params->unmeasured_perturbation_std = 0.001;
+    params->unmeasured_perturbation_std = 0.000001;
     Matrix3s unmeasured_cov = params->unmeasured_perturbation_std*params->unmeasured_perturbation_std*Matrix3s::Identity();
     ProcessorBasePtr prc_base = problem->installProcessor("ODOM 2D", "odom", sensor_odom2d, params);
     ProcessorOdom2DPtr processor_odom2d = std::static_pointer_cast<ProcessorOdom2D>(prc_base);
@@ -413,8 +423,10 @@ TEST(Odom2D, KF_callback)
 //    std::cout << report << std::endl;
     ceres_manager.computeCovariances(SolverManager::CovarianceBlocksToBeComputed::ALL_MARGINALS);
 
-    ASSERT_POSE2D_APPROX(problem->getLastKeyFramePtr()->getState() , integrated_pose_vector[n_split], 1e-6);
-    ASSERT_MATRIX_APPROX(problem->getLastKeyFrameCovariance()      , integrated_cov_vector [n_split], 1e-6);
+    ASSERT_POSE2D_APPROX(problem->getLastKeyFrame()->getState() , integrated_pose_vector[n_split], 1e-6);
+    MatrixXs computed_cov;
+    ASSERT_TRUE(problem->getLastKeyFrameCovariance(computed_cov));
+    ASSERT_MATRIX_APPROX(computed_cov, integrated_cov_vector [n_split], 1e-6);
 
     ////////////////////////////////////////////////////////////////
     // Split between keyframes, exact timestamp
@@ -450,12 +462,16 @@ TEST(Odom2D, KF_callback)
     problem->print(4,1,1,1);
 
     // check the split KF
-    ASSERT_POSE2D_APPROX(keyframe_1->getState()                  , integrated_pose_vector[m_split], 1e-6);
-    ASSERT_MATRIX_APPROX(problem->getFrameCovariance(keyframe_1) , integrated_cov_vector [m_split], 1e-6);
+    MatrixXs KF1_cov;
+    ASSERT_TRUE(problem->getFrameCovariance(keyframe_1, KF1_cov));
+    ASSERT_POSE2D_APPROX(keyframe_1->getState(), integrated_pose_vector[m_split], 1e-6);
+    ASSERT_MATRIX_APPROX(KF1_cov,                integrated_cov_vector [m_split], 1e-6);
 
     // check other KF in the future of the split KF
-    ASSERT_POSE2D_APPROX(problem->getLastKeyFramePtr()->getState() , integrated_pose_vector[n_split], 1e-6);
-    ASSERT_MATRIX_APPROX(problem->getFrameCovariance(keyframe_2)   , integrated_cov_vector [n_split], 1e-6);
+    MatrixXs KF2_cov;
+    ASSERT_TRUE(problem->getFrameCovariance(keyframe_2, KF2_cov));
+    ASSERT_POSE2D_APPROX(problem->getLastKeyFrame()->getState(), integrated_pose_vector[n_split], 1e-6);
+    ASSERT_MATRIX_APPROX(KF2_cov,                                integrated_cov_vector [n_split], 1e-6);
 
     // Check full trajectory
     t = t0;

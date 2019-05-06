@@ -6,16 +6,16 @@
  */
 
 #include "utils_gtest.h"
-#include "base/logging.h"
+#include "base/utils/logging.h"
 
-#include "base/problem.h"
+#include "base/problem/problem.h"
 #include "base/sensor/sensor_base.h"
-#include "base/state_block.h"
+#include "base/state_block/state_block.h"
 #include "base/capture/capture_void.h"
-#include "base/constraint/constraint_pose_2D.h"
+#include "base/factor/factor_pose_2D.h"
 #include "base/solver/solver_manager.h"
-#include "base/local_parametrization_base.h"
-#include "base/local_parametrization_angle.h"
+#include "base/state_block/local_parametrization_base.h"
+#include "base/state_block/local_parametrization_angle.h"
 
 #include <iostream>
 
@@ -26,7 +26,7 @@ WOLF_PTR_TYPEDEFS(SolverManagerWrapper);
 class SolverManagerWrapper : public SolverManager
 {
     public:
-        std::list<ConstraintBasePtr> constraints_;
+        std::list<FactorBasePtr> factors_;
         std::map<StateBlockPtr,bool> state_block_fixed_;
         std::map<StateBlockPtr,LocalParametrizationBasePtr> state_block_local_param_;
 
@@ -45,9 +45,9 @@ class SolverManagerWrapper : public SolverManager
             return state_block_fixed_.at(st);
         };
 
-        bool isConstraintRegistered(const ConstraintBasePtr& ctr_ptr) const
+        bool isFactorRegistered(const FactorBasePtr& fac_ptr) const
         {
-            return std::find(constraints_.begin(), constraints_.end(), ctr_ptr) != constraints_.end();
+            return std::find(factors_.begin(), factors_.end(), fac_ptr) != factors_.end();
         };
 
         bool hasThisLocalParametrization(const StateBlockPtr& st, const LocalParametrizationBasePtr& local_param) const
@@ -61,7 +61,7 @@ class SolverManagerWrapper : public SolverManager
         };
 
         virtual void computeCovariances(const CovarianceBlocksToBeComputed blocks){};
-        virtual void computeCovariances(const StateBlockList& st_list){};
+        virtual void computeCovariances(const StateBlockPtrList& st_list){};
 
         // The following are dummy implementations
         bool    hasConverged()  { return true;      }
@@ -74,18 +74,18 @@ class SolverManagerWrapper : public SolverManager
     protected:
 
         virtual std::string solveImpl(const ReportVerbosity report_level){ return std::string("");};
-        virtual void addConstraint(const ConstraintBasePtr& ctr_ptr)
+        virtual void addFactor(const FactorBasePtr& fac_ptr)
         {
-            constraints_.push_back(ctr_ptr);
+            factors_.push_back(fac_ptr);
         };
-        virtual void removeConstraint(const ConstraintBasePtr& ctr_ptr)
+        virtual void removeFactor(const FactorBasePtr& fac_ptr)
         {
-            constraints_.remove(ctr_ptr);
+            factors_.remove(fac_ptr);
         };
         virtual void addStateBlock(const StateBlockPtr& state_ptr)
         {
             state_block_fixed_[state_ptr] = state_ptr->isFixed();
-            state_block_local_param_[state_ptr] = state_ptr->getLocalParametrizationPtr();
+            state_block_local_param_[state_ptr] = state_ptr->getLocalParametrization();
         };
         virtual void removeStateBlock(const StateBlockPtr& state_ptr)
         {
@@ -98,10 +98,10 @@ class SolverManagerWrapper : public SolverManager
         };
         virtual void updateStateBlockLocalParametrization(const StateBlockPtr& state_ptr)
         {
-            if (state_ptr->getLocalParametrizationPtr() == nullptr)
+            if (state_ptr->getLocalParametrization() == nullptr)
                 state_block_local_param_.erase(state_ptr);
             else
-                state_block_local_param_[state_ptr] = state_ptr->getLocalParametrizationPtr();
+                state_block_local_param_[state_ptr] = state_ptr->getLocalParametrization();
         };
 };
 
@@ -111,7 +111,7 @@ TEST(SolverManager, Create)
     SolverManagerWrapperPtr solver_manager_ptr = std::make_shared<SolverManagerWrapper>(P);
 
     // check double pointers to branches
-    ASSERT_EQ(P, solver_manager_ptr->getProblemPtr());
+    ASSERT_EQ(P, solver_manager_ptr->getProblem());
 }
 
 TEST(SolverManager, AddStateBlock)
@@ -263,7 +263,7 @@ TEST(SolverManager, AddUpdateLocalParamStateBlock)
 
     // Local param
     LocalParametrizationBasePtr local_ptr = std::make_shared<LocalParametrizationAngle>();
-    sb_ptr->setLocalParametrizationPtr(local_ptr);
+    sb_ptr->setLocalParametrization(local_ptr);
 
     // Fix state block
     sb_ptr->fix();
@@ -298,7 +298,7 @@ TEST(SolverManager, AddLocalParamRemoveLocalParamStateBlock)
 
     // Local param
     LocalParametrizationBasePtr local_ptr = std::make_shared<LocalParametrizationAngle>();
-    sb_ptr->setLocalParametrizationPtr(local_ptr);
+    sb_ptr->setLocalParametrization(local_ptr);
 
     // check flags
     ASSERT_FALSE(sb_ptr->stateUpdated());
@@ -445,13 +445,14 @@ TEST(SolverManager, AddUpdatedStateBlock)
     ASSERT_TRUE(sb_ptr->fixUpdated());
     ASSERT_TRUE(sb_ptr->stateUpdated());
 
-    // == When an ADD is notified, all previous notifications should be cleared (if not consumption of notifs) ==
+    // == When an ADD is notified: a ADD notification should be stored ==
 
     // add state_block
     P->addStateBlock(sb_ptr);
 
-    ASSERT_EQ(P->getStateBlockNotificationMap().size(),1);
-    ASSERT_EQ(P->getStateBlockNotificationMap().begin()->second,ADD);
+    auto state_block_notification_map = P->consumeStateBlockNotificationMap();
+    ASSERT_EQ(state_block_notification_map.size(),1);
+    ASSERT_EQ(state_block_notification_map.begin()->second,ADD);
 
     // == Insert OTHER notifications ==
 
@@ -462,40 +463,33 @@ TEST(SolverManager, AddUpdatedStateBlock)
     // Fix --> FLAG
     sb_ptr->unfix();
 
-    ASSERT_EQ(P->getStateBlockNotificationMap().size(),1); // only ADD notification (fix and state are flags in sb)
+    ASSERT_TRUE(P->consumeStateBlockNotificationMap().empty()); // No new notifications (fix and set state are flags in sb)
 
-    // == REMOVE should clear the previous notification (ADD) in the stack ==
+    // == When an REMOVE is notified: a REMOVE notification should be stored ==
 
     // remove state_block
     P->removeStateBlock(sb_ptr);
 
-    ASSERT_EQ(P->getStateBlockNotificationMap().size(),0);// ADD + REMOVE = EMPTY
+    state_block_notification_map = P->consumeStateBlockNotificationMap();
+    ASSERT_EQ(state_block_notification_map.size(),1);
+    ASSERT_EQ(state_block_notification_map.begin()->second,REMOVE);
 
-    // == UPDATES + REMOVE should clear the list of notifications ==
+    // == ADD + REMOVE: notification map should be empty ==
+    P->addStateBlock(sb_ptr);
+    P->removeStateBlock(sb_ptr);
+    ASSERT_TRUE(P->consumeStateBlockNotificationMap().empty());
 
+    // == UPDATES should clear the list of notifications ==
     // add state_block
     P->addStateBlock(sb_ptr);
 
     // update solver
     solver_manager_ptr->update();
 
-    ASSERT_EQ(P->getStateBlockNotificationMap().size(),0); // After solver_manager->update, notifications should be empty
-
-    // Fix
-    sb_ptr->fix();
-
-    // Set State
-    state_2 = 2*state;
-    sb_ptr->setState(state_2);
-
-    // remove state_block
-    P->removeStateBlock(sb_ptr);
-
-    ASSERT_EQ(P->getStateBlockNotificationMap().size(),1);
-    ASSERT_EQ(P->getStateBlockNotificationMap().begin()->second, REMOVE);
+    ASSERT_TRUE(P->consumeStateBlockNotificationMap().empty()); // After solver_manager->update, notifications should be empty
 }
 
-TEST(SolverManager, AddConstraint)
+TEST(SolverManager, AddFactor)
 {
     ProblemPtr P = Problem::create("PO 2D");
     SolverManagerWrapperPtr solver_manager_ptr = std::make_shared<SolverManagerWrapper>(P);
@@ -504,20 +498,20 @@ TEST(SolverManager, AddConstraint)
     Vector2s state; state << 1, 2;
     StateBlockPtr sb_ptr = std::make_shared<StateBlock>(state);
 
-    // Create (and add) constraint point 2d
+    // Create (and add) factor point 2d
     FrameBasePtr        F = P->emplaceFrame(KEY_FRAME, P->zeroState(), TimeStamp(0));
     CaptureBasePtr      C = F->addCapture(std::make_shared<CaptureVoid>(0, nullptr));
     FeatureBasePtr      f = C->addFeature(std::make_shared<FeatureBase>("ODOM 2D", Vector3s::Zero(), Matrix3s::Identity()));
-    ConstraintPose2DPtr c = std::static_pointer_cast<ConstraintPose2D>(f->addConstraint(std::make_shared<ConstraintPose2D>(f)));
+    FactorPose2DPtr c = std::static_pointer_cast<FactorPose2D>(f->addFactor(std::make_shared<FactorPose2D>(f)));
 
     // update solver
     solver_manager_ptr->update();
 
-    // check constraint
-    ASSERT_TRUE(solver_manager_ptr->isConstraintRegistered(c));
+    // check factor
+    ASSERT_TRUE(solver_manager_ptr->isFactorRegistered(c));
 }
 
-TEST(SolverManager, RemoveConstraint)
+TEST(SolverManager, RemoveFactor)
 {
     ProblemPtr P = Problem::create("PO 2D");
     SolverManagerWrapperPtr solver_manager_ptr = std::make_shared<SolverManagerWrapper>(P);
@@ -526,26 +520,26 @@ TEST(SolverManager, RemoveConstraint)
     Vector2s state; state << 1, 2;
     StateBlockPtr sb_ptr = std::make_shared<StateBlock>(state);
 
-    // Create (and add) constraint point 2d
+    // Create (and add) factor point 2d
     FrameBasePtr        F = P->emplaceFrame(KEY_FRAME, P->zeroState(), TimeStamp(0));
     CaptureBasePtr      C = F->addCapture(std::make_shared<CaptureVoid>(0, nullptr));
     FeatureBasePtr      f = C->addFeature(std::make_shared<FeatureBase>("ODOM 2D", Vector3s::Zero(), Matrix3s::Identity()));
-    ConstraintPose2DPtr c = std::static_pointer_cast<ConstraintPose2D>(f->addConstraint(std::make_shared<ConstraintPose2D>(f)));
+    FactorPose2DPtr c = std::static_pointer_cast<FactorPose2D>(f->addFactor(std::make_shared<FactorPose2D>(f)));
 
     // update solver
     solver_manager_ptr->update();
 
-    // add constraint
-    P->removeConstraint(c);
+    // add factor
+    P->removeFactor(c);
 
     // update solver
     solver_manager_ptr->update();
 
-    // check constraint
-    ASSERT_FALSE(solver_manager_ptr->isConstraintRegistered(c));
+    // check factor
+    ASSERT_FALSE(solver_manager_ptr->isFactorRegistered(c));
 }
 
-TEST(SolverManager, AddRemoveConstraint)
+TEST(SolverManager, AddRemoveFactor)
 {
     ProblemPtr P = Problem::create("PO 2D");
     SolverManagerWrapperPtr solver_manager_ptr = std::make_shared<SolverManagerWrapper>(P);
@@ -554,27 +548,25 @@ TEST(SolverManager, AddRemoveConstraint)
     Vector2s state; state << 1, 2;
     StateBlockPtr sb_ptr = std::make_shared<StateBlock>(state);
 
-    // Create (and add) constraint point 2d
+    // Create (and add) factor point 2d
     FrameBasePtr        F = P->emplaceFrame(KEY_FRAME, P->zeroState(), TimeStamp(0));
     CaptureBasePtr      C = F->addCapture(std::make_shared<CaptureVoid>(0, nullptr));
     FeatureBasePtr      f = C->addFeature(std::make_shared<FeatureBase>("ODOM 2D", Vector3s::Zero(), Matrix3s::Identity()));
-    ConstraintPose2DPtr c = std::static_pointer_cast<ConstraintPose2D>(f->addConstraint(std::make_shared<ConstraintPose2D>(f)));
+    FactorPose2DPtr c = std::static_pointer_cast<FactorPose2D>(f->addFactor(std::make_shared<FactorPose2D>(f)));
 
-    ASSERT_TRUE(P->getConstraintNotificationMap().begin()->first == c);
+    // add factor
+    P->removeFactor(c);
 
-    // add constraint
-    P->removeConstraint(c);
-
-    ASSERT_TRUE(P->getConstraintNotificationMap().empty());
+    ASSERT_TRUE(P->consumeFactorNotificationMap().empty()); // ADD+REMOVE = empty
 
     // update solver
     solver_manager_ptr->update();
 
-    // check constraint
-    ASSERT_FALSE(solver_manager_ptr->isConstraintRegistered(c));
+    // check factor
+    ASSERT_FALSE(solver_manager_ptr->isFactorRegistered(c));
 }
 
-TEST(SolverManager, DoubleRemoveConstraint)
+TEST(SolverManager, DoubleRemoveFactor)
 {
     ProblemPtr P = Problem::create("PO 2D");
     SolverManagerWrapperPtr solver_manager_ptr = std::make_shared<SolverManagerWrapper>(P);
@@ -583,29 +575,29 @@ TEST(SolverManager, DoubleRemoveConstraint)
     Vector2s state; state << 1, 2;
     StateBlockPtr sb_ptr = std::make_shared<StateBlock>(state);
 
-    // Create (and add) constraint point 2d
+    // Create (and add) factor point 2d
     FrameBasePtr        F = P->emplaceFrame(KEY_FRAME, P->zeroState(), TimeStamp(0));
     CaptureBasePtr      C = F->addCapture(std::make_shared<CaptureVoid>(0, nullptr));
     FeatureBasePtr      f = C->addFeature(std::make_shared<FeatureBase>("ODOM 2D", Vector3s::Zero(), Matrix3s::Identity()));
-    ConstraintPose2DPtr c = std::static_pointer_cast<ConstraintPose2D>(f->addConstraint(std::make_shared<ConstraintPose2D>(f)));
+    FactorPose2DPtr c = std::static_pointer_cast<FactorPose2D>(f->addFactor(std::make_shared<FactorPose2D>(f)));
 
     // update solver
     solver_manager_ptr->update();
 
-    // remove constraint
-    P->removeConstraint(c);
+    // remove factor
+    P->removeFactor(c);
 
     // update solver
     solver_manager_ptr->update();
 
-    // remove constraint
-    P->removeConstraint(c);
+    // remove factor
+    P->removeFactor(c);
 
     // update solver
     solver_manager_ptr->update();
 
-    // check constraint
-    ASSERT_FALSE(solver_manager_ptr->isConstraintRegistered(c));
+    // check factor
+    ASSERT_FALSE(solver_manager_ptr->isFactorRegistered(c));
 }
 
 int main(int argc, char **argv)

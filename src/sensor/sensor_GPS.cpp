@@ -1,7 +1,7 @@
 
 #include "base/sensor/sensor_GPS.h"
-#include "base/state_block.h"
-#include "base/state_quaternion.h"
+#include "base/state_block/state_block.h"
+#include "base/state_block/state_quaternion.h"
 
 namespace wolf {
 
@@ -24,12 +24,12 @@ SensorGPS::~SensorGPS()
     //
 }
 
-StateBlockPtr SensorGPS::getMapPPtr() const
+StateBlockPtr SensorGPS::getMapP() const
 {
     return getStateBlockPtrStatic(3);
 }
 
-StateBlockPtr SensorGPS::getMapOPtr() const
+StateBlockPtr SensorGPS::getMapO() const
 {
     return getStateBlockPtrStatic(4);
 }

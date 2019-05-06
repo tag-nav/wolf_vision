@@ -6,9 +6,9 @@
  */
 
 #include "utils_gtest.h"
-#include "base/logging.h"
+#include "base/utils/logging.h"
 
-#include "base/problem.h"
+#include "base/problem/problem.h"
 #include "base/ceres_wrapper/ceres_manager.h"
 #include "base/sensor/sensor_odom_3D.h"
 
@@ -27,10 +27,10 @@ SensorOdom3DPtr odom_sensor_ptr_ = std::static_pointer_cast<SensorOdom3D>(proble
 TEST(ParameterPrior, initial_extrinsics)
 {
     ASSERT_TRUE(problem_ptr->check(0));
-    ASSERT_TRUE(odom_sensor_ptr_->getPPtr());
-    ASSERT_TRUE(odom_sensor_ptr_->getOPtr());
-    ASSERT_MATRIX_APPROX(odom_sensor_ptr_->getPPtr()->getState(),initial_extrinsics.head(3),1e-9);
-    ASSERT_MATRIX_APPROX(odom_sensor_ptr_->getOPtr()->getState(),initial_extrinsics.tail(4),1e-9);
+    ASSERT_TRUE(odom_sensor_ptr_->getP());
+    ASSERT_TRUE(odom_sensor_ptr_->getO());
+    ASSERT_MATRIX_APPROX(odom_sensor_ptr_->getP()->getState(),initial_extrinsics.head(3),1e-9);
+    ASSERT_MATRIX_APPROX(odom_sensor_ptr_->getO()->getState(),initial_extrinsics.tail(4),1e-9);
 }
 
 TEST(ParameterPrior, prior_p)
@@ -39,7 +39,7 @@ TEST(ParameterPrior, prior_p)
 
     std::string report = ceres_mgr_ptr->solve(SolverManager::ReportVerbosity::BRIEF);
 
-    ASSERT_MATRIX_APPROX(odom_sensor_ptr_->getPPtr()->getState(),prior_extrinsics.head(3),1e-6);
+    ASSERT_MATRIX_APPROX(odom_sensor_ptr_->getP()->getState(),prior_extrinsics.head(3),1e-6);
 }
 
 TEST(ParameterPrior, prior_o)
@@ -48,7 +48,7 @@ TEST(ParameterPrior, prior_o)
 
     std::string report = ceres_mgr_ptr->solve(SolverManager::ReportVerbosity::BRIEF);
 
-    ASSERT_MATRIX_APPROX(odom_sensor_ptr_->getOPtr()->getState(),prior_extrinsics.tail(4),1e-6);
+    ASSERT_MATRIX_APPROX(odom_sensor_ptr_->getO()->getState(),prior_extrinsics.tail(4),1e-6);
 }
 
 TEST(ParameterPrior, prior_p_overwrite)
@@ -57,7 +57,7 @@ TEST(ParameterPrior, prior_p_overwrite)
 
     std::string report = ceres_mgr_ptr->solve(SolverManager::ReportVerbosity::BRIEF);
 
-    ASSERT_MATRIX_APPROX(odom_sensor_ptr_->getPPtr()->getState(),prior2_extrinsics.head(3),1e-6);
+    ASSERT_MATRIX_APPROX(odom_sensor_ptr_->getP()->getState(),prior2_extrinsics.head(3),1e-6);
 }
 
 TEST(ParameterPrior, prior_p_segment)
@@ -66,7 +66,7 @@ TEST(ParameterPrior, prior_p_segment)
 
     std::string report = ceres_mgr_ptr->solve(SolverManager::ReportVerbosity::BRIEF);
 
-    ASSERT_MATRIX_APPROX(odom_sensor_ptr_->getPPtr()->getState().segment(1,2),prior_extrinsics.segment(1,2),1e-6);
+    ASSERT_MATRIX_APPROX(odom_sensor_ptr_->getP()->getState().segment(1,2),prior_extrinsics.segment(1,2),1e-6);
 }
 
 TEST(ParameterPrior, prior_o_segment)

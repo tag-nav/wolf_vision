@@ -12,8 +12,8 @@
 #include "base/processor/processor_tracker.h"
 #include "base/capture/capture_base.h"
 #include "base/feature/feature_match.h"
-#include "base/track_matrix.h"
-#include "base/wolf.h"
+#include "base/processor/track_matrix.h"
+#include "base/common/wolf.h"
 
 namespace wolf
 {
@@ -43,7 +43,7 @@ WOLF_PTR_TYPEDEFS(ProcessorTrackerFeature);
  *     Each successful correspondence
  *     results in an extension of the track of the Feature up to the \b incoming Capture.
  *
- * It establishes constraints Feature-Feature or Feature-Landmark.
+ * It establishes factors Feature-Feature or Feature-Landmark.
  *
  * This tracker builds on top of the ProcessorTracker by implementing some of its pure virtual functions.
  * As a reminder, we sketch here the pipeline of the parent ProcessorTracker process() function.
@@ -55,7 +55,7 @@ WOLF_PTR_TYPEDEFS(ProcessorTrackerFeature);
  *     - if voteForKeyFrame()                                                       <=== IMPLEMENT
  *       - Populate the tracker with new Features : processNew()                    <--- IMPLEMENTED
  *       - Make a KeyFrame with the \b last Capture: makeFrame(), setKey()
- *       - Establish constraints of the new Features: establishConstraints()        <--- IMPLEMENTED
+ *       - Establish factors of the new Features: establishFactors()        <--- IMPLEMENTED
  *       - Reset the tracker with the \b last Capture as the new \b origin: reset() <--- IMPLEMENTED
  *     - else
  *       - Advance the tracker one Capture ahead: advance()                         <--- IMPLEMENTED
@@ -67,8 +67,8 @@ WOLF_PTR_TYPEDEFS(ProcessorTrackerFeature);
  *   - processNew() : which calls the pure virtuals:
  *     - detectNewFeatures() : detects new Features in \b last                      <=== IMPLEMENT
  *     - trackFeatures() : track these new Features again in \b incoming            <=== IMPLEMENT
- *   - establishConstraints() : which calls the pure virtual:
- *     - createConstraint() : create constraint of the correct derived type         <=== IMPLEMENT
+ *   - establishFactors() : which calls the pure virtual:
+ *     - createFactor() : create factor of the correct derived type         <=== IMPLEMENT
  *
  * Should you need extra functionality for your derived types, you can override these two methods,
  *
@@ -92,7 +92,7 @@ class ProcessorTrackerFeature : public ProcessorTracker
         ProcessorParamsTrackerFeaturePtr params_tracker_feature_;
         TrackMatrix track_matrix_;
 
-        FeatureBaseList known_features_incoming_;
+        FeatureBasePtrList known_features_incoming_;
         FeatureMatchMap matches_last_from_incoming_;
 
         /** \brief Process known Features
@@ -103,13 +103,13 @@ class ProcessorTrackerFeature : public ProcessorTracker
          * This function does:
          *   - Track Features against other Features in the \b origin Capture. Tips:
          *     - An intermediary step of matching against Features in the \b last Capture makes tracking easier.
-         *     - Once tracked against last, then the link to Features in \b origin is provided by the Features' Constraints in \b last.
+         *     - Once tracked against last, then the link to Features in \b origin is provided by the Features' Factors in \b last.
          *     - If required, correct the drift by re-comparing against the Features in origin.
-         *     - The Constraints in \b last need to be transferred to \b incoming (moved, not copied).
+         *     - The Factors in \b last need to be transferred to \b incoming (moved, not copied).
          *   - Create the necessary Features in the \b incoming Capture,
          *     of the correct type, derived from FeatureBase.
-         *   - Create the constraints, of the correct type, derived from ConstraintBase
-         *     (through ConstraintAnalytic or ConstraintSparse).
+         *   - Create the factors, of the correct type, derived from FactorBase
+         *     (through FactorAnalytic or FactorSparse).
          */
         virtual unsigned int processKnown();
 
@@ -118,7 +118,7 @@ class ProcessorTrackerFeature : public ProcessorTracker
          * \param _features_incoming_out returned list of features found in \b incoming
          * \param _feature_correspondences returned map of correspondences: _feature_correspondences[feature_out_ptr] = feature_in_ptr
          */
-        virtual unsigned int trackFeatures(const FeatureBaseList& _features_last_in, FeatureBaseList& _features_incoming_out, FeatureMatchMap& _feature_correspondences) = 0;
+        virtual unsigned int trackFeatures(const FeatureBasePtrList& _features_last_in, FeatureBasePtrList& _features_incoming_out, FeatureMatchMap& _feature_correspondences) = 0;
 
         /** \brief Correct the drift in incoming feature by re-comparing against the corresponding feature in origin.
          * \param _origin_feature input feature in origin capture tracked
@@ -143,31 +143,33 @@ class ProcessorTrackerFeature : public ProcessorTracker
         /**\brief Process new Features
          *
          */
-        virtual unsigned int processNew(const unsigned int& _max_features);
+        virtual unsigned int processNew(const int& _max_features);
 
         /** \brief Detect new Features
-         * \param _max_features maximum number of features detected
+         * \param _max_features maximum number of features detected (-1: unlimited. 0: none)
+         * \param _features_last_out The list of detected Features.
          * \return The number of detected Features.
          *
          * This function detects Features that do not correspond to known Features/Landmarks in the system.
          *
-         * The function sets _features_last_out, the list of newly detected features in Capture last.
+         * The function is called in ProcessorTrackerFeature::processNew() to set the member new_features_last_,
+         * the list of newly detected features of the capture last_ptr_.
          */
-        virtual unsigned int detectNewFeatures(const unsigned int& _max_new_features, FeatureBaseList& _features_last_out) = 0;
+        virtual unsigned int detectNewFeatures(const int& _max_new_features, FeatureBasePtrList& _features_last_out) = 0;
 
-        /** \brief Create a new constraint and link it to the wolf tree
+        /** \brief Create a new factor and link it to the wolf tree
          * \param _feature_ptr pointer to the parent Feature
          * \param _feature_other_ptr pointer to the other feature constrained.
          *
          * Implement this method in derived classes.
          *
-         * This function creates a constraint of the appropriate type for the derived processor.
+         * This function creates a factor of the appropriate type for the derived processor.
          */
-        virtual ConstraintBasePtr createConstraint(FeatureBasePtr _feature_ptr, FeatureBasePtr _feature_other_ptr) = 0;
+        virtual FactorBasePtr createFactor(FeatureBasePtr _feature_ptr, FeatureBasePtr _feature_other_ptr) = 0;
 
-        /** \brief Establish constraints between features in Captures \b last and \b origin
+        /** \brief Establish factors between features in Captures \b last and \b origin
          */
-        virtual void establishConstraints();
+        virtual void establishFactors();
 
     public:
         Track track(SizeStd _trk_id);

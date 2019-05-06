@@ -142,8 +142,8 @@ int main(int argc, char** argv)
     //    ceres_options.minimizer_progress_to_stdout = false;
     //    ceres_options.line_search_direction_type = ceres::LBFGS;
     //    ceres_options.max_num_iterations = 100;
-    CeresManager* ceres_manager_ceres = new CeresManager(wolf_manager_ceres->getProblemPtr(), false);
-    CeresManager* ceres_manager_wolf = new CeresManager(wolf_manager_wolf->getProblemPtr(), true);
+    CeresManager* ceres_manager_ceres = new CeresManager(wolf_manager_ceres->getProblem(), false);
+    CeresManager* ceres_manager_wolf = new CeresManager(wolf_manager_wolf->getProblem(), true);
     std::ofstream log_file, landmark_file;  //output file
 
     //std::cout << "START TRAJECTORY..." << std::endl;
@@ -218,7 +218,7 @@ int main(int argc, char** argv)
         // UPDATING CERES ---------------------------
         std::cout << "UPDATING CERES..." << std::endl;
         t1 = clock();
-        // update state units and constraints in ceres
+        // update state units and factors in ceres
         ceres_manager_ceres->update();
         ceres_manager_wolf->update();
         mean_times(2) += ((double) clock() - t1) / CLOCKS_PER_SEC;
@@ -247,23 +247,23 @@ int main(int argc, char** argv)
         ceres_manager_ceres->computeCovariances(ALL_MARGINALS);
         ceres_manager_wolf->computeCovariances(ALL_MARGINALS);
         Eigen::MatrixXs marginal_ceres(3,3), marginal_wolf(3,3);
-        wolf_manager_ceres->getProblemPtr()->getCovarianceBlock(wolf_manager_ceres->getProblemPtr()->getTrajectoryPtr()->getLastFramePtr()->getPPtr(),
-                                                                wolf_manager_ceres->getProblemPtr()->getTrajectoryPtr()->getLastFramePtr()->getPPtr(),
+        wolf_manager_ceres->getProblem()->getCovarianceBlock(wolf_manager_ceres->getProblem()->getTrajectory()->getLastFrame()->getP(),
+                                                                wolf_manager_ceres->getProblem()->getTrajectory()->getLastFrame()->getP(),
                                                                 marginal_ceres, 0, 0);
-        wolf_manager_ceres->getProblemPtr()->getCovarianceBlock(wolf_manager_ceres->getProblemPtr()->getTrajectoryPtr()->getLastFramePtr()->getPPtr(),
-                                                                wolf_manager_ceres->getProblemPtr()->getTrajectoryPtr()->getLastFramePtr()->getOPtr(),
+        wolf_manager_ceres->getProblem()->getCovarianceBlock(wolf_manager_ceres->getProblem()->getTrajectory()->getLastFrame()->getP(),
+                                                                wolf_manager_ceres->getProblem()->getTrajectory()->getLastFrame()->getO(),
                                                                 marginal_ceres, 0, 2);
-        wolf_manager_ceres->getProblemPtr()->getCovarianceBlock(wolf_manager_ceres->getProblemPtr()->getTrajectoryPtr()->getLastFramePtr()->getOPtr(),
-                                                                wolf_manager_ceres->getProblemPtr()->getTrajectoryPtr()->getLastFramePtr()->getOPtr(),
+        wolf_manager_ceres->getProblem()->getCovarianceBlock(wolf_manager_ceres->getProblem()->getTrajectory()->getLastFrame()->getO(),
+                                                                wolf_manager_ceres->getProblem()->getTrajectory()->getLastFrame()->getO(),
                                                                 marginal_ceres, 2, 2);
-        wolf_manager_wolf->getProblemPtr()->getCovarianceBlock(wolf_manager_wolf->getProblemPtr()->getTrajectoryPtr()->getLastFramePtr()->getPPtr(),
-                                                               wolf_manager_wolf->getProblemPtr()->getTrajectoryPtr()->getLastFramePtr()->getPPtr(),
+        wolf_manager_wolf->getProblem()->getCovarianceBlock(wolf_manager_wolf->getProblem()->getTrajectory()->getLastFrame()->getP(),
+                                                               wolf_manager_wolf->getProblem()->getTrajectory()->getLastFrame()->getP(),
                                                                marginal_wolf, 0, 0);
-        wolf_manager_wolf->getProblemPtr()->getCovarianceBlock(wolf_manager_wolf->getProblemPtr()->getTrajectoryPtr()->getLastFramePtr()->getPPtr(),
-                                                               wolf_manager_wolf->getProblemPtr()->getTrajectoryPtr()->getLastFramePtr()->getOPtr(),
+        wolf_manager_wolf->getProblem()->getCovarianceBlock(wolf_manager_wolf->getProblem()->getTrajectory()->getLastFrame()->getP(),
+                                                               wolf_manager_wolf->getProblem()->getTrajectory()->getLastFrame()->getO(),
                                                                marginal_wolf, 0, 2);
-        wolf_manager_wolf->getProblemPtr()->getCovarianceBlock(wolf_manager_wolf->getProblemPtr()->getTrajectoryPtr()->getLastFramePtr()->getOPtr(),
-                                                               wolf_manager_wolf->getProblemPtr()->getTrajectoryPtr()->getLastFramePtr()->getOPtr(),
+        wolf_manager_wolf->getProblem()->getCovarianceBlock(wolf_manager_wolf->getProblem()->getTrajectory()->getLastFrame()->getO(),
+                                                               wolf_manager_wolf->getProblem()->getTrajectory()->getLastFrame()->getO(),
                                                                marginal_wolf, 2, 2);
         std::cout << "CERES AUTO DIFF covariance:" << std::endl;
         std::cout << marginal_ceres << std::endl;
@@ -287,9 +287,9 @@ int main(int argc, char** argv)
 
 //        // draw landmarks
 //        std::vector<double> landmark_vector;
-//        for (auto landmark_it = wolf_manager->getProblemPtr()->getMapPtr()->getLandmarkList().begin(); landmark_it != wolf_manager->getProblemPtr()->getMapPtr()->getLandmarkList().end(); landmark_it++)
+//        for (auto landmark_it = wolf_manager->getProblem()->getMap()->getLandmarkList().begin(); landmark_it != wolf_manager->getProblem()->getMap()->getLandmarkList().end(); landmark_it++)
 //        {
-//            Scalar* position_ptr = (*landmark_it)->getPPtr()->getPtr();
+//            Scalar* position_ptr = (*landmark_it)->getP()->get();
 //            landmark_vector.push_back(*position_ptr); //x
 //            landmark_vector.push_back(*(position_ptr + 1)); //y
 //            landmark_vector.push_back(0.2); //z
@@ -340,9 +340,9 @@ int main(int argc, char** argv)
 
 //    // Draw Final result -------------------------
 //    std::vector<double> landmark_vector;
-//    for (auto landmark_it = wolf_manager->getProblemPtr()->getMapPtr()->getLandmarkList().begin(); landmark_it != wolf_manager->getProblemPtr()->getMapPtr()->getLandmarkList().end(); landmark_it++)
+//    for (auto landmark_it = wolf_manager->getProblem()->getMap()->getLandmarkList().begin(); landmark_it != wolf_manager->getProblem()->getMap()->getLandmarkList().end(); landmark_it++)
 //    {
-//        Scalar* position_ptr = (*landmark_it)->getPPtr()->getPtr();
+//        Scalar* position_ptr = (*landmark_it)->getP()->get();
 //        landmark_vector.push_back(*position_ptr); //x
 //        landmark_vector.push_back(*(position_ptr + 1)); //y
 //        landmark_vector.push_back(0.2); //z
@@ -359,18 +359,18 @@ int main(int argc, char** argv)
     // Vehicle poses
 //    int i = 0;
 //    Eigen::VectorXs state_poses(n_execution * 3);
-//    for (auto frame_it = wolf_manager->getProblemPtr()->getTrajectoryPtr()->getFrameList().begin(); frame_it != wolf_manager->getProblemPtr()->getTrajectoryPtr()->getFrameList().end(); frame_it++)
+//    for (auto frame_it = wolf_manager->getProblem()->getTrajectory()->getFrameList().begin(); frame_it != wolf_manager->getProblem()->getTrajectory()->getFrameList().end(); frame_it++)
 //    {
-//        state_poses.segment(i, 3) << *(*frame_it)->getPPtr()->getPtr(), *((*frame_it)->getPPtr()->getPtr() + 1), *(*frame_it)->getOPtr()->getPtr();
+//        state_poses.segment(i, 3) << *(*frame_it)->getP()->get(), *((*frame_it)->getP()->get() + 1), *(*frame_it)->getO()->get();
 //        i += 3;
 //    }
 //
 //    // Landmarks
 //    i = 0;
-//    Eigen::VectorXs landmarks(wolf_manager->getProblemPtr()->getMapPtr()->getLandmarkList().size() * 2);
-//    for (auto landmark_it = wolf_manager->getProblemPtr()->getMapPtr()->getLandmarkList().begin(); landmark_it != wolf_manager->getProblemPtr()->getMapPtr()->getLandmarkList().end(); landmark_it++)
+//    Eigen::VectorXs landmarks(wolf_manager->getProblem()->getMap()->getLandmarkList().size() * 2);
+//    for (auto landmark_it = wolf_manager->getProblem()->getMap()->getLandmarkList().begin(); landmark_it != wolf_manager->getProblem()->getMap()->getLandmarkList().end(); landmark_it++)
 //    {
-//        Eigen::Map<Eigen::Vector2s> landmark((*landmark_it)->getPPtr()->getPtr());
+//        Eigen::Map<Eigen::Vector2s> landmark((*landmark_it)->getP()->get());
 //        landmarks.segment(i, 2) = landmark;
 //        i += 2;
 //    }

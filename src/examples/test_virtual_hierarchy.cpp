@@ -43,7 +43,7 @@ class ChildOf : virtual public N
     protected:
         ChildOf(Parent* _up_ptr) : up_ptr_(_up_ptr) { }
         virtual ~ChildOf() { }
-        Parent* upPtr() { return up_ptr_; }
+        Parent* up() { return up_ptr_; }
 };
 
 /**

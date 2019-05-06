@@ -70,8 +70,8 @@ int main(int argc, char *argv[])
     CholmodSupernodalLLT < SparseMatrix<double> > solver, solver2, solver3;
     PermutationMatrix<Dynamic, Dynamic, int> perm(size), perm_blocks(size * dim);
     CCOLAMDOrdering<int> ordering;
-    VectorXi block_ordering_constraints = VectorXi::Ones(size);
-    VectorXi ordering_constraints = VectorXi::Ones(size*dim);
+    VectorXi block_ordering_factors = VectorXi::Ones(size);
+    VectorXi ordering_factors = VectorXi::Ones(size*dim);
     VectorXd b(size * dim), b_ordered(size * dim), b_block_ordered(size * dim), x_block_ordered(size * dim), x_ordered(size * dim), x(size * dim);
     clock_t t1, t2, t3;
     double time1, time2, time3;
@@ -114,17 +114,17 @@ int main(int argc, char *argv[])
     time1 = ((double) clock() - t1) / CLOCKS_PER_SEC;
 
     // SOLVING AFTER REORDERING ------------------------------------
-    // ordering constraints
-    ordering_constraints.segment(dim * (size-1), dim) = VectorXi::Constant(dim,2);
-    ordering_constraints.segment(0, dim) = VectorXi::Constant(dim,2);
+    // ordering factors
+    ordering_factors.segment(dim * (size-1), dim) = VectorXi::Constant(dim,2);
+    ordering_factors.segment(0, dim) = VectorXi::Constant(dim,2);
 
     // variable ordering
     t2 = clock();
     H.makeCompressed();
 
     std::cout << "Reordering using CCOLAMD:" << std::endl;
-    std::cout << "ordering_constraints = " << std::endl << ordering_constraints.transpose() << std::endl << std::endl;
-    ordering(H, perm, ordering_constraints.data());
+    std::cout << "ordering_factors = " << std::endl << ordering_factors.transpose() << std::endl << std::endl;
+    ordering(H, perm, ordering_factors.data());
 
     b_ordered = perm * b;
     H_ordered = H.twistedBy(perm);
@@ -141,17 +141,17 @@ int main(int argc, char *argv[])
     time2 = ((double) clock() - t2) / CLOCKS_PER_SEC;
 
     // SOLVING AFTER BLOCK REORDERING ------------------------------------
-    // ordering constraints
-    block_ordering_constraints(size-1) = 2;
-    block_ordering_constraints(0) = 2;
+    // ordering factors
+    block_ordering_factors(size-1) = 2;
+    block_ordering_factors(0) = 2;
 
     // block ordering
     t3 = clock();
     FactorMatrix.makeCompressed();
 
     std::cout << "Reordering using Block CCOLAMD:" << std::endl;
-    std::cout << "block_ordering_constraints = " << std::endl << block_ordering_constraints.transpose() << std::endl << std::endl;
-    ordering(FactorMatrix, perm_blocks, block_ordering_constraints.data());
+    std::cout << "block_ordering_factors = " << std::endl << block_ordering_factors.transpose() << std::endl << std::endl;
+    ordering(FactorMatrix, perm_blocks, block_ordering_factors.data());
 
     // variable ordering
     permutation_2_block_permutation(perm_blocks, perm , dim, size);

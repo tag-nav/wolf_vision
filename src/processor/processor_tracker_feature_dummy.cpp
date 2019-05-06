@@ -13,8 +13,8 @@ namespace wolf
 
 unsigned int ProcessorTrackerFeatureDummy::count_ = 0;
 
-unsigned int ProcessorTrackerFeatureDummy::trackFeatures(const FeatureBaseList& _features_last_in,
-                                                         FeatureBaseList& _features_incoming_out,
+unsigned int ProcessorTrackerFeatureDummy::trackFeatures(const FeatureBasePtrList& _features_last_in,
+                                                         FeatureBasePtrList& _features_incoming_out,
                                                          FeatureMatchMap& _feature_correspondences)
 {
     WOLF_INFO("tracking " , _features_last_in.size() , " features...");
@@ -49,12 +49,19 @@ bool ProcessorTrackerFeatureDummy::voteForKeyFrame()
     return vote;
 }
 
-unsigned int ProcessorTrackerFeatureDummy::detectNewFeatures(const unsigned int& _max_features, FeatureBaseList& _features_last_out)
+unsigned int ProcessorTrackerFeatureDummy::detectNewFeatures(const int& _max_features, FeatureBasePtrList& _features_last_out)
 {
+    unsigned int max_features = _max_features;
+
+    if (max_features == -1)
+    {
+        max_features = 10;
+        WOLF_INFO("max_features unlimited, setting it to " , max_features);
+    }
     WOLF_INFO("Detecting " , _max_features , " new features..." );
 
     // detecting new features
-    for (unsigned int i = 1; i <= _max_features; i++)
+    for (unsigned int i = 0; i < max_features; i++)
     {
         n_feature_++;
         FeatureBasePtr ftr(std::make_shared<FeatureBase>("POINT IMAGE",
@@ -70,13 +77,13 @@ unsigned int ProcessorTrackerFeatureDummy::detectNewFeatures(const unsigned int&
     return _features_last_out.size();
 }
 
-ConstraintBasePtr ProcessorTrackerFeatureDummy::createConstraint(FeatureBasePtr _feature_ptr,
+FactorBasePtr ProcessorTrackerFeatureDummy::createFactor(FeatureBasePtr _feature_ptr,
                                                                  FeatureBasePtr _feature_other_ptr)
 {
-    WOLF_INFO( "creating constraint: track " , _feature_other_ptr->trackId() , " last feature " , _feature_ptr->id()
+    WOLF_INFO( "creating factor: track " , _feature_other_ptr->trackId() , " last feature " , _feature_ptr->id()
                , " with origin feature " , _feature_other_ptr->id() );
 
-    auto ctr = std::make_shared<ConstraintEpipolar>(_feature_ptr, _feature_other_ptr, shared_from_this());
+    auto ctr = std::make_shared<FactorEpipolar>(_feature_ptr, _feature_other_ptr, shared_from_this());
 
     return ctr;
 }

@@ -9,7 +9,7 @@
 #define TRUNK_SRC_SOLVER_COST_FUNCTION_SPARSE_BASE_H_
 
 //wolf includes
-#include "base/wolf.h"
+#include "base/common/wolf.h"
 #include "cost_function_base.h"
 
 // CERES JET
@@ -18,7 +18,7 @@
 namespace wolf
 {
 
-template <class ConstraintT,
+template <class FactorT,
           const unsigned int MEASUREMENT_SIZE,
                 unsigned int BLOCK_0_SIZE,
                 unsigned int BLOCK_1_SIZE = 0,
@@ -43,7 +43,7 @@ class CostFunctionSparseBase : CostFunctionBase
                                        BLOCK_8_SIZE +
                                        BLOCK_9_SIZE> WolfJet;
     protected:
-        ConstraintT* constraint_ptr_;
+        FactorT* factor_ptr_;
         WolfJet jets_0_[BLOCK_0_SIZE];
         WolfJet jets_1_[BLOCK_1_SIZE];
         WolfJet jets_2_[BLOCK_2_SIZE];
@@ -58,12 +58,12 @@ class CostFunctionSparseBase : CostFunctionBase
 
     public:
 
-        /** \brief Constructor with constraint pointer
+        /** \brief Constructor with factor pointer
          *
-         * Constructor with constraint pointer
+         * Constructor with factor pointer
          *
          */
-        CostFunctionSparseBase(ConstraintT* _constraint_ptr);
+        CostFunctionSparseBase(FactorT* _factor_ptr);
 
         /** \brief Default destructor
          *
@@ -72,18 +72,18 @@ class CostFunctionSparseBase : CostFunctionBase
          */
         virtual ~CostFunctionSparseBase();
 
-        /** \brief Evaluate residuals and jacobians of the constraint in the current x
+        /** \brief Evaluate residuals and jacobians of the factor in the current x
          *
-         * Evaluate residuals and jacobians of the constraint in the current x
+         * Evaluate residuals and jacobians of the factor in the current x
          *
          */
         virtual void evaluateResidualJacobians();
 
     protected:
 
-        /** \brief Calls the functor of the constraint evaluating jets
+        /** \brief Calls the functor of the factor evaluating jets
          *
-         * Calls the functor of the constraint evaluating jets
+         * Calls the functor of the factor evaluating jets
          *
          */
         virtual void callFunctor() = 0;
@@ -103,7 +103,7 @@ class CostFunctionSparseBase : CostFunctionBase
         void evaluateX();
 };
 
-template <class ConstraintT,
+template <class FactorT,
           const unsigned int MEASUREMENT_SIZE,
                 unsigned int BLOCK_0_SIZE,
                 unsigned int BLOCK_1_SIZE,
@@ -115,7 +115,7 @@ template <class ConstraintT,
                 unsigned int BLOCK_7_SIZE,
                 unsigned int BLOCK_8_SIZE,
                 unsigned int BLOCK_9_SIZE>
-CostFunctionSparseBase<ConstraintT,
+CostFunctionSparseBase<FactorT,
                    MEASUREMENT_SIZE,
                    BLOCK_0_SIZE,
                    BLOCK_1_SIZE,
@@ -126,14 +126,14 @@ CostFunctionSparseBase<ConstraintT,
                    BLOCK_6_SIZE,
                    BLOCK_7_SIZE,
                    BLOCK_8_SIZE,
-                   BLOCK_9_SIZE>::CostFunctionSparseBase(ConstraintT* _constraint_ptr) :
+                   BLOCK_9_SIZE>::CostFunctionSparseBase(FactorT* _factor_ptr) :
     CostFunctionBase(MEASUREMENT_SIZE, BLOCK_0_SIZE, BLOCK_1_SIZE, BLOCK_2_SIZE, BLOCK_3_SIZE, BLOCK_4_SIZE, BLOCK_5_SIZE, BLOCK_6_SIZE, BLOCK_7_SIZE, BLOCK_8_SIZE,BLOCK_9_SIZE),
-    constraint_ptr_(_constraint_ptr)
+    factor_ptr_(_factor_ptr)
 {
     initializeJets();
 }
 
-template <class ConstraintT,
+template <class FactorT,
           const unsigned int MEASUREMENT_SIZE,
                 unsigned int BLOCK_0_SIZE,
                 unsigned int BLOCK_1_SIZE,
@@ -145,7 +145,7 @@ template <class ConstraintT,
                 unsigned int BLOCK_7_SIZE,
                 unsigned int BLOCK_8_SIZE,
                 unsigned int BLOCK_9_SIZE>
-CostFunctionSparseBase<ConstraintT,
+CostFunctionSparseBase<FactorT,
                    MEASUREMENT_SIZE,
                    BLOCK_0_SIZE,
                    BLOCK_1_SIZE,
@@ -161,7 +161,7 @@ CostFunctionSparseBase<ConstraintT,
 
 }
 
-template <class ConstraintT,
+template <class FactorT,
           const unsigned int MEASUREMENT_SIZE,
                 unsigned int BLOCK_0_SIZE,
                 unsigned int BLOCK_1_SIZE,
@@ -173,7 +173,7 @@ template <class ConstraintT,
                 unsigned int BLOCK_7_SIZE,
                 unsigned int BLOCK_8_SIZE,
                 unsigned int BLOCK_9_SIZE>
-void CostFunctionSparseBase<ConstraintT,
+void CostFunctionSparseBase<FactorT,
                    MEASUREMENT_SIZE,
                    BLOCK_0_SIZE,
                    BLOCK_1_SIZE,
@@ -205,7 +205,7 @@ void CostFunctionSparseBase<ConstraintT,
         residual_(i) = residuals_jet_[i].a;
 }
 
-template <class ConstraintT,
+template <class FactorT,
 const unsigned int MEASUREMENT_SIZE,
       unsigned int BLOCK_0_SIZE,
       unsigned int BLOCK_1_SIZE,
@@ -217,7 +217,7 @@ const unsigned int MEASUREMENT_SIZE,
       unsigned int BLOCK_7_SIZE,
       unsigned int BLOCK_8_SIZE,
       unsigned int BLOCK_9_SIZE>
- void CostFunctionSparseBase<ConstraintT,
+ void CostFunctionSparseBase<FactorT,
                          MEASUREMENT_SIZE,
                          BLOCK_0_SIZE,
                          BLOCK_1_SIZE,
@@ -263,7 +263,7 @@ const unsigned int MEASUREMENT_SIZE,
         jets_9_[i] = WolfJet(0, last_jet_idx++);
 }
 
-template <class ConstraintT,
+template <class FactorT,
 const unsigned int MEASUREMENT_SIZE,
       unsigned int BLOCK_0_SIZE,
       unsigned int BLOCK_1_SIZE,
@@ -275,7 +275,7 @@ const unsigned int MEASUREMENT_SIZE,
       unsigned int BLOCK_7_SIZE,
       unsigned int BLOCK_8_SIZE,
       unsigned int BLOCK_9_SIZE>
- void CostFunctionSparseBase<ConstraintT,
+ void CostFunctionSparseBase<FactorT,
                          MEASUREMENT_SIZE,
                          BLOCK_0_SIZE,
                          BLOCK_1_SIZE,
@@ -290,34 +290,34 @@ const unsigned int MEASUREMENT_SIZE,
 {
     // JET 0
     for (int i = 0; i < BLOCK_0_SIZE; i++)
-        jets_0_[i].a = *(constraint_ptr_->getStateScalarPtrVector().at(0)+i);
+        jets_0_[i].a = *(factor_ptr_->getStateScalarPtrVector().at(0)+i);
     // JET 1
     for (int i = 0; i < BLOCK_1_SIZE; i++)
-        jets_1_[i].a = *(constraint_ptr_->getStateScalarPtrVector().at(1)+i);
+        jets_1_[i].a = *(factor_ptr_->getStateScalarPtrVector().at(1)+i);
     // JET 2
     for (int i = 0; i < BLOCK_2_SIZE; i++)
-        jets_2_[i].a = *(constraint_ptr_->getStateScalarPtrVector().at(2)+i);
+        jets_2_[i].a = *(factor_ptr_->getStateScalarPtrVector().at(2)+i);
     // JET 3
     for (int i = 0; i < BLOCK_3_SIZE; i++)
-        jets_3_[i].a = *(constraint_ptr_->getStateScalarPtrVector().at(3)+i);
+        jets_3_[i].a = *(factor_ptr_->getStateScalarPtrVector().at(3)+i);
     // JET 4
     for (int i = 0; i < BLOCK_4_SIZE; i++)
-        jets_4_[i].a = *(constraint_ptr_->getStateScalarPtrVector().at(4)+i);
+        jets_4_[i].a = *(factor_ptr_->getStateScalarPtrVector().at(4)+i);
     // JET 5
     for (int i = 0; i < BLOCK_5_SIZE; i++)
-        jets_5_[i].a = *(constraint_ptr_->getStateScalarPtrVector().at(5)+i);
+        jets_5_[i].a = *(factor_ptr_->getStateScalarPtrVector().at(5)+i);
     // JET 6
     for (int i = 0; i < BLOCK_6_SIZE; i++)
-        jets_6_[i].a = *(constraint_ptr_->getStateScalarPtrVector().at(6)+i);
+        jets_6_[i].a = *(factor_ptr_->getStateScalarPtrVector().at(6)+i);
     // JET 7
     for (int i = 0; i < BLOCK_7_SIZE; i++)
-        jets_7_[i].a = *(constraint_ptr_->getStateScalarPtrVector().at(7)+i);
+        jets_7_[i].a = *(factor_ptr_->getStateScalarPtrVector().at(7)+i);
     // JET 8
     for (int i = 0; i < BLOCK_8_SIZE; i++)
-        jets_8_[i].a = *(constraint_ptr_->getStateScalarPtrVector().at(8)+i);
+        jets_8_[i].a = *(factor_ptr_->getStateScalarPtrVector().at(8)+i);
     // JET 9
     for (int i = 0; i < BLOCK_9_SIZE; i++)
-        jets_9_[i].a = *(constraint_ptr_->getStateScalarPtrVector().at(9)+i);
+        jets_9_[i].a = *(factor_ptr_->getStateScalarPtrVector().at(9)+i);
 }
 
 } // wolf namespace

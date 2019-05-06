@@ -16,10 +16,10 @@
 #include "unistd.h"
 
 // wolf
-#include "base/wolf.h"
+#include "base/common/wolf.h"
 #include "base/feature/feature_base.h"
 #include "base/landmark/landmark_base.h"
-#include "base/state_block.h"
+#include "base/state_block/state_block.h"
 
 //faramotics includes
 #include "faramotics/dynamicSceneRender.h"
@@ -115,7 +115,7 @@ class FaramoticsRobot
             }
         }
 
-        void render(const FeatureBaseList& feature_list, int laser, const LandmarkBaseList& landmark_list, const Eigen::Vector3s& estimated_pose)
+        void render(const FeatureBasePtrList& feature_list, int laser, const LandmarkBasePtrList& landmark_list, const Eigen::Vector3s& estimated_pose)
         {
             // detected corners
             //std::cout << "   drawCorners: " << feature_list.size() << std::endl;
@@ -135,7 +135,7 @@ class FaramoticsRobot
             landmark_vector.reserve(3*landmark_list.size());
             for (auto landmark : landmark_list)
             {
-                Scalar* position_ptr = landmark->getPPtr()->getPtr();
+                Scalar* position_ptr = landmark->getP()->get();
                 landmark_vector.push_back(*position_ptr); //x
                 landmark_vector.push_back(*(position_ptr + 1)); //y
                 landmark_vector.push_back(0.2); //z

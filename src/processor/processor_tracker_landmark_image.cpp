@@ -1,17 +1,17 @@
 #include "base/processor/processor_tracker_landmark_image.h"
 
 #include "base/capture/capture_image.h"
-#include "base/constraint/constraint_AHP.h"
+#include "base/factor/factor_AHP.h"
 #include "base/feature/feature_base.h"
 #include "base/feature/feature_point_image.h"
-#include "base/frame_base.h"
-#include "base/logging.h"
-#include "base/map_base.h"
-#include "base/pinhole_tools.h"
-#include "base/problem.h"
+#include "base/frame/frame_base.h"
+#include "base/utils/logging.h"
+#include "base/map/map_base.h"
+#include "base/math/pinhole_tools.h"
+#include "base/problem/problem.h"
 #include "base/sensor/sensor_camera.h"
-#include "base/state_block.h"
-#include "base/time_stamp.h"
+#include "base/state_block/state_block.h"
+#include "base/common/time_stamp.h"
 
 // vision_utils
 #include <detectors.h>
@@ -37,72 +37,13 @@ ProcessorTrackerLandmarkImage::ProcessorTrackerLandmarkImage(ProcessorParamsTrac
     std::string det_name = vision_utils::readYamlType(params_tracker_landmark_image_->yaml_file_params_vision_utils, "detector");
     det_ptr_ = vision_utils::setupDetector(det_name, det_name + " detector", params_tracker_landmark_image_->yaml_file_params_vision_utils);
 
-    if (det_name.compare("ORB") == 0)
-        det_ptr_ = std::static_pointer_cast<vision_utils::DetectorORB>(det_ptr_);
-    else if (det_name.compare("FAST") == 0)
-        det_ptr_ = std::static_pointer_cast<vision_utils::DetectorFAST>(det_ptr_);
-    else if (det_name.compare("SIFT") == 0)
-        det_ptr_ = std::static_pointer_cast<vision_utils::DetectorSIFT>(det_ptr_);
-    else if (det_name.compare("SURF") == 0)
-        det_ptr_ = std::static_pointer_cast<vision_utils::DetectorSURF>(det_ptr_);
-    else if (det_name.compare("BRISK") == 0)
-        det_ptr_ = std::static_pointer_cast<vision_utils::DetectorBRISK>(det_ptr_);
-    else if (det_name.compare("MSER") == 0)
-        det_ptr_ = std::static_pointer_cast<vision_utils::DetectorMSER>(det_ptr_);
-    else if (det_name.compare("GFTT") == 0)
-        det_ptr_ = std::static_pointer_cast<vision_utils::DetectorGFTT>(det_ptr_);
-    else if (det_name.compare("HARRIS") == 0)
-        det_ptr_ = std::static_pointer_cast<vision_utils::DetectorHARRIS>(det_ptr_);
-    else if (det_name.compare("SBD") == 0)
-        det_ptr_ = std::static_pointer_cast<vision_utils::DetectorSBD>(det_ptr_);
-    else if (det_name.compare("KAZE") == 0)
-        det_ptr_ = std::static_pointer_cast<vision_utils::DetectorKAZE>(det_ptr_);
-    else if (det_name.compare("AKAZE") == 0)
-        det_ptr_ = std::static_pointer_cast<vision_utils::DetectorAKAZE>(det_ptr_);
-    else if (det_name.compare("AGAST") == 0)
-        det_ptr_ = std::static_pointer_cast<vision_utils::DetectorAGAST>(det_ptr_);
-
     // Descriptor
     std::string des_name = vision_utils::readYamlType(params_tracker_landmark_image_->yaml_file_params_vision_utils, "descriptor");
     des_ptr_ = vision_utils::setupDescriptor(des_name, des_name + " descriptor", params_tracker_landmark_image_->yaml_file_params_vision_utils);
 
-    if (des_name.compare("ORB") == 0)
-        des_ptr_ = std::static_pointer_cast<vision_utils::DescriptorORB>(des_ptr_);
-    else if (des_name.compare("SIFT") == 0)
-        des_ptr_ = std::static_pointer_cast<vision_utils::DescriptorSIFT>(des_ptr_);
-    else if (des_name.compare("SURF") == 0)
-        des_ptr_ = std::static_pointer_cast<vision_utils::DescriptorSURF>(des_ptr_);
-    else if (des_name.compare("BRISK") == 0)
-        des_ptr_ = std::static_pointer_cast<vision_utils::DescriptorBRISK>(des_ptr_);
-    else if (des_name.compare("KAZE") == 0)
-        des_ptr_ = std::static_pointer_cast<vision_utils::DescriptorKAZE>(des_ptr_);
-    else if (des_name.compare("AKAZE") == 0)
-        des_ptr_ = std::static_pointer_cast<vision_utils::DescriptorAKAZE>(des_ptr_);
-    else if (des_name.compare("LATCH") == 0)
-        des_ptr_ = std::static_pointer_cast<vision_utils::DescriptorLATCH>(des_ptr_);
-    else if (des_name.compare("FREAK") == 0)
-        des_ptr_ = std::static_pointer_cast<vision_utils::DescriptorFREAK>(des_ptr_);
-    else if (des_name.compare("BRIEF") == 0)
-        des_ptr_ = std::static_pointer_cast<vision_utils::DescriptorBRIEF>(des_ptr_);
-    else if (des_name.compare("DAISY") == 0)
-        des_ptr_ = std::static_pointer_cast<vision_utils::DescriptorDAISY>(des_ptr_);
-    else if (des_name.compare("LUCID") == 0)
-        des_ptr_ = std::static_pointer_cast<vision_utils::DescriptorLUCID>(des_ptr_);
-
     // Matcher
     std::string mat_name = vision_utils::readYamlType(params_tracker_landmark_image_->yaml_file_params_vision_utils, "matcher");
     mat_ptr_ = vision_utils::setupMatcher(mat_name, mat_name + " matcher", params_tracker_landmark_image_->yaml_file_params_vision_utils);
-
-    if (mat_name.compare("FLANNBASED") == 0)
-        mat_ptr_ = std::static_pointer_cast<vision_utils::MatcherFLANNBASED>(mat_ptr_);
-    if (mat_name.compare("BRUTEFORCE") == 0)
-        mat_ptr_ = std::static_pointer_cast<vision_utils::MatcherBRUTEFORCE>(mat_ptr_);
-    if (mat_name.compare("BRUTEFORCE_L1") == 0)
-        mat_ptr_ = std::static_pointer_cast<vision_utils::MatcherBRUTEFORCE_L1>(mat_ptr_);
-    if (mat_name.compare("BRUTEFORCE_HAMMING") == 0)
-        mat_ptr_ = std::static_pointer_cast<vision_utils::MatcherBRUTEFORCE_HAMMING>(mat_ptr_);
-    if (mat_name.compare("BRUTEFORCE_HAMMING_2") == 0)
-        mat_ptr_ = std::static_pointer_cast<vision_utils::MatcherBRUTEFORCE_HAMMING_2>(mat_ptr_);
 
     // Active search grid
     vision_utils::AlgorithmBasePtr alg_ptr = vision_utils::setupAlgorithm("ACTIVESEARCH", "ACTIVESEARCH algorithm", params_tracker_landmark_image_->yaml_file_params_vision_utils);
@@ -144,8 +85,8 @@ void ProcessorTrackerLandmarkImage::postProcess()
     feat_lmk_found_.clear();
 }
 
-unsigned int ProcessorTrackerLandmarkImage::findLandmarks(const LandmarkBaseList& _landmarks_in,
-                                                         FeatureBaseList&  _features_incoming_out,
+unsigned int ProcessorTrackerLandmarkImage::findLandmarks(const LandmarkBasePtrList& _landmarks_in,
+                                                         FeatureBasePtrList&  _features_incoming_out,
                                                          LandmarkMatchMap& _feature_landmark_correspondences)
 {
     KeyPointVector candidate_keypoints;
@@ -159,13 +100,13 @@ unsigned int ProcessorTrackerLandmarkImage::findLandmarks(const LandmarkBaseList
 
         // project landmark into incoming capture
         LandmarkAHPPtr landmark_ptr = std::static_pointer_cast<LandmarkAHP>(landmark_in_ptr);
-        SensorCameraPtr camera = std::static_pointer_cast<SensorCamera>(this->getSensorPtr());
+        SensorCameraPtr camera = std::static_pointer_cast<SensorCamera>(this->getSensor());
         Eigen::Vector4s point3D_hmg;
         Eigen::Vector2s pixel;
 
         landmarkInCurrentCamera(current_state, landmark_ptr, point3D_hmg);
 
-        pixel = pinhole::projectPoint(camera->getIntrinsicPtr()->getState(),
+        pixel = pinhole::projectPoint(camera->getIntrinsic()->getState(),
                                       camera->getDistortionVector(),
                                       point3D_hmg.head<3>());
 
@@ -225,7 +166,7 @@ bool ProcessorTrackerLandmarkImage::voteForKeyFrame()
 //    return landmarks_tracked_ < params_tracker_landmark_image_->min_features_for_keyframe;
 }
 
-unsigned int ProcessorTrackerLandmarkImage::detectNewFeatures(const unsigned int& _max_features, FeatureBaseList& _features_last_out)
+unsigned int ProcessorTrackerLandmarkImage::detectNewFeatures(const int& _max_features, FeatureBasePtrList& _features_last_out)
 {
     cv::Rect roi;
     KeyPointVector new_keypoints;
@@ -233,7 +174,7 @@ unsigned int ProcessorTrackerLandmarkImage::detectNewFeatures(const unsigned int
     cv::KeyPointsFilter keypoint_filter;
     unsigned int n_new_features = 0;
 
-    for (unsigned int n_iterations = 0; n_iterations < _max_features; n_iterations++)
+    for (unsigned int n_iterations = 0; _max_features == -1 || n_iterations < _max_features; n_iterations++)
     {
         if (active_search_ptr_->pickEmptyRoi(roi))
         {
@@ -283,7 +224,7 @@ LandmarkBasePtr ProcessorTrackerLandmarkImage::createLandmark(FeatureBasePtr _fe
 {
 
     FeaturePointImagePtr feat_point_image_ptr = std::static_pointer_cast<FeaturePointImage>( _feature_ptr);
-    FrameBasePtr anchor_frame = getLastPtr()->getFramePtr();
+    FrameBasePtr anchor_frame = getLast()->getFrame();
 
     Eigen::Vector2s point2D;
     point2D[0] = feat_point_image_ptr->getKeypoint().pt.x;
@@ -292,8 +233,8 @@ LandmarkBasePtr ProcessorTrackerLandmarkImage::createLandmark(FeatureBasePtr _fe
     Scalar distance = params_tracker_landmark_image_->distance; // arbitrary value
     Eigen::Vector4s vec_homogeneous;
 
-    point2D = pinhole::depixellizePoint(getSensorPtr()->getIntrinsicPtr()->getState(),point2D);
-    point2D = pinhole::undistortPoint((std::static_pointer_cast<SensorCamera>(getSensorPtr()))->getCorrectionVector(),point2D);
+    point2D = pinhole::depixellizePoint(getSensor()->getIntrinsic()->getState(),point2D);
+    point2D = pinhole::undistortPoint((std::static_pointer_cast<SensorCamera>(getSensor()))->getCorrectionVector(),point2D);
 
     Eigen::Vector3s point3D;
     point3D.head<2>() = point2D;
@@ -303,17 +244,17 @@ LandmarkBasePtr ProcessorTrackerLandmarkImage::createLandmark(FeatureBasePtr _fe
 
     vec_homogeneous = {point3D(0),point3D(1),point3D(2),1/distance};
 
-    LandmarkAHPPtr lmk_ahp_ptr = std::make_shared<LandmarkAHP>(vec_homogeneous, anchor_frame, getSensorPtr(), feat_point_image_ptr->getDescriptor());
+    LandmarkAHPPtr lmk_ahp_ptr = std::make_shared<LandmarkAHP>(vec_homogeneous, anchor_frame, getSensor(), feat_point_image_ptr->getDescriptor());
     _feature_ptr->setLandmarkId(lmk_ahp_ptr->id());
     return lmk_ahp_ptr;
 }
 
-ConstraintBasePtr ProcessorTrackerLandmarkImage::createConstraint(FeatureBasePtr _feature_ptr, LandmarkBasePtr _landmark_ptr)
+FactorBasePtr ProcessorTrackerLandmarkImage::createFactor(FeatureBasePtr _feature_ptr, LandmarkBasePtr _landmark_ptr)
 {
 
-    if ((std::static_pointer_cast<LandmarkAHP>(_landmark_ptr))->getAnchorFrame() == last_ptr_->getFramePtr())
+    if ((std::static_pointer_cast<LandmarkAHP>(_landmark_ptr))->getAnchorFrame() == last_ptr_->getFrame())
     {
-        return ConstraintBasePtr();
+        return FactorBasePtr();
     }
     else
     {
@@ -322,9 +263,9 @@ ConstraintBasePtr ProcessorTrackerLandmarkImage::createConstraint(FeatureBasePtr
 
         LandmarkAHPPtr landmark_ahp = std::static_pointer_cast<LandmarkAHP>(_landmark_ptr);
 
-        ConstraintAHPPtr constraint_ptr = ConstraintAHP::create(_feature_ptr, landmark_ahp, shared_from_this(), true);
+        FactorAHPPtr factor_ptr = FactorAHP::create(_feature_ptr, landmark_ahp, shared_from_this(), true);
 
-        return constraint_ptr;
+        return factor_ptr;
     }
 }
 
@@ -365,8 +306,8 @@ void ProcessorTrackerLandmarkImage::landmarkInCurrentCamera(const Eigen::VectorX
     Transform<Scalar,3,Eigen::Affine> T_W_R0, T_W_R1, T_R0_C0, T_R1_C1;
 
     // world to anchor robot frame
-    Translation<Scalar,3>  t_w_r0(_landmark->getAnchorFrame()->getPPtr()->getState()); // sadly we cannot put a Map over a translation
-    const Quaternions q_w_r0(Eigen::Vector4s(_landmark->getAnchorFrame()->getOPtr()->getState()));
+    Translation<Scalar,3>  t_w_r0(_landmark->getAnchorFrame()->getP()->getState()); // sadly we cannot put a Map over a translation
+    const Quaternions q_w_r0(Eigen::Vector4s(_landmark->getAnchorFrame()->getO()->getState()));
     T_W_R0 = t_w_r0 * q_w_r0;
 
     // world to current robot frame
@@ -375,17 +316,17 @@ void ProcessorTrackerLandmarkImage::landmarkInCurrentCamera(const Eigen::VectorX
     T_W_R1 = t_w_r1 * q_w_r1;
 
     // anchor robot to anchor camera
-    Translation<Scalar,3>  t_r0_c0(_landmark->getAnchorSensor()->getPPtr()->getState());
-    const Quaternions q_r0_c0(Eigen::Vector4s(_landmark->getAnchorSensor()->getOPtr()->getState()));
+    Translation<Scalar,3>  t_r0_c0(_landmark->getAnchorSensor()->getP()->getState());
+    const Quaternions q_r0_c0(Eigen::Vector4s(_landmark->getAnchorSensor()->getO()->getState()));
     T_R0_C0 = t_r0_c0 * q_r0_c0;
 
     // current robot to current camera
-    Translation<Scalar,3>  t_r1_c1(this->getSensorPtr()->getPPtr()->getState());
-    const Quaternions q_r1_c1(Eigen::Vector4s(this->getSensorPtr()->getOPtr()->getState()));
+    Translation<Scalar,3>  t_r1_c1(this->getSensor()->getP()->getState());
+    const Quaternions q_r1_c1(Eigen::Vector4s(this->getSensor()->getO()->getState()));
     T_R1_C1 = t_r1_c1 * q_r1_c1;
 
     // Transform lmk from c0 to c1 and exit
-    Vector4s landmark_hmg_c0 = _landmark->getPPtr()->getState(); // lmk in anchor frame
+    Vector4s landmark_hmg_c0 = _landmark->getP()->getState(); // lmk in anchor frame
     _point3D_hmg = T_R1_C1.inverse(Eigen::Affine) * T_W_R1.inverse(Eigen::Affine) * T_W_R0 * T_R0_C0 * landmark_hmg_c0;
 }
 
@@ -447,17 +388,17 @@ void ProcessorTrackerLandmarkImage::drawLandmarks(cv::Mat _image)
     {
         unsigned int num_lmks_in_img = 0;
 
-        Eigen::VectorXs current_state = last_ptr_->getFramePtr()->getState();
-        SensorCameraPtr camera = std::static_pointer_cast<SensorCamera>(getSensorPtr());
+        Eigen::VectorXs current_state = last_ptr_->getFrame()->getState();
+        SensorCameraPtr camera = std::static_pointer_cast<SensorCamera>(getSensor());
 
-        for (auto landmark_base_ptr : getProblem()->getMapPtr()->getLandmarkList())
+        for (auto landmark_base_ptr : getProblem()->getMap()->getLandmarkList())
         {
             LandmarkAHPPtr landmark_ptr = std::static_pointer_cast<LandmarkAHP>(landmark_base_ptr);
 
             Eigen::Vector4s point3D_hmg;
             landmarkInCurrentCamera(current_state, landmark_ptr, point3D_hmg);
 
-            Eigen::Vector2s point2D = pinhole::projectPoint(camera->getIntrinsicPtr()->getState(), // k
+            Eigen::Vector2s point2D = pinhole::projectPoint(camera->getIntrinsic()->getState(), // k
                                                             camera->getDistortionVector(),          // d
                                                             point3D_hmg.head(3));                   // v
 

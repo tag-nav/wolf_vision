@@ -8,9 +8,9 @@ class StateBlock;
 }
 
 //Wolf includes
-#include "base/wolf.h"
-#include "base/node_base.h"
-#include "base/time_stamp.h"
+#include "base/common/wolf.h"
+#include "base/common/node_base.h"
+#include "base/common/time_stamp.h"
 
 //std includes
 
@@ -24,7 +24,7 @@ class LandmarkBase : public NodeBase, public std::enable_shared_from_this<Landma
 {
     private:
         MapBaseWPtr map_ptr_;
-        ConstraintBaseList constrained_by_list_;
+        FactorBasePtrList constrained_by_list_;
         std::vector<StateBlockPtr> state_block_vec_; ///< vector of state blocks, in the order P, O.
 
         static unsigned int landmark_id_count_;
@@ -62,17 +62,16 @@ class LandmarkBase : public NodeBase, public std::enable_shared_from_this<Landma
         const std::vector<StateBlockPtr>& getStateBlockVec() const;
         std::vector<StateBlockPtr>& getStateBlockVec();
         std::vector<StateBlockPtr> getUsedStateBlockVec() const;
-        StateBlockPtr getStateBlockPtr(unsigned int _i) const;
-        void setStateBlockPtr(unsigned int _i, StateBlockPtr _sb_ptr);
-        StateBlockPtr getPPtr() const;
-        StateBlockPtr getOPtr() const;
-        void setPPtr(const StateBlockPtr _p_ptr);
-        void setOPtr(const StateBlockPtr _o_ptr);
+        StateBlockPtr getStateBlock(unsigned int _i) const;
+        void setStateBlock(unsigned int _i, StateBlockPtr _sb_ptr);
+        StateBlockPtr getP() const;
+        StateBlockPtr getO() const;
+        void setP(const StateBlockPtr _p_ptr);
+        void setO(const StateBlockPtr _o_ptr);
         virtual void registerNewStateBlocks();
         Eigen::VectorXs getState() const;
         void getState(Eigen::VectorXs& _state) const;
         bool getCovariance(Eigen::MatrixXs& _cov) const;
-        Eigen::MatrixXs getCovariance() const;
 
     protected:
         virtual void removeStateBlocks();
@@ -86,20 +85,20 @@ class LandmarkBase : public NodeBase, public std::enable_shared_from_this<Landma
         // Navigate wolf tree
         virtual void setProblem(ProblemPtr _problem) final;
 
-        ConstraintBasePtr addConstrainedBy(ConstraintBasePtr _ctr_ptr);
+        FactorBasePtr addConstrainedBy(FactorBasePtr _fac_ptr);
         unsigned int getHits() const;
-        ConstraintBaseList& getConstrainedByList();
+        FactorBasePtrList& getConstrainedByList();
 
-        void setMapPtr(const MapBasePtr _map_ptr);
-        MapBasePtr getMapPtr();
+        void setMap(const MapBasePtr _map_ptr);
+        MapBasePtr getMap();
 
 };
 
 }
 
-#include "base/map_base.h"
-#include "base/constraint/constraint_base.h"
-#include "base/state_block.h"
+#include "base/map/map_base.h"
+#include "base/factor/factor_base.h"
+#include "base/state_block/state_block.h"
 
 namespace wolf{
 
@@ -108,12 +107,12 @@ inline void LandmarkBase::setProblem(ProblemPtr _problem)
     NodeBase::setProblem(_problem);
 }
 
-inline MapBasePtr LandmarkBase::getMapPtr()
+inline MapBasePtr LandmarkBase::getMap()
 {
     return map_ptr_.lock();
 }
 
-inline void LandmarkBase::setMapPtr(const MapBasePtr _map_ptr)
+inline void LandmarkBase::setMap(const MapBasePtr _map_ptr)
 {
     map_ptr_ = _map_ptr;
 }
@@ -135,7 +134,7 @@ inline unsigned int LandmarkBase::getHits() const
     return constrained_by_list_.size();
 }
 
-inline ConstraintBaseList& LandmarkBase::getConstrainedByList()
+inline FactorBasePtrList& LandmarkBase::getConstrainedByList()
 {
     return constrained_by_list_;
 }
@@ -150,35 +149,35 @@ inline std::vector<StateBlockPtr>& LandmarkBase::getStateBlockVec()
     return state_block_vec_;
 }
 
-inline StateBlockPtr LandmarkBase::getStateBlockPtr(unsigned int _i) const
+inline StateBlockPtr LandmarkBase::getStateBlock(unsigned int _i) const
 {
     assert (_i < state_block_vec_.size() && "Requested a state block pointer out of the vector range!");
     return state_block_vec_[_i];
 }
 
-inline void LandmarkBase::setStateBlockPtr(unsigned int _i, StateBlockPtr _sb_ptr)
+inline void LandmarkBase::setStateBlock(unsigned int _i, StateBlockPtr _sb_ptr)
 {
     state_block_vec_[_i] = _sb_ptr;
 }
 
-inline StateBlockPtr LandmarkBase::getPPtr() const
+inline StateBlockPtr LandmarkBase::getP() const
 {
-    return getStateBlockPtr(0);
+    return getStateBlock(0);
 }
 
-inline StateBlockPtr LandmarkBase::getOPtr() const
+inline StateBlockPtr LandmarkBase::getO() const
 {
-    return getStateBlockPtr(1);
+    return getStateBlock(1);
 }
 
-inline void LandmarkBase::setPPtr(const StateBlockPtr _st_ptr)
+inline void LandmarkBase::setP(const StateBlockPtr _st_ptr)
 {
-    setStateBlockPtr(0, _st_ptr);
+    setStateBlock(0, _st_ptr);
 }
 
-inline void LandmarkBase::setOPtr(const StateBlockPtr _st_ptr)
+inline void LandmarkBase::setO(const StateBlockPtr _st_ptr)
 {
-    setStateBlockPtr(1, _st_ptr);
+    setStateBlock(1, _st_ptr);
 }
 
 inline void LandmarkBase::setDescriptor(const Eigen::VectorXs& _descriptor)

@@ -6,10 +6,10 @@
  */
 
 // Wolf includes
-#include "base/wolf.h"
-#include "base/problem.h"
-#include "base/frame_base.h"
-#include "base/trajectory_base.h"
+#include "base/common/wolf.h"
+#include "base/problem/problem.h"
+#include "base/frame/frame_base.h"
+#include "base/trajectory/trajectory_base.h"
 
 // STL includes
 #include <list>
@@ -23,7 +23,7 @@ using namespace wolf;
 void printFrames(ProblemPtr _problem_ptr)
 {
     std::cout << "TRAJECTORY:" << std::endl;
-    for (auto frm : _problem_ptr->getTrajectoryPtr()->getFrameList())
+    for (auto frm : _problem_ptr->getTrajectory()->getFrameList())
         std::cout << "\t " << (frm->isKey() ? "KEY FRAME: " : "FRAME: ") << frm->id() << " - TS: " << frm->getTimeStamp().getSeconds() << "." << frm->getTimeStamp().getNanoSeconds() << std::endl;
 }
 

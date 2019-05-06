@@ -6,11 +6,11 @@
  */
 
 //Wolf
-#include "base/wolf.h"
-#include "base/problem.h"
+#include "base/common/wolf.h"
+#include "base/problem/problem.h"
 #include "base/sensor/sensor_diff_drive.h"
 #include "base/capture/capture_wheel_joint_position.h"
-#include "processor/processor_diff_drive.h"
+#include "base/processor/processor_diff_drive.h"
 
 //std
 #include <iostream>
@@ -223,7 +223,7 @@ int main(int argc, char** argv)
 
   t.set(stamp_secs);
   auto processor_diff_drive_ptr =
-      std::static_pointer_cast<ProcessorDiffDrive>(wolf_problem_ptr_->getProcessorMotionPtr());
+      std::static_pointer_cast<ProcessorDiffDrive>(wolf_problem_ptr_->getProcessorMotion());
   processor_diff_drive_ptr->setTimeTolerance(period_secs/2); // overwrite time tolerance based on new evidence
 
   // Set the origin
@@ -270,19 +270,19 @@ int main(int argc, char** argv)
             "-----------------------------------------");
 
   WOLF_INFO("Integrated delta: " , /* std::fixed , std::setprecision(3),*/
-            wolf_problem_ptr_->getProcessorMotionPtr()->getMotion().delta_integr_.transpose());
+            wolf_problem_ptr_->getProcessorMotion()->getMotion().delta_integr_.transpose());
   WOLF_INFO("Integrated state: " , /*std::fixed , std::setprecision(3),*/
-            wolf_problem_ptr_->getProcessorMotionPtr()->getCurrentState().transpose());
+            wolf_problem_ptr_->getProcessorMotion()->getCurrentState().transpose());
   WOLF_INFO("Integrated std  : " , /*std::fixed , std::setprecision(3),*/
-            (wolf_problem_ptr_->getProcessorMotionPtr()->getMotion().
+            (wolf_problem_ptr_->getProcessorMotion()->getMotion().
                 delta_integr_cov_.diagonal().transpose()).array().sqrt());
 
   // Print statistics
   TimeStamp t0, tf;
-  t0 = wolf_problem_ptr_->getProcessorMotionPtr()->getBuffer().get().front().ts_;
-  tf = wolf_problem_ptr_->getProcessorMotionPtr()->getBuffer().get().back().ts_;
+  t0 = wolf_problem_ptr_->getProcessorMotion()->getBuffer().get().front().ts_;
+  tf = wolf_problem_ptr_->getProcessorMotion()->getBuffer().get().back().ts_;
 
-  double N = (double)wolf_problem_ptr_->getProcessorMotionPtr()->getBuffer().get().size();
+  double N = (double)wolf_problem_ptr_->getProcessorMotion()->getBuffer().get().size();
 
   WOLF_INFO("t0        : " , t0.get()               , " secs");
   WOLF_INFO("tf        : " , tf.get()               , " secs");

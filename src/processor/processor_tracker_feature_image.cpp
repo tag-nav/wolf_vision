@@ -23,72 +23,13 @@ ProcessorTrackerFeatureImage::ProcessorTrackerFeatureImage(ProcessorParamsTracke
     std::string det_name = vision_utils::readYamlType(params_tracker_feature_image_->yaml_file_params_vision_utils, "detector");
     det_ptr_ = vision_utils::setupDetector(det_name, det_name + " detector", params_tracker_feature_image_->yaml_file_params_vision_utils);
 
-    if (det_name.compare("ORB") == 0)
-    	det_ptr_ = std::static_pointer_cast<vision_utils::DetectorORB>(det_ptr_);
-    else if (det_name.compare("FAST") == 0)
-    	det_ptr_ = std::static_pointer_cast<vision_utils::DetectorFAST>(det_ptr_);
-    else if (det_name.compare("SIFT") == 0)
-    	det_ptr_ = std::static_pointer_cast<vision_utils::DetectorSIFT>(det_ptr_);
-    else if (det_name.compare("SURF") == 0)
-    	det_ptr_ = std::static_pointer_cast<vision_utils::DetectorSURF>(det_ptr_);
-    else if (det_name.compare("BRISK") == 0)
-    	det_ptr_ = std::static_pointer_cast<vision_utils::DetectorBRISK>(det_ptr_);
-    else if (det_name.compare("MSER") == 0)
-    	det_ptr_ = std::static_pointer_cast<vision_utils::DetectorMSER>(det_ptr_);
-    else if (det_name.compare("GFTT") == 0)
-    	det_ptr_ = std::static_pointer_cast<vision_utils::DetectorGFTT>(det_ptr_);
-    else if (det_name.compare("HARRIS") == 0)
-    	det_ptr_ = std::static_pointer_cast<vision_utils::DetectorHARRIS>(det_ptr_);
-    else if (det_name.compare("SBD") == 0)
-    	det_ptr_ = std::static_pointer_cast<vision_utils::DetectorSBD>(det_ptr_);
-    else if (det_name.compare("KAZE") == 0)
-    	det_ptr_ = std::static_pointer_cast<vision_utils::DetectorKAZE>(det_ptr_);
-    else if (det_name.compare("AKAZE") == 0)
-    	det_ptr_ = std::static_pointer_cast<vision_utils::DetectorAKAZE>(det_ptr_);
-    else if (det_name.compare("AGAST") == 0)
-    	det_ptr_ = std::static_pointer_cast<vision_utils::DetectorAGAST>(det_ptr_);
-
     // Descriptor
     std::string des_name = vision_utils::readYamlType(params_tracker_feature_image_->yaml_file_params_vision_utils, "descriptor");
     des_ptr_ = vision_utils::setupDescriptor(des_name, des_name + " descriptor", params_tracker_feature_image_->yaml_file_params_vision_utils);
 
-    if (des_name.compare("ORB") == 0)
-    	des_ptr_ = std::static_pointer_cast<vision_utils::DescriptorORB>(des_ptr_);
-    else if (des_name.compare("SIFT") == 0)
-    	des_ptr_ = std::static_pointer_cast<vision_utils::DescriptorSIFT>(des_ptr_);
-    else if (des_name.compare("SURF") == 0)
-    	des_ptr_ = std::static_pointer_cast<vision_utils::DescriptorSURF>(des_ptr_);
-    else if (des_name.compare("BRISK") == 0)
-      	des_ptr_ = std::static_pointer_cast<vision_utils::DescriptorBRISK>(des_ptr_);
-    else if (des_name.compare("KAZE") == 0)
-    	des_ptr_ = std::static_pointer_cast<vision_utils::DescriptorKAZE>(des_ptr_);
-    else if (des_name.compare("AKAZE") == 0)
-    	des_ptr_ = std::static_pointer_cast<vision_utils::DescriptorAKAZE>(des_ptr_);
-    else if (des_name.compare("LATCH") == 0)
-    	des_ptr_ = std::static_pointer_cast<vision_utils::DescriptorLATCH>(des_ptr_);
-    else if (des_name.compare("FREAK") == 0)
-    	des_ptr_ = std::static_pointer_cast<vision_utils::DescriptorFREAK>(des_ptr_);
-    else if (des_name.compare("BRIEF") == 0)
-    	des_ptr_ = std::static_pointer_cast<vision_utils::DescriptorBRIEF>(des_ptr_);
-    else if (des_name.compare("DAISY") == 0)
-    	des_ptr_ = std::static_pointer_cast<vision_utils::DescriptorDAISY>(des_ptr_);
-    else if (des_name.compare("LUCID") == 0)
-    	des_ptr_ = std::static_pointer_cast<vision_utils::DescriptorLUCID>(des_ptr_);
-
     // Matcher
     std::string mat_name = vision_utils::readYamlType(params_tracker_feature_image_->yaml_file_params_vision_utils, "matcher");
     mat_ptr_ = vision_utils::setupMatcher(mat_name, mat_name + " matcher", params_tracker_feature_image_->yaml_file_params_vision_utils);
-
-    if (mat_name.compare("FLANNBASED") == 0)
-    	mat_ptr_ = std::static_pointer_cast<vision_utils::MatcherFLANNBASED>(mat_ptr_);
-    if (mat_name.compare("BRUTEFORCE") == 0)
-    	mat_ptr_ = std::static_pointer_cast<vision_utils::MatcherBRUTEFORCE>(mat_ptr_);
-    if (mat_name.compare("BRUTEFORCE_L1") == 0)
-    	mat_ptr_ = std::static_pointer_cast<vision_utils::MatcherBRUTEFORCE_L1>(mat_ptr_);
-    if (mat_name.compare("BRUTEFORCE_HAMMING") == 0)
-    	mat_ptr_ = std::static_pointer_cast<vision_utils::MatcherBRUTEFORCE_HAMMING>(mat_ptr_);
-    if (mat_name.compare("BRUTEFORCE_HAMMING_2") == 0)
-       	mat_ptr_ = std::static_pointer_cast<vision_utils::MatcherBRUTEFORCE_HAMMING_2>(mat_ptr_);
 
     // Active search grid
     vision_utils::AlgorithmBasePtr alg_ptr = vision_utils::setupAlgorithm("ACTIVESEARCH", "ACTIVESEARCH algorithm", params_tracker_feature_image_->yaml_file_params_vision_utils);
@@ -135,7 +76,7 @@ void ProcessorTrackerFeatureImage::postProcess()
 {
 }
 
-unsigned int ProcessorTrackerFeatureImage::trackFeatures(const FeatureBaseList& _features_last_in, FeatureBaseList& _features_incoming_out,
+unsigned int ProcessorTrackerFeatureImage::trackFeatures(const FeatureBasePtrList& _features_last_in, FeatureBasePtrList& _features_incoming_out,
                                            FeatureMatchMap& _feature_matches)
 {
     KeyPointVector candidate_keypoints;
@@ -244,7 +185,7 @@ bool ProcessorTrackerFeatureImage::correctFeatureDrift(const FeatureBasePtr _ori
     }
 }
 
-unsigned int ProcessorTrackerFeatureImage::detectNewFeatures(const unsigned int& _max_new_features, FeatureBaseList& _features_last_out)
+unsigned int ProcessorTrackerFeatureImage::detectNewFeatures(const int& _max_new_features, FeatureBasePtrList& _features_last_out)
 {
     cv::Rect roi;
     KeyPointVector new_keypoints;
@@ -252,7 +193,7 @@ unsigned int ProcessorTrackerFeatureImage::detectNewFeatures(const unsigned int&
     cv::KeyPointsFilter keypoint_filter;
     unsigned int n_new_features = 0;
 
-    for (unsigned int n_iterations = 0; _max_new_features == 0 || n_iterations < _max_new_features; n_iterations++)
+    for (unsigned int n_iterations = 0; _max_new_features == -1 || n_iterations < _max_new_features; n_iterations++)
     {
 
         if (active_search_ptr_->pickEmptyRoi(roi))
@@ -306,12 +247,12 @@ Scalar ProcessorTrackerFeatureImage::match(cv::Mat _target_descriptor, cv::Mat _
     return normalized_score;
 }
 
-ConstraintBasePtr ProcessorTrackerFeatureImage::createConstraint(FeatureBasePtr _feature_ptr,
+FactorBasePtr ProcessorTrackerFeatureImage::createFactor(FeatureBasePtr _feature_ptr,
                                                           FeatureBasePtr _feature_other_ptr)
 {
-    ConstraintEpipolarPtr const_epipolar_ptr = std::make_shared<ConstraintEpipolar>(_feature_ptr, _feature_other_ptr,
+    FactorEpipolarPtr const_epipolar_ptr = std::make_shared<FactorEpipolar>(_feature_ptr, _feature_other_ptr,
                                                                                     shared_from_this());
-    //    _feature_ptr->addConstraint(const_epipolar_ptr);
+    //    _feature_ptr->addFactor(const_epipolar_ptr);
     //    _feature_other_ptr->addConstrainedBy(const_epipolar_ptr);
     return const_epipolar_ptr;
 }
@@ -324,7 +265,7 @@ unsigned int ProcessorTrackerFeatureImage::detect(cv::Mat _image, cv::Rect& _roi
     return _new_keypoints.size();
 }
 
-void ProcessorTrackerFeatureImage::resetVisualizationFlag(FeatureBaseList& _feature_list_last)
+void ProcessorTrackerFeatureImage::resetVisualizationFlag(FeatureBasePtrList& _feature_list_last)
 {
     for (auto feature_base_last_ptr : _feature_list_last)
     {

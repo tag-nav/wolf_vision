@@ -17,7 +17,7 @@
 #include "glog/logging.h"
 
 //Wolf includes
-#include "base/problem.h"
+#include "base/problem/problem.h"
 #include "base/processor/processor_tracker_landmark_corner.h"
 #include "base/processor/processor_odom_2D.h"
 #include "base/sensor/sensor_laser_2D.h"
@@ -126,7 +126,7 @@ class FaramoticsRobot
             }
         }
 
-        void render(const FeatureBaseList& feature_list, int laser, const LandmarkBaseList& landmark_list, const Eigen::Vector3s& estimated_pose)
+        void render(const FeatureBasePtrList& feature_list, int laser, const LandmarkBasePtrList& landmark_list, const Eigen::Vector3s& estimated_pose)
         {
             // detected corners
             //std::cout << "   drawCorners: " << feature_list.size() << std::endl;
@@ -146,7 +146,7 @@ class FaramoticsRobot
             landmark_vector.reserve(3*landmark_list.size());
             for (auto landmark : landmark_list)
             {
-                Scalar* position_ptr = landmark->getPPtr()->getPtr();
+                Scalar* position_ptr = landmark->getP()->get();
                 landmark_vector.push_back(*position_ptr); //x
                 landmark_vector.push_back(*(position_ptr + 1)); //y
                 landmark_vector.push_back(0.2); //z
@@ -334,8 +334,8 @@ int main(int argc, char** argv)
         //std::cout << "RENDERING..." << std::endl;
         t1 = clock();
         if (step % 3 == 0)
-            robot.render(laser_1_processor->getLastPtr() == nullptr ? FeatureBaseList({}) : *laser_1_processor->getLastPtr()->getFeatureList(), 1, *problem.getMapPtr()->getLandmarkList(), problem.getCurrentState());
-            //robot.render(laser_2_processor->getLastPtr() == nullptr ? FeatureBaseList({}) : *laser_2_processor->getLastPtr()->getFeatureListPtr(), 2, *problem.getMapPtr()->getLandmarkListPtr(), problem.getCurrentState());
+            robot.render(laser_1_processor->getLast() == nullptr ? FeatureBasePtrList({}) : *laser_1_processor->getLast()->getFeatureList(), 1, *problem.getMap()->getLandmarkList(), problem.getCurrentState());
+            //robot.render(laser_2_processor->getLast() == nullptr ? FeatureBasePtrList({}) : *laser_2_processor->getLast()->getFeatureList(), 2, *problem.getMap()->getLandmarkList(), problem.getCurrentState());
         mean_times(5) += ((double) clock() - t1) / CLOCKS_PER_SEC;
 
         // TIME MANAGEMENT ---------------------------
@@ -361,24 +361,24 @@ int main(int argc, char** argv)
     //	std::cout << "\nTree before deleting..." << std::endl;
 
     // Draw Final result -------------------------
-    robot.render(laser_1_processor->getLastPtr() == nullptr ? FeatureBaseList({}) : *laser_1_processor->getLastPtr()->getFeatureList(), 1, *problem.getMapPtr()->getLandmarkList(), problem.getCurrentState());
+    robot.render(laser_1_processor->getLast() == nullptr ? FeatureBasePtrList({}) : *laser_1_processor->getLast()->getFeatureList(), 1, *problem.getMap()->getLandmarkList(), problem.getCurrentState());
 
     // Print Final result in a file -------------------------
     // Vehicle poses
     int i = 0;
     Eigen::VectorXs state_poses = Eigen::VectorXs::Zero(n_execution * 3);
-    for (auto frame : *(problem.getTrajectoryPtr()->getFrameList()))
+    for (auto frame : *(problem.getTrajectory()->getFrameList()))
     {
-        state_poses.segment(i, 3) << frame->getPPtr()->getVector(), frame->getOPtr()->getVector();
+        state_poses.segment(i, 3) << frame->getP()->getVector(), frame->getO()->getVector();
         i += 3;
     }
 
     // Landmarks
     i = 0;
-    Eigen::VectorXs landmarks = Eigen::VectorXs::Zero(problem.getMapPtr()->getLandmarkList()->size() * 2);
-    for (auto landmark : *(problem.getMapPtr()->getLandmarkList()))
+    Eigen::VectorXs landmarks = Eigen::VectorXs::Zero(problem.getMap()->getLandmarkList()->size() * 2);
+    for (auto landmark : *(problem.getMap()->getLandmarkList()))
     {
-        landmarks.segment(i, 2) = landmark->getPPtr()->getVector();
+        landmarks.segment(i, 2) = landmark->getP()->getVector();
         i += 2;
     }
 

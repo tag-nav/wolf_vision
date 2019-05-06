@@ -7,10 +7,10 @@
 
  //Wolf
 #include "base/capture/capture_IMU.h"
-#include "base/wolf.h"
-#include "base/problem.h"
-#include "base/state_block.h"
-#include "base/state_quaternion.h"
+#include "base/common/wolf.h"
+#include "base/problem/problem.h"
+#include "base/state_block/state_block.h"
+#include "base/state_block/state_quaternion.h"
 #include <iostream>
 #include <fstream>
 #include <iomanip>
@@ -105,7 +105,7 @@ int main(int argc, char** argv)
     ProblemPtr wolf_problem_ptr_ = Problem::create("PQVBB 3D");
     Eigen::VectorXs IMU_extrinsics(7);
     IMU_extrinsics << 0,0,0, 0,0,0,1; // IMU pose in the robot
-    SensorBasePtr sensor_ptr = wolf_problem_ptr_->installSensor("IMU", "Main IMU", IMU_extrinsics, IntrinsicsBasePtr());
+    SensorBasePtr sensor_ptr = wolf_problem_ptr_->installSensor("IMU", "Main IMU", IMU_extrinsics, IntrinsicsBase());
     wolf_problem_ptr_->installProcessor("IMU", "IMU pre-integrator", "Main IMU", "");
 
     // Time and data variables
@@ -118,7 +118,7 @@ int main(int argc, char** argv)
     // Set the origin
     Eigen::VectorXs x0(16);
     x0 << 0,0,0,  0,0,0,  1,0,0,0,  0,0,.001,  0,0,.002; // Try some non-zero biases
-    wolf_problem_ptr_->getProcessorMotionPtr()->setOrigin(x0, t);
+    wolf_problem_ptr_->getProcessorMotion()->setOrigin(x0, t);
 
     // Create one capture to store the IMU data arriving from (sensor / callback / file / etc.)
     CaptureIMUPtr imu_ptr( std::make_shared<CaptureIMU>(t, sensor_ptr, data_) );
@@ -165,10 +165,10 @@ int main(int argc, char** argv)
         Eigen::VectorXs x_debug;
         TimeStamp ts;
 
-        delta_debug = wolf_problem_ptr_->getProcessorMotionPtr()->getMotion().delta_;
-        delta_integr_debug = wolf_problem_ptr_->getProcessorMotionPtr()->getMotion().delta_integr_;
-        x_debug = wolf_problem_ptr_->getProcessorMotionPtr()->getCurrentState();
-        ts = wolf_problem_ptr_->getProcessorMotionPtr()->getBuffer().get().back().ts_;
+        delta_debug = wolf_problem_ptr_->getProcessorMotion()->getMotion().delta_;
+        delta_integr_debug = wolf_problem_ptr_->getProcessorMotion()->getMotion().delta_integr_;
+        x_debug = wolf_problem_ptr_->getProcessorMotion()->getCurrentState();
+        ts = wolf_problem_ptr_->getProcessorMotion()->getBuffer().get().back().ts_;
 
         if(debug_results)
             debug_results << ts.get() << "\t" << delta_debug(0) << "\t" << delta_debug(1) << "\t" << delta_debug(2) << "\t" << delta_debug(3) << "\t" << delta_debug(4) << "\t"
@@ -188,11 +188,11 @@ int main(int argc, char** argv)
     std::cout << "Initial    state: " << std::fixed << std::setprecision(3) << std::setw(8)
     << x0.head(16).transpose() << std::endl;
     std::cout << "Integrated delta: " << std::fixed << std::setprecision(3) << std::setw(8)
-    << wolf_problem_ptr_->getProcessorMotionPtr()->getMotion().delta_integr_.transpose() << std::endl;
+    << wolf_problem_ptr_->getProcessorMotion()->getMotion().delta_integr_.transpose() << std::endl;
     std::cout << "Integrated state: " << std::fixed << std::setprecision(3) << std::setw(8)
-    << wolf_problem_ptr_->getProcessorMotionPtr()->getCurrentState().head(16).transpose() << std::endl;
+    << wolf_problem_ptr_->getProcessorMotion()->getCurrentState().head(16).transpose() << std::endl;
     std::cout << "Integrated std  : " << std::fixed << std::setprecision(3) << std::setw(8)
-    << (wolf_problem_ptr_->getProcessorMotionPtr()->getMotion().delta_integr_cov_.diagonal().transpose()).array().sqrt() << std::endl;
+    << (wolf_problem_ptr_->getProcessorMotion()->getMotion().delta_integr_cov_.diagonal().transpose()).array().sqrt() << std::endl;
 
     // Print statistics
     std::cout << "\nStatistics -----------------------------------------------------------------------------------" << std::endl;
@@ -204,9 +204,9 @@ int main(int argc, char** argv)
 #endif
 
     TimeStamp t0, tf;
-    t0 = wolf_problem_ptr_->getProcessorMotionPtr()->getBuffer().get().front().ts_;
-    tf = wolf_problem_ptr_->getProcessorMotionPtr()->getBuffer().get().back().ts_;
-    int N = wolf_problem_ptr_->getProcessorMotionPtr()->getBuffer().get().size();
+    t0 = wolf_problem_ptr_->getProcessorMotion()->getBuffer().get().front().ts_;
+    tf = wolf_problem_ptr_->getProcessorMotion()->getBuffer().get().back().ts_;
+    int N = wolf_problem_ptr_->getProcessorMotion()->getBuffer().get().size();
     std::cout << "t0        : " << t0.get() << " s" << std::endl;
     std::cout << "tf        : " << tf.get() << " s" << std::endl;
     std::cout << "duration  : " << tf-t0 << " s" << std::endl;

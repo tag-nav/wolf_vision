@@ -7,7 +7,7 @@
 #include "base/landmark/landmark_match.h"
 #include "base/processor/processor_params_image.h"
 #include "base/processor/processor_tracker_landmark.h"
-#include "base/wolf.h"
+#include "base/common/wolf.h"
 
 #include <algorithms/activesearch/alg_activesearch.h>
 #include <descriptors/descriptor_base.h>
@@ -76,7 +76,7 @@ class ProcessorTrackerLandmarkImage : public ProcessorTrackerLandmark
         std::list<cv::Rect> tracker_roi_;
         std::list<cv::Rect> detector_roi_;
         std::list<cv::Point> tracker_target_;
-        FeatureBaseList feat_lmk_found_;
+        FeatureBasePtrList feat_lmk_found_;
 
         ProcessorTrackerLandmarkImage(ProcessorParamsTrackerLandmarkImagePtr _params_tracker_landmark_image);
         virtual ~ProcessorTrackerLandmarkImage();
@@ -115,7 +115,7 @@ class ProcessorTrackerLandmarkImage : public ProcessorTrackerLandmark
          * \param _features_incoming_out returned list of incoming features corresponding to a landmark of _landmarks_in
          * \param _feature_landmark_correspondences returned map of landmark correspondences: _feature_landmark_correspondences[_feature_out_ptr] = landmark_in_ptr
          */
-        virtual unsigned int findLandmarks(const LandmarkBaseList& _landmarks_in, FeatureBaseList& _features_incoming_out,
+        virtual unsigned int findLandmarks(const LandmarkBasePtrList& _landmarks_in, FeatureBasePtrList& _features_incoming_out,
                                            LandmarkMatchMap& _feature_landmark_correspondences);
 
         /** \brief Vote for KeyFrame generation
@@ -128,14 +128,16 @@ class ProcessorTrackerLandmarkImage : public ProcessorTrackerLandmark
         virtual bool voteForKeyFrame();
 
         /** \brief Detect new Features
-         *
-         * This is intended to create Features that are not among the Features already known in the Map.
-         *
-         * This function sets _features_last_out, the list of newly detected features.
-         *
+         * \param _max_features maximum number of features detected (-1: unlimited. 0: none)
+         * \param _features_last_out The list of detected Features.
          * \return The number of detected Features.
+         *
+         * This function detects Features that do not correspond to known Features/Landmarks in the system.
+         *
+         * The function is called in ProcessorTrackerLandmark::processNew() to set the member new_features_last_,
+         * the list of newly detected features of the capture last_ptr_.
          */
-        virtual unsigned int detectNewFeatures(const unsigned int& _max_new_features, FeatureBaseList& _features_last_out);
+        virtual unsigned int detectNewFeatures(const int& _max_new_features, FeatureBasePtrList& _features_last_out);
 
         /** \brief Create one landmark
          *
@@ -146,11 +148,11 @@ class ProcessorTrackerLandmarkImage : public ProcessorTrackerLandmark
     public:
         static ProcessorBasePtr create(const std::string& _unique_name, const ProcessorParamsBasePtr _params, const SensorBasePtr sensor_ptr = nullptr);
 
-        /** \brief Create a new constraint
+        /** \brief Create a new factor
          * \param _feature_ptr pointer to the Feature to constrain
          * \param _landmark_ptr LandmarkBase pointer to the Landmark constrained.
          */
-        virtual ConstraintBasePtr createConstraint(FeatureBasePtr _feature_ptr, LandmarkBasePtr _landmark_ptr);
+        virtual FactorBasePtr createFactor(FeatureBasePtr _feature_ptr, LandmarkBasePtr _landmark_ptr);
 
         //Other functions
     private:

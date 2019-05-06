@@ -6,12 +6,12 @@
  */
 
 #include "utils_gtest.h"
-#include "base/logging.h"
+#include "base/utils/logging.h"
 
-#include "base/frame_base.h"
+#include "base/frame/frame_base.h"
 #include "base/sensor/sensor_odom_2D.h"
 #include "base/processor/processor_odom_2D.h"
-#include "base/constraint/constraint_odom_2D.h"
+#include "base/factor/factor_odom_2D.h"
 #include "base/capture/capture_motion.h"
 
 #include <iostream>
@@ -39,16 +39,16 @@ TEST(FrameBase, StateBlocks)
     FrameBasePtr F = make_shared<FrameBase>(1, make_shared<StateBlock>(2), make_shared<StateBlock>(1));
 
     ASSERT_EQ(F->getStateBlockVec().size(),   (unsigned int) 3);
-    ASSERT_EQ(F->getPPtr()->getState().size(),(unsigned int) 2);
-    ASSERT_EQ(F->getOPtr()->getState().size(),(unsigned int) 1);
-    ASSERT_EQ(F->getVPtr(), nullptr);
+    ASSERT_EQ(F->getP()->getState().size(),(unsigned int) 2);
+    ASSERT_EQ(F->getO()->getState().size(),(unsigned int) 1);
+    ASSERT_EQ(F->getV(), nullptr);
 }
 
 TEST(FrameBase, LinksBasic)
 {
     FrameBasePtr F = make_shared<FrameBase>(1, make_shared<StateBlock>(2), make_shared<StateBlock>(1));
 
-    ASSERT_FALSE(F->getTrajectoryPtr());
+    ASSERT_FALSE(F->getTrajectory());
     ASSERT_FALSE(F->getProblem());
     //    ASSERT_THROW(f->getPreviousFrame(), std::runtime_error);  // protected by assert()
     //    ASSERT_EQ(f->getStatus(), ST_ESTIMATED);                  // protected
@@ -61,14 +61,14 @@ TEST(FrameBase, LinksBasic)
 
 TEST(FrameBase, LinksToTree)
 {
-    // Problem with 2 frames and one motion constraint between them
+    // Problem with 2 frames and one motion factor between them
     ProblemPtr P = Problem::create("PO 2D");
-    TrajectoryBasePtr T = P->getTrajectoryPtr();
+    TrajectoryBasePtr T = P->getTrajectory();
     IntrinsicsOdom2D intrinsics_odo;
     intrinsics_odo.k_disp_to_disp = 1;
     intrinsics_odo.k_rot_to_rot = 1;
     SensorOdom2DPtr S = make_shared<SensorOdom2D>(Vector3s::Zero(), intrinsics_odo);
-    P->getHardwarePtr()->addSensor(S);
+    P->getHardware()->addSensor(S);
     FrameBasePtr F1 = make_shared<FrameBase>(1, make_shared<StateBlock>(2), make_shared<StateBlock>(1));
     T->addFrame(F1);
     FrameBasePtr F2 = make_shared<FrameBase>(1, make_shared<StateBlock>(2), make_shared<StateBlock>(1));
@@ -79,8 +79,8 @@ TEST(FrameBase, LinksToTree)
     ProcessorBasePtr p = std::make_shared<ProcessorOdom2D>(make_shared<ProcessorParamsOdom2D>());
     FeatureBasePtr f = make_shared<FeatureBase>("f", Vector1s(1), Matrix<Scalar,1,1>::Identity()*.01);
     C->addFeature(f);
-    ConstraintOdom2DPtr c = make_shared<ConstraintOdom2D>(f, F2, p);
-    f->addConstraint(c);
+    FactorOdom2DPtr c = make_shared<FactorOdom2D>(f, F2, p);
+    f->addFactor(c);
 
     // c-by link F2 -> c not yet established
     ASSERT_TRUE(F2->getConstrainedByList().empty());
@@ -94,12 +94,12 @@ TEST(FrameBase, LinksToTree)
     // tree is now consistent
     ASSERT_TRUE(P->check(0));
 
-    // F1 has one capture and no constraints-by
+    // F1 has one capture and no factors-by
     ASSERT_FALSE(F1->getCaptureList().empty());
     ASSERT_TRUE(F1->getConstrainedByList().empty());
     ASSERT_EQ(F1->getHits() , (unsigned int) 0);
 
-    // F2 has no capture and one constraint-by
+    // F2 has no capture and one factor-by
     ASSERT_TRUE(F2->getCaptureList().empty());
     ASSERT_FALSE(F2->getConstrainedByList().empty());
     ASSERT_EQ(F2->getHits() , (unsigned int) 1);
@@ -111,13 +111,13 @@ TEST(FrameBase, LinksToTree)
     ASSERT_FALSE(F1->isFixed());
     F1->fix();
     ASSERT_TRUE(F1->isFixed());
-    F1->getPPtr()->unfix();
+    F1->getP()->unfix();
     ASSERT_FALSE(F1->isFixed());
     F1->unfix();
     ASSERT_FALSE(F1->isFixed());
-    F1->getPPtr()->fix();
+    F1->getP()->fix();
     ASSERT_FALSE(F1->isFixed());
-    F1->getOPtr()->fix();
+    F1->getO()->fix();
     ASSERT_TRUE(F1->isFixed());
 
     // set key
@@ -129,7 +129,7 @@ TEST(FrameBase, LinksToTree)
     ASSERT_TRUE(F1->getCaptureList().empty());
 }
 
-#include "base/state_quaternion.h"
+#include "base/state_block/state_quaternion.h"
 TEST(FrameBase, GetSetState)
 {
     // Create PQV_3D state blocks
@@ -151,9 +151,9 @@ TEST(FrameBase, GetSetState)
 
     // Set the state, check that state blocks hold the current states
     F.setState(x);
-    ASSERT_TRUE((p - F.getPPtr()->getState()).isMuchSmallerThan(1, Constants::EPS_SMALL));
-    ASSERT_TRUE((q - F.getOPtr()->getState()).isMuchSmallerThan(1, Constants::EPS_SMALL));
-    ASSERT_TRUE((v - F.getVPtr()->getState()).isMuchSmallerThan(1, Constants::EPS_SMALL));
+    ASSERT_TRUE((p - F.getP()->getState()).isMuchSmallerThan(1, Constants::EPS_SMALL));
+    ASSERT_TRUE((q - F.getO()->getState()).isMuchSmallerThan(1, Constants::EPS_SMALL));
+    ASSERT_TRUE((v - F.getV()->getState()).isMuchSmallerThan(1, Constants::EPS_SMALL));
 
     // Get the state, form 1 by reference
     F.getState(x1);

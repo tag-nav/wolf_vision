@@ -1,7 +1,7 @@
 #include "utils_gtest.h"
 
-#include "base/wolf.h"
-#include "base/logging.h"
+#include "base/common/wolf.h"
+#include "base/utils/logging.h"
 
 #include "vision_utils.h"
 
@@ -52,9 +52,9 @@ using namespace wolf;
 //  std::cout << "033[1;33m [WARN]:033[0m gtest for ProcessorTrackerFeatureTrifocal detectNewFeatures is empty." << std::endl;
 //}
 //
-//TEST(ProcessorTrackerFeatureTrifocal, createConstraint)
+//TEST(ProcessorTrackerFeatureTrifocal, createFactor)
 //{
-//  std::cout << "033[1;33m [WARN]:033[0m gtest for ProcessorTrackerFeatureTrifocal createConstraint is empty." << std::endl;
+//  std::cout << "033[1;33m [WARN]:033[0m gtest for ProcessorTrackerFeatureTrifocal createFactor is empty." << std::endl;
 //}
 
 TEST(ProcessorTrackerFeatureTrifocal, KeyFrameCallback)
@@ -146,7 +146,7 @@ TEST(ProcessorTrackerFeatureTrifocal, KeyFrameCallback)
         problem->print(2,0,1,0);
 
         // Only odom creating KFs
-        ASSERT_TRUE( problem->getLastKeyFramePtr()->getType().compare("PO 3D")==0 );
+        ASSERT_TRUE( problem->getLastKeyFrame()->getType().compare("PO 3D")==0 );
     }
 }
 

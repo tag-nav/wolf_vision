@@ -2,7 +2,7 @@
 #define TRUNK_SRC_SOLVER_COST_FUNCTION_SPARSE_H_
 
 //wolf includes
-#include "base/wolf.h"
+#include "base/common/wolf.h"
 #include "cost_function_sparse_base.h"
 
 // CERES JET
@@ -11,7 +11,7 @@
 namespace wolf
 {
 
-template <class ConstraintT,
+template <class FactorT,
           const unsigned int MEASUREMENT_SIZE,
                 unsigned int BLOCK_0_SIZE,
                 unsigned int BLOCK_1_SIZE,
@@ -23,7 +23,7 @@ template <class ConstraintT,
                 unsigned int BLOCK_7_SIZE,
                 unsigned int BLOCK_8_SIZE,
                 unsigned int BLOCK_9_SIZE>
-class CostFunctionSparse : CostFunctionSparseBase<ConstraintT,
+class CostFunctionSparse : CostFunctionSparseBase<FactorT,
                                                         MEASUREMENT_SIZE,
                                                         BLOCK_0_SIZE,
                                                         BLOCK_1_SIZE,
@@ -37,8 +37,8 @@ class CostFunctionSparse : CostFunctionSparseBase<ConstraintT,
                                                         BLOCK_9_SIZE>
 {
     public:
-        CostFunctionSparse(ConstraintT* _constraint_ptr) :
-            CostFunctionSparse<ConstraintT,
+        CostFunctionSparse(FactorT* _factor_ptr) :
+            CostFunctionSparse<FactorT,
                                 MEASUREMENT_SIZE,
                                 BLOCK_0_SIZE,
                                 BLOCK_1_SIZE,
@@ -49,7 +49,7 @@ class CostFunctionSparse : CostFunctionSparseBase<ConstraintT,
                                 BLOCK_6_SIZE,
                                 BLOCK_7_SIZE,
                                 BLOCK_8_SIZE,
-                                BLOCK_9_SIZE>(_constraint_ptr)
+                                BLOCK_9_SIZE>(_factor_ptr)
         {
 
         }
@@ -58,34 +58,34 @@ class CostFunctionSparse : CostFunctionSparseBase<ConstraintT,
         {
 //            if (BLOCK_0_SIZE > 0 && BLOCK_1_SIZE > 0 && BLOCK_2_SIZE > 0 && BLOCK_3_SIZE > 0 && BLOCK_4_SIZE > 0 &&
 //                BLOCK_5_SIZE > 0 && BLOCK_6_SIZE > 0 && BLOCK_7_SIZE > 0 && BLOCK_8_SIZE > 0 && BLOCK_9_SIZE > 0)
-                    (*this->constraint_ptr_)(this->jets_0_, this->jets_1_, this->jets_2_, this->jets_3_, this->jets_4_, this->jets_5_, this->jets_6_, this->jets_7_, this->jets_8_ , this->jets_9_ ,this->residuals_jet_);
+                    (*this->factor_ptr_)(this->jets_0_, this->jets_1_, this->jets_2_, this->jets_3_, this->jets_4_, this->jets_5_, this->jets_6_, this->jets_7_, this->jets_8_ , this->jets_9_ ,this->residuals_jet_);
 //            else if (BLOCK_0_SIZE > 0 && BLOCK_1_SIZE > 0 && BLOCK_2_SIZE > 0 && BLOCK_3_SIZE > 0 && BLOCK_4_SIZE > 0 &&
 //                     BLOCK_5_SIZE > 0 && BLOCK_6_SIZE > 0 && BLOCK_7_SIZE > 0 && BLOCK_8_SIZE > 0 && BLOCK_9_SIZE == 0)
-//                (*this->constraint_ptr_)(this->jets_0_, this->jets_1_, this->jets_2_, this->jets_3_, this->jets_4_, this->jets_5_, this->jets_6_, this->jets_7_, this->jets_8_ ,this->residuals_jet_);
+//                (*this->factor_ptr_)(this->jets_0_, this->jets_1_, this->jets_2_, this->jets_3_, this->jets_4_, this->jets_5_, this->jets_6_, this->jets_7_, this->jets_8_ ,this->residuals_jet_);
 //            else if (BLOCK_0_SIZE > 0 && BLOCK_1_SIZE > 0 && BLOCK_2_SIZE > 0 && BLOCK_3_SIZE > 0 && BLOCK_4_SIZE > 0 &&
 //                     BLOCK_5_SIZE > 0 && BLOCK_6_SIZE > 0 && BLOCK_7_SIZE > 0 && BLOCK_8_SIZE ==0 && BLOCK_9_SIZE == 0)
-//                (*this->constraint_ptr_)(this->jets_0_, this->jets_1_, this->jets_2_, this->jets_3_, this->jets_4_, this->jets_5_, this->jets_6_, this->jets_7_,this->residuals_jet_);
+//                (*this->factor_ptr_)(this->jets_0_, this->jets_1_, this->jets_2_, this->jets_3_, this->jets_4_, this->jets_5_, this->jets_6_, this->jets_7_,this->residuals_jet_);
 //            else if (BLOCK_0_SIZE > 0 && BLOCK_1_SIZE > 0 && BLOCK_2_SIZE > 0 && BLOCK_3_SIZE > 0 && BLOCK_4_SIZE > 0 &&
 //                     BLOCK_5_SIZE > 0 && BLOCK_6_SIZE > 0 && BLOCK_7_SIZE ==0 && BLOCK_8_SIZE ==0 && BLOCK_9_SIZE == 0)
-//                (*this->constraint_ptr_)(this->jets_0_, this->jets_1_, this->jets_2_, this->jets_3_, this->jets_4_, this->jets_5_, this->jets_6_,this->residuals_jet_);
+//                (*this->factor_ptr_)(this->jets_0_, this->jets_1_, this->jets_2_, this->jets_3_, this->jets_4_, this->jets_5_, this->jets_6_,this->residuals_jet_);
 //            else if (BLOCK_0_SIZE > 0 && BLOCK_1_SIZE > 0 && BLOCK_2_SIZE > 0 && BLOCK_3_SIZE > 0 && BLOCK_4_SIZE > 0 &&
 //                     BLOCK_5_SIZE > 0 && BLOCK_6_SIZE ==0 && BLOCK_7_SIZE ==0 && BLOCK_8_SIZE ==0 && BLOCK_9_SIZE == 0)
-//                (*this->constraint_ptr_)(this->jets_0_, this->jets_1_, this->jets_2_, this->jets_3_, this->jets_4_, this->jets_5_,this->residuals_jet_);
+//                (*this->factor_ptr_)(this->jets_0_, this->jets_1_, this->jets_2_, this->jets_3_, this->jets_4_, this->jets_5_,this->residuals_jet_);
 //            else if (BLOCK_0_SIZE > 0 && BLOCK_1_SIZE > 0 && BLOCK_2_SIZE > 0 && BLOCK_3_SIZE > 0 && BLOCK_4_SIZE > 0 &&
 //                     BLOCK_5_SIZE ==0 && BLOCK_6_SIZE ==0 && BLOCK_7_SIZE ==0 && BLOCK_8_SIZE ==0 && BLOCK_9_SIZE == 0)
-//                (*this->constraint_ptr_)(this->jets_0_, this->jets_1_, this->jets_2_, this->jets_3_, this->jets_4_, this->residuals_jet_);
+//                (*this->factor_ptr_)(this->jets_0_, this->jets_1_, this->jets_2_, this->jets_3_, this->jets_4_, this->residuals_jet_);
 //            else if (BLOCK_0_SIZE > 0 && BLOCK_1_SIZE > 0 && BLOCK_2_SIZE > 0 && BLOCK_3_SIZE > 0 && BLOCK_4_SIZE ==0 &&
 //                    BLOCK_5_SIZE ==0 && BLOCK_6_SIZE ==0 && BLOCK_7_SIZE ==0 && BLOCK_8_SIZE ==0 && BLOCK_9_SIZE == 0)
-//                (*this->constraint_ptr_)(this->jets_0_, this->jets_1_, this->jets_2_, this->jets_3_, this->residuals_jet_);
+//                (*this->factor_ptr_)(this->jets_0_, this->jets_1_, this->jets_2_, this->jets_3_, this->residuals_jet_);
 //            else if (BLOCK_0_SIZE > 0 && BLOCK_1_SIZE > 0 && BLOCK_2_SIZE > 0 && BLOCK_3_SIZE ==0 && BLOCK_4_SIZE ==0 &&
 //                    BLOCK_5_SIZE ==0 && BLOCK_6_SIZE ==0 && BLOCK_7_SIZE ==0 && BLOCK_8_SIZE ==0 && BLOCK_9_SIZE == 0)
-//                (*this->constraint_ptr_)(this->jets_0_, this->jets_1_, this->jets_2_, this->residuals_jet_);
+//                (*this->factor_ptr_)(this->jets_0_, this->jets_1_, this->jets_2_, this->residuals_jet_);
 //            else if (BLOCK_0_SIZE > 0 && BLOCK_1_SIZE > 0 && BLOCK_2_SIZE ==0 && BLOCK_3_SIZE ==0 && BLOCK_4_SIZE ==0 &&
 //                    BLOCK_5_SIZE ==0 && BLOCK_6_SIZE ==0 && BLOCK_7_SIZE ==0 && BLOCK_8_SIZE ==0 && BLOCK_9_SIZE == 0)
-//                (*this->constraint_ptr_)(this->jets_0_, this->jets_1_, this->residuals_jet_);
+//                (*this->factor_ptr_)(this->jets_0_, this->jets_1_, this->residuals_jet_);
 //            else if (BLOCK_0_SIZE > 0 && BLOCK_1_SIZE ==0 && BLOCK_2_SIZE ==0 && BLOCK_3_SIZE ==0 && BLOCK_4_SIZE ==0 &&
 //                    BLOCK_5_SIZE ==0 && BLOCK_6_SIZE ==0 && BLOCK_7_SIZE ==0 && BLOCK_8_SIZE ==0 && BLOCK_9_SIZE == 0)
-//                (*this->constraint_ptr_)(this->jets_0_, this->residuals_jet_);
+//                (*this->factor_ptr_)(this->jets_0_, this->residuals_jet_);
 //            else
 //                assert("Wrong combination of zero sized blocks");
 
@@ -93,7 +93,7 @@ class CostFunctionSparse : CostFunctionSparseBase<ConstraintT,
 
 };
 
-template <class ConstraintT,
+template <class FactorT,
           const unsigned int MEASUREMENT_SIZE,
                 unsigned int BLOCK_0_SIZE,
                 unsigned int BLOCK_1_SIZE,
@@ -104,7 +104,7 @@ template <class ConstraintT,
                 unsigned int BLOCK_6_SIZE,
                 unsigned int BLOCK_7_SIZE,
                 unsigned int BLOCK_8_SIZE>
-class CostFunctionSparse<ConstraintT,
+class CostFunctionSparse<FactorT,
                          MEASUREMENT_SIZE,
                          BLOCK_0_SIZE,
                          BLOCK_1_SIZE,
@@ -115,7 +115,7 @@ class CostFunctionSparse<ConstraintT,
                          BLOCK_6_SIZE,
                          BLOCK_7_SIZE,
                          BLOCK_8_SIZE,
-                         0> : CostFunctionSparseBase<ConstraintT,
+                         0> : CostFunctionSparseBase<FactorT,
                                                      MEASUREMENT_SIZE,
                                                      BLOCK_0_SIZE,
                                                      BLOCK_1_SIZE,
@@ -129,8 +129,8 @@ class CostFunctionSparse<ConstraintT,
                                                      0>
 {
     public:
-        CostFunctionSparse(ConstraintT* _constraint_ptr) :
-            CostFunctionSparseBase<ConstraintT,
+        CostFunctionSparse(FactorT* _factor_ptr) :
+            CostFunctionSparseBase<FactorT,
                                 MEASUREMENT_SIZE,
                                 BLOCK_0_SIZE,
                                 BLOCK_1_SIZE,
@@ -141,18 +141,18 @@ class CostFunctionSparse<ConstraintT,
                                 BLOCK_6_SIZE,
                                 BLOCK_7_SIZE,
                                 BLOCK_8_SIZE,
-                                0>(_constraint_ptr)
+                                0>(_factor_ptr)
         {
 
         }
 
         void callFunctor()
         {
-                (*this->constraint_ptr_)(this->jets_0_, this->jets_1_, this->jets_2_, this->jets_3_, this->jets_4_, this->jets_5_, this->jets_6_, this->jets_7_, this->jets_8_ ,this->residuals_jet_);
+                (*this->factor_ptr_)(this->jets_0_, this->jets_1_, this->jets_2_, this->jets_3_, this->jets_4_, this->jets_5_, this->jets_6_, this->jets_7_, this->jets_8_ ,this->residuals_jet_);
         }
 };
 
-template <class ConstraintT,
+template <class FactorT,
           const unsigned int MEASUREMENT_SIZE,
                 unsigned int BLOCK_0_SIZE,
                 unsigned int BLOCK_1_SIZE,
@@ -162,7 +162,7 @@ template <class ConstraintT,
                 unsigned int BLOCK_5_SIZE,
                 unsigned int BLOCK_6_SIZE,
                 unsigned int BLOCK_7_SIZE>
-class CostFunctionSparse<ConstraintT,
+class CostFunctionSparse<FactorT,
                                     MEASUREMENT_SIZE,
                                     BLOCK_0_SIZE,
                                     BLOCK_1_SIZE,
@@ -173,7 +173,7 @@ class CostFunctionSparse<ConstraintT,
                                     BLOCK_6_SIZE,
                                     BLOCK_7_SIZE,
                                     0,
-                                    0> : CostFunctionSparseBase<ConstraintT,
+                                    0> : CostFunctionSparseBase<FactorT,
                                                         MEASUREMENT_SIZE,
                                                         BLOCK_0_SIZE,
                                                         BLOCK_1_SIZE,
@@ -187,8 +187,8 @@ class CostFunctionSparse<ConstraintT,
                                                         0>
 {
     public:
-        CostFunctionSparse(ConstraintT* _constraint_ptr) :
-            CostFunctionSparseBase<ConstraintT,
+        CostFunctionSparse(FactorT* _factor_ptr) :
+            CostFunctionSparseBase<FactorT,
                                 MEASUREMENT_SIZE,
                                 BLOCK_0_SIZE,
                                 BLOCK_1_SIZE,
@@ -199,18 +199,18 @@ class CostFunctionSparse<ConstraintT,
                                 BLOCK_6_SIZE,
                                 BLOCK_7_SIZE,
                                 0,
-                                0>(_constraint_ptr)
+                                0>(_factor_ptr)
         {
 
         }
 
         void callFunctor()
         {
-                (*this->constraint_ptr_)(this->jets_0_, this->jets_1_, this->jets_2_, this->jets_3_, this->jets_4_, this->jets_5_, this->jets_6_, this->jets_7_,this->residuals_jet_);
+                (*this->factor_ptr_)(this->jets_0_, this->jets_1_, this->jets_2_, this->jets_3_, this->jets_4_, this->jets_5_, this->jets_6_, this->jets_7_,this->residuals_jet_);
         }
 };
 
-template <class ConstraintT,
+template <class FactorT,
           const unsigned int MEASUREMENT_SIZE,
                 unsigned int BLOCK_0_SIZE,
                 unsigned int BLOCK_1_SIZE,
@@ -219,7 +219,7 @@ template <class ConstraintT,
                 unsigned int BLOCK_4_SIZE,
                 unsigned int BLOCK_5_SIZE,
                 unsigned int BLOCK_6_SIZE>
-class CostFunctionSparse<ConstraintT,
+class CostFunctionSparse<FactorT,
                                     MEASUREMENT_SIZE,
                                     BLOCK_0_SIZE,
                                     BLOCK_1_SIZE,
@@ -229,7 +229,7 @@ class CostFunctionSparse<ConstraintT,
                                     BLOCK_5_SIZE,
                                     BLOCK_6_SIZE,
                                     0,
-                                    0> : CostFunctionSparseBase<ConstraintT,
+                                    0> : CostFunctionSparseBase<FactorT,
                                                         MEASUREMENT_SIZE,
                                                         BLOCK_0_SIZE,
                                                         BLOCK_1_SIZE,
@@ -242,8 +242,8 @@ class CostFunctionSparse<ConstraintT,
                                                         0>
 {
     public:
-        CostFunctionSparse(ConstraintT* _constraint_ptr) :
-            CostFunctionSparseBase<ConstraintT,
+        CostFunctionSparse(FactorT* _factor_ptr) :
+            CostFunctionSparseBase<FactorT,
                                 MEASUREMENT_SIZE,
                                 BLOCK_0_SIZE,
                                 BLOCK_1_SIZE,
@@ -253,18 +253,18 @@ class CostFunctionSparse<ConstraintT,
                                 BLOCK_5_SIZE,
                                 BLOCK_6_SIZE,
                                 0,
-                                0>(_constraint_ptr)
+                                0>(_factor_ptr)
         {
 
         }
 
         void callFunctor()
         {
-                (*this->constraint_ptr_)(this->jets_0_, this->jets_1_, this->jets_2_, this->jets_3_, this->jets_4_, this->jets_5_, this->jets_6_,this->residuals_jet_);
+                (*this->factor_ptr_)(this->jets_0_, this->jets_1_, this->jets_2_, this->jets_3_, this->jets_4_, this->jets_5_, this->jets_6_,this->residuals_jet_);
         }
 };
 
-template <class ConstraintT,
+template <class FactorT,
           const unsigned int MEASUREMENT_SIZE,
                 unsigned int BLOCK_0_SIZE,
                 unsigned int BLOCK_1_SIZE,
@@ -272,7 +272,7 @@ template <class ConstraintT,
                 unsigned int BLOCK_3_SIZE,
                 unsigned int BLOCK_4_SIZE,
                 unsigned int BLOCK_5_SIZE>
-class CostFunctionSparse<ConstraintT,
+class CostFunctionSparse<FactorT,
                                     MEASUREMENT_SIZE,
                                     BLOCK_0_SIZE,
                                     BLOCK_1_SIZE,
@@ -281,7 +281,7 @@ class CostFunctionSparse<ConstraintT,
                                     BLOCK_4_SIZE,
                                     BLOCK_5_SIZE,
                                     0,
-                                    0> : CostFunctionSparseBase<ConstraintT,
+                                    0> : CostFunctionSparseBase<FactorT,
                                                         MEASUREMENT_SIZE,
                                                         BLOCK_0_SIZE,
                                                         BLOCK_1_SIZE,
@@ -293,8 +293,8 @@ class CostFunctionSparse<ConstraintT,
                                                         0>
 {
     public:
-        CostFunctionSparse(ConstraintT* _constraint_ptr) :
-            CostFunctionSparseBase<ConstraintT,
+        CostFunctionSparse(FactorT* _factor_ptr) :
+            CostFunctionSparseBase<FactorT,
                                 MEASUREMENT_SIZE,
                                 BLOCK_0_SIZE,
                                 BLOCK_1_SIZE,
@@ -303,25 +303,25 @@ class CostFunctionSparse<ConstraintT,
                                 BLOCK_4_SIZE,
                                 BLOCK_5_SIZE,
                                 0,
-                                0>(_constraint_ptr)
+                                0>(_factor_ptr)
         {
 
         }
 
         void callFunctor()
         {
-                (*this->constraint_ptr_)(this->jets_0_, this->jets_1_, this->jets_2_, this->jets_3_, this->jets_4_, this->jets_5_,this->residuals_jet_);
+                (*this->factor_ptr_)(this->jets_0_, this->jets_1_, this->jets_2_, this->jets_3_, this->jets_4_, this->jets_5_,this->residuals_jet_);
         }
 };
 
-template <class ConstraintT,
+template <class FactorT,
           const unsigned int MEASUREMENT_SIZE,
                 unsigned int BLOCK_0_SIZE,
                 unsigned int BLOCK_1_SIZE,
                 unsigned int BLOCK_2_SIZE,
                 unsigned int BLOCK_3_SIZE,
                 unsigned int BLOCK_4_SIZE>
-class CostFunctionSparse<ConstraintT,
+class CostFunctionSparse<FactorT,
                                     MEASUREMENT_SIZE,
                                     BLOCK_0_SIZE,
                                     BLOCK_1_SIZE,
@@ -329,7 +329,7 @@ class CostFunctionSparse<ConstraintT,
                                     BLOCK_3_SIZE,
                                     BLOCK_4_SIZE,
                                     0,
-                                    0> : CostFunctionSparseBase<ConstraintT,
+                                    0> : CostFunctionSparseBase<FactorT,
                                                         MEASUREMENT_SIZE,
                                                         BLOCK_0_SIZE,
                                                         BLOCK_1_SIZE,
@@ -340,8 +340,8 @@ class CostFunctionSparse<ConstraintT,
                                                         0>
 {
     public:
-        CostFunctionSparse(ConstraintT* _constraint_ptr) :
-            CostFunctionSparseBase<ConstraintT,
+        CostFunctionSparse(FactorT* _factor_ptr) :
+            CostFunctionSparseBase<FactorT,
                                 MEASUREMENT_SIZE,
                                 BLOCK_0_SIZE,
                                 BLOCK_1_SIZE,
@@ -349,31 +349,31 @@ class CostFunctionSparse<ConstraintT,
                                 BLOCK_3_SIZE,
                                 BLOCK_4_SIZE,
                                 0,
-                                0>(_constraint_ptr)
+                                0>(_factor_ptr)
         {
 
         }
 
         void callFunctor()
         {
-                (*this->constraint_ptr_)(this->jets_0_, this->jets_1_, this->jets_2_, this->jets_3_, this->jets_4_,this->residuals_jet_);
+                (*this->factor_ptr_)(this->jets_0_, this->jets_1_, this->jets_2_, this->jets_3_, this->jets_4_,this->residuals_jet_);
         }
 };
 
-template <class ConstraintT,
+template <class FactorT,
           const unsigned int MEASUREMENT_SIZE,
                 unsigned int BLOCK_0_SIZE,
                 unsigned int BLOCK_1_SIZE,
                 unsigned int BLOCK_2_SIZE,
                 unsigned int BLOCK_3_SIZE>
-class CostFunctionSparse<ConstraintT,
+class CostFunctionSparse<FactorT,
                                     MEASUREMENT_SIZE,
                                     BLOCK_0_SIZE,
                                     BLOCK_1_SIZE,
                                     BLOCK_2_SIZE,
                                     BLOCK_3_SIZE,
                                     0,
-                                    0> : CostFunctionSparseBase<ConstraintT,
+                                    0> : CostFunctionSparseBase<FactorT,
                                                         MEASUREMENT_SIZE,
                                                         BLOCK_0_SIZE,
                                                         BLOCK_1_SIZE,
@@ -383,37 +383,37 @@ class CostFunctionSparse<ConstraintT,
                                                         0>
 {
     public:
-        CostFunctionSparse(ConstraintT* _constraint_ptr) :
-            CostFunctionSparseBase<ConstraintT,
+        CostFunctionSparse(FactorT* _factor_ptr) :
+            CostFunctionSparseBase<FactorT,
                                 MEASUREMENT_SIZE,
                                 BLOCK_0_SIZE,
                                 BLOCK_1_SIZE,
                                 BLOCK_2_SIZE,
                                 BLOCK_3_SIZE,
                                 0,
-                                0>(_constraint_ptr)
+                                0>(_factor_ptr)
         {
 
         }
 
         void callFunctor()
         {
-                (*this->constraint_ptr_)(this->jets_0_, this->jets_1_, this->jets_2_, this->jets_3_,this->residuals_jet_);
+                (*this->factor_ptr_)(this->jets_0_, this->jets_1_, this->jets_2_, this->jets_3_,this->residuals_jet_);
         }
 };
 
-template <class ConstraintT,
+template <class FactorT,
           const unsigned int MEASUREMENT_SIZE,
                 unsigned int BLOCK_0_SIZE,
                 unsigned int BLOCK_1_SIZE,
                 unsigned int BLOCK_2_SIZE>
-class CostFunctionSparse<ConstraintT,
+class CostFunctionSparse<FactorT,
                                     MEASUREMENT_SIZE,
                                     BLOCK_0_SIZE,
                                     BLOCK_1_SIZE,
                                     BLOCK_2_SIZE,
                                     0,
-                                    0> : CostFunctionSparseBase<ConstraintT,
+                                    0> : CostFunctionSparseBase<FactorT,
                                                         MEASUREMENT_SIZE,
                                                         BLOCK_0_SIZE,
                                                         BLOCK_1_SIZE,
@@ -422,34 +422,34 @@ class CostFunctionSparse<ConstraintT,
                                                         0>
 {
     public:
-        CostFunctionSparse(ConstraintT* _constraint_ptr) :
-            CostFunctionSparseBase<ConstraintT,
+        CostFunctionSparse(FactorT* _factor_ptr) :
+            CostFunctionSparseBase<FactorT,
                                 MEASUREMENT_SIZE,
                                 BLOCK_0_SIZE,
                                 BLOCK_1_SIZE,
                                 BLOCK_2_SIZE,
                                 0,
-                                0>(_constraint_ptr)
+                                0>(_factor_ptr)
         {
 
         }
 
         void callFunctor()
         {
-                (*this->constraint_ptr_)(this->jets_0_, this->jets_1_, this->jets_2_,this->residuals_jet_);
+                (*this->factor_ptr_)(this->jets_0_, this->jets_1_, this->jets_2_,this->residuals_jet_);
         }
 };
 
-template <class ConstraintT,
+template <class FactorT,
           const unsigned int MEASUREMENT_SIZE,
                 unsigned int BLOCK_0_SIZE,
                 unsigned int BLOCK_1_SIZE>
-class CostFunctionSparse<ConstraintT,
+class CostFunctionSparse<FactorT,
                                     MEASUREMENT_SIZE,
                                     BLOCK_0_SIZE,
                                     BLOCK_1_SIZE,
                                     0,
-                                    0> : CostFunctionSparseBase<ConstraintT,
+                                    0> : CostFunctionSparseBase<FactorT,
                                                         MEASUREMENT_SIZE,
                                                         BLOCK_0_SIZE,
                                                         BLOCK_1_SIZE,
@@ -457,50 +457,50 @@ class CostFunctionSparse<ConstraintT,
                                                         0>
 {
     public:
-        CostFunctionSparse(ConstraintT* _constraint_ptr) :
-            CostFunctionSparseBase<ConstraintT,
+        CostFunctionSparse(FactorT* _factor_ptr) :
+            CostFunctionSparseBase<FactorT,
                                 MEASUREMENT_SIZE,
                                 BLOCK_0_SIZE,
                                 BLOCK_1_SIZE,
                                 0,
-                                0>(_constraint_ptr)
+                                0>(_factor_ptr)
         {
 
         }
 
         void callFunctor()
         {
-                (*this->constraint_ptr_)(this->jets_0_, this->jets_1_,this->residuals_jet_);
+                (*this->factor_ptr_)(this->jets_0_, this->jets_1_,this->residuals_jet_);
         }
 };
 
-template <class ConstraintT,
+template <class FactorT,
           const unsigned int MEASUREMENT_SIZE,
                 unsigned int BLOCK_0_SIZE>
-class CostFunctionSparse<ConstraintT,
+class CostFunctionSparse<FactorT,
                                     MEASUREMENT_SIZE,
                                     BLOCK_0_SIZE,
                                     0,
-                                    0> : CostFunctionSparseBase<ConstraintT,
+                                    0> : CostFunctionSparseBase<FactorT,
                                                         MEASUREMENT_SIZE,
                                                         BLOCK_0_SIZE,
                                                         0,
                                                         0>
 {
     public:
-        CostFunctionSparse(ConstraintT* _constraint_ptr) :
-            CostFunctionSparseBase<ConstraintT,
+        CostFunctionSparse(FactorT* _factor_ptr) :
+            CostFunctionSparseBase<FactorT,
                                 MEASUREMENT_SIZE,
                                 BLOCK_0_SIZE,
                                 0,
-                                0>(_constraint_ptr)
+                                0>(_factor_ptr)
         {
 
         }
 
         void callFunctor()
         {
-                (*this->constraint_ptr_)(this->jets_0_,this->residuals_jet_);
+                (*this->factor_ptr_)(this->jets_0_,this->residuals_jet_);
         }
 };
 

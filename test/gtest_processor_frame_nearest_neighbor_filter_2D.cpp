@@ -7,7 +7,7 @@
  */
 
 #include "utils_gtest.h"
-#include "base/logging.h"
+#include "base/utils/logging.h"
 
 #include "base/sensor/sensor_odom_2D.h"
 #include "base/processor/processor_frame_nearest_neighbor_filter.h"
@@ -99,10 +99,10 @@ TEST(ProcessorFrameNearestNeighborFilter, PointInEllipseRotated)
   F4->addCapture(capture_dummy);
 
   // Add first three states to trajectory
-  problem->getTrajectoryPtr()->addFrame(F1);
-  problem->getTrajectoryPtr()->addFrame(F2);
-  problem->getTrajectoryPtr()->addFrame(F3);
-  problem->getTrajectoryPtr()->addFrame(F4);
+  problem->getTrajectory()->addFrame(F1);
+  problem->getTrajectory()->addFrame(F2);
+  problem->getTrajectory()->addFrame(F3);
+  problem->getTrajectory()->addFrame(F4);
 
   // Add same covariances for all states
   Eigen::Matrix2s position_covariance_matrix;
@@ -148,7 +148,7 @@ TEST(ProcessorFrameNearestNeighborFilter, PointInEllipseRotated)
                                                         1.2,
                                                         sensor_ptr);
   // Make 3rd frame last Keyframe
-  problem->getTrajectoryPtr()->setLastKeyFramePtr(F3);
+  problem->getTrajectory()->setLastKeyFrame(F3);
 
   // trigger search for loopclosure
   processor_ptr_point2d->process(incomming_dummy);
@@ -171,17 +171,17 @@ TEST(ProcessorFrameNearestNeighborFilter, EllipseEllipseRotatedCrosscovariance)
   position_covariance_matrix << 5.0, 0.0,
                                 0.0, 9.0;
 
-  problem->addCovarianceBlock( F1->getPPtr(), F1->getPPtr(),
+  problem->addCovarianceBlock( F1->getP(), F1->getP(),
                                position_covariance_matrix);
-  problem->addCovarianceBlock( F2->getPPtr(), F2->getPPtr(),
+  problem->addCovarianceBlock( F2->getP(), F2->getP(),
                                position_covariance_matrix);
-  problem->addCovarianceBlock( F3->getPPtr(), F3->getPPtr(),
+  problem->addCovarianceBlock( F3->getP(), F3->getP(),
                                position_covariance_matrix);
-  problem->addCovarianceBlock( F4->getPPtr(), F4->getPPtr(),
+  problem->addCovarianceBlock( F4->getP(), F4->getP(),
                                position_covariance_matrix);
 
   // Make 3rd frame last Keyframe
-  problem->getTrajectoryPtr()->setLastKeyFramePtr(F3);
+  problem->getTrajectory()->setLastKeyFrame(F3);
 
   // trigger search for loopclosure
   processor_ptr_ellipse2d->process(incomming_dummy);
@@ -193,7 +193,7 @@ TEST(ProcessorFrameNearestNeighborFilter, EllipseEllipseRotatedCrosscovariance)
   ASSERT_EQ(testloops[1]->id(), (unsigned int) 2);
 
   // Make 4th frame last Keyframe
-  problem->getTrajectoryPtr()->setLastKeyFramePtr(F4);
+  problem->getTrajectory()->setLastKeyFrame(F4);
 
   // trigger search for loopclosure again
   processor_ptr_ellipse2d->process(incomming_dummy);

@@ -8,12 +8,12 @@
 #include "base/capture/capture_IMU.h"
 #include "base/processor/processor_IMU.h"
 #include "base/sensor/sensor_IMU.h"
-#include "base/wolf.h"
+#include "base/common/wolf.h"
 
 #include "utils_gtest.h"
-#include "base/logging.h"
+#include "base/utils/logging.h"
 
-#include "base/rotations.h"
+#include "base/math/rotations.h"
 #include "base/ceres_wrapper/ceres_manager.h"
 
 #include <cmath>
@@ -172,7 +172,7 @@ TEST(ProcessorIMU, voteForKeyFrame)
         - 1 keyframe created by process() in voteForKeyFrame() since conditions to create a keyframe are met
         - 1 frame that would be used by future data
     */
-    ASSERT_EQ(problem->getTrajectoryPtr()->getFrameList().size(),(unsigned int) 3);
+    ASSERT_EQ(problem->getTrajectory()->getFrameList().size(),(unsigned int) 3);
 
     /* if max_time_span == 2,  Wolf tree should be
 
@@ -195,7 +195,7 @@ TEST(ProcessorIMU, voteForKeyFrame)
             Estim, ts=2.1,	 x = ( . . .)
             C4 -> S1
     */
-    //TODO : ASSERT TESTS to make sure the constraints are correctly set + check the tree above
+    //TODO : ASSERT TESTS to make sure the factors are correctly set + check the tree above
 
 }
 
@@ -215,20 +215,20 @@ TEST_F(ProcessorIMUt, interpolate)
     // make one step to depart from origin
     cap_imu_ptr->setTimeStamp(0.05);
     sensor_ptr->process(cap_imu_ptr);
-    Motion mot_ref = problem->getProcessorMotionPtr()->getMotion();
+    Motion mot_ref = problem->getProcessorMotion()->getMotion();
 
     // make two steps, then pretend it's just one
     cap_imu_ptr->setTimeStamp(0.10);
     sensor_ptr->process(cap_imu_ptr);
-    Motion mot_int_gt = problem->getProcessorMotionPtr()->getMotion();
+    Motion mot_int_gt = problem->getProcessorMotion()->getMotion();
 
     cap_imu_ptr->setTimeStamp(0.15);
     sensor_ptr->process(cap_imu_ptr);
-    Motion mot_final = problem->getProcessorMotionPtr()->getMotion();
+    Motion mot_final = problem->getProcessorMotion()->getMotion();
     mot_final.delta_ = mot_final.delta_integr_;
     Motion mot_sec = mot_final;
 
-//    problem->getProcessorMotionPtr()->getBuffer().print(0,1,1,0);
+//    problem->getProcessorMotion()->getBuffer().print(0,1,1,0);
 
 class P : public wolf::ProcessorIMU
 {
@@ -267,8 +267,8 @@ TEST_F(ProcessorIMUt, acc_x)
     Vector6s b; b << 0,0,0, 0,0,0;
 
     ASSERT_MATRIX_APPROX(problem->getCurrentState().head(10) , x, wolf::Constants::EPS_SMALL);
-    ASSERT_MATRIX_APPROX(problem->getProcessorMotionPtr()->getLastPtr()->getCalibration() , b, wolf::Constants::EPS_SMALL);
-    ASSERT_MATRIX_APPROX(problem->getProcessorMotionPtr()->getLastPtr()->getCalibrationPreint() , b, wolf::Constants::EPS_SMALL);
+    ASSERT_MATRIX_APPROX(problem->getProcessorMotion()->getLast()->getCalibration() , b, wolf::Constants::EPS_SMALL);
+    ASSERT_MATRIX_APPROX(problem->getProcessorMotion()->getLast()->getCalibrationPreint() , b, wolf::Constants::EPS_SMALL);
 }
 
 TEST_F(ProcessorIMUt, acc_y)
@@ -293,8 +293,8 @@ TEST_F(ProcessorIMUt, acc_y)
     Vector6s b; b<< 0,0,0, 0,0,0;
 
     ASSERT_MATRIX_APPROX(problem->getCurrentState().head(10) , x, wolf::Constants::EPS_SMALL);
-    ASSERT_MATRIX_APPROX(problem->getProcessorMotionPtr()->getLastPtr()->getCalibration() , b, wolf::Constants::EPS_SMALL);
-    ASSERT_MATRIX_APPROX(problem->getProcessorMotionPtr()->getLastPtr()->getCalibrationPreint() , b, wolf::Constants::EPS_SMALL);
+    ASSERT_MATRIX_APPROX(problem->getProcessorMotion()->getLast()->getCalibration() , b, wolf::Constants::EPS_SMALL);
+    ASSERT_MATRIX_APPROX(problem->getProcessorMotion()->getLast()->getCalibrationPreint() , b, wolf::Constants::EPS_SMALL);
 
     //do so for 5s
     const unsigned int iter = 1000; //how many ms
@@ -307,8 +307,8 @@ TEST_F(ProcessorIMUt, acc_y)
     // advanced at a=20m/s2 during 1s ==> dx = 0.5*20*1^2 = 10; dvx = 20*1 = 20
     x << 0,10,0, 0,0,0,1, 0,20,0;
     ASSERT_MATRIX_APPROX(problem->getCurrentState().head(10) , x, wolf::Constants::EPS);
-    ASSERT_MATRIX_APPROX(problem->getProcessorMotionPtr()->getLastPtr()->getCalibration() , b, wolf::Constants::EPS);
-    ASSERT_MATRIX_APPROX(problem->getProcessorMotionPtr()->getLastPtr()->getCalibrationPreint() , b, wolf::Constants::EPS);
+    ASSERT_MATRIX_APPROX(problem->getProcessorMotion()->getLast()->getCalibration() , b, wolf::Constants::EPS);
+    ASSERT_MATRIX_APPROX(problem->getProcessorMotion()->getLast()->getCalibrationPreint() , b, wolf::Constants::EPS);
 }
 
 TEST_F(ProcessorIMUt, acc_z)
@@ -330,8 +330,8 @@ TEST_F(ProcessorIMUt, acc_z)
     Vector6s b; b<< 0,0,0, 0,0,0;
 
     ASSERT_MATRIX_APPROX(problem->getCurrentState().head(10) , x, wolf::Constants::EPS_SMALL);
-    ASSERT_MATRIX_APPROX(problem->getProcessorMotionPtr()->getLastPtr()->getCalibration() , b, wolf::Constants::EPS_SMALL);
-    ASSERT_MATRIX_APPROX(problem->getProcessorMotionPtr()->getLastPtr()->getCalibrationPreint() , b, wolf::Constants::EPS_SMALL);
+    ASSERT_MATRIX_APPROX(problem->getProcessorMotion()->getLast()->getCalibration() , b, wolf::Constants::EPS_SMALL);
+    ASSERT_MATRIX_APPROX(problem->getProcessorMotion()->getLast()->getCalibrationPreint() , b, wolf::Constants::EPS_SMALL);
 
     //do so for 5s
     const unsigned int iter = 50; //how 0.1s 
@@ -344,8 +344,8 @@ TEST_F(ProcessorIMUt, acc_z)
     // advanced at a=2m/s2 during 5s ==> dz = 0.5*2*5^2 = 25; dvz = 2*5 = 10
     x << 0,0,25, 0,0,0,1, 0,0,10;
     ASSERT_MATRIX_APPROX(problem->getCurrentState().head(10) , x, wolf::Constants::EPS);
-    ASSERT_MATRIX_APPROX(problem->getProcessorMotionPtr()->getLastPtr()->getCalibration() , b, wolf::Constants::EPS);
-    ASSERT_MATRIX_APPROX(problem->getProcessorMotionPtr()->getLastPtr()->getCalibrationPreint() , b, wolf::Constants::EPS);
+    ASSERT_MATRIX_APPROX(problem->getProcessorMotion()->getLast()->getCalibration() , b, wolf::Constants::EPS);
+    ASSERT_MATRIX_APPROX(problem->getProcessorMotion()->getLast()->getCalibrationPreint() , b, wolf::Constants::EPS);
 }
 
 TEST_F(ProcessorIMUt, check_Covariance)
@@ -361,8 +361,8 @@ TEST_F(ProcessorIMUt, check_Covariance)
     cap_imu_ptr->setTimeStamp(0.1);
     sensor_ptr->process(cap_imu_ptr);
 
-    VectorXs delta_preint(problem->getProcessorMotionPtr()->getMotion().delta_integr_);
-//    Matrix<wolf::Scalar,9,9> delta_preint_cov = problem->getProcessorMotionPtr()->getCurrentDeltaPreintCov();
+    VectorXs delta_preint(problem->getProcessorMotion()->getMotion().delta_integr_);
+//    Matrix<wolf::Scalar,9,9> delta_preint_cov = problem->getProcessorMotion()->getCurrentDeltaPreintCov();
 
     ASSERT_FALSE(delta_preint.isMuchSmallerThan(1, wolf::Constants::EPS_SMALL));
 //    ASSERT_MATRIX_APPROX(delta_preint_cov, MatrixXs::Zero(9,9), wolf::Constants::EPS_SMALL); // << "delta_preint_cov :\n" << delta_preint_cov; //covariances computed only at keyframe creation
@@ -428,8 +428,8 @@ TEST_F(ProcessorIMUt, gyro_x_biasedAbx)
     // init things
     problem->setPrior(x0, P0, t, 0.01);
 
-    problem->getProcessorMotionPtr()->getOriginPtr()->setCalibration(bias);
-    problem->getProcessorMotionPtr()->getLastPtr()->setCalibrationPreint(bias);
+    problem->getProcessorMotion()->getOrigin()->setCalibration(bias);
+    problem->getProcessorMotion()->getLast()->setCalibrationPreint(bias);
 //    WOLF_DEBUG("calib: ", cap_imu_ptr->getCalibration().transpose());
 
     // data
@@ -484,8 +484,8 @@ TEST_F(ProcessorIMUt, gyro_xy_biasedAbxy)
     Vector6s bias; bias << abx,aby,0,  0,0,0;
     Vector3s acc_bias = bias.head(3);
 
-    problem->getProcessorMotionPtr()->getOriginPtr()->setCalibration(bias);
-    problem->getProcessorMotionPtr()->getLastPtr()->setCalibrationPreint(bias);
+    problem->getProcessorMotion()->getOrigin()->setCalibration(bias);
+    problem->getProcessorMotion()->getLast()->setCalibrationPreint(bias);
 
     wolf::Scalar rate_of_turn = 5 * M_PI/180.0;
 //    data << 0+abx, 0+aby, 9.806, rate_of_turn, rate_of_turn*1.5, 0; // measure gravity

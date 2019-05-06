@@ -17,7 +17,7 @@
 #include "glog/logging.h"
 
 //Wolf includes
-#include "base/problem.h"
+#include "base/problem/problem.h"
 #include "base/processor/processor_tracker_landmark_corner.h"
 #include "base/processor/processor_odom_2D.h"
 #include "base/sensor/sensor_laser_2D.h"
@@ -263,18 +263,18 @@ int main(int argc, char** argv)
     // Vehicle poses
     int i = 0;
     Eigen::VectorXs state_poses = Eigen::VectorXs::Zero(n_execution * 3);
-    for (auto frame : *(problem.getTrajectoryPtr()->getFrameList()))
+    for (auto frame : *(problem.getTrajectory()->getFrameList()))
     {
-        state_poses.segment(i, 3) << frame->getPPtr()->getVector(), frame->getOPtr()->getVector();
+        state_poses.segment(i, 3) << frame->getP()->getVector(), frame->getO()->getVector();
         i += 3;
     }
 
     // Landmarks
     i = 0;
-    Eigen::VectorXs landmarks = Eigen::VectorXs::Zero(problem.getMapPtr()->getLandmarkList()->size() * 2);
-    for (auto landmark : *(problem.getMapPtr()->getLandmarkList()))
+    Eigen::VectorXs landmarks = Eigen::VectorXs::Zero(problem.getMap()->getLandmarkList()->size() * 2);
+    for (auto landmark : *(problem.getMap()->getLandmarkList()))
     {
-        landmarks.segment(i, 2) = landmark->getPPtr()->getVector();
+        landmarks.segment(i, 2) = landmark->getP()->getVector();
         i += 2;
     }
 
@@ -310,9 +310,9 @@ int main(int argc, char** argv)
     std::getchar();
 
     std::cout << "Problem:" << std::endl;
-    std::cout << "Frames: " << problem.getTrajectoryPtr()->getFrameList().size() << std::endl;
-    std::cout << "Landmarks: " << problem.getMapPtr()->getLandmarkList()->size() << std::endl;
-    std::cout << "Sensors: " << problem.getHardwarePtr()->getSensorList()->size() << std::endl;
+    std::cout << "Frames: " << problem.getTrajectory()->getFrameList().size() << std::endl;
+    std::cout << "Landmarks: " << problem.getMap()->getLandmarkList()->size() << std::endl;
+    std::cout << "Sensors: " << problem.getHardware()->getSensorList()->size() << std::endl;
 
     std::cout << " ========= END ===========" << std::endl << std::endl;
 

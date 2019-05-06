@@ -14,7 +14,7 @@
 #include "base/processor/processor_tracker_feature_dummy.h"
 #include "base/capture/capture_void.h"
 
-#include "base/problem.h"
+#include "base/problem/problem.h"
 
 // STL
 #include <iterator>
@@ -89,7 +89,7 @@ TEST(ProcessorBase, KeyFrameCallback)
 //        problem->print(4,1,1,0);
 
         // Only odom creating KFs
-        ASSERT_TRUE( problem->getLastKeyFramePtr()->getType().compare("PO 2D")==0 );
+        ASSERT_TRUE( problem->getLastKeyFrame()->getType().compare("PO 2D")==0 );
     }
 }
 

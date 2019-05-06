@@ -7,10 +7,10 @@ class SensorBase;
 }
 
 // Wolf includes
-#include "base/wolf.h"
-#include "base/node_base.h"
-#include "base/time_stamp.h"
-#include "base/frame_base.h"
+#include "base/common/wolf.h"
+#include "base/common/node_base.h"
+#include "base/common/time_stamp.h"
+#include "base/frame/frame_base.h"
 
 // std
 #include <memory>
@@ -182,9 +182,9 @@ class ProcessorBase : public NodeBase, public std::enable_shared_from_this<Proce
 
         virtual void keyFrameCallback(FrameBasePtr _keyframe_ptr, const Scalar& _time_tol_other);
 
-        SensorBasePtr getSensorPtr();
-        const SensorBasePtr getSensorPtr() const;
-        void setSensorPtr(SensorBasePtr _sen_ptr){sensor_ptr_ = _sen_ptr;}
+        SensorBasePtr getSensor();
+        const SensorBasePtr getSensor() const;
+        void setSensor(SensorBasePtr _sen_ptr){sensor_ptr_ = _sen_ptr;}
 
         virtual bool isMotion();
 
@@ -208,7 +208,7 @@ inline void ProcessorBase::setVotingActive(bool _voting_active)
 }
 
 #include "base/sensor/sensor_base.h"
-#include "base/constraint/constraint_base.h"
+#include "base/factor/factor_base.h"
 
 namespace wolf {
 
@@ -222,12 +222,12 @@ inline unsigned int ProcessorBase::id()
     return processor_id_;
 }
 
-inline SensorBasePtr ProcessorBase::getSensorPtr()
+inline SensorBasePtr ProcessorBase::getSensor()
 {
     return sensor_ptr_.lock();
 }
 
-inline const SensorBasePtr ProcessorBase::getSensorPtr() const
+inline const SensorBasePtr ProcessorBase::getSensor() const
 {
     return sensor_ptr_.lock();
 }

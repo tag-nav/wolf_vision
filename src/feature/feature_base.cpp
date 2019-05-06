@@ -1,5 +1,5 @@
 #include "base/feature/feature_base.h"
-#include "base/constraint/constraint_base.h"
+#include "base/factor/factor_base.h"
 #include "base/capture/capture_base.h"
 
 namespace wolf {
@@ -40,9 +40,9 @@ void FeatureBase::remove()
         }
 
         // remove downstream
-        while (!constraint_list_.empty())
+        while (!factor_list_.empty())
         {
-            constraint_list_.front()->remove(); // remove downstream
+            factor_list_.front()->remove(); // remove downstream
         }
         while (!constrained_by_list_.empty())
         {
@@ -51,42 +51,42 @@ void FeatureBase::remove()
     }
 }
 
-ConstraintBasePtr FeatureBase::addConstraint(ConstraintBasePtr _co_ptr)
+FactorBasePtr FeatureBase::addFactor(FactorBasePtr _co_ptr)
 {
-    constraint_list_.push_back(_co_ptr);
-    _co_ptr->setFeaturePtr(shared_from_this());
+    factor_list_.push_back(_co_ptr);
+    _co_ptr->setFeature(shared_from_this());
     _co_ptr->setProblem(getProblem());
-    // add constraint to be added in solver
+    // add factor to be added in solver
     if (getProblem() != nullptr)
     {
-        if (_co_ptr->getStatus() == CTR_ACTIVE)
-            getProblem()->addConstraint(_co_ptr);
+        if (_co_ptr->getStatus() == FAC_ACTIVE)
+            getProblem()->addFactor(_co_ptr);
     }
     else
         WOLF_TRACE("WARNING: ADDING CONSTRAINT ", _co_ptr->id(), " TO FEATURE ", this->id(), " NOT CONNECTED WITH PROBLEM.");
     return _co_ptr;
 }
 
-FrameBasePtr FeatureBase::getFramePtr() const
+FrameBasePtr FeatureBase::getFrame() const
 {
-    return capture_ptr_.lock()->getFramePtr();
+    return capture_ptr_.lock()->getFrame();
 }
 
-ConstraintBasePtr FeatureBase::addConstrainedBy(ConstraintBasePtr _ctr_ptr)
+FactorBasePtr FeatureBase::addConstrainedBy(FactorBasePtr _fac_ptr)
 {
-    constrained_by_list_.push_back(_ctr_ptr);
-    _ctr_ptr->setFeatureOtherPtr(shared_from_this());
-    return _ctr_ptr;
+    constrained_by_list_.push_back(_fac_ptr);
+    _fac_ptr->setFeatureOther(shared_from_this());
+    return _fac_ptr;
 }
 
-ConstraintBaseList& FeatureBase::getConstraintList()
+FactorBasePtrList& FeatureBase::getFactorList()
 {
-    return constraint_list_;
+    return factor_list_;
 }
 
-void FeatureBase::getConstraintList(ConstraintBaseList & _ctr_list)
+void FeatureBase::getFactorList(FactorBasePtrList & _fac_list)
 {
-    _ctr_list.insert(_ctr_list.end(), constraint_list_.begin(), constraint_list_.end());
+    _fac_list.insert(_fac_list.end(), factor_list_.begin(), factor_list_.end());
 }
 
 void FeatureBase::setMeasurementCovariance(const Eigen::MatrixXs & _meas_cov)
@@ -117,7 +117,7 @@ void FeatureBase::setMeasurementInformation(const Eigen::MatrixXs & _meas_info)
 void FeatureBase::setProblem(ProblemPtr _problem)
 {
     NodeBase::setProblem(_problem);
-    for (auto ctr : constraint_list_)
+    for (auto ctr : factor_list_)
         ctr->setProblem(_problem);
 }
 

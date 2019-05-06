@@ -9,10 +9,10 @@
 #include "base/capture/capture_IMU.h"
 #include "base/sensor/sensor_IMU.h"
 #include <test/processor_IMU_UnitTester.h>
-#include "base/wolf.h"
-#include "base/problem.h"
-#include "base/state_block.h"
-#include "base/state_quaternion.h"
+#include "base/common/wolf.h"
+#include "base/problem/problem.h"
+#include "base/state_block/state_block.h"
+#include "base/state_block/state_quaternion.h"
 #include <iostream>
 #include <fstream>
 #include <iomanip>
@@ -49,7 +49,7 @@ int main(int argc, char** argv)
     Eigen::VectorXs x0(16);
     x0 << 0,1,0,   0,0,0,1,  1,0,0,  0,0,.000,  0,0,.000; // P Q V B B
 
-    //wolf_problem_ptr_->getProcessorMotionPtr()->setOrigin(x0, t);
+    //wolf_problem_ptr_->getProcessorMotion()->setOrigin(x0, t);
 
     //CaptureIMU* imu_ptr;
 

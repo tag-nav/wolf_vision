@@ -11,9 +11,9 @@
 #include "ceres/cost_function.h"
 #include "ceres/numeric_diff_cost_function.h"
 
-// Constraints
-#include "base/constraint/constraint_odom_2D.h"
-#include "base/constraint/constraint_base.h"
+// Factors
+#include "base/factor/factor_odom_2D.h"
+#include "base/factor/factor_base.h"
 
 namespace wolf {
 
@@ -21,28 +21,28 @@ namespace wolf {
 template <class T>
 std::shared_ptr<ceres::NumericDiffCostFunction<T, ceres::CENTRAL, T::residualSize,
                                                T::block0Size,T::block1Size,T::block2Size,T::block3Size,T::block4Size,
-                                               T::block5Size,T::block6Size,T::block7Size,T::block8Size,T::block9Size> > createNumericDiffCostFunctionCeres(ConstraintBasePtr _constraint_ptr)
+                                               T::block5Size,T::block6Size,T::block7Size,T::block8Size,T::block9Size> > createNumericDiffCostFunctionCeres(FactorBasePtr _factor_ptr)
 {
     return std::make_shared<ceres::NumericDiffCostFunction<T, ceres::CENTRAL, T::residualSize,
                                                            T::block0Size,T::block1Size,T::block2Size,T::block3Size,T::block4Size,
-                                                           T::block5Size,T::block6Size,T::block7Size,T::block8Size,T::block9Size> >(std::static_pointer_cast<T>(_constraint_ptr).get());
+                                                           T::block5Size,T::block6Size,T::block7Size,T::block8Size,T::block9Size> >(std::static_pointer_cast<T>(_factor_ptr).get());
 };
 
-inline std::shared_ptr<ceres::CostFunction> createNumericDiffCostFunction(ConstraintBasePtr _ctr_ptr)
+inline std::shared_ptr<ceres::CostFunction> createNumericDiffCostFunction(FactorBasePtr _fac_ptr)
 {
-//    switch (_ctr_ptr->getTypeId())
+//    switch (_fac_ptr->getTypeId())
 //    {
 //        // just for testing
-//        case CTR_ODOM_2D:
-//            return createNumericDiffCostFunctionCeres<ConstraintOdom2D>(_ctr_ptr);
+//        case FAC_ODOM_2D:
+//            return createNumericDiffCostFunctionCeres<FactorOdom2D>(_fac_ptr);
 //
-//        /* For adding a new constraint, add the #include and a case:
-//        case CTR_ENUM:
-//            return createNumericDiffCostFunctionCeres<ConstraintType>(_ctr_ptr);
+//        /* For adding a new factor, add the #include and a case:
+//        case FAC_ENUM:
+//            return createNumericDiffCostFunctionCeres<FactorType>(_fac_ptr);
 //         */
 //
 //        default:
-            throw std::invalid_argument( "Unknown constraint type! Please add it in the file: ceres_wrapper/create_Numeric_diff_cost_function.h" );
+            throw std::invalid_argument( "Unknown factor type! Please add it in the file: ceres_wrapper/create_Numeric_diff_cost_function.h" );
 //    }
 }
 

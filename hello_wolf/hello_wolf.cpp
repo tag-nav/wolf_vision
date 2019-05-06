@@ -12,7 +12,7 @@
  *      \author: jsola
  */
 
-#include "base/wolf.h"
+#include "base/common/wolf.h"
 
 #include "base/sensor/sensor_odom_2D.h"
 #include "base/processor/processor_odom_2D.h"
@@ -20,7 +20,7 @@
 #include "processor_range_bearing.h"
 #include "capture_range_bearing.h"
 #include "feature_range_bearing.h"
-#include "constraint_range_bearing.h"
+#include "factor_range_bearing.h"
 #include "landmark_point_2D.h"
 
 #include "base/ceres_wrapper/ceres_manager.h"
@@ -141,11 +141,11 @@ int main()
 
     // NOTE: SELF-CALIBRATION OF SENSOR ORIENTATION
     // Uncomment this line below to achieve sensor self-calibration (of the orientation only, since the position is not observable)
-    sensor_rb->getOPtr()->unfix();
+    sensor_rb->getO()->unfix();
 
     // NOTE: SELF-CALIBRATION OF SENSOR POSITION
     // The position is however not observable, and thus self-calibration would not work. You can try uncommenting it too.
-    // sensor_rb->getPPtr()->unfix();
+    // sensor_rb->getP()->unfix();
 
     // CONFIGURE ==========================================================
 
@@ -220,16 +220,16 @@ int main()
 
     // PERTURB initial guess
     WOLF_TRACE("======== PERTURB PROBLEM PRIORS =======")
-    for (auto sen : problem->getHardwarePtr()->getSensorList())
+    for (auto sen : problem->getHardware()->getSensorList())
         for (auto sb : sen->getStateBlockVec())
             if (sb && !sb->isFixed())
                 sb->setState(sb->getState() + VectorXs::Random(sb->getSize()) * 0.5);       // We perturb A LOT !
-    for (auto kf : problem->getTrajectoryPtr()->getFrameList())
+    for (auto kf : problem->getTrajectory()->getFrameList())
         if (kf->isKey())
             for (auto sb : kf->getStateBlockVec())
                 if (sb && !sb->isFixed())
                     sb->setState(sb->getState() + VectorXs::Random(sb->getSize()) * 0.5);   // We perturb A LOT !
-    for (auto lmk : problem->getMapPtr()->getLandmarkList())
+    for (auto lmk : problem->getMap()->getLandmarkList())
         for (auto sb : lmk->getStateBlockVec())
             if (sb && !sb->isFixed())
                 sb->setState(sb->getState() + VectorXs::Random(sb->getSize()) * 0.5);       // We perturb A LOT !
@@ -244,11 +244,19 @@ int main()
     // GET COVARIANCES of all states
     WOLF_TRACE("======== COVARIANCES OF SOLVED PROBLEM =======")
     ceres->computeCovariances(SolverManager::CovarianceBlocksToBeComputed::ALL_MARGINALS);
-    for (auto kf : problem->getTrajectoryPtr()->getFrameList())
+    for (auto kf : problem->getTrajectory()->getFrameList())
         if (kf->isKey())
-            WOLF_TRACE("KF", kf->id(), "_cov = \n", kf->getCovariance());
-    for (auto lmk : problem->getMapPtr()->getLandmarkList())
-        WOLF_TRACE("L", lmk->id(), "_cov = \n", lmk->getCovariance());
+        {
+            Eigen::MatrixXs cov;
+            kf->getCovariance(cov);
+            WOLF_TRACE("KF", kf->id(), "_cov = \n", cov);
+        }
+    for (auto lmk : problem->getMap()->getLandmarkList())
+        {
+            Eigen::MatrixXs cov;
+            lmk->getCovariance(cov);
+            WOLF_TRACE("L", lmk->id(), "_cov = \n", cov);
+        }
     std::cout << std::endl;
 
     WOLF_TRACE("======== FINAL PRINT FOR INTERPRETATION =======")
@@ -292,25 +300,25 @@ int main()
             Intr [Sta] = [ ]                            // Static intrinsics, but no intrinsics anyway
             pt2 RANGE BEARING                           // Processor 2: type Range and Bearing
         Trajectory
-          KF1  <-- c3                                   // KeyFrame 1, constrained by Constraint 3
+          KF1  <-- c3                                   // KeyFrame 1, constrained by Factor 3
             Est, ts=0,   x = ( -1.6e-13 9.4e-11  1.4e-10 ) // State is estimated; time stamp and state vector
             sb: Est Est                                 // State's pos and orient are estimated
             C1 FIX -> S- [  <--                         // Capture 1, type FIX or Absolute
               f1 FIX  <--                               // Feature 1, type Fix
                 m = ( 0 0 0 )                           // The absolute measurement for this frame is (0,0,0) --> origin
-                c1 FIX --> A                            // Constraint 1, type FIX, it is Absolute
+                c1 FIX --> A                            // Factor 1, type FIX, it is Absolute
             CM2 ODOM 2D -> S1 [Sta, Sta]  <--           // Capture 2, type ODOM, from Sensor 1 (static extr and intr)
             C5 RANGE BEARING -> S2 [Sta, Sta]  <--      // Capture 5, type R+B, from Sensor 2 (static extr and intr)
               f2 RANGE BEARING  <--                     // Feature 2, type R+B
                 m = ( 1    1.57 )                       // The feature's measurement is 1m, 1.57rad
-                c2 RANGE BEARING --> L1                 // Constraint 2 against Landmark 1
+                c2 RANGE BEARING --> L1                 // Factor 2 against Landmark 1
           KF2  <-- c6
             Est, ts=1,   x = ( 1       2.5e-10 1.6e-10 )
             sb: Est Est
             CM3 ODOM 2D -> S1 [Sta, Sta]  <--
               f3 ODOM 2D  <--
                 m = ( 1 0 0 )
-                c3 ODOM 2D --> F1                       // Constraint 3, type ODOM, against Frame 1
+                c3 ODOM 2D --> F1                       // Factor 3, type ODOM, against Frame 1
             C9 RANGE BEARING -> S2 [Sta, Sta]  <--
               f4 RANGE BEARING  <--
                 m = ( 1.41 2.36 )
@@ -337,7 +345,7 @@ int main()
             sb: Est Est
             CM10 ODOM 2D -> S1 [Sta, Sta]  <--
         Map
-          L1 POINT 2D   <-- c2  c4                      // Landmark 1, constrained by Constraints 2 and 4
+          L1 POINT 2D   <-- c2  c4                      // Landmark 1, constrained by Factors 2 and 4
             Est,     x = ( 1 2 )                        // L4 state is estimated, state vector
             sb: Est                                     // L4 has 1 state block estimated
           L2 POINT 2D   <-- c5  c7

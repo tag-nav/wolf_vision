@@ -7,9 +7,9 @@
 
 #include "utils_gtest.h"
 
-#include "base/track_matrix.h"
+#include "base/processor/track_matrix.h"
 
-#include "base/time_stamp.h"
+#include "base/common/time_stamp.h"
 
 using namespace wolf;
 
@@ -337,7 +337,7 @@ TEST_F(TrackMatrixTest, snapshotAsList)
      *  f2             trk 1
      */
 
-    std::list<FeatureBasePtr> lt0 = track_matrix.snapshotAsList(f0->getCapturePtr()); // get track 0 as vector
+    std::list<FeatureBasePtr> lt0 = track_matrix.snapshotAsList(f0->getCapture()); // get track 0 as vector
 
     ASSERT_EQ(lt0.size() , (unsigned int) 2);
     ASSERT_EQ(lt0.front(), f0);

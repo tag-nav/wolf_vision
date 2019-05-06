@@ -4,7 +4,7 @@
 
 #include "base/sensor/sensor_camera.h"
 #include "base/feature/feature_point_image.h"
-#include "base/constraint/constraint_autodiff_trifocal.h"
+#include "base/factor/factor_autodiff_trifocal.h"
 #include "base/capture/capture_image.h"
 
 // vision_utils
@@ -81,7 +81,7 @@ bool ProcessorTrackerFeatureTrifocal::isInlier(const cv::KeyPoint& _kp_last, con
 }
 
 
-unsigned int ProcessorTrackerFeatureTrifocal::detectNewFeatures(const unsigned int& _max_new_features, FeatureBaseList& _features_last_out)
+unsigned int ProcessorTrackerFeatureTrifocal::detectNewFeatures(const int& _max_new_features, FeatureBasePtrList& _features_last_out)
 {
 //    // DEBUG =====================================
 //    clock_t debug_tStart;
@@ -90,7 +90,7 @@ unsigned int ProcessorTrackerFeatureTrifocal::detectNewFeatures(const unsigned i
 //    WOLF_TRACE("======== DetectNewFeatures =========");
 //    // ===========================================
 
-    for (unsigned int n_iterations = 0; n_iterations < _max_new_features; ++n_iterations)
+    for (unsigned int n_iterations = 0; _max_new_features == -1 || n_iterations < _max_new_features; ++n_iterations)
     {
         Eigen::Vector2i cell_last;
         if (capture_image_last_->grid_features_->pickEmptyTrackingCell(cell_last))
@@ -150,7 +150,7 @@ unsigned int ProcessorTrackerFeatureTrifocal::detectNewFeatures(const unsigned i
     return _features_last_out.size();
 }
 
-unsigned int ProcessorTrackerFeatureTrifocal::trackFeatures(const FeatureBaseList& _features_last_in, FeatureBaseList& _features_incoming_out, FeatureMatchMap& _feature_matches)
+unsigned int ProcessorTrackerFeatureTrifocal::trackFeatures(const FeatureBasePtrList& _features_last_in, FeatureBasePtrList& _features_incoming_out, FeatureMatchMap& _feature_matches)
 {
 //    // DEBUG =====================================
 //    clock_t debug_tStart;
@@ -267,7 +267,7 @@ void ProcessorTrackerFeatureTrifocal::resetDerived()
 void ProcessorTrackerFeatureTrifocal::preProcess()
 {
 //    //DEBUG
-//    WOLF_TRACE("-------- Image ", getIncomingPtr()->id(), " -- t = ", getIncomingPtr()->getTimeStamp(), " s ----------");
+//    WOLF_TRACE("-------- Image ", getIncoming()->id(), " -- t = ", getIncoming()->getTimeStamp(), " s ----------");
 
     if (!initialized_)
     {
@@ -358,17 +358,17 @@ void ProcessorTrackerFeatureTrifocal::postProcess()
     cv::waitKey(1);
 }
 
-ConstraintBasePtr ProcessorTrackerFeatureTrifocal::createConstraint(FeatureBasePtr _feature_ptr, FeatureBasePtr _feature_other_ptr)
+FactorBasePtr ProcessorTrackerFeatureTrifocal::createFactor(FeatureBasePtr _feature_ptr, FeatureBasePtr _feature_other_ptr)
 {
     // NOTE: This function cannot be implemented because the API lacks an input to feature_prev_origin.
-    // Therefore, we implement establishConstraints() instead and do all the job there.
+    // Therefore, we implement establishFactors() instead and do all the job there.
     // This function remains empty, and with a warning or even an error issued in case someone calls it.
-    std::cout << "033[1;33m [WARN]:033[0m ProcessorTrackerFeatureTrifocal::createConstraint is empty." << std::endl;
-    ConstraintBasePtr return_var{};
+    std::cout << "033[1;33m [WARN]:033[0m ProcessorTrackerFeatureTrifocal::createFactor is empty." << std::endl;
+    FactorBasePtr return_var{}; //TODO: fill this variable
     return return_var;
 }
 
-void ProcessorTrackerFeatureTrifocal::establishConstraints()
+void ProcessorTrackerFeatureTrifocal::establishFactors()
 {
 //    WOLF_TRACE("===== ESTABLISH CONSTRAINT =====");
 
@@ -377,14 +377,12 @@ void ProcessorTrackerFeatureTrifocal::establishConstraints()
         // get tracks between prev, origin and last
         TrackMatches matches = track_matrix_.matches(prev_origin_ptr_, last_ptr_); // it's guaranteed by construction that the track also includes origin
 
-        for (auto pair_trkid_match : matches) // OMG this will add potentially a loooot of constraints! TODO see a smarter way of adding constraints
-        {                                     // Currently reduced by creating constraints for large tracks
+        for (auto pair_trkid_match : matches) // OMG this will add potentially a loooot of factors! TODO see a smarter way of adding factors
+        {                                     // Currently reduced by creating factors for large tracks
             // get track ID
             SizeStd trk_id = pair_trkid_match.first;
 
-            size_t trk_length = track_matrix_.trackSize(trk_id);
-
-            if (trk_length >= params_tracker_feature_trifocal_->min_track_length_for_constraint)
+            if (track_matrix_.trackSize(trk_id)>params_tracker_feature_trifocal_->min_track_length_for_factor)
             {
                 // get the last feature in the track
                 FeatureBasePtr ftr_last = pair_trkid_match.second.second;
@@ -395,8 +393,8 @@ void ProcessorTrackerFeatureTrifocal::establishConstraints()
                 // get the middle feature of the track using the average of the time stamps
                 FeatureBasePtr ftr_mid = nullptr;
 
-                TimeStamp ts_first      = ftr_first->getCapturePtr()->getTimeStamp();
-                TimeStamp ts_last       = ftr_last->getCapturePtr()->getTimeStamp();
+                TimeStamp ts_first      = ftr_first->getCapture()->getTimeStamp();
+                TimeStamp ts_last       = ftr_last->getCapture()->getTimeStamp();
                 Scalar    Dt2           = (ts_last - ts_first) / 2.0;
                 TimeStamp ts_ave        = ts_first + Dt2;
 
@@ -404,9 +402,9 @@ void ProcessorTrackerFeatureTrifocal::establishConstraints()
                 auto track = track_matrix_.track(trk_id);
                 for (auto ftr_it = track.begin() ; ftr_it != track.end() ; ftr_it ++)
                 {
-                    if ( ftr_it->second->getCapturePtr() != nullptr ) // have capture
+                    if ( ftr_it->second->getCapture() != nullptr ) // have capture
                     {
-                        if ( auto kf_mid = ftr_it->second->getCapturePtr()->getFramePtr() ) // have frame
+                        if ( auto kf_mid = ftr_it->second->getCapture()->getFrame() ) // have frame
                         {
                             TimeStamp ts_mid    = kf_mid->getTimeStamp();
 
@@ -424,24 +422,23 @@ void ProcessorTrackerFeatureTrifocal::establishConstraints()
 
                 // Several safety checks
                 assert(ftr_mid != nullptr   && "Middle feature is nullptr!");
-                assert(ftr_mid->getCapturePtr()->getFramePtr() != nullptr   && "Middle feature's frame is nullptr!");
+                assert(ftr_mid->getCapture()->getFrame() != nullptr   && "Middle feature's frame is nullptr!");
                 assert(ftr_mid != ftr_first && "First and middle features are the same!");
                 assert(ftr_mid != ftr_last  && "Last and middle features are the same!");
 
-                // make constraint
-                ConstraintAutodiffTrifocalPtr ctr = std::make_shared<ConstraintAutodiffTrifocal>(
+                // make factor
+                FactorAutodiffTrifocalPtr ctr = std::make_shared<FactorAutodiffTrifocal>(
                         ftr_first,
                         ftr_mid,
                         ftr_last,
                         shared_from_this(),
                         false,
-                        CTR_ACTIVE);
+                        FAC_ACTIVE);
 
                 // link to wolf tree
-                ctr         ->  setFeaturePtr   (ftr_last);
-                ftr_first   ->  addConstrainedBy(ctr);
-                ftr_mid     ->  addConstrainedBy(ctr);
-                ftr_last    ->  addConstraint   (ctr);
+                ftr_last->addFactor(ctr);
+                ftr_mid->addConstrainedBy(ctr);
+                ftr_last->addConstrainedBy(ctr);
             }
         }
     }

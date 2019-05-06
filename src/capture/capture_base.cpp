@@ -48,7 +48,7 @@ CaptureBase::CaptureBase(const std::string& _type,
             WOLF_ERROR("Provided dynamic sensor intrinsics but the sensor intrinsics are static");
         }
 
-        getSensorPtr()->setHasCapture();
+        getSensor()->setHasCapture();
     }
     else if (_p_ptr || _o_ptr || _intr_ptr)
     {
@@ -99,56 +99,56 @@ FeatureBasePtr CaptureBase::addFeature(FeatureBasePtr _ft_ptr)
 {
     //std::cout << "Adding feature" << std::endl;
     feature_list_.push_back(_ft_ptr);
-    _ft_ptr->setCapturePtr(shared_from_this());
+    _ft_ptr->setCapture(shared_from_this());
     _ft_ptr->setProblem(getProblem());
     return _ft_ptr;
 }
 
-void CaptureBase::addFeatureList(FeatureBaseList& _new_ft_list)
+void CaptureBase::addFeatureList(FeatureBasePtrList& _new_ft_list)
 {
     for (FeatureBasePtr feature_ptr : _new_ft_list)
     {
-        feature_ptr->setCapturePtr(shared_from_this());
+        feature_ptr->setCapture(shared_from_this());
         if (getProblem() != nullptr)
             feature_ptr->setProblem(getProblem());
     }
     feature_list_.splice(feature_list_.end(), _new_ft_list);
 }
 
-void CaptureBase::getConstraintList(ConstraintBaseList& _ctr_list)
+void CaptureBase::getFactorList(FactorBasePtrList& _fac_list)
 {
     for (auto f_ptr : getFeatureList())
-        f_ptr->getConstraintList(_ctr_list);
+        f_ptr->getFactorList(_fac_list);
 }
 
-ConstraintBasePtr CaptureBase::addConstrainedBy(ConstraintBasePtr _ctr_ptr)
+FactorBasePtr CaptureBase::addConstrainedBy(FactorBasePtr _fac_ptr)
 {
-    constrained_by_list_.push_back(_ctr_ptr);
-    _ctr_ptr->setCaptureOtherPtr(shared_from_this());
-    return _ctr_ptr;
+    constrained_by_list_.push_back(_fac_ptr);
+    _fac_ptr->setCaptureOther(shared_from_this());
+    return _fac_ptr;
 }
 
-StateBlockPtr CaptureBase::getStateBlockPtr(unsigned int _i) const
+StateBlockPtr CaptureBase::getStateBlock(unsigned int _i) const
 {
-    if (getSensorPtr())
+    if (getSensor())
     {
         if (_i < 2) // _i == 0 is position, 1 is orientation, 2 and onwards are intrinsics
-            if (getSensorPtr()->extrinsicsInCaptures())
+            if (getSensor()->extrinsicsInCaptures())
             {
                 assert(_i < state_block_vec_.size() && "Requested a state block pointer out of the vector range!");
                 return state_block_vec_[_i];
             }
             else
-                return getSensorPtr()->getStateBlockPtrStatic(_i);
+                return getSensor()->getStateBlockPtrStatic(_i);
 
         else // 2 and onwards are intrinsics
-        if (getSensorPtr()->intrinsicsInCaptures())
+        if (getSensor()->intrinsicsInCaptures())
         {
             assert(_i < state_block_vec_.size() && "Requested a state block pointer out of the vector range!");
             return state_block_vec_[_i];
         }
         else
-            return getSensorPtr()->getStateBlockPtrStatic(_i);
+            return getSensor()->getStateBlockPtrStatic(_i);
     }
     else // No sensor associated: assume sensor params are here
     {
@@ -168,7 +168,7 @@ void CaptureBase::removeStateBlocks()
             {
                 getProblem()->removeStateBlock(sbp);
             }
-            setStateBlockPtr(i, nullptr);
+            setStateBlock(i, nullptr);
         }
     }
 }
@@ -177,7 +177,7 @@ void CaptureBase::fix()
 {
     for (unsigned int i = 0; i<getStateBlockVec().size(); i++)
     {
-        auto sbp = getStateBlockPtr(i);
+        auto sbp = getStateBlock(i);
         if (sbp != nullptr)
             sbp->fix();
     }
@@ -188,7 +188,7 @@ void CaptureBase::unfix()
 {
     for (unsigned int i = 0; i<getStateBlockVec().size(); i++)
     {
-        auto sbp = getStateBlockPtr(i);
+        auto sbp = getStateBlock(i);
         if (sbp != nullptr)
             sbp->unfix();
     }
@@ -199,7 +199,7 @@ void CaptureBase::fixExtrinsics()
 {
     for (unsigned int i = 0; i < 2; i++)
     {
-        auto sbp = getStateBlockPtr(i);
+        auto sbp = getStateBlock(i);
         if (sbp != nullptr)
             sbp->fix();
     }
@@ -210,7 +210,7 @@ void CaptureBase::unfixExtrinsics()
 {
     for (unsigned int i = 0; i < 2; i++)
     {
-        auto sbp = getStateBlockPtr(i);
+        auto sbp = getStateBlock(i);
         if (sbp != nullptr)
             sbp->unfix();
     }
@@ -221,7 +221,7 @@ void CaptureBase::fixIntrinsics()
 {
     for (unsigned int i = 2; i < getStateBlockVec().size(); i++)
     {
-        auto sbp = getStateBlockPtr(i);
+        auto sbp = getStateBlock(i);
         if (sbp != nullptr)
             sbp->fix();
     }
@@ -232,7 +232,7 @@ void CaptureBase::unfixIntrinsics()
 {
     for (unsigned int i = 2; i < getStateBlockVec().size(); i++)
     {
-        auto sbp = getStateBlockPtr(i);
+        auto sbp = getStateBlock(i);
         if (sbp != nullptr)
             sbp->unfix();
     }
@@ -254,7 +254,7 @@ SizeEigen CaptureBase::computeCalibSize() const
     SizeEigen sz = 0;
     for (unsigned int i = 0; i < state_block_vec_.size(); i++)
     {
-        auto sb = getStateBlockPtr(i);
+        auto sb = getStateBlock(i);
         if (sb && !sb->isFixed())
             sz += sb->getSize();
     }
@@ -267,7 +267,7 @@ Eigen::VectorXs CaptureBase::getCalibration() const
     SizeEigen index = 0;
     for (unsigned int i = 0; i < getStateBlockVec().size(); i++)
     {
-        auto sb = getStateBlockPtr(i);
+        auto sb = getStateBlock(i);
         if (sb && !sb->isFixed())
         {
             calib.segment(index, sb->getSize()) = sb->getState();
@@ -284,7 +284,7 @@ void CaptureBase::setCalibration(const VectorXs& _calib)
     SizeEigen index = 0;
     for (unsigned int i = 0; i < getStateBlockVec().size(); i++)
     {
-        auto sb = getStateBlockPtr(i);
+        auto sb = getStateBlock(i);
         if (sb && !sb->isFixed())
         {
             sb->setState(_calib.segment(index, sb->getSize()));

@@ -13,8 +13,8 @@
 #include "base/capture/capture_laser_2D.h"
 #include "base/feature/feature_corner_2D.h"
 #include "base/landmark/landmark_corner_2D.h"
-#include "base/constraint/constraint_corner_2D.h"
-#include "base/state_block.h"
+#include "base/factor/factor_corner_2D.h"
+#include "base/state_block/state_block.h"
 #include "base/association/association_tree.h"
 #include "base/processor/processor_tracker_landmark.h"
 
@@ -61,8 +61,8 @@ class ProcessorTrackerLandmarkCorner : public ProcessorTrackerLandmark
         laserscanutils::CornerFinder corner_finder_;
         //TODO: add corner_finder_params
 
-        FeatureBaseList corners_incoming_;
-        FeatureBaseList corners_last_;
+        FeatureBasePtrList corners_incoming_;
+        FeatureBasePtrList corners_last_;
         unsigned int new_corners_th_;
         unsigned int loop_frames_th_;
 
@@ -122,7 +122,7 @@ class ProcessorTrackerLandmarkCorner : public ProcessorTrackerLandmark
          * \param _features_incoming_out returned list of incoming features corresponding to a landmark of _landmarks_in
          * \param _feature_landmark_correspondences returned map of landmark correspondences: _feature_landmark_correspondences[_feature_out_ptr] = landmark_in_ptr
          */
-        virtual unsigned int findLandmarks(const LandmarkBaseList& _landmarks_in, FeatureBaseList& _features_incoming_out,
+        virtual unsigned int findLandmarks(const LandmarkBasePtrList& _landmarks_in, FeatureBasePtrList& _features_incoming_out,
                                            LandmarkMatchMap& _feature_landmark_correspondences);
 
         /** \brief Vote for KeyFrame generation
@@ -135,16 +135,16 @@ class ProcessorTrackerLandmarkCorner : public ProcessorTrackerLandmark
         virtual bool voteForKeyFrame();
 
         /** \brief Detect new Features
-         * \param _capture_ptr Capture for feature detection. Defaults to incoming_ptr_.
-         * \param _new_features_list The list of detected Features. Defaults to member new_features_list_.
+         * \param _max_features maximum number of features detected (-1: unlimited. 0: none)
+         * \param _features_last_out The list of detected Features.
          * \return The number of detected Features.
          *
          * This function detects Features that do not correspond to known Features/Landmarks in the system.
          *
-         * The function sets _features_last_out, the list of newly detected features,
-         * to be used for landmark initialization.
+         * The function is called in ProcessorTrackerLandmark::processNew() to set the member new_features_last_,
+         * the list of newly detected features of the capture last_ptr_.
          */
-        virtual unsigned int detectNewFeatures(const unsigned int& _max_features, FeatureBaseList& _features_last_out);
+        virtual unsigned int detectNewFeatures(const int& _max_features, FeatureBasePtrList& _features_last_out);
 
         /** \brief Create one landmark
          *
@@ -152,17 +152,17 @@ class ProcessorTrackerLandmarkCorner : public ProcessorTrackerLandmark
          */
         virtual LandmarkBasePtr createLandmark(FeatureBasePtr _feature_ptr);
 
-        /** \brief Create a new constraint
+        /** \brief Create a new factor
          * \param _feature_ptr pointer to the Feature to constrain
          * \param _landmark_ptr LandmarkBase pointer to the Landmark constrained.
          *
          * Implement this method in derived classes.
          */
-        virtual ConstraintBasePtr createConstraint(FeatureBasePtr _feature_ptr, LandmarkBasePtr _landmark_ptr);
+        virtual FactorBasePtr createFactor(FeatureBasePtr _feature_ptr, LandmarkBasePtr _landmark_ptr);
 
     private:
 
-        void extractCorners(CaptureLaser2DPtr _capture_laser_ptr, FeatureBaseList& _corner_list);
+        void extractCorners(CaptureLaser2DPtr _capture_laser_ptr, FeatureBasePtrList& _corner_list);
 
         void expectedFeature(LandmarkBasePtr _landmark_ptr, Eigen::Vector4s& expected_feature_,
                              Eigen::Matrix3s& expected_feature_cov_);

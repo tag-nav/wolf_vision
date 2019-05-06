@@ -6,7 +6,7 @@
  */
 
 // Wolf includes
-#include "base/wolf.h"
+#include "base/common/wolf.h"
 
 //std includes
 #include <cstdlib>
@@ -45,7 +45,7 @@ int main(int argc, char *argv[])
     CholmodSupernodalLLT < SparseMatrix<double, ColMajor, SizeEigen> > solver;
     PermutationMatrix<Dynamic, Dynamic, SizeEigen> perm(size);
     CCOLAMDOrdering<SizeEigen> ordering;
-    Matrix<SizeEigen, Dynamic, 1> ordering_constraints = Matrix<SizeEigen, Dynamic, 1>::Ones(size);
+    Matrix<SizeEigen, Dynamic, 1> ordering_factors = Matrix<SizeEigen, Dynamic, 1>::Ones(size);
     VectorXd b(size), bordered(size), xordered(size), x(size);
     clock_t t1, t2, t3;
     double time1, time2, time3;
@@ -82,17 +82,17 @@ int main(int argc, char *argv[])
     std::cout << "x = " << x.transpose() << std::endl;
 
     // SOLVING AFTER REORDERING ------------------------------------
-    // ordering constraints
-    ordering_constraints(size-1) = 2;
-    ordering_constraints(0) = 2;
+    // ordering factors
+    ordering_factors(size-1) = 2;
+    ordering_factors(0) = 2;
 
     // ordering
     t2 = clock();
     A.makeCompressed();
 
     std::cout << "Reordering using CCOLAMD:" << std::endl;
-    std::cout << "ordering_constraints = " << std::endl << ordering_constraints.transpose() << std::endl << std::endl;
-    ordering(A, perm, ordering_constraints.data());
+    std::cout << "ordering_factors = " << std::endl << ordering_factors.transpose() << std::endl << std::endl;
+    ordering(A, perm, ordering_factors.data());
     std::cout << "perm = " << std::endl << perm.indices().transpose() << std::endl << std::endl;
 
     bordered = perm * b;

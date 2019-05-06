@@ -5,8 +5,8 @@
 #include "base/capture/capture_wheel_joint_position.h"
 #include "base/capture/capture_velocity.h"
 
-#include "base/rotations.h"
-#include "base/constraint/constraint_odom_2D.h"
+#include "base/math/rotations.h"
+#include "base/factor/factor_odom_2D.h"
 #include "base/feature/feature_diff_drive.h"
 
 namespace wolf
@@ -34,7 +34,7 @@ void ProcessorDiffDrive::computeCurrentDelta(const Eigen::VectorXs& _data,
 
   /// Retrieve sensor intrinsics
   const IntrinsicsDiffDrive& intrinsics =
-      *(std::static_pointer_cast<SensorDiffDrive>(getSensorPtr())->getIntrinsics());
+      *(std::static_pointer_cast<SensorDiffDrive>(getSensor())->getIntrinsics());
 
   VelocityComand<Scalar> vel;
   Eigen::MatrixXs J_vel_data;
@@ -209,17 +209,17 @@ CaptureMotionPtr ProcessorDiffDrive::createCapture(const TimeStamp& _ts,
                                                      _frame_origin, nullptr, nullptr, i_ptr);
 }
 
-ConstraintBasePtr ProcessorDiffDrive::emplaceConstraint(FeatureBasePtr _feature,
+FactorBasePtr ProcessorDiffDrive::emplaceFactor(FeatureBasePtr _feature,
                                                         CaptureBasePtr _capture_origin)
 {
-  ConstraintOdom2DPtr ctr_odom =
-      std::make_shared<ConstraintOdom2D>(_feature, _capture_origin->getFramePtr(),
+  FactorOdom2DPtr fac_odom =
+      std::make_shared<FactorOdom2D>(_feature, _capture_origin->getFrame(),
                                          shared_from_this());
 
-  _feature->addConstraint(ctr_odom);
-  _capture_origin->getFramePtr()->addConstrainedBy(ctr_odom);
+  _feature->addFactor(fac_odom);
+  _capture_origin->getFrame()->addConstrainedBy(fac_odom);
 
-  return ctr_odom;
+  return fac_odom;
 }
 
 FeatureBasePtr ProcessorDiffDrive::createFeature(CaptureMotionPtr _capture_motion)
