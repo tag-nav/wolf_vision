@@ -131,7 +131,7 @@ TEST(Odom2D, FactorFix_and_FactorOdom2D)
 
     // KF1 and motion from KF0
     t += dt;
-    FrameBasePtr        F1 = Pr->emplaceFrame(KEY_FRAME, Vector3s::Zero(), t);
+    FrameBasePtr        F1 = Pr->emplaceFrame(KEY, Vector3s::Zero(), t);
     CaptureBasePtr      C1 = F1->addCapture(std::make_shared<CaptureBase>("ODOM 2D", t));
     FeatureBasePtr      f1 = C1->addFeature(std::make_shared<FeatureBase>("ODOM 2D", delta, delta_cov));
     FactorBasePtr   c1 = f1->addFactor(std::make_shared<FactorOdom2D>(f1, F0, nullptr));
@@ -139,7 +139,7 @@ TEST(Odom2D, FactorFix_and_FactorOdom2D)
 
     // KF2 and motion from KF1
     t += dt;
-    FrameBasePtr        F2 = Pr->emplaceFrame(KEY_FRAME, Vector3s::Zero(), t);
+    FrameBasePtr        F2 = Pr->emplaceFrame(KEY, Vector3s::Zero(), t);
     CaptureBasePtr      C2 = F2->addCapture(std::make_shared<CaptureBase>("ODOM 2D", t));
     FeatureBasePtr      f2 = C2->addFeature(std::make_shared<FeatureBase>("ODOM 2D", delta, delta_cov));
     FactorBasePtr   c2 = f2->addFactor(std::make_shared<FactorOdom2D>(f2, F1, nullptr));
@@ -329,7 +329,7 @@ TEST(Odom2D, KF_callback)
     params->angle_turned    = 6.28;
     params->max_time_span   = 100;
     params->cov_det         = 100;
-    params->unmeasured_perturbation_std = 0.001;
+    params->unmeasured_perturbation_std = 0.000001;
     Matrix3s unmeasured_cov = params->unmeasured_perturbation_std*params->unmeasured_perturbation_std*Matrix3s::Identity();
     ProcessorBasePtr prc_base = problem->installProcessor("ODOM 2D", "odom", sensor_odom2d, params);
     ProcessorOdom2DPtr processor_odom2d = std::static_pointer_cast<ProcessorOdom2D>(prc_base);
@@ -367,6 +367,7 @@ TEST(Odom2D, KF_callback)
 
         // re-use capture with updated timestamp
         capture->setTimeStamp(t);
+
         std::cout << "capture ts: " << capture->getTimeStamp() << " - " << capture->getTimeStamp().get();
         std::cout << "nsec:        " << capture->getTimeStamp().getNanoSeconds() << std::endl;
         std::cout << "filled nsec: " << std::setfill('0') << std::setw(9) << std::right << capture->getTimeStamp().getNanoSeconds() << std::endl;
@@ -404,7 +405,7 @@ TEST(Odom2D, KF_callback)
     std::cout << "-----------------------------\nSplit after last KF; time: " << t_split << std::endl;
 
     Vector3s x_split = processor_odom2d->getState(t_split);
-    FrameBasePtr keyframe_2 = problem->emplaceFrame(KEY_FRAME, x_split, t_split);
+    FrameBasePtr keyframe_2 = problem->emplaceFrame(KEY, x_split, t_split);
 
     ASSERT_TRUE(problem->check(0));
     processor_odom2d->keyFrameCallback(keyframe_2, dt/2);
@@ -436,7 +437,7 @@ TEST(Odom2D, KF_callback)
     problem->print(4,1,1,1);
 
     x_split = processor_odom2d->getState(t_split);
-    FrameBasePtr keyframe_1 = problem->emplaceFrame(KEY_FRAME, x_split, t_split);
+    FrameBasePtr keyframe_1 = problem->emplaceFrame(KEY, x_split, t_split);
 
     ASSERT_TRUE(problem->check(0));
     processor_odom2d->keyFrameCallback(keyframe_1, dt/2);

@@ -121,7 +121,7 @@ class ProcessorTrackerFeatureImage : public ProcessorTrackerFeature
          * The function is called in ProcessorTrackerFeature::processNew() to set the member new_features_last_,
          * the list of newly detected features of the capture last_ptr_.
          */
-        virtual unsigned int detectNewFeatures(const int& _max_new_features, FeatureBasePtrList& _features_incoming_out);
+        virtual unsigned int detectNewFeatures(const int& _max_new_features, FeatureBasePtrList& _features_last_out);
 
         virtual FactorBasePtr createFactor(FeatureBasePtr _feature_ptr, FeatureBasePtr _feature_other_ptr);
 

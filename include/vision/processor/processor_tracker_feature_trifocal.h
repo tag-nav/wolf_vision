@@ -24,7 +24,6 @@ struct ProcessorParamsTrackerFeatureTrifocal : public ProcessorParamsTrackerFeat
         int n_cells_h;
         int n_cells_v;
         int min_response_new_feature;
-        Scalar max_euclidean_distance;
         Scalar pixel_noise_std; ///< std noise of the pixel
         int min_track_length_for_factor; ///< Minimum track length of a matched feature to create a factor
 };
@@ -43,8 +42,9 @@ class ProcessorTrackerFeatureTrifocal : public ProcessorTrackerFeature
 
         ProcessorParamsTrackerFeatureTrifocalPtr params_tracker_feature_trifocal_;      ///< Configuration parameters
 
-        CaptureImagePtr capture_last_;
-        CaptureImagePtr capture_incoming_;
+        CaptureImagePtr capture_image_last_;
+        CaptureImagePtr capture_image_incoming_;
+        Matrix2s        pixel_cov_;
 
     private:
         CaptureBasePtr prev_origin_ptr_;                    ///< Capture previous to origin_ptr_ for the third focus of the trifocal.
@@ -94,7 +94,7 @@ class ProcessorTrackerFeatureTrifocal : public ProcessorTrackerFeature
          * The function is called in ProcessorTrackerFeature::processNew() to set the member new_features_last_,
          * the list of newly detected features of the capture last_ptr_.
          */
-        virtual unsigned int detectNewFeatures(const int& _max_new_features, FeatureBasePtrList& _features_incoming_out) override;
+        virtual unsigned int detectNewFeatures(const int& _max_new_features, FeatureBasePtrList& _features_last_out) override;
 
         /** \brief Create a new factor and link it to the wolf tree
          * \param _feature_ptr pointer to the parent Feature
@@ -144,11 +144,34 @@ class ProcessorTrackerFeatureTrifocal : public ProcessorTrackerFeature
         static ProcessorBasePtr create(const std::string& _unique_name,
                                        const ProcessorParamsBasePtr _params,
                                        const SensorBasePtr _sensor_ptr);
+    private:
+
+        cv::Mat image_debug_;
+
+    public:
+
+        /**
+         * \brief Return Image for debug purposes
+         */
+        cv::Mat getImageDebug();
+
+        /// \brief Get pixel covariance
+        const Matrix2s& pixelCov() const;
 };
 
 inline CaptureBasePtr ProcessorTrackerFeatureTrifocal::getPrevOrigin()
 {
     return prev_origin_ptr_;
+}
+
+inline cv::Mat ProcessorTrackerFeatureTrifocal::getImageDebug()
+{
+    return image_debug_;
+}
+
+inline const Eigen::Matrix2s& ProcessorTrackerFeatureTrifocal::pixelCov() const
+{
+    return pixel_cov_;
 }
 
 } // namespace wolf

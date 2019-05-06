@@ -30,6 +30,8 @@ class FactorAutodiffTrifocalTest : public testing::Test{
         FeatureBasePtr  f1, f2, f3;
         FactorAutodiffTrifocalPtr c123;
 
+        Scalar pixel_noise_std;
+
         virtual void SetUp() override
         {
             std::string wolf_root = _WOLF_ROOT_DIR;
@@ -124,28 +126,29 @@ class FactorAutodiffTrifocalTest : public testing::Test{
             params_tracker_feature_trifocal_trifocal->time_tolerance                = 1.0/2;
             params_tracker_feature_trifocal_trifocal->max_new_features              = 5;
             params_tracker_feature_trifocal_trifocal->min_features_for_keyframe     = 5;
-            params_tracker_feature_trifocal_trifocal->yaml_file_params_vision_utils = wolf_root + "/src/examples/vision_utils_active_search.yaml";
+            params_tracker_feature_trifocal_trifocal->yaml_file_params_vision_utils = wolf_root + "/src/examples/processor_tracker_feature_trifocal_vision_utils.yaml";
 
             ProcessorBasePtr proc = problem->installProcessor("TRACKER FEATURE TRIFOCAL", "trifocal", camera, params_tracker_feature_trifocal_trifocal);
             proc_trifocal = std::static_pointer_cast<ProcessorTrackerFeatureTrifocal>(proc);
 
             // Add three viewpoints with frame, capture and feature
+            pixel_noise_std = 2.0;
             Vector2s pix(0,0);
-            Matrix2s pix_cov; pix_cov.setIdentity();
+            Matrix2s pix_cov(Matrix2s::Identity() * pow(pixel_noise_std, 2));
 
-            F1 = problem->emplaceFrame(KEY_FRAME, pose1, 1.0);
+            F1 = problem->emplaceFrame(KEY, pose1, 1.0);
             I1 = std::make_shared<CaptureImage>(1.0, camera, cv::Mat(2,2,CV_8UC1));
             F1-> addCapture(I1);
             f1 = std::make_shared<FeatureBase>("PIXEL", pix, pix_cov); // pixel at origin
             I1-> addFeature(f1);
 
-            F2 = problem->emplaceFrame(KEY_FRAME, pose2, 2.0);
+            F2 = problem->emplaceFrame(KEY, pose2, 2.0);
             I2 = std::make_shared<CaptureImage>(2.0, camera, cv::Mat(2,2,CV_8UC1));
             F2-> addCapture(I2);
             f2 = std::make_shared<FeatureBase>("PIXEL", pix, pix_cov); // pixel at origin
             I2-> addFeature(f2);
 
-            F3 = problem->emplaceFrame(KEY_FRAME, pose3, 3.0);
+            F3 = problem->emplaceFrame(KEY, pose3, 3.0);
             I3 = std::make_shared<CaptureImage>(3.0, camera, cv::Mat(2,2,CV_8UC1));
             F3-> addCapture(I3);
             f3 = std::make_shared<FeatureBase>("PIXEL", pix, pix_cov); // pixel at origin
@@ -158,6 +161,30 @@ class FactorAutodiffTrifocalTest : public testing::Test{
             f2   ->addConstrainedBy(c123);
         }
 };
+
+TEST_F(FactorAutodiffTrifocalTest, InfoMatrix)
+{
+    /** Ground truth covariance. Rationale:
+     * Due to the orthogonal configuration (see line 40 and onwards), we have:
+     *   Let s = pixel_noise_std.
+     *   Let d = 1 the distance from the cameras to the 3D point
+     *   Let k be a proportionality constant related to the projection and pixellization process
+     *   Let S = k*d*s
+     *   The pixel on camera 1 retroprojects a conic PDF with width S = k*s*d
+     *   The line on camera 2 retroprojects a plane aperture of S = k*s*d
+     *   The product (ie intersection) of cone and plane aperture PDFs is a sphere of radius S
+     *   Projection of the sphere to camera 3 is a circle of S/k/d=s pixels
+     *   This is the projected covariance: s^2 pixel^2
+     *   The measurement has a std dev of s pixel --> cov is s^2 pixel^2
+     *   The total cov is s^2 pix^2 + s^2 pix^2 = 2s^2 pix^2
+     *   The info matrix is 0.5 s^-2 pix^-2
+     *   The sqrt info matrix is 1/s/sqrt(2) pix^-1
+     */
+    Matrix3s sqrt_info_gt = Matrix3s::Identity() / pixel_noise_std / sqrt(2.0);
+
+    ASSERT_MATRIX_APPROX(c123->getSqrtInformationUpper(), sqrt_info_gt, 1e-8);
+
+}
 
 TEST_F(FactorAutodiffTrifocalTest, expectation)
 {
@@ -263,50 +290,50 @@ TEST_F(FactorAutodiffTrifocalTest, error_jacobians)
     Matrix<Scalar,3,3> Jn_r_m1, Jn_r_m2, Jn_r_m3;
 
     // jacs wrt m1
-    pix0 = c123->getPixelCanonicalPrev();
+    pix0 = c123->getPixelCanonical1();
     for (int i=0; i<3; i++)
     {
         pert.setZero();
         pert(i)  = epsilon;
         pix_pert = pix0 + pert;
-        c123->setPixelCanonicalPrev(pix_pert); // m1
+        c123->setPixelCanonical1(pix_pert); // m1
         residual_pert = c123->residual(tensor, c2Ec1);
 
         Jn_r_m1.col(i) = (residual_pert - residual) / epsilon;
     }
-    c123->setPixelCanonicalPrev(pix0);
+    c123->setPixelCanonical1(pix0);
 
     ASSERT_MATRIX_APPROX(J_r_m1, Jn_r_m1, 1e-6);
 
     // jacs wrt m2
-    pix0 = c123->getPixelCanonicalOrigin();
+    pix0 = c123->getPixelCanonical2();
     for (int i=0; i<3; i++)
     {
         pert.setZero();
         pert(i)  = epsilon;
         pix_pert = pix0 + pert;
-        c123->setPixelCanonicalOrigin(pix_pert); // m2
+        c123->setPixelCanonical2(pix_pert); // m2
         residual_pert = c123->residual(tensor, c2Ec1);
 
         Jn_r_m2.col(i) = (residual_pert - residual) / epsilon;
     }
-    c123->setPixelCanonicalOrigin(pix0);
+    c123->setPixelCanonical2(pix0);
 
     ASSERT_MATRIX_APPROX(J_r_m2, Jn_r_m2, 1e-6);
 
     // jacs wrt m3
-    pix0 = c123->getPixelCanonicalLast();
+    pix0 = c123->getPixelCanonical3();
     for (int i=0; i<3; i++)
     {
         pert.setZero();
         pert(i)  = epsilon;
         pix_pert = pix0 + pert;
-        c123->setPixelCanonicalLast(pix_pert); // m3
+        c123->setPixelCanonical3(pix_pert); // m3
         residual_pert = c123->residual(tensor, c2Ec1);
 
         Jn_r_m3.col(i) = (residual_pert - residual) / epsilon;
     }
-    c123->setPixelCanonicalLast(pix0);
+    c123->setPixelCanonical3(pix0);
 
     ASSERT_MATRIX_APPROX(J_r_m3, Jn_r_m3, 1e-6);
 

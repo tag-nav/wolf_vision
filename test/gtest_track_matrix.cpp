@@ -9,6 +9,8 @@
 
 #include "core/processor/track_matrix.h"
 
+#include "base/common/time_stamp.h"
+
 using namespace wolf;
 
 class TrackMatrixTest : public testing::Test
@@ -20,7 +22,7 @@ class TrackMatrixTest : public testing::Test
         Eigen::Matrix2s m_cov = Eigen::Matrix2s::Identity()*0.01;
 
         CaptureBasePtr C0, C1, C2, C3, C4;
-        FeatureBasePtr f0, f1, f2, f3, f4;
+        FeatureBasePtr f0, f1, f2, f3, f4, f5;
 
         virtual void SetUp()
         {
@@ -35,6 +37,7 @@ class TrackMatrixTest : public testing::Test
             f2 = std::make_shared<FeatureBase>("BASE", m, m_cov);
             f3 = std::make_shared<FeatureBase>("BASE", m, m_cov);
             f4 = std::make_shared<FeatureBase>("BASE", m, m_cov);
+            f5 = std::make_shared<FeatureBase>("BASE", m, m_cov);
         }
 };
 
@@ -121,6 +124,52 @@ TEST_F(TrackMatrixTest, first_last_Feature)
     ASSERT_EQ(track_matrix.feature (f0->trackId(), C1 ), f1);
     ASSERT_EQ(track_matrix.feature (f2->trackId(), C1 ), f2);
 }
+
+TEST_F(TrackMatrixTest, feature_time)
+{
+    /* C0  C1  C2  snapshots
+     *
+     * f0--f1--f2  trk 0
+     *     |
+     *     f3--f4  trk 1
+     *     |
+     *     f5      trk 2
+     */
+
+    track_matrix.newTrack(C0,f0);
+    track_matrix.add(f0->trackId(), C1, f1);
+    track_matrix.add(f0->trackId(), C2, f2);
+    track_matrix.newTrack(C1,f3);
+    track_matrix.add(f3->trackId(), C2, f4);
+    track_matrix.newTrack(C1,f5);
+
+    // query f1 by exact, lacking and past time stamps
+    ASSERT_EQ(track_matrix.feature(f0->trackId(), wolf::TimeStamp(1.0)), f1);
+    ASSERT_EQ(track_matrix.feature(f0->trackId(), wolf::TimeStamp(0.9)), f1);
+    ASSERT_NE(track_matrix.feature(f0->trackId(), wolf::TimeStamp(1.1)), f1);
+
+    // query f3 by exact, lacking and past time stamps
+    ASSERT_EQ(track_matrix.feature(f3->trackId(), wolf::TimeStamp(1.0)), f3);
+    ASSERT_EQ(track_matrix.feature(f3->trackId(), wolf::TimeStamp(0.9)), f3);
+    ASSERT_NE(track_matrix.feature(f3->trackId(), wolf::TimeStamp(1.1)), f3);
+
+    // query f4 by exact, lacking and past time stamps
+    ASSERT_EQ(track_matrix.feature(f3->trackId(), wolf::TimeStamp(2.0)), f4);
+    ASSERT_EQ(track_matrix.feature(f3->trackId(), wolf::TimeStamp(1.9)), f4);
+    ASSERT_NE(track_matrix.feature(f3->trackId(), wolf::TimeStamp(2.1)), f4);
+
+    // query f5 by exact, lacking and past time stamps
+    ASSERT_EQ(track_matrix.feature(f5->trackId(), wolf::TimeStamp(1.0)), f5);
+    ASSERT_EQ(track_matrix.feature(f5->trackId(), wolf::TimeStamp(0.9)), f5);
+    ASSERT_NE(track_matrix.feature(f5->trackId(), wolf::TimeStamp(1.1)), f5);
+
+    // query a feature after the track's last time stamp --> should be empty
+    ASSERT_TRUE(track_matrix.feature(f0->trackId(), wolf::TimeStamp(3.1)) == nullptr);
+
+    // query for a feature in a non-existing track --> should be empty
+    ASSERT_TRUE(track_matrix.feature(99, wolf::TimeStamp(1.0)) == nullptr);
+}
+
 
 TEST_F(TrackMatrixTest, remove_ftr)
 {
