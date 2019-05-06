@@ -30,7 +30,7 @@ ProblemPtr problem = Problem::create("PO 2D");
 CeresManager ceres_mgr(problem);
 
 // Two frames
-FrameBasePtr frm0 = problem->emplaceFrame(KEY_FRAME, problem->zeroState(), TimeStamp(0));
+FrameBasePtr frm0 = problem->emplaceFrame(KEY, problem->zeroState(), TimeStamp(0));
 
 // Capture, feature and factor from frm1 to frm0
 CaptureBasePtr cap0 = frm0->addCapture(std::make_shared<CaptureMotion>("ODOM 2D", 0, nullptr, pose, 3, 3, nullptr));

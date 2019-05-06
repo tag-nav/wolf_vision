@@ -16,7 +16,7 @@ FrameBase::FrameBase(const TimeStamp& _ts, StateBlockPtr _p_ptr, StateBlockPtr _
             trajectory_ptr_(),
             state_block_vec_(3), // allow for 3 state blocks by default. Resize in derived constructors if needed.
             frame_id_(++frame_id_count_),
-            type_(NON_KEY_FRAME),
+            type_(NON_ESTIMATED),
             time_stamp_(_ts)
 {
     state_block_vec_[0] = _p_ptr;
@@ -39,8 +39,6 @@ FrameBase::FrameBase(const FrameType & _tp, const TimeStamp& _ts, StateBlockPtr 
                 
 FrameBase::~FrameBase()
 {
-    if ( isKey() )
-        removeStateBlocks();
 }
 
 void FrameBase::remove()
@@ -68,11 +66,12 @@ void FrameBase::remove()
         }
 
         // Remove Frame State Blocks
-        if ( isKey() )
+        if ( isKeyOrAux() )
             removeStateBlocks();
 
-        if (getTrajectory()->getLastKeyFrame()->id() == this_F->id())
-            getTrajectory()->setLastKeyFrame(getTrajectory()->findLastKeyFrame());
+
+        if (getTrajectory()->getLastKeyFrame()->id() == this_F->id() || getTrajectory()->getLastKeyOrAuxFrame()->id() == this_F->id())
+            getTrajectory()->updateLastFrames();
 
 //        std::cout << "Removed       F" << id() << std::endl;
     }
@@ -81,7 +80,7 @@ void FrameBase::remove()
 void FrameBase::setTimeStamp(const TimeStamp& _ts)
 {
     time_stamp_ = _ts;
-    if (isKey() && getTrajectory() != nullptr)
+    if (isKeyOrAux() && getTrajectory() != nullptr)
         getTrajectory()->sortFrame(shared_from_this());
 }
 
@@ -113,18 +112,25 @@ void FrameBase::removeStateBlocks()
 
 void FrameBase::setKey()
 {
-    if (type_ != KEY_FRAME)
-    {
-        type_ = KEY_FRAME;
+    // register if previously not estimated
+    if (!isKeyOrAux())
         registerNewStateBlocks();
 
-        if (getTrajectory()->getLastKeyFrame() == nullptr || getTrajectory()->getLastKeyFrame()->getTimeStamp() < time_stamp_)
-            getTrajectory()->setLastKeyFrame(shared_from_this());
+    // WOLF_DEBUG("Set Key", this->id());
+    type_ = KEY;
+    getTrajectory()->sortFrame(shared_from_this());
+    getTrajectory()->updateLastFrames();
+}
 
-        getTrajectory()->sortFrame(shared_from_this());
+void FrameBase::setAux()
+{
+    if (!isKeyOrAux())
+        registerNewStateBlocks();
 
-//        WOLF_DEBUG("Set KF", this->id());
-    }
+    // WOLF_DEBUG("Set Auxiliary", this->id());
+    type_ = AUXILIARY;
+    getTrajectory()->sortFrame(shared_from_this());
+    getTrajectory()->updateLastFrames();
 }
 
 void FrameBase::fix()
@@ -170,7 +176,7 @@ void FrameBase::setState(const Eigen::VectorXs& _state)
     for (StateBlockPtr sb : state_block_vec_)
         if (sb && (index < _st_size))
         {
-            sb->setState(_state.segment(index, sb->getSize()), isKey());
+            sb->setState(_state.segment(index, sb->getSize()), isKeyOrAux()); // do not notify if state block is not estimated by the solver
             index += sb->getSize();
         }
 }
