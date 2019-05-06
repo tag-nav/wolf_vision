@@ -81,7 +81,7 @@ void CeresManager::computeCovariances(const CovarianceBlocksToBeComputed _blocks
             std::vector<StateBlockPtr> all_state_blocks, landmark_state_blocks;
             //frame state blocks
             for(auto fr_ptr : wolf_problem_->getTrajectory()->getFrameList())
-                if (fr_ptr->isEstimated())
+                if (fr_ptr->isKeyOrAux())
                     for (auto sb : fr_ptr->getStateBlockVec())
                         if (sb)
                             all_state_blocks.push_back(sb);
@@ -106,7 +106,7 @@ void CeresManager::computeCovariances(const CovarianceBlocksToBeComputed _blocks
         {
             // first create a vector containing all state blocks
             for(auto fr_ptr : wolf_problem_->getTrajectory()->getFrameList())
-                if (fr_ptr->isEstimated())
+                if (fr_ptr->isKeyOrAux())
                     for (auto sb : fr_ptr->getStateBlockVec())
                         if (sb)
                             for(auto sb2 : fr_ptr->getStateBlockVec())

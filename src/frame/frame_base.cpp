@@ -66,11 +66,11 @@ void FrameBase::remove()
         }
 
         // Remove Frame State Blocks
-        if ( isEstimated() )
+        if ( isKeyOrAux() )
             removeStateBlocks();
 
 
-        if (getTrajectory()->getLastKeyFrame()->id() == this_F->id() || getTrajectory()->getLastEstimatedFrame()->id() == this_F->id())
+        if (getTrajectory()->getLastKeyFrame()->id() == this_F->id() || getTrajectory()->getLastKeyOrAuxFrame()->id() == this_F->id())
             getTrajectory()->updateLastFrames();
 
 //        std::cout << "Removed       F" << id() << std::endl;
@@ -80,7 +80,7 @@ void FrameBase::remove()
 void FrameBase::setTimeStamp(const TimeStamp& _ts)
 {
     time_stamp_ = _ts;
-    if (isEstimated() && getTrajectory() != nullptr)
+    if (isKeyOrAux() && getTrajectory() != nullptr)
         getTrajectory()->sortFrame(shared_from_this());
 }
 
@@ -113,7 +113,7 @@ void FrameBase::removeStateBlocks()
 void FrameBase::setKey()
 {
     // register if previously not estimated
-    if (!isEstimated())
+    if (!isKeyOrAux())
         registerNewStateBlocks();
 
     // WOLF_DEBUG("Set Key", this->id());
@@ -122,9 +122,9 @@ void FrameBase::setKey()
     getTrajectory()->updateLastFrames();
 }
 
-void FrameBase::setAuxiliary()
+void FrameBase::setAux()
 {
-    if (!isEstimated())
+    if (!isKeyOrAux())
         registerNewStateBlocks();
 
     // WOLF_DEBUG("Set Auxiliary", this->id());
@@ -176,7 +176,7 @@ void FrameBase::setState(const Eigen::VectorXs& _state)
     for (StateBlockPtr sb : state_block_vec_)
         if (sb && (index < _st_size))
         {
-            sb->setState(_state.segment(index, sb->getSize()), isEstimated()); // do not notify if state block is not estimated by the solver
+            sb->setState(_state.segment(index, sb->getSize()), isKeyOrAux()); // do not notify if state block is not estimated by the solver
             index += sb->getSize();
         }
 }

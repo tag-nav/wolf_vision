@@ -26,7 +26,7 @@ class TrajectoryBase : public NodeBase, public std::enable_shared_from_this<Traj
     protected:
         std::string frame_structure_;  // Defines the structure of the Frames in the Trajectory.
         FrameBasePtr last_key_frame_ptr_; // keeps pointer to the last key frame
-        FrameBasePtr last_estimated_frame_ptr_; // keeps pointer to the last estimated frame
+        FrameBasePtr last_key_or_aux_frame_ptr_; // keeps pointer to the last estimated frame
         
     public:
         TrajectoryBase(const std::string& _frame_sturcture);
@@ -41,9 +41,9 @@ class TrajectoryBase : public NodeBase, public std::enable_shared_from_this<Traj
         const FrameBasePtrList& getFrameList() const;
         FrameBasePtr getLastFrame() const;
         FrameBasePtr getLastKeyFrame() const;
-        FrameBasePtr getLastEstimatedFrame() const;
+        FrameBasePtr getLastKeyOrAuxFrame() const;
         FrameBasePtr closestKeyFrameToTimeStamp(const TimeStamp& _ts) const;
-        FrameBasePtr closestEstimatedFrameToTimeStamp(const TimeStamp& _ts) const;
+        FrameBasePtr closestKeyOrAuxFrameToTimeStamp(const TimeStamp& _ts) const;
         void sortFrame(FrameBasePtr _frm_ptr);
         void updateLastFrames();
 
@@ -75,9 +75,9 @@ inline FrameBasePtr TrajectoryBase::getLastKeyFrame() const
     return last_key_frame_ptr_;
 }
 
-inline FrameBasePtr TrajectoryBase::getLastEstimatedFrame() const
+inline FrameBasePtr TrajectoryBase::getLastKeyOrAuxFrame() const
 {
-    return last_estimated_frame_ptr_;
+    return last_key_or_aux_frame_ptr_;
 }
 
 inline std::string TrajectoryBase::getFrameStructure() const

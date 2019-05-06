@@ -7,7 +7,7 @@ TrajectoryBase::TrajectoryBase(const std::string& _frame_structure) :
     NodeBase("TRAJECTORY", "Base"),
     frame_structure_(_frame_structure),
     last_key_frame_ptr_(nullptr),
-    last_estimated_frame_ptr_(nullptr)
+    last_key_or_aux_frame_ptr_(nullptr)
 {
 //    WOLF_DEBUG("constructed T");
 }
@@ -26,7 +26,7 @@ FrameBasePtr TrajectoryBase::addFrame(FrameBasePtr _frame_ptr)
     // add to list
     frame_list_.push_back(_frame_ptr);
 
-    if (_frame_ptr->isEstimated())
+    if (_frame_ptr->isKeyOrAux())
     {
         // register state blocks
         _frame_ptr->registerNewStateBlocks();
@@ -65,7 +65,7 @@ void TrajectoryBase::moveFrame(FrameBasePtr _frm_ptr, FrameBaseIter _place)
 FrameBaseIter TrajectoryBase::computeFrameOrder(FrameBasePtr _frame_ptr)
 {
     for (auto frm_rit = getFrameList().rbegin(); frm_rit != getFrameList().rend(); frm_rit++)
-        if ((*frm_rit)!= _frame_ptr && (*frm_rit)->isEstimated() && (*frm_rit)->getTimeStamp() <= _frame_ptr->getTimeStamp())
+        if ((*frm_rit)!= _frame_ptr && (*frm_rit)->isKeyOrAux() && (*frm_rit)->getTimeStamp() <= _frame_ptr->getTimeStamp())
             return frm_rit.base();
     return getFrameList().begin();
 }
@@ -76,11 +76,11 @@ void TrajectoryBase::updateLastFrames()
 
     // NOTE: Assumes estimated (key or auxiliary) frames are sorted by timestamp
     for (auto frm_rit = getFrameList().rbegin(); frm_rit != getFrameList().rend(); ++frm_rit)
-        if ((*frm_rit)->isEstimated())
+        if ((*frm_rit)->isKeyOrAux())
         {
             if (!last_estimated_set)
             {
-                last_estimated_frame_ptr_ = (*frm_rit);
+                last_key_or_aux_frame_ptr_ = (*frm_rit);
                 last_estimated_set = true;
             }
             if ((*frm_rit)->isKey())
@@ -112,14 +112,14 @@ FrameBasePtr TrajectoryBase::closestKeyFrameToTimeStamp(const TimeStamp& _ts) co
     return closest_kf;
 }
 
-FrameBasePtr TrajectoryBase::closestEstimatedFrameToTimeStamp(const TimeStamp& _ts) const
+FrameBasePtr TrajectoryBase::closestKeyOrAuxFrameToTimeStamp(const TimeStamp& _ts) const
 {
     // NOTE: Assumes estimated (key or auxiliary) frames are sorted by timestamp
     FrameBasePtr closest_kf = nullptr;
     Scalar min_dt = 1e9;
 
     for (auto frm_rit = frame_list_.rbegin(); frm_rit != frame_list_.rend(); frm_rit++)
-        if ((*frm_rit)->isEstimated())
+        if ((*frm_rit)->isKeyOrAux())
         {
             Scalar dt = std::fabs((*frm_rit)->getTimeStamp() - _ts);
             if (dt < min_dt)

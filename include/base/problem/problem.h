@@ -195,9 +195,9 @@ class Problem : public std::enable_shared_from_this<Problem>
         // Frame getters
         FrameBasePtr getLastFrame( ) const;
         FrameBasePtr getLastKeyFrame( ) const;
-        FrameBasePtr getLastEstimatedFrame( ) const;
+        FrameBasePtr getLastKeyOrAuxFrame( ) const;
         FrameBasePtr closestKeyFrameToTimeStamp(const TimeStamp& _ts) const;
-        FrameBasePtr closestEstimatedFrameToTimeStamp(const TimeStamp& _ts) const;
+        FrameBasePtr closestKeyOrAuxFrameToTimeStamp(const TimeStamp& _ts) const;
 
         /** \brief Give the permission to a processor to create a new key Frame
          *
@@ -258,7 +258,7 @@ class Problem : public std::enable_shared_from_this<Problem>
         bool getCovarianceBlock(StateBlockPtr _state, Eigen::MatrixXs& _cov, const int _row_and_col = 0);
         bool getFrameCovariance(FrameBaseConstPtr _frame_ptr, Eigen::MatrixXs& _covariance);
         bool getLastKeyFrameCovariance(Eigen::MatrixXs& _covariance);
-        bool getLastEstimatedFrameCovariance(Eigen::MatrixXs& _covariance);
+        bool getLastKeyOrAuxFrameCovariance(Eigen::MatrixXs& _covariance);
         bool getLandmarkCovariance(LandmarkBaseConstPtr _landmark_ptr, Eigen::MatrixXs& _covariance);
 
         // Solver management ----------------------------------------

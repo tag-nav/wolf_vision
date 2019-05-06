@@ -251,8 +251,8 @@ void Problem::getCurrentState(Eigen::VectorXs& state)
 {
     if (processor_motion_ptr_ != nullptr)
         processor_motion_ptr_->getCurrentState(state);
-    else if (trajectory_ptr_->getLastEstimatedFrame() != nullptr)
-        trajectory_ptr_->getLastEstimatedFrame()->getState(state);
+    else if (trajectory_ptr_->getLastKeyOrAuxFrame() != nullptr)
+        trajectory_ptr_->getLastKeyOrAuxFrame()->getState(state);
     else
         state = zeroState();
 }
@@ -264,10 +264,10 @@ void Problem::getCurrentStateAndStamp(Eigen::VectorXs& state, TimeStamp& ts)
         processor_motion_ptr_->getCurrentState(state);
         processor_motion_ptr_->getCurrentTimeStamp(ts);
     }
-    else if (trajectory_ptr_->getLastEstimatedFrame() != nullptr)
+    else if (trajectory_ptr_->getLastKeyOrAuxFrame() != nullptr)
     {
-        trajectory_ptr_->getLastEstimatedFrame()->getTimeStamp(ts);
-        trajectory_ptr_->getLastEstimatedFrame()->getState(state);
+        trajectory_ptr_->getLastKeyOrAuxFrame()->getTimeStamp(ts);
+        trajectory_ptr_->getLastKeyOrAuxFrame()->getState(state);
     }
     else
         state = zeroState();
@@ -278,7 +278,7 @@ void Problem::getState(const TimeStamp& _ts, Eigen::VectorXs& state)
     // try to get the state from processor_motion if any, otherwise...
     if (processor_motion_ptr_ == nullptr || !processor_motion_ptr_->getState(_ts, state))
     {
-        FrameBasePtr closest_frame = trajectory_ptr_->closestEstimatedFrameToTimeStamp(_ts);
+        FrameBasePtr closest_frame = trajectory_ptr_->closestKeyOrAuxFrameToTimeStamp(_ts);
         if (closest_frame != nullptr)
             closest_frame->getState(state);
         else
@@ -611,9 +611,9 @@ bool Problem::getLastKeyFrameCovariance(Eigen::MatrixXs& cov)
     return getFrameCovariance(frm, cov);
 }
 
-bool Problem::getLastEstimatedFrameCovariance(Eigen::MatrixXs& cov)
+bool Problem::getLastKeyOrAuxFrameCovariance(Eigen::MatrixXs& cov)
 {
-    FrameBasePtr frm = getLastEstimatedFrame();
+    FrameBasePtr frm = getLastKeyOrAuxFrame();
     return getFrameCovariance(frm, cov);
 }
 
@@ -679,9 +679,9 @@ FrameBasePtr Problem::getLastKeyFrame() const
     return trajectory_ptr_->getLastKeyFrame();
 }
 
-FrameBasePtr Problem::getLastEstimatedFrame() const
+FrameBasePtr Problem::getLastKeyOrAuxFrame() const
 {
-    return trajectory_ptr_->getLastEstimatedFrame();
+    return trajectory_ptr_->getLastKeyOrAuxFrame();
 }
 
 FrameBasePtr Problem::closestKeyFrameToTimeStamp(const TimeStamp& _ts) const
@@ -689,9 +689,9 @@ FrameBasePtr Problem::closestKeyFrameToTimeStamp(const TimeStamp& _ts) const
     return trajectory_ptr_->closestKeyFrameToTimeStamp(_ts);
 }
 
-FrameBasePtr Problem::closestEstimatedFrameToTimeStamp(const TimeStamp& _ts) const
+FrameBasePtr Problem::closestKeyOrAuxFrameToTimeStamp(const TimeStamp& _ts) const
 {
-    return trajectory_ptr_->closestEstimatedFrameToTimeStamp(_ts);
+    return trajectory_ptr_->closestKeyOrAuxFrameToTimeStamp(_ts);
 }
 
 FrameBasePtr Problem::setPrior(const Eigen::VectorXs& _prior_state, const Eigen::MatrixXs& _prior_cov, const TimeStamp& _ts, const Scalar _time_tolerance)
@@ -808,10 +808,10 @@ void Problem::print(int depth, bool constr_by, bool metric, bool state_blocks)
                         std::cout << "    pm" << p->id() << " " << p->getType() << endl;
                         ProcessorMotionPtr pm = std::static_pointer_cast<ProcessorMotion>(p);
                         if (pm->getOrigin())
-                            cout << "      o: C" << pm->getOrigin()->id() << " - " << (pm->getOrigin()->getFrame()->isEstimated() ? (pm->getOrigin()->getFrame()->isKey() ? "  KF" : "  AuxF" ) : "  F")
+                            cout << "      o: C" << pm->getOrigin()->id() << " - " << (pm->getOrigin()->getFrame()->isKeyOrAux() ? (pm->getOrigin()->getFrame()->isKey() ? "  KF" : "  AuxF" ) : "  F")
                             << pm->getOrigin()->getFrame()->id() << endl;
                         if (pm->getLast())
-                            cout << "      l: C" << pm->getLast()->id() << " - " << (pm->getLast()->getFrame()->isEstimated() ? (pm->getLast()->getFrame()->isKey() ? "  KF" : " AuxF") : "  F")
+                            cout << "      l: C" << pm->getLast()->id() << " - " << (pm->getLast()->getFrame()->isKeyOrAux() ? (pm->getLast()->getFrame()->isKey() ? "  KF" : " AuxF") : "  F")
                             << pm->getLast()->getFrame()->id() << endl;
                         if (pm->getIncoming())
                             cout << "      i: C" << pm->getIncoming()->id() << endl;
@@ -830,10 +830,10 @@ void Problem::print(int depth, bool constr_by, bool metric, bool state_blocks)
 //                                    << ptt->getPrevOrigin()->getFrame()->id() << endl;
 //                            }
                             if (pt->getOrigin())
-                                cout << "      o: C" << pt->getOrigin()->id() << " - " << (pt->getOrigin()->getFrame()->isEstimated() ? (pt->getOrigin()->getFrame()->isKey() ? "  KF" : " AuxF") : "  F")
+                                cout << "      o: C" << pt->getOrigin()->id() << " - " << (pt->getOrigin()->getFrame()->isKeyOrAux() ? (pt->getOrigin()->getFrame()->isKey() ? "  KF" : " AuxF") : "  F")
                                 << pt->getOrigin()->getFrame()->id() << endl;
                             if (pt->getLast())
-                                cout << "      l: C" << pt->getLast()->id() << " - " << (pt->getLast()->getFrame()->isEstimated() ? (pt->getLast()->getFrame()->isKey() ? "  KF" : " AuxF") : "  F")
+                                cout << "      l: C" << pt->getLast()->id() << " - " << (pt->getLast()->getFrame()->isKeyOrAux() ? (pt->getLast()->getFrame()->isKey() ? "  KF" : " AuxF") : "  F")
                                 << pt->getLast()->getFrame()->id() << endl;
                             if (pt->getIncoming())
                                 cout << "      i: C" << pt->getIncoming()->id() << endl;
@@ -849,7 +849,7 @@ void Problem::print(int depth, bool constr_by, bool metric, bool state_blocks)
         // Frames =======================================================================================
         for (auto F : getTrajectory()->getFrameList())
         {
-            cout << (F->isEstimated() ? (F->isKey() ? "  KF" : " AuxF") : "  F") << F->id() << ((depth < 2) ? " -- " + std::to_string(F->getCaptureList().size()) + "C  " : "");
+            cout << (F->isKeyOrAux() ? (F->isKey() ? "  KF" : " AuxF") : "  F") << F->id() << ((depth < 2) ? " -- " + std::to_string(F->getCaptureList().size()) + "C  " : "");
             if (constr_by)
             {
                 cout << "  <-- ";
@@ -1085,7 +1085,7 @@ bool Problem::check(int verbose_level)
     {
         if (verbose_level > 0)
         {
-            cout << (F->isEstimated() ? (F->isKey() ? "  KF" : " EF") : "  F") << F->id() << " @ " << F.get() << endl;
+            cout << (F->isKeyOrAux() ? (F->isKey() ? "  KF" : " EF") : "  F") << F->id() << " @ " << F.get() << endl;
             cout << "    -> P @ " << F->getProblem().get() << endl;
             cout << "    -> T @ " << F->getTrajectory().get() << endl;
             for (auto sb : F->getStateBlockVec())

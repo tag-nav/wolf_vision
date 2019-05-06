@@ -101,7 +101,7 @@ TEST(TrajectoryBase, ClosestKeyFrame)
     ASSERT_EQ(KF->id(), F2->id());                           // same id!
 }
 
-TEST(TrajectoryBase, ClosestEstimatedFrame)
+TEST(TrajectoryBase, ClosestKeyOrAuxFrame)
 {
 
     ProblemPtr P = Problem::create("PO 2D");
@@ -121,19 +121,19 @@ TEST(TrajectoryBase, ClosestEstimatedFrame)
 
     FrameBasePtr KF; // closest key-frame queried
 
-    KF = T->closestEstimatedFrameToTimeStamp(-0.8);          // before all keyframes    --> return f0
+    KF = T->closestKeyOrAuxFrameToTimeStamp(-0.8);          // before all keyframes    --> return f0
     ASSERT_EQ(KF->id(), F1->id());                           // same id!
 
-    KF = T->closestEstimatedFrameToTimeStamp(1.1);           // between keyframes       --> return F1
+    KF = T->closestKeyOrAuxFrameToTimeStamp(1.1);           // between keyframes       --> return F1
     ASSERT_EQ(KF->id(), F1->id());                           // same id!
 
-    KF = T->closestEstimatedFrameToTimeStamp(1.9);           // between keyframes       --> return F2
+    KF = T->closestKeyOrAuxFrameToTimeStamp(1.9);           // between keyframes       --> return F2
     ASSERT_EQ(KF->id(), F2->id());                           // same id!
 
-    KF = T->closestEstimatedFrameToTimeStamp(2.6);           // between keyframe and frame, but closer to frame --> return F2
+    KF = T->closestKeyOrAuxFrameToTimeStamp(2.6);           // between keyframe and frame, but closer to frame --> return F2
     ASSERT_EQ(KF->id(), F2->id());                           // same id!
 
-    KF = T->closestEstimatedFrameToTimeStamp(3.2);           // after the last frame    --> return F2
+    KF = T->closestKeyOrAuxFrameToTimeStamp(3.2);           // after the last frame    --> return F2
     ASSERT_EQ(KF->id(), F2->id());                           // same id!
 }
 
@@ -232,25 +232,25 @@ TEST(TrajectoryBase, KeyFramesAreSorted)
     T->addFrame(F2); // KF2
     if (debug) P->print(2,0,0,0);
     ASSERT_EQ(T->getLastFrame()         ->id(), F2->id());
-    ASSERT_EQ(T->getLastEstimatedFrame()->id(), F2->id());
+    ASSERT_EQ(T->getLastKeyOrAuxFrame()->id(), F2->id());
     ASSERT_EQ(T->getLastKeyFrame()      ->id(), F2->id());
 
     T->addFrame(F3); // F3
     if (debug) P->print(2,0,0,0);
     ASSERT_EQ(T->getLastFrame()         ->id(), F3->id());
-    ASSERT_EQ(T->getLastEstimatedFrame()->id(), F2->id());
+    ASSERT_EQ(T->getLastKeyOrAuxFrame()->id(), F2->id());
     ASSERT_EQ(T->getLastKeyFrame()      ->id(), F2->id());
 
     T->addFrame(F1); // KF1
     if (debug) P->print(2,0,0,0);
     ASSERT_EQ(T->getLastFrame()         ->id(), F3->id());
-    ASSERT_EQ(T->getLastEstimatedFrame()->id(), F2->id());
+    ASSERT_EQ(T->getLastKeyOrAuxFrame()->id(), F2->id());
     ASSERT_EQ(T->getLastKeyFrame()      ->id(), F2->id());
 
     F3->setKey(); // set KF3
     if (debug) P->print(2,0,0,0);
     ASSERT_EQ(T->getLastFrame()         ->id(), F3->id());
-    ASSERT_EQ(T->getLastEstimatedFrame()->id(), F3->id());
+    ASSERT_EQ(T->getLastKeyOrAuxFrame()->id(), F3->id());
     ASSERT_EQ(T->getLastKeyFrame()      ->id(), F3->id());
 
     FrameBasePtr F4 = std::make_shared<FrameBase>(NON_ESTIMATED, 1.5, make_shared<StateBlock>(2), make_shared<StateBlock>(1)); // non-key-frame
@@ -261,7 +261,7 @@ TEST(TrajectoryBase, KeyFramesAreSorted)
     // --+-----+-----+------+--->    time
     if (debug) P->print(2,0,1,0);
     ASSERT_EQ(T->getLastFrame()         ->id(), F4->id());
-    ASSERT_EQ(T->getLastEstimatedFrame()->id(), F3->id());
+    ASSERT_EQ(T->getLastKeyOrAuxFrame()->id(), F3->id());
     ASSERT_EQ(T->getLastKeyFrame()      ->id(), F3->id());
 
     F4->setKey();
@@ -271,7 +271,7 @@ TEST(TrajectoryBase, KeyFramesAreSorted)
     // --+-----+-----+------+--->    time
     if (debug) P->print(2,0,1,0);
     ASSERT_EQ(T->getLastFrame()         ->id(), F3->id());
-    ASSERT_EQ(T->getLastEstimatedFrame()->id(), F3->id());
+    ASSERT_EQ(T->getLastKeyOrAuxFrame()->id(), F3->id());
     ASSERT_EQ(T->getLastKeyFrame()      ->id(), F3->id());
 
     F2->setTimeStamp(4);
@@ -281,7 +281,7 @@ TEST(TrajectoryBase, KeyFramesAreSorted)
     // --+-----+-----+------+--->    time
     if (debug) P->print(2,0,1,0);
     ASSERT_EQ(T->getLastFrame()         ->id(), F2->id());
-    ASSERT_EQ(T->getLastEstimatedFrame()->id(), F2->id());
+    ASSERT_EQ(T->getLastKeyOrAuxFrame()->id(), F2->id());
     ASSERT_EQ(T->getLastKeyFrame()      ->id(), F2->id());
 
     F4->setTimeStamp(0.5);
@@ -300,7 +300,7 @@ TEST(TrajectoryBase, KeyFramesAreSorted)
     // --+-----+-----+-----+-----+--->    time
     if (debug) P->print(2,0,1,0);
     ASSERT_EQ(T->getLastFrame()         ->id(), F2->id());
-    ASSERT_EQ(T->getLastEstimatedFrame()->id(), F2->id());
+    ASSERT_EQ(T->getLastKeyOrAuxFrame()->id(), F2->id());
     ASSERT_EQ(T->getLastKeyFrame()      ->id(), F2->id());
 
     F5->setTimeStamp(5);
@@ -310,7 +310,7 @@ TEST(TrajectoryBase, KeyFramesAreSorted)
     // --+-----+-----+-----+-----+--->    time
     if (debug) P->print(2,0,1,0);
     ASSERT_EQ(T->getLastFrame()         ->id(), F5->id());
-    ASSERT_EQ(T->getLastEstimatedFrame()->id(), F5->id());
+    ASSERT_EQ(T->getLastKeyOrAuxFrame()->id(), F5->id());
     ASSERT_EQ(T->getLastKeyFrame()      ->id(), F2->id());
 
     FrameBasePtr F6 = std::make_shared<FrameBase>(NON_ESTIMATED, 1.5, make_shared<StateBlock>(2), make_shared<StateBlock>(1)); // non-key-frame
@@ -321,7 +321,7 @@ TEST(TrajectoryBase, KeyFramesAreSorted)
     // --+-----+-----+-----+-----+-----+--->    time
     if (debug) P->print(2,0,1,0);
     ASSERT_EQ(T->getLastFrame()         ->id(), F6->id());
-    ASSERT_EQ(T->getLastEstimatedFrame()->id(), F5->id());
+    ASSERT_EQ(T->getLastKeyOrAuxFrame()->id(), F5->id());
     ASSERT_EQ(T->getLastKeyFrame()      ->id(), F2->id());
 
 }

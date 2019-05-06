@@ -32,7 +32,7 @@ TEST(FrameBase, GettersAndSetters)
     ASSERT_EQ(t, 1);
     ASSERT_FALSE(F->isFixed());
     ASSERT_EQ(F->isKey(), false);
-    ASSERT_EQ(F->isEstimated(), false);
+    ASSERT_EQ(F->isKeyOrAux(), false);
 }
 
 TEST(FrameBase, StateBlocks)
@@ -124,7 +124,7 @@ TEST(FrameBase, LinksToTree)
     // set key
     F1->setKey();
     ASSERT_TRUE(F1->isKey());
-    ASSERT_TRUE(F1->isEstimated());
+    ASSERT_TRUE(F1->isKeyOrAux());
 
     // Unlink
     F1->unlinkCapture(C);
