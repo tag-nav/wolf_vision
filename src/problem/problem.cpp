@@ -47,7 +47,6 @@ Problem::Problem(const std::string& _frame_structure, SizeEigen _dim) :
         dim_ = 3;
     } else if (_frame_structure == "POV" and _dim == 3)
     {
-        std::cout << "HOLA" << std::endl;
         state_size_ = 10;
         state_cov_size_ = 9;
         dim_ = 3;
@@ -326,10 +325,8 @@ Eigen::VectorXs Problem::zeroState()
     Eigen::VectorXs state = Eigen::VectorXs::Zero(getFrameStructureSize());
 
     // Set the quaternion identity for 3D states. Set only the real part to 1:
-    if (trajectory_ptr_->getFrameStructure() == "PO 3D" ||
-        trajectory_ptr_->getFrameStructure() == "POV 3D")
+    if(this->getDim() == 3)
         state(6) = 1.0;
-
     return state;
 }
 
