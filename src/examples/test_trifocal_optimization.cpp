@@ -159,7 +159,7 @@ int main(int argc, char** argv)
     }
 
     // ==================================================
-    // Establish Scale Constraint (to see results scaled)
+    // Establish Scale Factor (to see results scaled)
     // ==================================================
 
     std::cout << "================== ADD Scale constraint ========================" << std::endl;
@@ -175,8 +175,8 @@ int main(int argc, char** argv)
     ftr_dist = cap_dist->addFeature(make_shared<FeatureBase>("DISTANCE",
                                                               distance,
                                                               dist_cov));
-    ConstraintBasePtr
-    ctr_dist  = ftr_dist->addConstraint(make_shared<ConstraintAutodiffDistance3D>(ftr_dist,
+    FactorBasePtr
+    ctr_dist  = ftr_dist->addFactor(make_shared<FactorAutodiffDistance3D>(ftr_dist,
                                                                                   kfs.at(0),
                                                                                   nullptr));
     kfs.at(0)->addConstrainedBy(ctr_dist);

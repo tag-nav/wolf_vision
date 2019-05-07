@@ -1,0 +1,19 @@
+processor type: "TRACKER FEATURE TRIFOCAL"
+processor name: "tracker feature trifocal example"
+
+vision_utils:
+    YAML file params: processor_tracker_feature_trifocal_vision_utils.yaml
+
+algorithm:
+    time tolerance: 0.005
+    voting active: false
+    minimum features for keyframe: 40
+    maximum new features: 100
+    grid horiz cells: 13
+    grid vert cells:  10
+    min response new features: 50   
+    min track length for constraint: 3
+    
+noise:
+    pixel noise std: 1 # pixels
+    
