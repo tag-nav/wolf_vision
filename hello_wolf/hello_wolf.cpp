@@ -104,7 +104,7 @@ int main()
     using namespace wolf;
 
     // Wolf problem and solver
-    ProblemPtr problem                      = Problem::create("PO 2D");
+    ProblemPtr problem                      = Problem::create("PO", 2);
     ceres::Solver::Options options;
     options.max_num_iterations              = 1000; // We depart far from solution, need a lot of iterations
     CeresManagerPtr ceres                   = std::make_shared<CeresManager>(problem, options);

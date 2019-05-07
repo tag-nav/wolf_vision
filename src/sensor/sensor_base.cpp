@@ -177,10 +177,12 @@ void SensorBase::addPriorParameter(const unsigned int _i, const Eigen::VectorXs&
     ftr_prior->setProblem(getProblem());
 
     // create & add factor absolute
+    // ftr_prior->addFactor(std::make_shared<FactorQuaternionAbsolute>(_sb));
+    // ftr_prior->addFactor(std::make_shared<FactorBlockAbsolute>(_sb, _start_idx, _size));
     if (is_quaternion)
-        ftr_prior->addFactor(std::make_shared<FactorQuaternionAbsolute>(_sb));
+        FactorBase::emplace<FactorQuaternionAbsolute>(ftr_prior, _sb);
     else
-        ftr_prior->addFactor(std::make_shared<FactorBlockAbsolute>(_sb, _start_idx, _size));
+        FactorBase::emplace<FactorBlockAbsolute>(ftr_prior, _sb, _start_idx, _size);
 
     // store feature in params_prior_map_
     params_prior_map_[_i] = ftr_prior;
@@ -334,8 +336,6 @@ bool SensorBase::process(const CaptureBasePtr capture_ptr)
 ProcessorBasePtr SensorBase::addProcessor(ProcessorBasePtr _proc_ptr)
 {
     processor_list_.push_back(_proc_ptr);
-    _proc_ptr->setSensor(shared_from_this());
-    _proc_ptr->setProblem(getProblem());
     return _proc_ptr;
 }
 
@@ -402,6 +402,22 @@ void SensorBase::setProblem(ProblemPtr _problem)
     NodeBase::setProblem(_problem);
     for (auto prc : processor_list_)
         prc->setProblem(_problem);
+}
+
+void SensorBase::link(HardwareBasePtr _hw_ptr)
+{
+    std::cout << "Linking SensorBase" << std::endl;
+    if(_hw_ptr)
+    {
+        this->setHardware(_hw_ptr);
+        this->getHardware()->addSensor(shared_from_this());
+        this->setProblem(_hw_ptr->getProblem());
+        this->registerNewStateBlocks();
+    }
+    else
+    {
+        WOLF_WARN("Linking with a nullptr");
+    }
 }
 
 } // namespace wolf

@@ -81,7 +81,7 @@ class CeresManagerWrapper : public CeresManager
 
 TEST(CeresManager, Create)
 {
-    ProblemPtr P = Problem::create("PO 2D");
+    ProblemPtr P = Problem::create("PO", 2);
     CeresManagerWrapperPtr ceres_manager_ptr = std::make_shared<CeresManagerWrapper>(P);
 
     // check double ointers to branches
@@ -93,7 +93,7 @@ TEST(CeresManager, Create)
 
 TEST(CeresManager, AddStateBlock)
 {
-    ProblemPtr P = Problem::create("PO 2D");
+    ProblemPtr P = Problem::create("PO", 2);
     CeresManagerWrapperPtr ceres_manager_ptr = std::make_shared<CeresManagerWrapper>(P);
 
     // Create State block
@@ -116,7 +116,7 @@ TEST(CeresManager, AddStateBlock)
 
 TEST(CeresManager, DoubleAddStateBlock)
 {
-    ProblemPtr P = Problem::create("PO 2D");
+    ProblemPtr P = Problem::create("PO", 2);
     CeresManagerWrapperPtr ceres_manager_ptr = std::make_shared<CeresManagerWrapper>(P);
 
     // Create State block
@@ -145,7 +145,7 @@ TEST(CeresManager, DoubleAddStateBlock)
 
 TEST(CeresManager, UpdateStateBlock)
 {
-    ProblemPtr P = Problem::create("PO 2D");
+    ProblemPtr P = Problem::create("PO", 2);
     CeresManagerWrapperPtr ceres_manager_ptr = std::make_shared<CeresManagerWrapper>(P);
 
     // Create State block
@@ -176,7 +176,7 @@ TEST(CeresManager, UpdateStateBlock)
 
 TEST(CeresManager, AddUpdateStateBlock)
 {
-    ProblemPtr P = Problem::create("PO 2D");
+    ProblemPtr P = Problem::create("PO", 2);
     CeresManagerWrapperPtr ceres_manager_ptr = std::make_shared<CeresManagerWrapper>(P);
 
     // Create State block
@@ -203,7 +203,7 @@ TEST(CeresManager, AddUpdateStateBlock)
 
 TEST(CeresManager, RemoveStateBlock)
 {
-    ProblemPtr P = Problem::create("PO 2D");
+    ProblemPtr P = Problem::create("PO", 2);
     CeresManagerWrapperPtr ceres_manager_ptr = std::make_shared<CeresManagerWrapper>(P);
 
     // Create State block
@@ -235,7 +235,7 @@ TEST(CeresManager, RemoveStateBlock)
 
 TEST(CeresManager, AddRemoveStateBlock)
 {
-    ProblemPtr P = Problem::create("PO 2D");
+    ProblemPtr P = Problem::create("PO", 2);
     CeresManagerWrapperPtr ceres_manager_ptr = std::make_shared<CeresManagerWrapper>(P);
 
     // Create State block
@@ -261,7 +261,7 @@ TEST(CeresManager, AddRemoveStateBlock)
 
 TEST(CeresManager, RemoveUpdateStateBlock)
 {
-    ProblemPtr P = Problem::create("PO 2D");
+    ProblemPtr P = Problem::create("PO", 2);
     CeresManagerWrapperPtr ceres_manager_ptr = std::make_shared<CeresManagerWrapper>(P);
 
     // Create State block
@@ -286,7 +286,7 @@ TEST(CeresManager, RemoveUpdateStateBlock)
 
 TEST(CeresManager, DoubleRemoveStateBlock)
 {
-    ProblemPtr P = Problem::create("PO 2D");
+    ProblemPtr P = Problem::create("PO", 2);
     CeresManagerWrapperPtr ceres_manager_ptr = std::make_shared<CeresManagerWrapper>(P);
 
     // Create State block
@@ -314,14 +314,14 @@ TEST(CeresManager, DoubleRemoveStateBlock)
 
 TEST(CeresManager, AddFactor)
 {
-    ProblemPtr P = Problem::create("PO 2D");
+    ProblemPtr P = Problem::create("PO", 2);
     CeresManagerWrapperPtr ceres_manager_ptr = std::make_shared<CeresManagerWrapper>(P);
 
     // Create (and add) factor point 2d
     FrameBasePtr        F = P->emplaceFrame(KEY, P->zeroState(), TimeStamp(0));
-    CaptureBasePtr      C = F->addCapture(std::make_shared<CaptureVoid>(0, nullptr));
-    FeatureBasePtr      f = C->addFeature(std::make_shared<FeatureBase>("ODOM 2D", Vector3s::Zero(), Matrix3s::Identity()));
-    FactorPose2DPtr c = std::static_pointer_cast<FactorPose2D>(f->addFactor(std::make_shared<FactorPose2D>(f)));
+    auto C = CaptureBase::emplace<CaptureVoid>(F, 0, nullptr);
+    auto f = FeatureBase::emplace<FeatureBase>(C, "ODOM 2D", Vector3s::Zero(), Matrix3s::Identity());
+    FactorPose2DPtr c = std::static_pointer_cast<FactorPose2D>(FactorBase::emplace<FactorPose2D>(f,f));
 
     // update solver
     ceres_manager_ptr->update();
@@ -336,14 +336,14 @@ TEST(CeresManager, AddFactor)
 
 TEST(CeresManager, DoubleAddFactor)
 {
-    ProblemPtr P = Problem::create("PO 2D");
+    ProblemPtr P = Problem::create("PO", 2);
     CeresManagerWrapperPtr ceres_manager_ptr = std::make_shared<CeresManagerWrapper>(P);
 
     // Create (and add) factor point 2d
     FrameBasePtr        F = P->emplaceFrame(KEY, P->zeroState(), TimeStamp(0));
-    CaptureBasePtr      C = F->addCapture(std::make_shared<CaptureVoid>(0, nullptr));
-    FeatureBasePtr      f = C->addFeature(std::make_shared<FeatureBase>("ODOM 2D", Vector3s::Zero(), Matrix3s::Identity()));
-    FactorPose2DPtr c = std::static_pointer_cast<FactorPose2D>(f->addFactor(std::make_shared<FactorPose2D>(f)));
+    auto C = CaptureBase::emplace<CaptureVoid>(F, 0, nullptr);
+    auto f = FeatureBase::emplace<FeatureBase>(C, "ODOM 2D", Vector3s::Zero(), Matrix3s::Identity());
+    FactorPose2DPtr c = std::static_pointer_cast<FactorPose2D>(FactorBase::emplace<FactorPose2D>(f,f));
 
     // add factor again
     P->addFactor(c);
@@ -361,14 +361,14 @@ TEST(CeresManager, DoubleAddFactor)
 
 TEST(CeresManager, RemoveFactor)
 {
-    ProblemPtr P = Problem::create("PO 2D");
+    ProblemPtr P = Problem::create("PO", 2);
     CeresManagerWrapperPtr ceres_manager_ptr = std::make_shared<CeresManagerWrapper>(P);
 
     // Create (and add) factor point 2d
     FrameBasePtr        F = P->emplaceFrame(KEY, P->zeroState(), TimeStamp(0));
-    CaptureBasePtr      C = F->addCapture(std::make_shared<CaptureVoid>(0, nullptr));
-    FeatureBasePtr      f = C->addFeature(std::make_shared<FeatureBase>("ODOM 2D", Vector3s::Zero(), Matrix3s::Identity()));
-    FactorPose2DPtr c = std::static_pointer_cast<FactorPose2D>(f->addFactor(std::make_shared<FactorPose2D>(f)));
+    auto C = CaptureBase::emplace<CaptureVoid>(F, 0, nullptr);
+    auto f = FeatureBase::emplace<FeatureBase>(C, "ODOM 2D", Vector3s::Zero(), Matrix3s::Identity());
+    FactorPose2DPtr c = std::static_pointer_cast<FactorPose2D>(FactorBase::emplace<FactorPose2D>(f,f));
 
     // update solver
     ceres_manager_ptr->update();
@@ -389,14 +389,14 @@ TEST(CeresManager, RemoveFactor)
 
 TEST(CeresManager, AddRemoveFactor)
 {
-    ProblemPtr P = Problem::create("PO 2D");
+    ProblemPtr P = Problem::create("PO", 2);
     CeresManagerWrapperPtr ceres_manager_ptr = std::make_shared<CeresManagerWrapper>(P);
 
     // Create (and add) factor point 2d
     FrameBasePtr        F = P->emplaceFrame(KEY, P->zeroState(), TimeStamp(0));
-    CaptureBasePtr      C = F->addCapture(std::make_shared<CaptureVoid>(0, nullptr));
-    FeatureBasePtr      f = C->addFeature(std::make_shared<FeatureBase>("ODOM 2D", Vector3s::Zero(), Matrix3s::Identity()));
-    FactorPose2DPtr c = std::static_pointer_cast<FactorPose2D>(f->addFactor(std::make_shared<FactorPose2D>(f)));
+    auto C = CaptureBase::emplace<CaptureVoid>(F, 0, nullptr);
+    auto f = FeatureBase::emplace<FeatureBase>(C, "ODOM 2D", Vector3s::Zero(), Matrix3s::Identity());
+    FactorPose2DPtr c = std::static_pointer_cast<FactorPose2D>(FactorBase::emplace<FactorPose2D>(f,f));
 
     // remove factor
     P->removeFactor(c);
@@ -416,14 +416,14 @@ TEST(CeresManager, AddRemoveFactor)
 
 TEST(CeresManager, DoubleRemoveFactor)
 {
-    ProblemPtr P = Problem::create("PO 2D");
+    ProblemPtr P = Problem::create("PO", 2);
     CeresManagerWrapperPtr ceres_manager_ptr = std::make_shared<CeresManagerWrapper>(P);
 
     // Create (and add) factor point 2d
     FrameBasePtr        F = P->emplaceFrame(KEY, P->zeroState(), TimeStamp(0));
-    CaptureBasePtr      C = F->addCapture(std::make_shared<CaptureVoid>(0, nullptr));
-    FeatureBasePtr      f = C->addFeature(std::make_shared<FeatureBase>("ODOM 2D", Vector3s::Zero(), Matrix3s::Identity()));
-    FactorPose2DPtr c = std::static_pointer_cast<FactorPose2D>(f->addFactor(std::make_shared<FactorPose2D>(f)));
+    auto C = CaptureBase::emplace<CaptureVoid>(F, 0, nullptr);
+    auto f = FeatureBase::emplace<FeatureBase>(C, "ODOM 2D", Vector3s::Zero(), Matrix3s::Identity());
+    FactorPose2DPtr c = std::static_pointer_cast<FactorPose2D>(FactorBase::emplace<FactorPose2D>(f,f));
 
     // update solver
     ceres_manager_ptr->update();
@@ -451,7 +451,7 @@ TEST(CeresManager, DoubleRemoveFactor)
 
 TEST(CeresManager, AddStateBlockLocalParam)
 {
-    ProblemPtr P = Problem::create("PO 2D");
+    ProblemPtr P = Problem::create("PO", 2);
     CeresManagerWrapperPtr ceres_manager_ptr = std::make_shared<CeresManagerWrapper>(P);
 
     // Create State block
@@ -478,7 +478,7 @@ TEST(CeresManager, AddStateBlockLocalParam)
 
 TEST(CeresManager, RemoveLocalParam)
 {
-    ProblemPtr P = Problem::create("PO 2D");
+    ProblemPtr P = Problem::create("PO", 2);
     CeresManagerWrapperPtr ceres_manager_ptr = std::make_shared<CeresManagerWrapper>(P);
 
     // Create State block
@@ -510,7 +510,7 @@ TEST(CeresManager, RemoveLocalParam)
 
 TEST(CeresManager, AddLocalParam)
 {
-    ProblemPtr P = Problem::create("PO 2D");
+    ProblemPtr P = Problem::create("PO", 2);
     CeresManagerWrapperPtr ceres_manager_ptr = std::make_shared<CeresManagerWrapper>(P);
 
     // Create State block
@@ -543,15 +543,15 @@ TEST(CeresManager, AddLocalParam)
 
 TEST(CeresManager, FactorsRemoveLocalParam)
 {
-    ProblemPtr P = Problem::create("PO 3D");
+    ProblemPtr P = Problem::create("PO", 3);
     CeresManagerWrapperPtr ceres_manager_ptr = std::make_shared<CeresManagerWrapper>(P);
 
     // Create (and add) 2 factors quaternion
     FrameBasePtr                    F = P->emplaceFrame(KEY, P->zeroState(), TimeStamp(0));
-    CaptureBasePtr                  C = F->addCapture(std::make_shared<CaptureVoid>(0, nullptr));
-    FeatureBasePtr                  f = C->addFeature(std::make_shared<FeatureBase>("ODOM 2D", Vector3s::Zero(), Matrix3s::Identity()));
-    FactorQuaternionAbsolutePtr c1 = std::static_pointer_cast<FactorQuaternionAbsolute>(f->addFactor(std::make_shared<FactorQuaternionAbsolute>(F->getO())));
-    FactorQuaternionAbsolutePtr c2 = std::static_pointer_cast<FactorQuaternionAbsolute>(f->addFactor(std::make_shared<FactorQuaternionAbsolute>(F->getO())));
+    auto C = CaptureBase::emplace<CaptureVoid>(F, 0, nullptr);
+    auto f = FeatureBase::emplace<FeatureBase>(C, "ODOM 2D", Vector3s::Zero(), Matrix3s::Identity());
+    FactorQuaternionAbsolutePtr c1 = std::static_pointer_cast<FactorQuaternionAbsolute>(FactorBase::emplace<FactorQuaternionAbsolute>(f, F->getO()));
+    FactorQuaternionAbsolutePtr c2 = std::static_pointer_cast<FactorQuaternionAbsolute>(FactorBase::emplace<FactorQuaternionAbsolute>(f, F->getO()));
 
     // update solver
     ceres_manager_ptr->update();
@@ -585,15 +585,15 @@ TEST(CeresManager, FactorsRemoveLocalParam)
 
 TEST(CeresManager, FactorsUpdateLocalParam)
 {
-    ProblemPtr P = Problem::create("PO 3D");
+    ProblemPtr P = Problem::create("PO", 3);
     CeresManagerWrapperPtr ceres_manager_ptr = std::make_shared<CeresManagerWrapper>(P);
 
     // Create (and add) 2 factors quaternion
     FrameBasePtr                    F = P->emplaceFrame(KEY, P->zeroState(), TimeStamp(0));
-    CaptureBasePtr                  C = F->addCapture(std::make_shared<CaptureVoid>(0, nullptr));
-    FeatureBasePtr                  f = C->addFeature(std::make_shared<FeatureBase>("ODOM 2D", Vector3s::Zero(), Matrix3s::Identity()));
-    FactorQuaternionAbsolutePtr c1 = std::static_pointer_cast<FactorQuaternionAbsolute>(f->addFactor(std::make_shared<FactorQuaternionAbsolute>(F->getO())));
-    FactorQuaternionAbsolutePtr c2 = std::static_pointer_cast<FactorQuaternionAbsolute>(f->addFactor(std::make_shared<FactorQuaternionAbsolute>(F->getO())));
+    auto C = CaptureBase::emplace<CaptureVoid>(F, 0, nullptr);
+    auto f = FeatureBase::emplace<FeatureBase>(C, "ODOM 2D", Vector3s::Zero(), Matrix3s::Identity());
+    FactorQuaternionAbsolutePtr c1 = std::static_pointer_cast<FactorQuaternionAbsolute>(FactorBase::emplace<FactorQuaternionAbsolute>(f, F->getO()));
+    FactorQuaternionAbsolutePtr c2 = std::static_pointer_cast<FactorQuaternionAbsolute>(FactorBase::emplace<FactorQuaternionAbsolute>(f, F->getO()));
 
     // update solver
     ceres_manager_ptr->update();

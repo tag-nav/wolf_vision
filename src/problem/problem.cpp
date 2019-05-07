@@ -27,27 +27,25 @@ namespace
 std::string uppercase(std::string s) {for (auto & c: s) c = std::toupper(c); return s;}
 }
 
-Problem::Problem(const std::string& _frame_structure) :
+Problem::Problem(const std::string& _frame_structure, SizeEigen _dim) :
         hardware_ptr_(std::make_shared<HardwareBase>()),
         trajectory_ptr_(std::make_shared<TrajectoryBase>(_frame_structure)),
         map_ptr_(std::make_shared<MapBase>()),
         processor_motion_ptr_(),
-        prior_is_set_(false)
+        prior_is_set_(false),
+        frame_structure_(_frame_structure)
 {
-    if (_frame_structure == "PO 2D")
+    if (_frame_structure == "PO" and _dim == 2)
     {
         state_size_ = 3;
         state_cov_size_ = 3;
         dim_ = 2;
-    }
-
-    else if (_frame_structure == "PO 3D")
+    }else if (_frame_structure == "PO" and _dim == 3)
     {
         state_size_ = 7;
         state_cov_size_ = 6;
         dim_ = 3;
-    }
-    else if (_frame_structure == "POV 3D")
+    } else if (_frame_structure == "POV" and _dim == 3)
     {
         state_size_ = 10;
         state_cov_size_ = 9;
@@ -65,9 +63,9 @@ void Problem::setup()
     map_ptr_       -> setProblem(shared_from_this());
 }
 
-ProblemPtr Problem::create(const std::string& _frame_structure)
+    ProblemPtr Problem::create(const std::string& _frame_structure, SizeEigen _dim)
 {
-    ProblemPtr p(new Problem(_frame_structure)); // We use `new` and not `make_shared` since the Problem constructor is private and cannot be passed to `make_shared`.
+    ProblemPtr p(new Problem(_frame_structure, _dim)); // We use `new` and not `make_shared` since the Problem constructor is private and cannot be passed to `make_shared`.
     p->setup();
     return p->shared_from_this();
 }
@@ -79,7 +77,8 @@ Problem::~Problem()
 
 void Problem::addSensor(SensorBasePtr _sen_ptr)
 {
-    getHardware()->addSensor(_sen_ptr);
+    // getHardware()->addSensor(_sen_ptr);
+    _sen_ptr->link(getHardware());
 }
 
 SensorBasePtr Problem::installSensor(const std::string& _sen_type, //
@@ -123,7 +122,8 @@ ProcessorBasePtr Problem::installProcessor(const std::string& _prc_type, //
 
     ProcessorBasePtr prc_ptr = ProcessorFactory::get().create(uppercase(_prc_type), _unique_processor_name, _prc_params, _corresponding_sensor_ptr);
     prc_ptr->configure(_corresponding_sensor_ptr);
-    _corresponding_sensor_ptr->addProcessor(prc_ptr);
+    // _corresponding_sensor_ptr->addProcessor(prc_ptr);
+    prc_ptr->link(_corresponding_sensor_ptr);
 
     // setting the origin in all processor motion if origin already setted
     if (prc_ptr->isMotion() && prior_is_set_)
@@ -211,33 +211,34 @@ void Problem::clearProcessorMotion()
 }
 
 FrameBasePtr Problem::emplaceFrame(const std::string& _frame_structure, //
+                                   const SizeEigen _dim, //
                                    FrameType _frame_key_type, //
                                    const Eigen::VectorXs& _frame_state, //
                                    const TimeStamp& _time_stamp)
 {
-    FrameBasePtr frm = FrameFactory::get().create(_frame_structure, _frame_key_type, _time_stamp, _frame_state);
-    trajectory_ptr_->addFrame(frm);
+    auto frm = FrameBase::emplace<FrameBase>(trajectory_ptr_, _frame_structure, _dim, _frame_key_type, _time_stamp, _frame_state);
     return frm;
 }
 
 FrameBasePtr Problem::emplaceFrame(const std::string& _frame_structure, //
+                                   const SizeEigen _dim, //
                                    FrameType _frame_key_type, //
                                    const TimeStamp& _time_stamp)
 {
-    return emplaceFrame(_frame_structure, _frame_key_type, getState(_time_stamp), _time_stamp);
+    return emplaceFrame(_frame_structure, _dim, _frame_key_type, getState(_time_stamp), _time_stamp);
 }
 
 FrameBasePtr Problem::emplaceFrame(FrameType _frame_key_type, //
                                    const Eigen::VectorXs& _frame_state, //
                                    const TimeStamp& _time_stamp)
 {
-    return emplaceFrame(trajectory_ptr_->getFrameStructure(), _frame_key_type, _frame_state, _time_stamp);
+    return emplaceFrame(this->getFrameStructure(), this->getDim(), _frame_key_type, _frame_state, _time_stamp);
 }
 
 FrameBasePtr Problem::emplaceFrame(FrameType _frame_key_type, //
                                    const TimeStamp& _time_stamp)
 {
-    return emplaceFrame(trajectory_ptr_->getFrameStructure(), _frame_key_type, _time_stamp);
+    return emplaceFrame(this->getFrameStructure(), this->getDim(), _frame_key_type, _time_stamp);
 }
 
 Eigen::VectorXs Problem::getCurrentState()
@@ -308,16 +309,18 @@ SizeEigen Problem::getDim() const
 {
     return dim_;
 }
+std::string Problem::getFrameStructure() const
+{
+    return frame_structure_;
+}
 
 Eigen::VectorXs Problem::zeroState()
 {
     Eigen::VectorXs state = Eigen::VectorXs::Zero(getFrameStructureSize());
 
     // Set the quaternion identity for 3D states. Set only the real part to 1:
-    if (trajectory_ptr_->getFrameStructure() == "PO 3D" ||
-        trajectory_ptr_->getFrameStructure() == "POV 3D")
+    if(this->getDim() == 3)
         state(6) = 1.0;
-
     return state;
 }
 
@@ -724,12 +727,16 @@ FrameBasePtr Problem::setPrior(const Eigen::VectorXs& _prior_state, const Eigen:
         // create origin capture with the given state as data
         // Capture fix only takes 3D position and Quaternion orientation
         CapturePosePtr init_capture;
-        if (trajectory_ptr_->getFrameStructure() == "POV 3D")
-            init_capture = std::make_shared<CapturePose>(_ts, nullptr, _prior_state.head(7), _prior_cov.topLeftCorner(6,6));
+        CaptureBasePtr init_capture_base;
+        // init_capture = std::make_shared<CapturePose>(_ts, nullptr, _prior_state.head(7), _prior_cov.topLeftCorner(6,6));
+        // init_capture = std::make_shared<CapturePose>(_ts, nullptr, _prior_state, _prior_cov);
+        if (this->getFrameStructure() == "POV" and this->getDim() == 3)
+            init_capture_base = CaptureBase::emplace<CapturePose>(origin_keyframe, _ts, nullptr, _prior_state.head(7), _prior_cov.topLeftCorner(6,6));
         else
-            init_capture = std::make_shared<CapturePose>(_ts, nullptr, _prior_state, _prior_cov);
+            init_capture_base = CaptureBase::emplace<CapturePose>(origin_keyframe, _ts, nullptr, _prior_state, _prior_cov);
 
-        origin_keyframe->addCapture(init_capture);
+        init_capture = std::static_pointer_cast<CapturePose>(init_capture_base);
+        // origin_keyframe->addCapture(init_capture);
 
         // emplace feature and factor
         init_capture->emplaceFeatureAndFactor();

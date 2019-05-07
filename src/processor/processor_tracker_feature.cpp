@@ -151,9 +151,9 @@ void ProcessorTrackerFeature::establishFactors()
         FeatureBasePtr feature_in_origin = pair_trkid_pair.second.first;
         FeatureBasePtr feature_in_last   = pair_trkid_pair.second.second;
 
+
         auto fac_ptr  = createFactor(feature_in_last, feature_in_origin);
-        feature_in_last  ->addFactor(fac_ptr);
-        feature_in_origin->addConstrainedBy(fac_ptr);
+        fac_ptr->link(feature_in_last);
 
         WOLF_DEBUG( "Factor: track: " , feature_in_last->trackId(),
                     " origin: "           , feature_in_origin->id() ,

@@ -17,11 +17,6 @@ HardwareBase::~HardwareBase()
 SensorBasePtr HardwareBase::addSensor(SensorBasePtr _sensor_ptr)
 {
     sensor_list_.push_back(_sensor_ptr);
-    _sensor_ptr->setProblem(getProblem());
-    _sensor_ptr->setHardware(shared_from_this());
-
-    _sensor_ptr->registerNewStateBlocks();
-
     return _sensor_ptr;
 }
 

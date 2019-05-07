@@ -135,7 +135,8 @@ FactorBasePtr ProcessorTrackerFeatureCorner::createFactor(FeatureBasePtr _featur
                                                           _feature_ptr->getMeasurement()(3));
 
         // Add landmark factor to the other feature
-        _feature_other_ptr->addFactor(std::make_shared<FactorCorner2D>(_feature_other_ptr, landmark_ptr, shared_from_this()));
+        // _feature_other_ptr->addFactor(std::make_shared<FactorCorner2D>(_feature_other_ptr, landmark_ptr, shared_from_this()));
+        FactorBase::emplace<FactorCorner2D>(_feature_other_ptr, _feature_other_ptr, landmark_ptr, shared_from_this());
     }
 
 //    std::cout << "creating factor: last feature " << _feature_ptr->getMeasurement()

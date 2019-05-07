@@ -45,7 +45,7 @@ bool debug = false;
 TEST(TrajectoryBase, ClosestKeyFrame)
 {
 
-    ProblemPtr P = Problem::create("PO 2D");
+    ProblemPtr P = Problem::create("PO", 2);
     TrajectoryBasePtr T = P->getTrajectory();
 
     // Trajectory status:
@@ -86,7 +86,7 @@ TEST(TrajectoryBase, ClosestKeyFrame)
 TEST(TrajectoryBase, ClosestKeyOrAuxFrame)
 {
 
-    ProblemPtr P = Problem::create("PO 2D");
+    ProblemPtr P = Problem::create("PO", 2);
     TrajectoryBasePtr T = P->getTrajectory();
 
     // Trajectory status:
@@ -94,12 +94,9 @@ TEST(TrajectoryBase, ClosestKeyOrAuxFrame)
     //   1     2     3       time stamps
     // --+-----+-----+--->   time
 
-    FrameBasePtr F1 = std::make_shared<FrameBase>(KEY,           1, nullptr, nullptr);
-    FrameBasePtr F2 = std::make_shared<FrameBase>(AUXILIARY,     2, nullptr, nullptr);
-    FrameBasePtr F3 = std::make_shared<FrameBase>(NON_ESTIMATED, 3, nullptr, nullptr);
-    T->addFrame(F1);
-    T->addFrame(F2);
-    T->addFrame(F3);
+    FrameBasePtr F1 = FrameBase::emplace<FrameBase>(T, KEY,     1, nullptr, nullptr);
+    FrameBasePtr F2 = FrameBase::emplace<FrameBase>(T, AUXILIARY,     2, nullptr, nullptr);
+    FrameBasePtr F3 = FrameBase::emplace<FrameBase>(T, NON_ESTIMATED, 3, nullptr, nullptr);
 
     FrameBasePtr KF; // closest key-frame queried
 
@@ -123,7 +120,7 @@ TEST(TrajectoryBase, Add_Remove_Frame)
 {
     using std::make_shared;
 
-    ProblemPtr P = Problem::create("PO 2D");
+    ProblemPtr P = Problem::create("PO", 2);
     TrajectoryBasePtr T = P->getTrajectory();
 
     DummySolverManager N(P);
@@ -137,22 +134,26 @@ TEST(TrajectoryBase, Add_Remove_Frame)
     FrameBasePtr F2 = std::make_shared<FrameBase>(KEY,     2, make_shared<StateBlock>(2), make_shared<StateBlock>(1, true)); // 1 fixed, 1 not
     FrameBasePtr F3 = std::make_shared<FrameBase>(NON_ESTIMATED, 3, make_shared<StateBlock>(2), make_shared<StateBlock>(1)); // non-key-frame
 
+    // FrameBasePtr f1 = FrameBase::emplace<FrameBase>(T, KEY_FRAME,     1, make_shared<StateBlock>(2), make_shared<StateBlock>(1)); // 2 non-fixed
+    // FrameBasePtr f2 = FrameBase::emplace<FrameBase>(T, KEY_FRAME,     2, make_shared<StateBlock>(2), make_shared<StateBlock>(1, true)); // 1 fixed, 1 not
+    // FrameBasePtr f3 = FrameBase::emplace<FrameBase>(T, NON_KEY_FRAME, 3, make_shared<StateBlock>(2), make_shared<StateBlock>(1)); // non-key-frame
+
     std::cout << __LINE__ << std::endl;
 
     // add frames and keyframes
-    T->addFrame(F1); // KF
+    F1->link(T);
     if (debug) P->print(2,0,0,0);
     ASSERT_EQ(T->getFrameList().             size(), (SizeStd) 1);
     ASSERT_EQ(P->getStateBlockNotificationMapSize(), (SizeStd) 2);
     std::cout << __LINE__ << std::endl;
 
-    T->addFrame(F2); // KF
+    F2->link(T);
     if (debug) P->print(2,0,0,0);
     ASSERT_EQ(T->getFrameList().             size(), (SizeStd) 2);
     ASSERT_EQ(P->getStateBlockNotificationMapSize(), (SizeStd) 4);
     std::cout << __LINE__ << std::endl;
 
-    T->addFrame(F3); // F (not KF so state blocks are not notified)
+    F3->link(T);
     if (debug) P->print(2,0,0,0);
     ASSERT_EQ(T->getFrameList().             size(), (SizeStd) 3);
     ASSERT_EQ(P->getStateBlockNotificationMapSize(), (SizeStd) 4);
@@ -199,7 +200,7 @@ TEST(TrajectoryBase, KeyFramesAreSorted)
 {
     using std::make_shared;
 
-    ProblemPtr P = Problem::create("PO 2D");
+    ProblemPtr P = Problem::create("PO", 2);
     TrajectoryBasePtr T = P->getTrajectory();
 
     // Trajectory status:
@@ -212,19 +213,19 @@ TEST(TrajectoryBase, KeyFramesAreSorted)
     FrameBasePtr F3 = std::make_shared<FrameBase>(NON_ESTIMATED, 3, make_shared<StateBlock>(2), make_shared<StateBlock>(1)); // non-key-frame
 
     // add frames and keyframes in random order --> keyframes must be sorted after that
-    T->addFrame(F2); // KF2
+    F2->link(T);
     if (debug) P->print(2,0,0,0);
     ASSERT_EQ(T->getLastFrame()         ->id(), F2->id());
     ASSERT_EQ(T->getLastKeyOrAuxFrame()->id(), F2->id());
     ASSERT_EQ(T->getLastKeyFrame()      ->id(), F2->id());
 
-    T->addFrame(F3); // F3
+    F3->link(T);
     if (debug) P->print(2,0,0,0);
     ASSERT_EQ(T->getLastFrame()         ->id(), F3->id());
     ASSERT_EQ(T->getLastKeyOrAuxFrame()->id(), F2->id());
     ASSERT_EQ(T->getLastKeyFrame()      ->id(), F2->id());
 
-    T->addFrame(F1); // KF1
+    F1->link(T);
     if (debug) P->print(2,0,0,0);
     ASSERT_EQ(T->getLastFrame()         ->id(), F3->id());
     ASSERT_EQ(T->getLastKeyOrAuxFrame()->id(), F2->id());
@@ -236,8 +237,7 @@ TEST(TrajectoryBase, KeyFramesAreSorted)
     ASSERT_EQ(T->getLastKeyOrAuxFrame()->id(), F3->id());
     ASSERT_EQ(T->getLastKeyFrame()      ->id(), F3->id());
 
-    FrameBasePtr F4 = std::make_shared<FrameBase>(NON_ESTIMATED, 1.5, make_shared<StateBlock>(2), make_shared<StateBlock>(1)); // non-key-frame
-    T->addFrame(F4);
+    auto F4 = P->emplaceFrame(NON_ESTIMATED, Eigen::Vector3s::Zero(), 1.5);
     // Trajectory status:
     //  KF1   KF2   KF3     F4       frames
     //   1     2     3     1.5       time stamps
@@ -275,8 +275,7 @@ TEST(TrajectoryBase, KeyFramesAreSorted)
     if (debug) P->print(2,0,1,0);
     ASSERT_EQ(T->getFrameList().front()->id(), F4->id());
 
-    FrameBasePtr F5 = std::make_shared<FrameBase>(AUXILIARY, 1.5, make_shared<StateBlock>(2), make_shared<StateBlock>(1)); // non-key-frame
-    T->addFrame(F5);
+    auto F5 = P->emplaceFrame(AUXILIARY, Eigen::Vector3s::Zero(), 1.5);
     // Trajectory status:
     //  KF4   KF2  AuxF5  KF3   KF2       frames
     //  0.5    1    1.5    3     4        time stamps
@@ -296,14 +295,23 @@ TEST(TrajectoryBase, KeyFramesAreSorted)
     ASSERT_EQ(T->getLastKeyOrAuxFrame()->id(), F5->id());
     ASSERT_EQ(T->getLastKeyFrame()      ->id(), F2->id());
 
-    FrameBasePtr F6 = std::make_shared<FrameBase>(NON_ESTIMATED, 1.5, make_shared<StateBlock>(2), make_shared<StateBlock>(1)); // non-key-frame
-    T->addFrame(F6);
+    auto F6 = P->emplaceFrame(NON_ESTIMATED, Eigen::Vector3s::Zero(), 6);
     // Trajectory status:
     //  KF4   KF2   KF3   KF2   AuxF5  F6       frames
     //  0.5    1     3     4     5     6        time stamps
     // --+-----+-----+-----+-----+-----+--->    time
     if (debug) P->print(2,0,1,0);
     ASSERT_EQ(T->getLastFrame()         ->id(), F6->id());
+    ASSERT_EQ(T->getLastKeyOrAuxFrame()->id(), F5->id());
+    ASSERT_EQ(T->getLastKeyFrame()      ->id(), F2->id());
+
+    auto F7 = P->emplaceFrame(NON_ESTIMATED, Eigen::Vector3s::Zero(), 5.5);
+    // Trajectory status:
+    //  KF4   KF2   KF3   KF2   AuxF5  F7   F6       frames
+    //  0.5    1     3     4     5     5.5   6        time stamps
+    // --+-----+-----+-----+-----+-----+-----+--->    time
+    if (debug) P->print(2,0,1,0);
+    ASSERT_EQ(T->getLastFrame()         ->id(), F7->id()); //Only auxiliary and key-frames are sorted
     ASSERT_EQ(T->getLastKeyOrAuxFrame()->id(), F5->id());
     ASSERT_EQ(T->getLastKeyFrame()      ->id(), F2->id());
 

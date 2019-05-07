@@ -36,7 +36,52 @@ FrameBase::FrameBase(const FrameType & _tp, const TimeStamp& _ts, StateBlockPtr 
     state_block_vec_[1] = _o_ptr;
     state_block_vec_[2] = _v_ptr;
 }
-                
+
+FrameBase::FrameBase(const std::string _frame_structure, const SizeEigen _dim, const FrameType & _tp, const TimeStamp& _ts, const Eigen::VectorXs& _x) :
+           NodeBase("FRAME", "Base"),
+           trajectory_ptr_(),
+           state_block_vec_(3), // allow for 3 state blocks by default. Resize in derived constructors if needed.
+           frame_id_(++frame_id_count_),
+           type_(_tp),
+           time_stamp_(_ts)
+{
+    if(_frame_structure.compare("PO") == 0 and _dim == 2){
+        // auto _x = Eigen::VectorXs::Zero(3);
+        assert(_x.size() == 3 && "Wrong state vector size. Should be 3 for 2D!");
+        StateBlockPtr p_ptr ( std::make_shared<StateBlock>    (_x.head    <2> ( ) ) );
+        StateBlockPtr o_ptr ( std::make_shared<StateAngle>    ((Scalar) _x(2) ) );
+        StateBlockPtr v_ptr ( nullptr );
+        state_block_vec_[0] = p_ptr;
+        state_block_vec_[1] = o_ptr;
+        state_block_vec_[2] = v_ptr;
+        this->setType("PO 2D");
+    }else if(_frame_structure.compare("PO") == 0 and _dim == 3){
+        // auto _x = Eigen::VectorXs::Zero(7);
+        assert(_x.size() == 7 && "Wrong state vector size. Should be 7 for 3D!");
+        StateBlockPtr p_ptr ( std::make_shared<StateBlock>      (_x.head    <3> ( ) ) );
+        StateBlockPtr o_ptr ( std::make_shared<StateQuaternion> (_x.tail    <4> ( ) ) );
+        StateBlockPtr v_ptr ( nullptr );
+        state_block_vec_[0] = p_ptr;
+        state_block_vec_[1] = o_ptr;
+        state_block_vec_[2] = v_ptr;
+        this->setType("PO 3D");
+    }else if(_frame_structure.compare("POV") == 0 and _dim == 3){
+        // auto _x = Eigen::VectorXs::Zero(10);
+        assert(_x.size() == 10 && "Wrong state vector size. Should be 10 for 3D!");
+        StateBlockPtr p_ptr ( std::make_shared<StateBlock>      (_x.head    <3> ( ) ) );
+        StateBlockPtr o_ptr ( std::make_shared<StateQuaternion> (_x.segment <4> (3) ) );
+        StateBlockPtr v_ptr ( std::make_shared<StateBlock>      (_x.tail    <3> ( ) ) );
+        state_block_vec_[0] = p_ptr;
+        state_block_vec_[1] = o_ptr;
+        state_block_vec_[2] = v_ptr;
+        this->setType("POV 3D");
+    }else{
+        std::cout << _frame_structure << " ^^ " << _dim << std::endl;
+        throw std::runtime_error("Unknown frame structure");
+    }
+
+}
+
 FrameBase::~FrameBase()
 {
 }
@@ -164,7 +209,7 @@ void FrameBase::setState(const Eigen::VectorXs& _state)
     for(unsigned int i = 0; i<state_block_vec_.size(); i++){
         size += (state_block_vec_[i]==nullptr ? 0 : state_block_vec_[i]->getSize());
     }
-    
+
     //State Vector size must be lower or equal to frame state size :
     // example : PQVBB -> if we initialize only position and orientation due to use of processorOdom3D
     assert(_state.size() <= size && "In FrameBase::setState wrong state size");
@@ -172,7 +217,7 @@ void FrameBase::setState(const Eigen::VectorXs& _state)
     unsigned int index = 0;
     const unsigned int _st_size = _state.size();
 
-    //initialize the FrameBase StateBlocks while StateBlocks list's end not reached and input state_size can go further 
+    //initialize the FrameBase StateBlocks while StateBlocks list's end not reached and input state_size can go further
     for (StateBlockPtr sb : state_block_vec_)
         if (sb && (index < _st_size))
         {
@@ -275,9 +320,6 @@ FrameBasePtr FrameBase::getNextFrame() const
 CaptureBasePtr FrameBase::addCapture(CaptureBasePtr _capt_ptr)
 {
     capture_list_.push_back(_capt_ptr);
-    _capt_ptr->setFrame(shared_from_this());
-    _capt_ptr->setProblem(getProblem());
-    _capt_ptr->registerNewStateBlocks();
     return _capt_ptr;
 }
 
@@ -377,7 +419,20 @@ FrameBasePtr FrameBase::create_POV_3D(const FrameType & _tp,
     f->setType("POV 3D");
     return f;
 }
-
+void FrameBase::link(TrajectoryBasePtr _ptr)
+{
+    if(_ptr)
+    {
+        _ptr->addFrame(shared_from_this());
+        this->setTrajectory(_ptr);
+        this->setProblem(_ptr->getProblem());
+        if (this->isKey()) this->registerNewStateBlocks();
+    }
+    else
+    {
+        WOLF_WARN("Linking with a nullptr");
+    }
+}
 } // namespace wolf
 
 #include "base/common/factory.h"

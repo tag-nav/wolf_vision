@@ -416,12 +416,13 @@ void ProcessorTrackerFeatureTrifocal::establishFactors()
                 FeatureBasePtr ftr_last = pair_trkid_match.second.second;
 
                 // make factor
-                FactorAutodiffTrifocalPtr ctr = std::make_shared<FactorAutodiffTrifocal>(ftr_prev, ftr_orig, ftr_last, shared_from_this(), false, FAC_ACTIVE);
+                // FactorAutodiffTrifocalPtr ctr = std::make_shared<FactorAutodiffTrifocal>(ftr_prev, ftr_orig, ftr_last, shared_from_this(), false, FAC_ACTIVE);
+                auto ctr = FactorBase::emplace<FactorAutodiffTrifocal>(ftr_last, ftr_prev, ftr_orig, ftr_last, shared_from_this(), false, FAC_ACTIVE);
 
                 // link to wolf tree
-                ftr_last->addFactor(ctr);
-                ftr_orig->addConstrainedBy(ctr);
-                ftr_prev->addConstrainedBy(ctr);
+                // ftr_last->addFactor(ctr);
+                // ftr_orig->addConstrainedBy(ctr);
+                // ftr_prev->addConstrainedBy(ctr);
             }
         }
     }

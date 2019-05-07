@@ -19,18 +19,11 @@ TrajectoryBase::~TrajectoryBase()
 
 FrameBasePtr TrajectoryBase::addFrame(FrameBasePtr _frame_ptr)
 {
-    // link up
-    _frame_ptr->setTrajectory(shared_from_this());
-    _frame_ptr->setProblem(getProblem());
-
     // add to list
     frame_list_.push_back(_frame_ptr);
 
     if (_frame_ptr->isKeyOrAux())
     {
-        // register state blocks
-        _frame_ptr->registerNewStateBlocks();
-
         // sort
         sortFrame(_frame_ptr);
 

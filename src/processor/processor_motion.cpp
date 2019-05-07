@@ -632,14 +632,16 @@ CaptureMotionPtr ProcessorMotion::emplaceCapture(const FrameBasePtr& _frame_own,
     capture->setCalibrationPreint(_calib_preint);
 
     // add to wolf tree
-    _frame_own->addCapture(capture);
+    // _frame_own->addCapture(capture);
+    capture->link(_frame_own);
     return capture;
 }
 
 FeatureBasePtr ProcessorMotion::emplaceFeature(CaptureMotionPtr _capture_motion)
 {
     FeatureBasePtr feature = createFeature(_capture_motion);
-    _capture_motion->addFeature(feature);
+    // _capture_motion->addFeature(feature);
+    feature->link(_capture_motion);
     return feature;
 }
 

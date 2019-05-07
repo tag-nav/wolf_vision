@@ -31,14 +31,15 @@ Eigen::Matrix<wolf::Scalar, 9, 9> data_cov = 0.2 * Eigen::Matrix<Scalar,9,9>::Id
 Vector10s x0 = pose9toPose10(pose + Vector9s::Random()*0.25);
 
 // Problem and solver
-ProblemPtr problem_ptr = Problem::create("POV 3D");
+ProblemPtr problem_ptr = Problem::create("POV", 3);
 CeresManager ceres_mgr(problem_ptr);
 
 // Two frames
 FrameBasePtr frm0 = problem_ptr->emplaceFrame(KEY, problem_ptr->zeroState(), TimeStamp(0));
 
 // Capture, feature and factor
-CaptureBasePtr cap0 = frm0->addCapture(std::make_shared<CaptureMotion>("IMU ABS", 0, nullptr, pose10, 10, 9, nullptr));
+// CaptureBasePtr cap0 = frm0->addCapture(std::make_shared<CaptureMotion>("IMU ABS", 0, nullptr, pose10, 10, 9, nullptr));
+auto cap0 = CaptureBase::emplace<CaptureMotion>(frm0, "IMU ABS", 0, nullptr, pose10, 10, 9, nullptr);
 
 ////////////////////////////////////////////////////////
 /* In the tests below, we check that FactorBlockAbsolute and FactorQuaternionAbsolute are working fine
@@ -48,8 +49,10 @@ CaptureBasePtr cap0 = frm0->addCapture(std::make_shared<CaptureMotion>("IMU ABS"
 
 TEST(FactorBlockAbs, fac_block_abs_p)
 {
-    FeatureBasePtr fea0 = cap0->addFeature(std::make_shared<FeatureBase>("POSITION", pose10.head<3>(), data_cov.topLeftCorner<3,3>()));
-    fea0->addFactor(std::make_shared<FactorBlockAbsolute>(fea0->getFrame()->getP()));
+    // FeatureBasePtr fea0 = cap0->addFeature(std::make_shared<FeatureBase>("POSITION", pose10.head<3>(), data_cov.topLeftCorner<3,3>()));
+    auto fea0 = FeatureBase::emplace<FeatureBase>(cap0, "POSITION", pose10.head<3>(), data_cov.topLeftCorner<3,3>());
+    // fea0->addFactor(std::make_shared<FactorBlockAbsolute>(fea0->getFrame()->getP()));
+    FactorBase::emplace<FactorBlockAbsolute>(fea0, fea0->getFrame()->getP());
 
     ASSERT_TRUE(problem_ptr->check(0));
 
@@ -66,8 +69,10 @@ TEST(FactorBlockAbs, fac_block_abs_p)
 
 TEST(FactorBlockAbs, fac_block_abs_p_tail2)
 {
-    FeatureBasePtr fea0 = cap0->addFeature(std::make_shared<FeatureBase>("POSITION TAIL 2", pose10.segment<2>(1), data_cov.bottomRightCorner<2,2>()));
-    fea0->addFactor(std::make_shared<FactorBlockAbsolute>(fea0->getFrame()->getP(),1,2));
+    // FeatureBasePtr fea0 = cap0->addFeature(std::make_shared<FeatureBase>("POSITION TAIL 2", pose10.segment<2>(1), data_cov.bottomRightCorner<2,2>()));
+    auto fea0 = FeatureBase::emplace<FeatureBase>(cap0, "POSITION TAIL 2", pose10.segment<2>(1), data_cov.bottomRightCorner<2,2>());
+    // fea0->addFactor(std::make_shared<FactorBlockAbsolute>(fea0->getFrame()->getP(),1,2));
+    FactorBase::emplace<FactorBlockAbsolute>(fea0, fea0->getFrame()->getP(),1,2);
 
     // Unfix frame 0, perturb frm0
     frm0->unfix();
@@ -82,8 +87,10 @@ TEST(FactorBlockAbs, fac_block_abs_p_tail2)
 
 TEST(FactorBlockAbs, fac_block_abs_v)
 {
-    FeatureBasePtr fea0 = cap0->addFeature(std::make_shared<FeatureBase>("VELOCITY", pose10.tail<3>(), data_cov.bottomRightCorner<3,3>()));
-    fea0->addFactor(std::make_shared<FactorBlockAbsolute>(fea0->getFrame()->getV()));
+    // FeatureBasePtr fea0 = cap0->addFeature(std::make_shared<FeatureBase>("VELOCITY", pose10.tail<3>(), data_cov.bottomRightCorner<3,3>()));
+    auto fea0 = FeatureBase::emplace<FeatureBase>(cap0, "VELOCITY", pose10.tail<3>(), data_cov.bottomRightCorner<3,3>());
+    // fea0->addFactor(std::make_shared<FactorBlockAbsolute>(fea0->getFrame()->getV()));
+    FactorBase::emplace<FactorBlockAbsolute>(fea0, fea0->getFrame()->getV());
 
     ASSERT_TRUE(problem_ptr->check(0));
     
@@ -100,8 +107,10 @@ TEST(FactorBlockAbs, fac_block_abs_v)
 
 TEST(FactorQuatAbs, fac_block_abs_o)
 {
-    FeatureBasePtr fea0 = cap0->addFeature(std::make_shared<FeatureBase>("QUATERNION", pose10.segment<4>(3), data_cov.block<3,3>(3,3)));
-    fea0->addFactor(std::make_shared<FactorQuaternionAbsolute>(fea0->getFrame()->getO()));
+    // FeatureBasePtr fea0 = cap0->addFeature(std::make_shared<FeatureBase>("QUATERNION", pose10.segment<4>(3), data_cov.block<3,3>(3,3)));
+    auto fea0 = FeatureBase::emplace<FeatureBase>(cap0, "QUATERNION", pose10.segment<4>(3), data_cov.block<3,3>(3,3));
+    // fea0->addFactor(std::make_shared<FactorQuaternionAbsolute>(fea0->getFrame()->getO()));
+    FactorBase::emplace<FactorQuaternionAbsolute>(fea0, fea0->getFrame()->getO());
 
     ASSERT_TRUE(problem_ptr->check(0));
     

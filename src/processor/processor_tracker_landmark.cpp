@@ -153,8 +153,7 @@ void ProcessorTrackerLandmark::establishFactors()
                                                      lmk);
         if (fac_ptr != nullptr) // factor links
         {
-            last_feature->addFactor(fac_ptr);
-            lmk->addConstrainedBy(fac_ptr);
+            fac_ptr->link(last_feature);
         }
     }
 }

@@ -36,7 +36,7 @@ class ProcessorMotion_test : public ProcessorOdom2D, public testing::Test{
         virtual void SetUp()
         {
             dt                      = 1.0;
-            problem = Problem::create("PO 2D");
+            problem = Problem::create("PO", 2);
             ProcessorParamsOdom2DPtr params(std::make_shared<ProcessorParamsOdom2D>());
             params->time_tolerance  = 0.25;
             params->dist_traveled   = 100;

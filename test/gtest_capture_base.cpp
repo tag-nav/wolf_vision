@@ -76,7 +76,8 @@ TEST(CaptureBase, Dynamic_sensor_params)
 TEST(CaptureBase, addFeature)
 {
     CaptureBasePtr C(std::make_shared<CaptureBase>("DUMMY", 1.2)); // timestamp = 1.2
-    FeatureBasePtr f = C->addFeature(std::make_shared<FeatureBase>("DUMMY", Vector2s::Zero(), Matrix2s::Identity()));
+    // FeatureBasePtr f = C->addFeature(std::make_shared<FeatureBase>("DUMMY", Vector2s::Zero(), Matrix2s::Identity()));
+    auto f = FeatureBase::emplace<FeatureBase>(C, "DUMMY", Vector2s::Zero(), Matrix2s::Identity());
     ASSERT_FALSE(C->getFeatureList().empty());
     ASSERT_EQ(C->getFeatureList().front(), f);
 }
@@ -84,7 +85,8 @@ TEST(CaptureBase, addFeature)
 TEST(CaptureBase, addFeatureList)
 {
     CaptureBasePtr C(std::make_shared<CaptureBase>("DUMMY", 1.2)); // timestamp = 1.2
-    FeatureBasePtr f_first = C->addFeature(std::make_shared<FeatureBase>("DUMMY", Vector2s::Zero(), Matrix2s::Identity()));
+    // FeatureBasePtr f_first = C->addFeature(std::make_shared<FeatureBase>("DUMMY", Vector2s::Zero(), Matrix2s::Identity()));
+    auto f_first = FeatureBase::emplace<FeatureBase>(C, "DUMMY", Vector2s::Zero(), Matrix2s::Identity());
     ASSERT_EQ(C->getFeatureList().size(), (unsigned int) 1);
 
     // make a list to add

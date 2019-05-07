@@ -36,7 +36,8 @@ FrameBasePtr ProcessorBase::emplaceFrame(FrameType _type, CaptureBasePtr _captur
     std::cout << "Making " << (_type == KEY ? "key-" : (_type == AUXILIARY ? "aux-" : "")) << "frame" << std::endl;
 
     FrameBasePtr new_frame_ptr = getProblem()->emplaceFrame(_type, _capture_ptr->getTimeStamp());
-    new_frame_ptr->addCapture(_capture_ptr);
+    // new_frame_ptr->addCapture(_capture_ptr);
+    _capture_ptr->link(new_frame_ptr);
 
     return new_frame_ptr;
 }
@@ -77,7 +78,19 @@ void ProcessorBase::remove()
             sen->getProcessorList().remove(this_p);
     }
 }
-
+    void ProcessorBase::link(SensorBasePtr _sen_ptr)
+    {
+        if(_sen_ptr)
+        {
+            _sen_ptr->addProcessor(shared_from_this());
+            this->setSensor(_sen_ptr);
+            this->setProblem(_sen_ptr->getProblem());
+        }
+        else
+        {
+            WOLF_WARN("Linking with a nullptr");
+        }
+    }
 /////////////////////////////////////////////////////////////////////////////////////////
 
 void PackKeyFrameBuffer::removeUpTo(const TimeStamp& _time_stamp)
@@ -188,5 +201,4 @@ bool PackKeyFrameBuffer::checkTimeTolerance(const TimeStamp& _time_stamp1, const
     bool pass = time_diff <= time_tol;
     return pass;
 }
-
 } // namespace wolf

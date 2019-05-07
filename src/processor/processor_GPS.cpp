@@ -37,14 +37,16 @@ void ProcessorGPS::process(CaptureBasePtr _capture_ptr)
     {
         Eigen::Vector3s sat_pos = obs.measurements_[i].sat_position_;
         Scalar pr = obs.measurements_[i].pseudorange_;
-        capture_gps_ptr_->addFeature(std::make_shared<FeatureGPSPseudorange>(sat_pos, pr, gps_covariance_));
+        // capture_gps_ptr_->addFeature(std::make_shared<FeatureGPSPseudorange>(sat_pos, pr, gps_covariance_));
+        FeatureBase::emplace<FeatureGPSPseudorange>(capture_gps_ptr_, sat_pos, pr, gps_covariance_);
     }
     //std::cout << "gps features extracted" << std::endl;
     //std::cout << "Establishing factors to gps features..." << std::endl;
     for (auto i_it = capture_gps_ptr_->getFeatureList().begin();
             i_it != capture_gps_ptr_->getFeatureList().end(); i_it++)
     {
-        capture_gps_ptr_->getFeatureList().front()->addFactor(std::make_shared<FactorGPSPseudorange2D>((*i_it), shared_from_this()));
+        // capture_gps_ptr_->getFeatureList().front()->addFactor(std::make_shared<FactorGPSPseudorange2D>((*i_it), shared_from_this()));
+        FactorBase::emplace<FactorGPSPseudorange2D>(capture_gps_ptr_->getFeatureList().front(), (*i_it), shared_from_this());
     }
     //std::cout << "Factors established" << std::endl;
 }

@@ -65,6 +65,8 @@ class FrameBase : public NodeBase, public std::enable_shared_from_this<FrameBase
          **/        
         FrameBase(const FrameType & _tp, const TimeStamp& _ts, StateBlockPtr _p_ptr, StateBlockPtr _o_ptr = nullptr, StateBlockPtr _v_ptr = nullptr);
 
+        FrameBase(const std::string _frame_structure, const SizeEigen _dim, const FrameType & _tp, const TimeStamp& _ts, const Eigen::VectorXs& _x);
+
         virtual ~FrameBase();
         virtual void remove();
 
@@ -144,6 +146,9 @@ class FrameBase : public NodeBase, public std::enable_shared_from_this<FrameBase
         virtual FactorBasePtr addConstrainedBy(FactorBasePtr _fac_ptr);
         unsigned int getHits() const;
         FactorBasePtrList& getConstrainedByList();
+        void link(TrajectoryBasePtr);
+        template<typename classType, typename... T>
+        static std::shared_ptr<FrameBase> emplace(TrajectoryBasePtr _ptr, T&&... all);
 
     public:
         static FrameBasePtr create_PO_2D (const FrameType & _tp,
@@ -167,6 +172,14 @@ class FrameBase : public NodeBase, public std::enable_shared_from_this<FrameBase
 #include "base/state_block/state_block.h"
 
 namespace wolf {
+
+template<typename classType, typename... T>
+std::shared_ptr<FrameBase> FrameBase::emplace(TrajectoryBasePtr _ptr, T&&... all)
+{
+    FrameBasePtr frm = std::make_shared<classType>(std::forward<T>(all)...);
+    frm->link(_ptr);
+    return frm;
+}
 
 inline unsigned int FrameBase::id()
 {

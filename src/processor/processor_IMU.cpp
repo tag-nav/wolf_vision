@@ -213,12 +213,13 @@ FactorBasePtr ProcessorIMU::emplaceFactor(FeatureBasePtr _feature_motion, Captur
 {
     CaptureIMUPtr cap_imu = std::static_pointer_cast<CaptureIMU>(_capture_origin);
     FeatureIMUPtr ftr_imu = std::static_pointer_cast<FeatureIMU>(_feature_motion);
-    FactorIMUPtr fac_imu = std::make_shared<FactorIMU>(ftr_imu, cap_imu, shared_from_this());
+    // FactorIMUPtr fac_imu = std::make_shared<FactorIMU>(ftr_imu, cap_imu, shared_from_this());
+    auto fac_imu = FactorBase::emplace<FactorIMU>(_feature_motion, ftr_imu, cap_imu, shared_from_this());
 
     // link ot wolf tree
-    _feature_motion->addFactor(fac_imu);
-    _capture_origin->addConstrainedBy(fac_imu);
-    _capture_origin->getFrame()->addConstrainedBy(fac_imu);
+    // _feature_motion->addFactor(fac_imu);
+    // _capture_origin->addConstrainedBy(fac_imu);
+    // _capture_origin->getFrame()->addConstrainedBy(fac_imu);
 
     return fac_imu;
 }
