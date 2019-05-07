@@ -9,6 +9,7 @@
 #include "core/utils/logging.h"
 
 #include "core/problem/problem.h"
+#include "core/solver/solver_manager.h"
 #include "core/trajectory/trajectory_base.h"
 #include "core/frame/frame_base.h"
 
@@ -16,45 +17,26 @@
 
 using namespace wolf;
 
-struct DummyNotificationProcessor
+struct DummySolverManager : public SolverManager
 {
-  DummyNotificationProcessor(ProblemPtr _problem)
-    : problem_(_problem)
+  DummySolverManager(const ProblemPtr& _problem)
+    : SolverManager(_problem)
   {
     //
   }
-
-  void update()
-  {
-    if (problem_ == nullptr)
-    {
-      FAIL() << "problem_ is nullptr !";
-    }
-
-    auto sb_noti_map = problem_->consumeStateBlockNotificationMap();
-    ASSERT_TRUE(problem_->consumeStateBlockNotificationMap().empty()); // consume should empty the notification map
-
-    while (!sb_noti_map.empty())
-    {
-        switch (sb_noti_map.begin()->second)
-        {
-          case ADD:
-          {
-            break;
-          }
-          case REMOVE:
-          {
-            break;
-          }
-          default:
-            throw std::runtime_error("SolverManager::update: State Block notification must be ADD or REMOVE.");
-        }
-        sb_noti_map.erase(sb_noti_map.begin());
-    }
-    ASSERT_TRUE(sb_noti_map.empty());
-  }
-
-  ProblemPtr problem_;
+  virtual void computeCovariances(const CovarianceBlocksToBeComputed blocks){};
+  virtual void computeCovariances(const std::vector<StateBlockPtr>& st_list){};
+  virtual bool hasConverged(){return true;};
+  virtual SizeStd iterations(){return 0;};
+  virtual Scalar initialCost(){return 0;};
+  virtual Scalar finalCost(){return 0;};
+  virtual std::string solveImpl(const ReportVerbosity report_level){return std::string("");};
+  virtual void addFactor(const FactorBasePtr& fac_ptr){};
+  virtual void removeFactor(const FactorBasePtr& fac_ptr){};
+  virtual void addStateBlock(const StateBlockPtr& state_ptr){};
+  virtual void removeStateBlock(const StateBlockPtr& state_ptr){};
+  virtual void updateStateBlockStatus(const StateBlockPtr& state_ptr){};
+  virtual void updateStateBlockLocalParametrization(const StateBlockPtr& state_ptr){};
 };
 
 /// Set to true if you want debug info
@@ -144,7 +126,7 @@ TEST(TrajectoryBase, Add_Remove_Frame)
     ProblemPtr P = Problem::create("PO 2D");
     TrajectoryBasePtr T = P->getTrajectory();
 
-    DummyNotificationProcessor N(P);
+    DummySolverManager N(P);
 
     // Trajectory status:
     //  KF1   KF2    F3      frames
@@ -160,19 +142,20 @@ TEST(TrajectoryBase, Add_Remove_Frame)
     // add frames and keyframes
     T->addFrame(F1); // KF
     if (debug) P->print(2,0,0,0);
-    ASSERT_EQ(T->getFrameList().                 size(), (unsigned int) 1);
-    ASSERT_EQ(P->consumeStateBlockNotificationMap(). size(), (unsigned int) 2);
+    ASSERT_EQ(T->getFrameList().             size(), (SizeStd) 1);
+    ASSERT_EQ(P->getStateBlockNotificationMapSize(), (SizeStd) 2);
     std::cout << __LINE__ << std::endl;
 
     T->addFrame(F2); // KF
     if (debug) P->print(2,0,0,0);
-    ASSERT_EQ(T->getFrameList().                 size(), (unsigned int) 2);
+    ASSERT_EQ(T->getFrameList().             size(), (SizeStd) 2);
+    ASSERT_EQ(P->getStateBlockNotificationMapSize(), (SizeStd) 4);
     std::cout << __LINE__ << std::endl;
 
     T->addFrame(F3); // F (not KF so state blocks are not notified)
     if (debug) P->print(2,0,0,0);
-    ASSERT_EQ(T->getFrameList().                 size(), (unsigned int) 3);
-    ASSERT_EQ(P->consumeStateBlockNotificationMap(). size(), (unsigned int) 2); // consumeStateBlockNotificationMap empties the notification map, 2 state blocks were notified since last call to consumeStateBlockNotificationMap
+    ASSERT_EQ(T->getFrameList().             size(), (SizeStd) 3);
+    ASSERT_EQ(P->getStateBlockNotificationMapSize(), (SizeStd) 4);
     std::cout << __LINE__ << std::endl;
 
     ASSERT_EQ(T->getLastFrame()->id(), F3->id());
@@ -180,14 +163,14 @@ TEST(TrajectoryBase, Add_Remove_Frame)
     std::cout << __LINE__ << std::endl;
 
     N.update();
-    ASSERT_TRUE(P->consumeStateBlockNotificationMap().empty()); // consumeStateBlockNotificationMap was called in update() so it should be empty
+    ASSERT_EQ(P->getStateBlockNotificationMapSize(), (SizeStd) 0); // consumeStateBlockNotificationMap was called in update() so it should be empty
     std::cout << __LINE__ << std::endl;
 
     // remove frames and keyframes
     F2->remove(); // KF
     if (debug) P->print(2,0,0,0);
-    ASSERT_EQ(T->getFrameList().                 size(), (unsigned int) 2);
-    ASSERT_EQ(P->consumeStateBlockNotificationMap(). size(), (unsigned int) 2); // consumeStateBlockNotificationMap empties the notification map, 2 state blocks were notified since last call to consumeStateBlockNotificationMap
+    ASSERT_EQ(T->getFrameList().             size(), (SizeStd) 2);
+    ASSERT_EQ(P->getStateBlockNotificationMapSize(), (SizeStd) 2);
     std::cout << __LINE__ << std::endl;
 
     ASSERT_EQ(T->getLastFrame()->id(), F3->id());
@@ -196,19 +179,19 @@ TEST(TrajectoryBase, Add_Remove_Frame)
 
     F3->remove(); // F
     if (debug) P->print(2,0,0,0);
-    ASSERT_EQ(T->getFrameList().                 size(), (unsigned int) 1);
+    ASSERT_EQ(T->getFrameList().             size(), (SizeStd) 1);
     std::cout << __LINE__ << std::endl;
 
     ASSERT_EQ(T->getLastKeyFrame()->id(), F1->id());
 
     F1->remove(); // KF
     if (debug) P->print(2,0,0,0);
-    ASSERT_EQ(T->getFrameList().                 size(), (unsigned int) 0);
+    ASSERT_EQ(T->getFrameList().             size(), (SizeStd) 0);
     std::cout << __LINE__ << std::endl;
 
     N.update();
 
-    ASSERT_TRUE(P->consumeStateBlockNotificationMap().empty()); // consumeStateBlockNotificationMap was called in update() so it should be empty
+    ASSERT_EQ(P->getStateBlockNotificationMapSize(), (SizeStd) 0); // consumeStateBlockNotificationMap was called in update() so it should be empty
     std::cout << __LINE__ << std::endl;
 }
 
