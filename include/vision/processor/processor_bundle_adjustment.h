@@ -9,8 +9,8 @@
 #define INCLUDE_BASE_PROCESSOR_PROCESSOR_BUNDLE_ADJUSTMENT_H_
 
 //wolf includes
-#include "base/processor/processor_tracker_feature.h"
-#include "base/capture/capture_image.h"
+#include "core/processor/processor_tracker_feature.h"
+#include "vision/capture/capture_image.h"
 
 //vision utils includes
 #include "vision_utils/vision_utils.h"

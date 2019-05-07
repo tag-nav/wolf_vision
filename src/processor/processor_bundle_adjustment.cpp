@@ -13,7 +13,7 @@
 
 //standard
 #include <memory>
-#include "../../include/base/processor/processor_bundle_adjustment.h"
+#include "vision/processor/processor_bundle_adjustment.h"
 
 namespace wolf{
 
@@ -193,7 +193,7 @@ ProcessorBasePtr ProcessorBundleAdjustment::create(const std::string& _unique_na
 } //namespace wolf
 
 // Register in the ProcessorFactory
-#include "base/processor/processor_factory.h"
+#include "core/processor/processor_factory.h"
 namespace wolf {
 WOLF_REGISTER_PROCESSOR("TRACKER BUNDLE ADJUSTMENT", ProcessorBundleAdjustment)
 } // namespace wolf
