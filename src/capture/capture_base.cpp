@@ -293,11 +293,17 @@ void CaptureBase::setCalibration(const VectorXs& _calib)
 
 void CaptureBase::link(FrameBasePtr _frm_ptr)
 {
-    std::cout << "Linking CaptureBase" << std::endl;
-    _frm_ptr->addCapture(shared_from_this());
-    this->setFrame(_frm_ptr);
-    this->setProblem(_frm_ptr->getProblem());
-    this->registerNewStateBlocks();
+    if(_frm_ptr)
+    {
+        _frm_ptr->addCapture(shared_from_this());
+        this->setFrame(_frm_ptr);
+        this->setProblem(_frm_ptr->getProblem());
+        this->registerNewStateBlocks();
+    }
+    else
+    {
+        WOLF_WARN("Linking with a nullptr");
+    }
 }
 
 } // namespace wolf

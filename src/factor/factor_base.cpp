@@ -147,19 +147,24 @@ void FactorBase::setApplyLossFunction(const bool _apply)
 }
 void FactorBase::link(FeatureBasePtr _ftr_ptr)
 {
-    std::cout << "Linking FactorBase" << std::endl;
-    // _ftr_ptr->addConstrainedBy(shared_from_this());
-    _ftr_ptr->addFactor(shared_from_this());
-    this->setFeature(_ftr_ptr);
-    this->setProblem(_ftr_ptr->getProblem());
-    // add factor to be added in solver
-    if (this->getProblem() != nullptr)
-        {
-            if (this->getStatus() == FAC_ACTIVE)
-                this->getProblem()->addFactor(shared_from_this());
-        }
+    if(_ftr_ptr)
+    {
+        _ftr_ptr->addFactor(shared_from_this());
+        this->setFeature(_ftr_ptr);
+        this->setProblem(_ftr_ptr->getProblem());
+        // add factor to be added in solver
+        if (this->getProblem() != nullptr)
+            {
+                if (this->getStatus() == FAC_ACTIVE)
+                    this->getProblem()->addFactor(shared_from_this());
+            }
+        else
+            WOLF_WARN("ADDING CONSTRAINT ", this->id(), " TO FEATURE ", _ftr_ptr->id(), " NOT CONNECTED WITH PROBLEM.");
+    }
     else
-        WOLF_TRACE("WARNING: ADDING CONSTRAINT ", this->id(), " TO FEATURE ", _ftr_ptr->id(), " NOT CONNECTED WITH PROBLEM.");
+    {
+        WOLF_WARN("Linking with nullptr");
+    }
     auto frame_other = this->frame_other_ptr_.lock();
     if(frame_other != nullptr) frame_other->addConstrainedBy(shared_from_this());
     auto capture_other = this->capture_other_ptr_.lock();

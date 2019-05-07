@@ -407,10 +407,17 @@ void SensorBase::setProblem(ProblemPtr _problem)
 void SensorBase::link(HardwareBasePtr _hw_ptr)
 {
     std::cout << "Linking SensorBase" << std::endl;
-    this->setHardware(_hw_ptr);
-    this->getHardware()->addSensor(shared_from_this());
-    this->setProblem(_hw_ptr->getProblem());
-    this->registerNewStateBlocks();
+    if(_hw_ptr)
+    {
+        this->setHardware(_hw_ptr);
+        this->getHardware()->addSensor(shared_from_this());
+        this->setProblem(_hw_ptr->getProblem());
+        this->registerNewStateBlocks();
+    }
+    else
+    {
+        WOLF_WARN("Linking with a nullptr");
+    }
 }
 
 } // namespace wolf

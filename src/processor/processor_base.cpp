@@ -26,9 +26,14 @@ bool ProcessorBase::permittedKeyFrame()
     return isVotingActive() && getProblem()->permitKeyFrame(shared_from_this());
 }
 
+bool ProcessorBase::permittedAuxFrame()
+{
+    return isVotingAuxActive() && getProblem()->permitAuxFrame(shared_from_this());
+}
+
 FrameBasePtr ProcessorBase::emplaceFrame(FrameType _type, CaptureBasePtr _capture_ptr)
 {
-    std::cout << "Making " << (_type == KEY_FRAME? "key-" : "") << "frame" << std::endl;
+    std::cout << "Making " << (_type == KEY ? "key-" : (_type == AUXILIARY ? "aux-" : "")) << "frame" << std::endl;
 
     FrameBasePtr new_frame_ptr = getProblem()->emplaceFrame(_type, _capture_ptr->getTimeStamp());
     // new_frame_ptr->addCapture(_capture_ptr);
@@ -75,10 +80,16 @@ void ProcessorBase::remove()
 }
     void ProcessorBase::link(SensorBasePtr _sen_ptr)
     {
-        std::cout << "Linking ProcessorBase" << std::endl;
-        _sen_ptr->addProcessor(shared_from_this());
-        this->setSensor(_sen_ptr);
-        this->setProblem(_sen_ptr->getProblem());
+        if(_sen_ptr)
+        {
+            _sen_ptr->addProcessor(shared_from_this());
+            this->setSensor(_sen_ptr);
+            this->setProblem(_sen_ptr->getProblem());
+        }
+        else
+        {
+            WOLF_WARN("Linking with a nullptr");
+        }
     }
 /////////////////////////////////////////////////////////////////////////////////////////
 

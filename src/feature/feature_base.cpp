@@ -133,12 +133,18 @@ Eigen::MatrixXs FeatureBase::computeSqrtUpper(const Eigen::MatrixXs & _info) con
     return R;
 }
 
-    void FeatureBase::link(CaptureBasePtr _cpt_ptr)
+void FeatureBase::link(CaptureBasePtr _cpt_ptr)
+{
+    if(_cpt_ptr)
     {
-        std::cout << "Linking FeatureBase" << std::endl;
         _cpt_ptr->addFeature(shared_from_this());
         this->setCapture(_cpt_ptr);
         this->setProblem(_cpt_ptr->getProblem());
     }
+    else
+    {
+        WOLF_WARN("Linking with nullptr");
+    }
+}
 
 } // namespace wolf

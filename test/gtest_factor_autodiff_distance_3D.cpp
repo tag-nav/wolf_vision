@@ -55,18 +55,11 @@ class FactorAutodiffDistance3D_Test : public testing::Test
             problem = Problem::create("PO", 3);
             ceres_manager = std::make_shared<CeresManager>(problem);
 
-            F1 = problem->emplaceFrame        (KEY_FRAME, pose1, 1.0);
+            F1 = problem->emplaceFrame        (KEY, pose1, 1.0);
 
-            F2 = problem->emplaceFrame        (KEY_FRAME, pose2, 2.0);
-            // C2 = std::make_shared<CaptureBase>("Base", 1.0);
-            // F2->addCapture(C2);
+            F2 = problem->emplaceFrame        (KEY, pose2, 2.0);
             C2 = CaptureBase::emplace<CaptureBase>(F2, "Base", 1.0);
-            // f2 = std::make_shared<FeatureBase>("Dist", dist, dist_cov);
-            // C2->addFeature(f2);
             f2 = FeatureBase::emplace<FeatureBase>(C2, "Dist", dist, dist_cov);
-            // c2 = std::make_shared<FactorAutodiffDistance3D>(f2, F1, nullptr, false, FAC_ACTIVE);
-            // f2->addFactor(c2);
-            // F1->addConstrainedBy(c2);
             c2 = std::static_pointer_cast<FactorAutodiffDistance3D>(FactorBase::emplace<FactorAutodiffDistance3D>(f2, f2, F1, nullptr, false, FAC_ACTIVE));
 
         }

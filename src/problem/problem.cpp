@@ -216,10 +216,6 @@ FrameBasePtr Problem::emplaceFrame(const std::string& _frame_structure, //
                                    const Eigen::VectorXs& _frame_state, //
                                    const TimeStamp& _time_stamp)
 {
-    // FrameBasePtr frm = FrameFactory::get().create(_frame_structure, _frame_key_type, _time_stamp, _frame_state);
-    // FrameBasePtr frm = std::make_shared<FrameBase>(_frame_structure, _dim, _frame_key_type, _time_stamp, _frame_state);
-    // // trajectory_ptr_->addFrame(frm);
-    // frm->link(trajectory_ptr_);
     auto frm = FrameBase::emplace<FrameBase>(trajectory_ptr_, _frame_structure, _dim, _frame_key_type, _time_stamp, _frame_state);
     return frm;
 }
@@ -236,14 +232,12 @@ FrameBasePtr Problem::emplaceFrame(FrameType _frame_key_type, //
                                    const Eigen::VectorXs& _frame_state, //
                                    const TimeStamp& _time_stamp)
 {
-    // return emplaceFrame(trajectory_ptr_->getFrameStructure(), _frame_key_type, _frame_state, _time_stamp);
     return emplaceFrame(this->getFrameStructure(), this->getDim(), _frame_key_type, _frame_state, _time_stamp);
 }
 
 FrameBasePtr Problem::emplaceFrame(FrameType _frame_key_type, //
                                    const TimeStamp& _time_stamp)
 {
-    // return emplaceFrame(trajectory_ptr_->getFrameStructure(), _frame_key_type, _time_stamp);
     return emplaceFrame(this->getFrameStructure(), this->getDim(), _frame_key_type, _time_stamp);
 }
 
@@ -258,8 +252,8 @@ void Problem::getCurrentState(Eigen::VectorXs& state)
 {
     if (processor_motion_ptr_ != nullptr)
         processor_motion_ptr_->getCurrentState(state);
-    else if (trajectory_ptr_->getLastKeyFrame() != nullptr)
-        trajectory_ptr_->getLastKeyFrame()->getState(state);
+    else if (trajectory_ptr_->getLastKeyOrAuxFrame() != nullptr)
+        trajectory_ptr_->getLastKeyOrAuxFrame()->getState(state);
     else
         state = zeroState();
 }
@@ -271,10 +265,10 @@ void Problem::getCurrentStateAndStamp(Eigen::VectorXs& state, TimeStamp& ts)
         processor_motion_ptr_->getCurrentState(state);
         processor_motion_ptr_->getCurrentTimeStamp(ts);
     }
-    else if (trajectory_ptr_->getLastKeyFrame() != nullptr)
+    else if (trajectory_ptr_->getLastKeyOrAuxFrame() != nullptr)
     {
-        trajectory_ptr_->getLastKeyFrame()->getTimeStamp(ts);
-        trajectory_ptr_->getLastKeyFrame()->getState(state);
+        trajectory_ptr_->getLastKeyOrAuxFrame()->getTimeStamp(ts);
+        trajectory_ptr_->getLastKeyOrAuxFrame()->getState(state);
     }
     else
         state = zeroState();
@@ -285,7 +279,7 @@ void Problem::getState(const TimeStamp& _ts, Eigen::VectorXs& state)
     // try to get the state from processor_motion if any, otherwise...
     if (processor_motion_ptr_ == nullptr || !processor_motion_ptr_->getState(_ts, state))
     {
-        FrameBasePtr closest_frame = trajectory_ptr_->closestKeyFrameToTimeStamp(_ts);
+        FrameBasePtr closest_frame = trajectory_ptr_->closestKeyOrAuxFrameToTimeStamp(_ts);
         if (closest_frame != nullptr)
             closest_frame->getState(state);
         else
@@ -357,6 +351,30 @@ void Problem::keyFrameCallback(FrameBasePtr _keyframe_ptr, ProcessorBasePtr _pro
                 processor->keyFrameCallback(_keyframe_ptr, _time_tolerance);
 }
 
+bool Problem::permitAuxFrame(ProcessorBasePtr _processor_ptr)
+{
+    // This should implement a black list of processors that have forbidden auxiliary frame creation
+    // This decision is made at problem level, not at processor configuration level.
+    // If you want to configure a processor for not creating auxiliary frames, see Processor::voting_active_ and its accessors.
+
+    // Currently allowing all processors to vote:
+    return true;
+}
+
+void Problem::auxFrameCallback(FrameBasePtr _frame_ptr, ProcessorBasePtr _processor_ptr, const Scalar& _time_tolerance)
+{
+    if (_processor_ptr)
+    {
+        WOLF_DEBUG((_processor_ptr->isMotion() ? "PM " : "PT "), _processor_ptr->getName(), ": AuxF", _frame_ptr->id(), " Callback emitted with ts = ", _frame_ptr->getTimeStamp());
+    }
+    else
+    {
+        WOLF_DEBUG("External callback: AuxF", _frame_ptr->id(), " Callback emitted with ts = ", _frame_ptr->getTimeStamp());
+    }
+
+    processor_motion_ptr_->keyFrameCallback(_frame_ptr, _time_tolerance);
+}
+
 LandmarkBasePtr Problem::addLandmark(LandmarkBasePtr _lmk_ptr)
 {
     getMap()->addLandmark(_lmk_ptr);
@@ -410,6 +428,16 @@ void Problem::removeStateBlock(StateBlockPtr _state_ptr)
         state_block_notification_map_[_state_ptr] = REMOVE;
 }
 
+bool Problem::getStateBlockNotification(const StateBlockPtr& sb_ptr, Notification& notif) const
+{
+    std::lock_guard<std::mutex> lock(mut_state_block_notifications_);
+    if (state_block_notification_map_.find(sb_ptr) == state_block_notification_map_.end())
+        return false;
+
+    notif = state_block_notification_map_.at(sb_ptr);
+    return true;
+}
+
 FactorBasePtr Problem::addFactor(FactorBasePtr _factor_ptr)
 {
     std::lock_guard<std::mutex> lock(mut_factor_notifications_);
@@ -451,6 +479,16 @@ void Problem::removeFactor(FactorBasePtr _factor_ptr)
         factor_notification_map_[_factor_ptr] = REMOVE;
 }
 
+bool Problem::getFactorNotification(const FactorBasePtr& fac_ptr, Notification& notif) const
+{
+    std::lock_guard<std::mutex> lock(mut_factor_notifications_);
+    if (factor_notification_map_.find(fac_ptr) == factor_notification_map_.end())
+        return false;
+
+    notif = factor_notification_map_.at(fac_ptr);
+    return true;
+}
+
 void Problem::clearCovariance()
 {
     std::lock_guard<std::mutex> lock(mut_covariances_);
@@ -459,8 +497,8 @@ void Problem::clearCovariance()
 
 void Problem::addCovarianceBlock(StateBlockPtr _state1, StateBlockPtr _state2, const Eigen::MatrixXs& _cov)
 {
-    assert(_state1->getSize() == (unsigned int ) _cov.rows() && "wrong covariance block size");
-    assert(_state2->getSize() == (unsigned int ) _cov.cols() && "wrong covariance block size");
+    assert(_state1->getLocalSize() == (unsigned int ) _cov.rows() && "wrong covariance block size");
+    assert(_state2->getLocalSize() == (unsigned int ) _cov.cols() && "wrong covariance block size");
 
     std::lock_guard<std::mutex> lock(mut_covariances_);
     covariances_[std::pair<StateBlockPtr, StateBlockPtr>(_state1, _state2)] = _cov;
@@ -468,8 +506,8 @@ void Problem::addCovarianceBlock(StateBlockPtr _state1, StateBlockPtr _state2, c
 
 void Problem::addCovarianceBlock(StateBlockPtr _state1, const Eigen::MatrixXs& _cov)
 {
-    assert(_state1->getSize() == (unsigned int ) _cov.rows() && "wrong covariance block size");
-    assert(_state1->getSize() == (unsigned int ) _cov.cols() && "wrong covariance block size");
+    assert(_state1->getLocalSize() == (unsigned int ) _cov.rows() && "wrong covariance block size");
+    assert(_state1->getLocalSize() == (unsigned int ) _cov.cols() && "wrong covariance block size");
 
     std::lock_guard<std::mutex> lock(mut_covariances_);
     covariances_[std::make_pair(_state1, _state1)] = _cov;
@@ -481,23 +519,23 @@ bool Problem::getCovarianceBlock(StateBlockPtr _state1, StateBlockPtr _state2, E
     //std::cout << "entire cov to be filled:" << std::endl << _cov << std::endl;
     //std::cout << "_row " << _row << std::endl;
     //std::cout << "_col " << _col << std::endl;
-    //std::cout << "_state1 size: " << _state1->getSize() << std::endl;
-    //std::cout << "_state2 size: " << _state2->getSize() << std::endl;
-    //std::cout << "part of cov to be filled:" << std::endl <<  _cov.block(_row, _col, _state1->getSize(), _state2->getSize()) << std::endl;
+    //std::cout << "_state1 tangent space size: " << _state1->getLocalSize() << std::endl;
+    //std::cout << "_state2 tangent space size: " << _state2->getLocalSize() << std::endl;
+    //std::cout << "part of cov to be filled:" << std::endl <<  _cov.block(_row, _col, _state1->getLocalSize(), _state2->getLocalSize()) << std::endl;
     //if (covariances_.find(std::pair<StateBlockPtr, StateBlockPtr>(_state1, _state2)) != covariances_.end())
     //    std::cout << "stored cov" << std::endl << covariances_[std::pair<StateBlockPtr, StateBlockPtr>(_state1, _state2)] << std::endl;
     //else if (covariances_.find(std::pair<StateBlockPtr, StateBlockPtr>(_state2, _state1)) != covariances_.end())
     //    std::cout << "stored cov" << std::endl << covariances_[std::pair<StateBlockPtr, StateBlockPtr>(_state2, _state1)].transpose() << std::endl;
 
-    assert(_row + _state1->getSize() <= _cov.rows() && _col + _state2->getSize() <= _cov.cols() && "Problem::getCovarianceBlock: Bad matrix covariance size!");
+    assert(_row + _state1->getLocalSize() <= _cov.rows() && _col + _state2->getLocalSize() <= _cov.cols() && "Problem::getCovarianceBlock: Bad matrix covariance size!");
 
     std::lock_guard<std::mutex> lock(mut_covariances_);
 
     if (covariances_.find(std::pair<StateBlockPtr, StateBlockPtr>(_state1, _state2)) != covariances_.end())
-        _cov.block(_row, _col, _state1->getSize(), _state2->getSize()) =
+        _cov.block(_row, _col, _state1->getLocalSize(), _state2->getLocalSize()) =
                 covariances_[std::pair<StateBlockPtr, StateBlockPtr>(_state1, _state2)];
     else if (covariances_.find(std::pair<StateBlockPtr, StateBlockPtr>(_state2, _state1)) != covariances_.end())
-       _cov.block(_row, _col, _state1->getSize(), _state2->getSize()) =
+       _cov.block(_row, _col, _state1->getLocalSize(), _state2->getLocalSize()) =
                 covariances_[std::pair<StateBlockPtr, StateBlockPtr>(_state2, _state1)].transpose();
     else
     {
@@ -524,23 +562,23 @@ bool Problem::getCovarianceBlock(std::map<StateBlockPtr, unsigned int> _sb_2_idx
             // search st1 & st2
             if (covariances_.find(pair_12) != covariances_.end())
             {
-                assert(_sb_2_idx[sb1] + sb1->getSize() <= _cov.rows() &&
-                       _sb_2_idx[sb2] + sb2->getSize() <= _cov.cols() && "Problem::getCovarianceBlock: Bad matrix covariance size!");
-                assert(_sb_2_idx[sb2] + sb2->getSize() <= _cov.rows() &&
-                       _sb_2_idx[sb1] + sb1->getSize() <= _cov.cols() && "Problem::getCovarianceBlock: Bad matrix covariance size!");
+                assert(_sb_2_idx[sb1] + sb1->getLocalSize() <= _cov.rows() &&
+                       _sb_2_idx[sb2] + sb2->getLocalSize() <= _cov.cols() && "Problem::getCovarianceBlock: Bad matrix covariance size!");
+                assert(_sb_2_idx[sb2] + sb2->getLocalSize() <= _cov.rows() &&
+                       _sb_2_idx[sb1] + sb1->getLocalSize() <= _cov.cols() && "Problem::getCovarianceBlock: Bad matrix covariance size!");
 
-                _cov.block(_sb_2_idx[sb1], _sb_2_idx[sb2], sb1->getSize(), sb2->getSize()) = covariances_[pair_12];
-                _cov.block(_sb_2_idx[sb2], _sb_2_idx[sb1], sb2->getSize(), sb1->getSize()) = covariances_[pair_12].transpose();
+                _cov.block(_sb_2_idx[sb1], _sb_2_idx[sb2], sb1->getLocalSize(), sb2->getLocalSize()) = covariances_[pair_12];
+                _cov.block(_sb_2_idx[sb2], _sb_2_idx[sb1], sb2->getLocalSize(), sb1->getLocalSize()) = covariances_[pair_12].transpose();
             }
             else if (covariances_.find(pair_21) != covariances_.end())
             {
-                assert(_sb_2_idx[sb1] + sb1->getSize() <= _cov.rows() &&
-                       _sb_2_idx[sb2] + sb2->getSize() <= _cov.cols() && "Problem::getCovarianceBlock: Bad matrix covariance size!");
-                assert(_sb_2_idx[sb2] + sb2->getSize() <= _cov.rows() &&
-                       _sb_2_idx[sb1] + sb1->getSize() <= _cov.cols() && "Problem::getCovarianceBlock: Bad matrix covariance size!");
+                assert(_sb_2_idx[sb1] + sb1->getLocalSize() <= _cov.rows() &&
+                       _sb_2_idx[sb2] + sb2->getLocalSize() <= _cov.cols() && "Problem::getCovarianceBlock: Bad matrix covariance size!");
+                assert(_sb_2_idx[sb2] + sb2->getLocalSize() <= _cov.rows() &&
+                       _sb_2_idx[sb1] + sb1->getLocalSize() <= _cov.cols() && "Problem::getCovarianceBlock: Bad matrix covariance size!");
 
-                _cov.block(_sb_2_idx[sb1], _sb_2_idx[sb2], sb1->getSize(), sb2->getSize()) = covariances_[pair_21].transpose();
-                _cov.block(_sb_2_idx[sb2], _sb_2_idx[sb1], sb2->getSize(), sb1->getSize()) = covariances_[pair_21];
+                _cov.block(_sb_2_idx[sb1], _sb_2_idx[sb2], sb1->getLocalSize(), sb2->getLocalSize()) = covariances_[pair_21].transpose();
+                _cov.block(_sb_2_idx[sb2], _sb_2_idx[sb1], sb2->getLocalSize(), sb1->getLocalSize()) = covariances_[pair_21];
             }
             else
                 return false;
@@ -565,7 +603,7 @@ bool Problem::getFrameCovariance(FrameBaseConstPtr _frame_ptr, Eigen::MatrixXs& 
     SizeEigen sz = 0;
     for (const auto& sb : state_bloc_vec)
         if (sb)
-            sz += sb->getSize();
+            sz += sb->getLocalSize();
 
     // resizing
     _covariance = Eigen::MatrixXs(sz, sz);
@@ -581,10 +619,10 @@ bool Problem::getFrameCovariance(FrameBaseConstPtr _frame_ptr, Eigen::MatrixXs& 
                 if (sb_j)
                 {
                     success = success && getCovarianceBlock(sb_i, sb_j, _covariance, i, j);
-                    j += sb_j->getSize();
+                    j += sb_j->getLocalSize();
                 }
             }
-            i += sb_i->getSize();
+            i += sb_i->getLocalSize();
         }
     }
     return success;
@@ -593,6 +631,12 @@ bool Problem::getFrameCovariance(FrameBaseConstPtr _frame_ptr, Eigen::MatrixXs& 
 bool Problem::getLastKeyFrameCovariance(Eigen::MatrixXs& cov)
 {
     FrameBasePtr frm = getLastKeyFrame();
+    return getFrameCovariance(frm, cov);
+}
+
+bool Problem::getLastKeyOrAuxFrameCovariance(Eigen::MatrixXs& cov)
+{
+    FrameBasePtr frm = getLastKeyOrAuxFrame();
     return getFrameCovariance(frm, cov);
 }
 
@@ -607,7 +651,7 @@ bool Problem::getLandmarkCovariance(LandmarkBaseConstPtr _landmark_ptr, Eigen::M
     SizeEigen sz = 0;
     for (const auto& sb : state_bloc_vec)
         if (sb)
-            sz += sb->getSize();
+            sz += sb->getLocalSize();
 
     // resizing
     _covariance = Eigen::MatrixXs(sz, sz);
@@ -624,10 +668,10 @@ bool Problem::getLandmarkCovariance(LandmarkBaseConstPtr _landmark_ptr, Eigen::M
                 if (sb_j)
                 {
                     success = success && getCovarianceBlock(sb_i, sb_j, _covariance, i, j);
-                    j += sb_j->getSize();
+                    j += sb_j->getLocalSize();
                 }
             }
-            i += sb_i->getSize();
+            i += sb_i->getLocalSize();
         }
     }
     return success;
@@ -648,14 +692,29 @@ HardwareBasePtr Problem::getHardware()
     return hardware_ptr_;
 }
 
-FrameBasePtr Problem::getLastFrame()
+FrameBasePtr Problem::getLastFrame() const
 {
     return trajectory_ptr_->getLastFrame();
 }
 
-FrameBasePtr Problem::getLastKeyFrame()
+FrameBasePtr Problem::getLastKeyFrame() const
 {
     return trajectory_ptr_->getLastKeyFrame();
+}
+
+FrameBasePtr Problem::getLastKeyOrAuxFrame() const
+{
+    return trajectory_ptr_->getLastKeyOrAuxFrame();
+}
+
+FrameBasePtr Problem::closestKeyFrameToTimeStamp(const TimeStamp& _ts) const
+{
+    return trajectory_ptr_->closestKeyFrameToTimeStamp(_ts);
+}
+
+FrameBasePtr Problem::closestKeyOrAuxFrameToTimeStamp(const TimeStamp& _ts) const
+{
+    return trajectory_ptr_->closestKeyOrAuxFrameToTimeStamp(_ts);
 }
 
 FrameBasePtr Problem::setPrior(const Eigen::VectorXs& _prior_state, const Eigen::MatrixXs& _prior_cov, const TimeStamp& _ts, const Scalar _time_tolerance)
@@ -663,7 +722,7 @@ FrameBasePtr Problem::setPrior(const Eigen::VectorXs& _prior_state, const Eigen:
     if ( ! prior_is_set_ )
     {
         // Create origin frame
-        FrameBasePtr origin_keyframe = emplaceFrame(KEY_FRAME, _prior_state, _ts);
+        FrameBasePtr origin_keyframe = emplaceFrame(KEY, _prior_state, _ts);
 
         // create origin capture with the given state as data
         // Capture fix only takes 3D position and Quaternion orientation
@@ -776,10 +835,10 @@ void Problem::print(int depth, bool constr_by, bool metric, bool state_blocks)
                         std::cout << "    pm" << p->id() << " " << p->getType() << endl;
                         ProcessorMotionPtr pm = std::static_pointer_cast<ProcessorMotion>(p);
                         if (pm->getOrigin())
-                            cout << "      o: C" << pm->getOrigin()->id() << " - " << (pm->getOrigin()->getFrame()->isKey() ? "  KF" : "  F")
+                            cout << "      o: C" << pm->getOrigin()->id() << " - " << (pm->getOrigin()->getFrame()->isKeyOrAux() ? (pm->getOrigin()->getFrame()->isKey() ? "  KF" : "  AuxF" ) : "  F")
                             << pm->getOrigin()->getFrame()->id() << endl;
                         if (pm->getLast())
-                            cout << "      l: C" << pm->getLast()->id() << " - " << (pm->getLast()->getFrame()->isKey() ? "  KF" : "  F")
+                            cout << "      l: C" << pm->getLast()->id() << " - " << (pm->getLast()->getFrame()->isKeyOrAux() ? (pm->getLast()->getFrame()->isKey() ? "  KF" : " AuxF") : "  F")
                             << pm->getLast()->getFrame()->id() << endl;
                         if (pm->getIncoming())
                             cout << "      i: C" << pm->getIncoming()->id() << endl;
@@ -794,14 +853,14 @@ void Problem::print(int depth, bool constr_by, bool metric, bool state_blocks)
 //                            if (ptt)
 //                            {
 //                                if (ptt->getPrevOrigin())
-//                                    cout << "      p: C" << ptt->getPrevOrigin()->id() << " - " << (ptt->getPrevOrigin()->getFrame()->isKey() ? "  KF" : "  F")
+//                                    cout << "      p: C" << ptt->getPrevOrigin()->id() << " - " << (ptt->getPrevOrigin()->getFrame()->isEstimated() ? (ptt->getPrevOrigin()->getFrame()->isKey() ? "  KF" : " AuxF") : "  F")
 //                                    << ptt->getPrevOrigin()->getFrame()->id() << endl;
 //                            }
                             if (pt->getOrigin())
-                                cout << "      o: C" << pt->getOrigin()->id() << " - " << (pt->getOrigin()->getFrame()->isKey() ? "  KF" : "  F")
+                                cout << "      o: C" << pt->getOrigin()->id() << " - " << (pt->getOrigin()->getFrame()->isKeyOrAux() ? (pt->getOrigin()->getFrame()->isKey() ? "  KF" : " AuxF") : "  F")
                                 << pt->getOrigin()->getFrame()->id() << endl;
                             if (pt->getLast())
-                                cout << "      l: C" << pt->getLast()->id() << " - " << (pt->getLast()->getFrame()->isKey() ? "  KF" : "  F")
+                                cout << "      l: C" << pt->getLast()->id() << " - " << (pt->getLast()->getFrame()->isKeyOrAux() ? (pt->getLast()->getFrame()->isKey() ? "  KF" : " AuxF") : "  F")
                                 << pt->getLast()->getFrame()->id() << endl;
                             if (pt->getIncoming())
                                 cout << "      i: C" << pt->getIncoming()->id() << endl;
@@ -817,7 +876,7 @@ void Problem::print(int depth, bool constr_by, bool metric, bool state_blocks)
         // Frames =======================================================================================
         for (auto F : getTrajectory()->getFrameList())
         {
-            cout << (F->isKey() ? "  KF" : "  F") << F->id() << ((depth < 2) ? " -- " + std::to_string(F->getCaptureList().size()) + "C  " : "");
+            cout << (F->isKeyOrAux() ? (F->isKey() ? "  KF" : " AuxF") : "  F") << F->id() << ((depth < 2) ? " -- " + std::to_string(F->getCaptureList().size()) + "C  " : "");
             if (constr_by)
             {
                 cout << "  <-- ";
@@ -974,11 +1033,6 @@ void Problem::print(int depth, bool constr_by, bool metric, bool state_blocks)
     cout << endl;
 }
 
-FrameBasePtr Problem::closestKeyFrameToTimeStamp(const TimeStamp& _ts)
-{
-    return trajectory_ptr_->closestKeyFrameToTimeStamp(_ts);
-}
-
 bool Problem::check(int verbose_level)
 {
     using std::cout;
@@ -1058,7 +1112,7 @@ bool Problem::check(int verbose_level)
     {
         if (verbose_level > 0)
         {
-            cout << (F->isKey() ? "  KF" : "  F") << F->id() << " @ " << F.get() << endl;
+            cout << (F->isKeyOrAux() ? (F->isKey() ? "  KF" : " EF") : "  F") << F->id() << " @ " << F.get() << endl;
             cout << "    -> P @ " << F->getProblem().get() << endl;
             cout << "    -> T @ " << F->getTrajectory().get() << endl;
             for (auto sb : F->getStateBlockVec())

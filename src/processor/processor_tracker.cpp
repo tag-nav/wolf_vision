@@ -76,8 +76,7 @@ void ProcessorTracker::process(CaptureBasePtr const _incoming_ptr)
         }
         case FIRST_TIME_WITHOUT_PACK :
         {
-            FrameBasePtr kfrm = getProblem()->emplaceFrame(KEY_FRAME, incoming_ptr_->getTimeStamp());
-            // kfrm->addCapture(incoming_ptr_);
+            FrameBasePtr kfrm = getProblem()->emplaceFrame(KEY, incoming_ptr_->getTimeStamp());
             incoming_ptr_->link(kfrm);
 
             // Process info
@@ -103,8 +102,7 @@ void ProcessorTracker::process(CaptureBasePtr const _incoming_ptr)
         } // @suppress("No break at end of case")
         case SECOND_TIME_WITHOUT_PACK :
         {
-            FrameBasePtr frm = getProblem()->emplaceFrame(NON_KEY_FRAME, incoming_ptr_->getTimeStamp());
-            // frm->addCapture(incoming_ptr_);
+            FrameBasePtr frm = getProblem()->emplaceFrame(NON_ESTIMATED, incoming_ptr_->getTimeStamp());
             incoming_ptr_->link(frm);
 
             // We have a last_ Capture with no features, so we do not process known features, and we do not vote for KF.
@@ -141,10 +139,8 @@ void ProcessorTracker::process(CaptureBasePtr const _incoming_ptr)
             last_ptr_->link(pack->key_frame);
 
             // Create new frame
-            FrameBasePtr frm = getProblem()->emplaceFrame(NON_KEY_FRAME, incoming_ptr_->getTimeStamp());
-            // frm->addCapture(incoming_ptr_);
+            FrameBasePtr frm = getProblem()->emplaceFrame(NON_ESTIMATED, incoming_ptr_->getTimeStamp());
             incoming_ptr_->link(frm);
-
 
             // Detect new Features, initialize Landmarks, create Factors, ...
             processNew(params_tracker_->max_new_features);
@@ -180,16 +176,12 @@ void ProcessorTracker::process(CaptureBasePtr const _incoming_ptr)
                 last_ptr_->getFrame()->setKey();
 
                 // make F; append incoming to new F
-                FrameBasePtr frm = getProblem()->emplaceFrame(NON_KEY_FRAME, incoming_ptr_->getTimeStamp());
-                // frm->addCapture(incoming_ptr_);
+                FrameBasePtr frm = getProblem()->emplaceFrame(NON_ESTIMATED, incoming_ptr_->getTimeStamp());
                 incoming_ptr_->link(frm);
 
                 // process
                 processNew(params_tracker_->max_new_features);
 
-                //                // Set key
-                //                last_ptr_->getFrame()->setKey();
-                //
                 // Set state to the keyframe
                 last_ptr_->getFrame()->setState(getProblem()->getState(last_ptr_->getTimeStamp()));
 
@@ -206,6 +198,38 @@ void ProcessorTracker::process(CaptureBasePtr const _incoming_ptr)
                 incoming_ptr_ = nullptr;
 
             }
+            /* TODO: create an auxiliary frame
+            else if (voteForAuxFrame() && permittedAuxFrame())
+            {
+                // We create an Auxiliary Frame
+
+                // set AuxF on last
+                last_ptr_->getFrame()->setState(getProblem()->getState(last_ptr_->getTimeStamp()));
+                last_ptr_->getFrame()->setAuxiliary();
+
+                // make F; append incoming to new F
+                FrameBasePtr frm = getProblem()->emplaceFrame(NON_ESTIMATED, incoming_ptr_->getTimeStamp());
+                frm->addCapture(incoming_ptr_);
+
+                // Set state to the keyframe
+                last_ptr_->getFrame()->setState(getProblem()->getState(last_ptr_->getTimeStamp()));
+
+                // Establish factors
+                establishFactors();
+
+                // Call the new auxframe callback in order to let the ProcessorMotion to establish their factors
+                getProblem()->auxFrameCallback(last_ptr_->getFrame(), std::static_pointer_cast<ProcessorBase>(shared_from_this()), params_tracker_->time_tolerance);
+
+                // Advance this
+                last_ptr_->getFrame()->addCapture(incoming_ptr_); // Add incoming Capture to the tracker's last Frame
+                // do not remove! last_ptr_->remove();
+                incoming_ptr_->getFrame()->setTimeStamp(incoming_ptr_->getTimeStamp());
+
+                // Update pointers
+                advanceDerived();
+                last_ptr_   = incoming_ptr_;
+                incoming_ptr_ = nullptr;
+            }*/
             else
             {
                 // We do not create a KF

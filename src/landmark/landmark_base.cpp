@@ -170,15 +170,20 @@ YAML::Node LandmarkBase::saveToYaml() const
     }
     return node;
 }
-    void LandmarkBase::link(MapBasePtr _map_ptr)
+void LandmarkBase::link(MapBasePtr _map_ptr)
+{
+    if(_map_ptr)
     {
-        std::cout << "Linking LandmarkBase" << std::endl;
-        // this->map_ptr_.lock()->addLandmark(shared_from_this());
         this->setMap(_map_ptr);
         _map_ptr->addLandmark(shared_from_this());
         this->setProblem(_map_ptr->getProblem());
         this->registerNewStateBlocks();
     }
+    else
+    {
+        WOLF_WARN("Linking with nullptr");
+    }
+}
 
 FactorBasePtr LandmarkBase::addConstrainedBy(FactorBasePtr _fac_ptr)
 {

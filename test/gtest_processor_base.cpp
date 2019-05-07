@@ -63,7 +63,7 @@ TEST(ProcessorBase, KeyFrameCallback)
 
     std::cout << "sensor & processor created and added to wolf problem" << std::endl;
 
-    // Sequence to test KeyFrame creations (callback calls)
+    // Sequence to test Key Frame creations (callback calls)
 
     // initialize
     TimeStamp   t(0.0);

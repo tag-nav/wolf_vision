@@ -44,7 +44,7 @@ TEST(Emplace, Frame)
     ProblemPtr P = Problem::create("POV", 3);
 
     ASSERT_NE(P->getTrajectory(), nullptr);
-    FrameBase::emplace<FrameBase>(P->getTrajectory(),  KEY_FRAME, TimeStamp(0), std::make_shared<StateBlock>(2,true), std::make_shared<StateBlock>(2,true));
+    FrameBase::emplace<FrameBase>(P->getTrajectory(),  KEY, TimeStamp(0), std::make_shared<StateBlock>(2,true), std::make_shared<StateBlock>(2,true));
     ASSERT_EQ(P, P->getTrajectory()->getFrameList().front()->getTrajectory()->getProblem());
 }
 
@@ -64,7 +64,7 @@ TEST(Emplace, Capture)
     ProblemPtr P = Problem::create("POV", 3);
 
     ASSERT_NE(P->getTrajectory(), nullptr);
-    auto frm = FrameBase::emplace<FrameBase>(P->getTrajectory(),  KEY_FRAME, TimeStamp(0), std::make_shared<StateBlock>(2,true), std::make_shared<StateBlock>(2,true));
+    auto frm = FrameBase::emplace<FrameBase>(P->getTrajectory(),  KEY, TimeStamp(0), std::make_shared<StateBlock>(2,true), std::make_shared<StateBlock>(2,true));
     ASSERT_EQ(P, P->getTrajectory()->getFrameList().front()->getTrajectory()->getProblem());
 
     auto cpt = CaptureBase::emplace<CaptureBase>(frm, "Dummy", TimeStamp(0), nullptr, nullptr, nullptr, nullptr);
@@ -78,7 +78,7 @@ TEST(Emplace, Feature)
     ProblemPtr P = Problem::create("POV", 3);
 
     ASSERT_NE(P->getTrajectory(), nullptr);
-    auto frm = FrameBase::emplace<FrameBase>(P->getTrajectory(),  KEY_FRAME, TimeStamp(0), std::make_shared<StateBlock>(2,true), std::make_shared<StateBlock>(2,true));
+    auto frm = FrameBase::emplace<FrameBase>(P->getTrajectory(),  KEY, TimeStamp(0), std::make_shared<StateBlock>(2,true), std::make_shared<StateBlock>(2,true));
     ASSERT_EQ(P, P->getTrajectory()->getFrameList().front()->getTrajectory()->getProblem());
 
     auto cpt = CaptureBase::emplace<CaptureBase>(frm, "Dummy", TimeStamp(0), nullptr, nullptr, nullptr, nullptr);
@@ -98,7 +98,7 @@ TEST(Emplace, Factor)
     ProblemPtr P = Problem::create("POV", 3);
 
     ASSERT_NE(P->getTrajectory(), nullptr);
-    auto frm = FrameBase::emplace<FrameBase>(P->getTrajectory(),  KEY_FRAME, TimeStamp(0), std::make_shared<StateBlock>(2,true), std::make_shared<StateBlock>(2,true));
+    auto frm = FrameBase::emplace<FrameBase>(P->getTrajectory(),  KEY, TimeStamp(0), std::make_shared<StateBlock>(2,true), std::make_shared<StateBlock>(2,true));
     ASSERT_EQ(P, P->getTrajectory()->getFrameList().front()->getTrajectory()->getProblem());
 
     auto cpt = CaptureBase::emplace<CaptureBase>(frm, "Dummy", TimeStamp(0), nullptr, nullptr, nullptr, nullptr);
@@ -120,7 +120,7 @@ TEST(Emplace, EmplaceDerived)
 {
     ProblemPtr P = Problem::create("POV", 3);
 
-    auto frm = FrameBase::emplace<FrameBase>(P->getTrajectory(),  KEY_FRAME, TimeStamp(0), std::make_shared<StateBlock>(2,true), std::make_shared<StateBlock>(2,true));
+    auto frm = FrameBase::emplace<FrameBase>(P->getTrajectory(),  KEY, TimeStamp(0), std::make_shared<StateBlock>(2,true), std::make_shared<StateBlock>(2,true));
     // LandmarkBase::emplace<LandmarkBase>(MapBaseWPtr(P->getMap()),"Dummy", nullptr, nullptr);
     auto sen = SensorBase::emplace<SensorIMU>(P->getHardware(), Eigen::VectorXs(7), IntrinsicsIMU());
     auto cov = Eigen::MatrixXs(2,2);
@@ -138,6 +138,11 @@ TEST(Emplace, EmplaceDerived)
                                                 Eigen::Vector6s(), m, cpt2);
     ASSERT_EQ(sen, P->getHardware()->getSensorList().front());
     ASSERT_EQ(P, P->getTrajectory()->getFrameList().front()->getCaptureList().front()->getFeatureList().front()->getProblem());
+}
+TEST(Emplace, Nullpointer)
+{
+    
+    // incomming_dummy = wolf::CaptureBase::emplace<wolf::CaptureBase>(nullptr, "DUMMY", 1.2, sensor_ptr);
 }
 int main(int argc, char **argv)
 {

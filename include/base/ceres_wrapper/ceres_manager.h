@@ -56,7 +56,7 @@ class CeresManager : public SolverManager
         virtual void computeCovariances(CovarianceBlocksToBeComputed _blocks
                                         = CovarianceBlocksToBeComputed::ROBOT_LANDMARKS) override;
 
-        virtual void computeCovariances(const StateBlockPtrList& st_list) override;
+        virtual void computeCovariances(const std::vector<StateBlockPtr>& st_list) override;
 
         virtual bool hasConverged() override;
 
