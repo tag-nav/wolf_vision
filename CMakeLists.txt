@@ -178,6 +178,7 @@ include/vision/feature/feature_point_image.h
   )
 SET(HDRS_LANDMARK
   include/vision/landmark/landmark_AHP.h
+  include/vision/landmark/landmark_point_3D.h
   )
 SET(HDRS_PROCESSOR
 include/vision/processor/processor_tracker_feature_trifocal.h
@@ -210,6 +211,7 @@ src/feature/feature_point_image.cpp
   )
 SET(SRCS_LANDMARK
 src/landmark/landmark_AHP.cpp
+src/landmark/landmark_point_3D.cpp
   )
 SET(SRCS_PROCESSOR
 src/processor/processor_tracker_feature_trifocal.cpp
@@ -230,133 +232,25 @@ src/yaml/processor_image_yaml.cpp
   )
 #OPTIONALS
 #optional HDRS and SRCS
-IF (Ceres_FOUND)
-    SET(HDRS_WRAPPER
-      include/base/solver_suitesparse/sparse_utils.h
-      include/base/solver/solver_manager.h
-      include/base/ceres_wrapper/ceres_manager.h
-      #ceres_wrapper/qr_manager.h
-      include/base/ceres_wrapper/cost_function_wrapper.h
-      include/base/ceres_wrapper/create_numeric_diff_cost_function.h
-      include/base/ceres_wrapper/local_parametrization_wrapper.h 
-      )
-    SET(SRCS_WRAPPER
-      src/solver/solver_manager.cpp
-      src/ceres_wrapper/ceres_manager.cpp
-      #ceres_wrapper/qr_manager.cpp
-      src/ceres_wrapper/local_parametrization_wrapper.cpp 
-      )
-ELSE(Ceres_FOUND)
-  SET(HDRS_WRAPPER)
-  SET(SRCS_WRAPPER)
-ENDIF(Ceres_FOUND)
-
-IF (laser_scan_utils_FOUND)
-  SET(HDRS_CAPTURE ${HDRS_CAPTURE}
-    include/base/capture/capture_laser_2D.h
-    )
-  SET(HDRS_PROCESSOR ${HDRS_PROCESSOR}
-    include/base/processor/processor_tracker_feature_corner.h
-    include/base/processor/processor_tracker_landmark_corner.h
-    )
-  SET(HDRS_SENSOR ${HDRS_SENSOR}
-    include/base/sensor/sensor_laser_2D.h
-    )
-  SET(SRCS ${SRCS}
-    src/sensor/sensor_laser_2D.cpp
-    src/processor/processor_tracker_feature_corner.cpp
-    src/processor/processor_tracker_landmark_corner.cpp
-    )
-ENDIF(laser_scan_utils_FOUND)
-
-IF (raw_gps_utils_FOUND)
-  SET(HDRS_CAPTURE ${HDRS_CAPTURE}
-    include/base/capture/capture_GPS.h
-    )
-  SET(HDRS_PROCESSOR ${HDRS_PROCESSOR}
-    include/base/processor/processor_GPS.h
-    )
-  SET(SRCS ${SRCS}
-    src/capture/capture_GPS.cpp
-    src/processor/processor_GPS.cpp
-    )
-ENDIF(raw_gps_utils_FOUND)
-
-# Vision
-IF (vision_utils_FOUND)
-  SET(HDRS_CAPTURE ${HDRS_CAPTURE}
-    include/base/capture/capture_image.h
-    )
-  SET(HDRS_FEATURE ${HDRS_FEATURE}
-    include/base/feature/feature_point_image.h
-    )
-  SET(HDRS_PROCESSOR ${HDRS_PROCESSOR}
-    include/base/processor/processor_bundle_adjustment.h
-    include/base/processor/processor_tracker_feature_trifocal.h
-    include/base/processor/processor_params_image.h
-    include/base/processor/processor_tracker_feature_image.h
-    include/base/processor/processor_tracker_landmark_image.h
-    )
-  SET(HDRS_LANDMARK ${HDRS_LANDMARK}
-    include/base/landmark/landmark_point_3D.h
-    include/base/landmark/landmark_AHP.h
-    )
-  SET(SRCS ${SRCS}
-    src/capture/capture_image.cpp
-    src/feature/feature_point_image.cpp
-    )
-  SET(SRCS_LANDMARK ${SRCS_LANDMARK}
-    src/landmark/landmark_point_3D.cpp
-    src/landmark/landmark_AHP.cpp
-    )
-  SET(SRCS_PROCESSOR ${SRCS_PROCESSOR}
-    src/processor/processor_bundle_adjustment.cpp
-    src/processor/processor_tracker_feature_trifocal.cpp
-    src/processor/processor_tracker_feature_image.cpp
-    src/processor/processor_tracker_landmark_image.cpp
-    )
-ENDIF(vision_utils_FOUND)
-#SUBDIRECTORIES
-add_subdirectory(hello_wolf)
-IF (cereal_FOUND)
-  ADD_SUBDIRECTORY(serialization/cereal)
-ENDIF(cereal_FOUND)
-
-IF (Suitesparse_FOUND)
-  #DOES NOTHING?!    
-  #ADD_SUBDIRECTORY(solver_suitesparse)
-ENDIF(Suitesparse_FOUND)
-# LEAVE YAML FILES ALWAYS IN THE LAST POSITION !!
-IF(YAMLCPP_FOUND)
-  # headers
-  SET(HDRS ${HDRS}
-    include/base/yaml/yaml_conversion.h
-    )
-  SET(HDRS_YAML ${HDRS_YAML}
-    include/base/yaml/yaml_conversion.h
-    )
-  
-  # sources
-  SET(SRCS ${SRCS}
-    src/yaml/processor_odom_3D_yaml.cpp
-    src/yaml/processor_IMU_yaml.cpp
-    src/yaml/sensor_camera_yaml.cpp
-    src/yaml/sensor_odom_3D_yaml.cpp
-    src/yaml/sensor_IMU_yaml.cpp
-    )
-  IF(laser_scan_utils_FOUND)
-    SET(SRCS ${SRCS}
-      src/yaml/sensor_laser_2D_yaml.cpp
-      )
-  ENDIF(laser_scan_utils_FOUND)
-  IF(vision_utils_FOUND)
-    SET(SRCS ${SRCS}
-      src/yaml/processor_image_yaml.cpp
-      src/yaml/processor_bundle_adjustment_yaml.cpp
-      src/yaml/processor_tracker_feature_trifocal_yaml.cpp
-      )
-  ENDIF(vision_utils_FOUND)
-ENDIF(YAMLCPP_FOUND)
+# ==================EXAMPLE===============
+# IF (Ceres_FOUND)
+#     SET(HDRS_WRAPPER
+#       include/base/solver_suitesparse/sparse_utils.h
+#       include/base/solver/solver_manager.h
+#       include/base/ceres_wrapper/ceres_manager.h
+#       include/base/ceres_wrapper/cost_function_wrapper.h
+#       include/base/ceres_wrapper/create_numeric_diff_cost_function.h
+#       include/base/ceres_wrapper/local_parametrization_wrapper.h 
+#       )
+#     SET(SRCS_WRAPPER
+#       src/solver/solver_manager.cpp
+#       src/ceres_wrapper/ceres_manager.cpp
+#       src/ceres_wrapper/local_parametrization_wrapper.cpp 
+#       )
+# ELSE(Ceres_FOUND)
+#   SET(HDRS_WRAPPER)
+#   SET(SRCS_WRAPPER)
+# ENDIF(Ceres_FOUND)
 
 # create the shared library
 ADD_LIBRARY(${PROJECT_NAME}
