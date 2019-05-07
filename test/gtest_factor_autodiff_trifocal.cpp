@@ -32,6 +32,11 @@ class FactorAutodiffTrifocalTest : public testing::Test{
 
         Scalar pixel_noise_std;
 
+        virtual ~FactorAutodiffTrifocalTest()
+        {
+            std::cout << "destructor\n";
+        }
+
         virtual void SetUp() override
         {
             std::string wolf_root = _WOLF_ROOT_DIR;
