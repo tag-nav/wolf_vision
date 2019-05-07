@@ -218,13 +218,20 @@ void CeresManager::computeCovariances(const std::vector<StateBlockPtr>& st_list)
     std::vector<std::pair<const double*, const double*>> double_pairs;
 
     // double loop all against all (without repetitions)
-    for (auto st_it1 = st_list.begin(); st_it1 != st_list.end(); st_it1++)
+    for (auto st_it1 = st_list.begin(); st_it1 != st_list.end(); st_it1++){
+        if (*st_it1 == nullptr){
+            continue;
+        }
         for (auto st_it2 = st_it1; st_it2 != st_list.end(); st_it2++)
         {
+            if (*st_it2 == nullptr){
+                continue;
+            }
             state_block_pairs.emplace_back(*st_it1, *st_it2);
             double_pairs.emplace_back(getAssociatedMemBlockPtr((*st_it1)),
                                       getAssociatedMemBlockPtr((*st_it2)));
         }
+    }
 
     //std::cout << "pairs... " << double_pairs.size() << std::endl;
 
