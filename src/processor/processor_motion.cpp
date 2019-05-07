@@ -209,7 +209,7 @@ void ProcessorMotion::process(CaptureBasePtr _incoming_ptr)
     last_ptr_->getFrame()->setTimeStamp(getCurrentTimeStamp());
     last_ptr_->getFrame()->setState(getCurrentState());
 
-    if (voteForKeyFrame() && permittedKeyFrame())
+    if (permittedKeyFrame() && voteForKeyFrame())
     {
         // Set the frame of last_ptr as key
         auto key_frame_ptr = last_ptr_->getFrame();
@@ -222,7 +222,7 @@ void ProcessorMotion::process(CaptureBasePtr _incoming_ptr)
         auto fac_ptr = emplaceFactor(key_feature_ptr, origin_ptr_);
 
         // create a new frame
-        auto new_frame_ptr = getProblem()->emplaceFrame(NON_KEY_FRAME,
+        auto new_frame_ptr = getProblem()->emplaceFrame(NON_ESTIMATED,
                                                         getCurrentState(),
                                                         getCurrentTimeStamp());
         // create a new capture
@@ -303,7 +303,7 @@ bool ProcessorMotion::getState(const TimeStamp& _ts, Eigen::VectorXs& _x)
 
 FrameBasePtr ProcessorMotion::setOrigin(const Eigen::VectorXs& _x_origin, const TimeStamp& _ts_origin)
 {
-    FrameBasePtr key_frame_ptr = getProblem()->emplaceFrame(KEY_FRAME, _x_origin, _ts_origin);
+    FrameBasePtr key_frame_ptr = getProblem()->emplaceFrame(KEY, _x_origin, _ts_origin);
     setOrigin(key_frame_ptr);
 
     return key_frame_ptr;
@@ -329,7 +329,7 @@ void ProcessorMotion::setOrigin(FrameBasePtr _origin_frame)
 
     // ---------- LAST ----------
     // Make non-key-frame for last Capture
-    auto new_frame_ptr = getProblem()->emplaceFrame(NON_KEY_FRAME,
+    auto new_frame_ptr = getProblem()->emplaceFrame(NON_ESTIMATED,
                                                     _origin_frame->getState(),
                                                     _origin_frame->getTimeStamp());
     // emplace (emtpy) last Capture

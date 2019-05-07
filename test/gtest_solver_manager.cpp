@@ -450,9 +450,10 @@ TEST(SolverManager, AddUpdatedStateBlock)
     // add state_block
     P->addStateBlock(sb_ptr);
 
-    auto state_block_notification_map = P->consumeStateBlockNotificationMap();
-    ASSERT_EQ(state_block_notification_map.size(),1);
-    ASSERT_EQ(state_block_notification_map.begin()->second,ADD);
+    Notification notif;
+    ASSERT_EQ(P->getStateBlockNotificationMapSize(),1);
+    ASSERT_TRUE(P->getStateBlockNotification(sb_ptr, notif));
+    ASSERT_EQ(notif, ADD);
 
     // == Insert OTHER notifications ==
 
@@ -463,21 +464,25 @@ TEST(SolverManager, AddUpdatedStateBlock)
     // Fix --> FLAG
     sb_ptr->unfix();
 
-    ASSERT_TRUE(P->consumeStateBlockNotificationMap().empty()); // No new notifications (fix and set state are flags in sb)
+    ASSERT_EQ(P->getStateBlockNotificationMapSize(),1); // No new notifications (fix and set state are flags in sb)
+
+    // == consume empties the notification map ==
+    solver_manager_ptr->update(); // it calls P->consumeStateBlockNotificationMap();
+    ASSERT_EQ(P->getStateBlockNotificationMapSize(),0);
 
     // == When an REMOVE is notified: a REMOVE notification should be stored ==
 
     // remove state_block
     P->removeStateBlock(sb_ptr);
 
-    state_block_notification_map = P->consumeStateBlockNotificationMap();
-    ASSERT_EQ(state_block_notification_map.size(),1);
-    ASSERT_EQ(state_block_notification_map.begin()->second,REMOVE);
+    ASSERT_EQ(P->getStateBlockNotificationMapSize(),1);
+    ASSERT_TRUE(P->getStateBlockNotification(sb_ptr, notif));
+    ASSERT_EQ(notif, REMOVE);
 
     // == ADD + REMOVE: notification map should be empty ==
     P->addStateBlock(sb_ptr);
     P->removeStateBlock(sb_ptr);
-    ASSERT_TRUE(P->consumeStateBlockNotificationMap().empty());
+    ASSERT_TRUE(P->getStateBlockNotificationMapSize() == 0);
 
     // == UPDATES should clear the list of notifications ==
     // add state_block
@@ -486,7 +491,7 @@ TEST(SolverManager, AddUpdatedStateBlock)
     // update solver
     solver_manager_ptr->update();
 
-    ASSERT_TRUE(P->consumeStateBlockNotificationMap().empty()); // After solver_manager->update, notifications should be empty
+    ASSERT_EQ(P->getStateBlockNotificationMapSize(),0); // After solver_manager->update, notifications should be empty
 }
 
 TEST(SolverManager, AddFactor)
@@ -499,10 +504,15 @@ TEST(SolverManager, AddFactor)
     StateBlockPtr sb_ptr = std::make_shared<StateBlock>(state);
 
     // Create (and add) factor point 2d
-    FrameBasePtr        F = P->emplaceFrame(KEY_FRAME, P->zeroState(), TimeStamp(0));
+    FrameBasePtr        F = P->emplaceFrame(KEY, P->zeroState(), TimeStamp(0));
     CaptureBasePtr      C = F->addCapture(std::make_shared<CaptureVoid>(0, nullptr));
     FeatureBasePtr      f = C->addFeature(std::make_shared<FeatureBase>("ODOM 2D", Vector3s::Zero(), Matrix3s::Identity()));
     FactorPose2DPtr c = std::static_pointer_cast<FactorPose2D>(f->addFactor(std::make_shared<FactorPose2D>(f)));
+
+    // notification
+    Notification notif;
+    ASSERT_TRUE(P->getFactorNotification(c,notif));
+    ASSERT_EQ(notif, ADD);
 
     // update solver
     solver_manager_ptr->update();
@@ -521,7 +531,7 @@ TEST(SolverManager, RemoveFactor)
     StateBlockPtr sb_ptr = std::make_shared<StateBlock>(state);
 
     // Create (and add) factor point 2d
-    FrameBasePtr        F = P->emplaceFrame(KEY_FRAME, P->zeroState(), TimeStamp(0));
+    FrameBasePtr        F = P->emplaceFrame(KEY, P->zeroState(), TimeStamp(0));
     CaptureBasePtr      C = F->addCapture(std::make_shared<CaptureVoid>(0, nullptr));
     FeatureBasePtr      f = C->addFeature(std::make_shared<FeatureBase>("ODOM 2D", Vector3s::Zero(), Matrix3s::Identity()));
     FactorPose2DPtr c = std::static_pointer_cast<FactorPose2D>(f->addFactor(std::make_shared<FactorPose2D>(f)));
@@ -531,6 +541,11 @@ TEST(SolverManager, RemoveFactor)
 
     // add factor
     P->removeFactor(c);
+
+    // notification
+    Notification notif;
+    ASSERT_TRUE(P->getFactorNotification(c,notif));
+    ASSERT_EQ(notif, REMOVE);
 
     // update solver
     solver_manager_ptr->update();
@@ -549,15 +564,22 @@ TEST(SolverManager, AddRemoveFactor)
     StateBlockPtr sb_ptr = std::make_shared<StateBlock>(state);
 
     // Create (and add) factor point 2d
-    FrameBasePtr        F = P->emplaceFrame(KEY_FRAME, P->zeroState(), TimeStamp(0));
+    FrameBasePtr        F = P->emplaceFrame(KEY, P->zeroState(), TimeStamp(0));
     CaptureBasePtr      C = F->addCapture(std::make_shared<CaptureVoid>(0, nullptr));
     FeatureBasePtr      f = C->addFeature(std::make_shared<FeatureBase>("ODOM 2D", Vector3s::Zero(), Matrix3s::Identity()));
     FactorPose2DPtr c = std::static_pointer_cast<FactorPose2D>(f->addFactor(std::make_shared<FactorPose2D>(f)));
 
+    // notification
+    Notification notif;
+    ASSERT_TRUE(P->getFactorNotification(c,notif));
+    ASSERT_EQ(notif, ADD);
+
     // add factor
     P->removeFactor(c);
 
-    ASSERT_TRUE(P->consumeFactorNotificationMap().empty()); // ADD+REMOVE = empty
+    // notification
+    ASSERT_EQ(P->getFactorNotificationMapSize(), 0); // ADD+REMOVE cancels out
+    ASSERT_FALSE(P->getFactorNotification(c, notif)); // ADD+REMOVE cancels out
 
     // update solver
     solver_manager_ptr->update();
@@ -576,7 +598,7 @@ TEST(SolverManager, DoubleRemoveFactor)
     StateBlockPtr sb_ptr = std::make_shared<StateBlock>(state);
 
     // Create (and add) factor point 2d
-    FrameBasePtr        F = P->emplaceFrame(KEY_FRAME, P->zeroState(), TimeStamp(0));
+    FrameBasePtr        F = P->emplaceFrame(KEY, P->zeroState(), TimeStamp(0));
     CaptureBasePtr      C = F->addCapture(std::make_shared<CaptureVoid>(0, nullptr));
     FeatureBasePtr      f = C->addFeature(std::make_shared<FeatureBase>("ODOM 2D", Vector3s::Zero(), Matrix3s::Identity()));
     FactorPose2DPtr c = std::static_pointer_cast<FactorPose2D>(f->addFactor(std::make_shared<FactorPose2D>(f)));

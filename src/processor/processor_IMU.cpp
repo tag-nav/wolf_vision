@@ -36,8 +36,6 @@ ProcessorBasePtr ProcessorIMU::create(const std::string& _unique_name, const Pro
 
 bool ProcessorIMU::voteForKeyFrame()
 {
-    if(!isVotingActive())
-        return false;
     // time span
     if (getBuffer().get().back().ts_ - getBuffer().get().front().ts_ > params_motion_IMU_->max_time_span)
     {
