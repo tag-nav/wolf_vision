@@ -45,15 +45,6 @@ message(STATUS "Configured to compile in ${CMAKE_BUILD_TYPE} mode.")
 SET(CMAKE_CXX_FLAGS_DEBUG "-g -Wall -D_REENTRANT")
 SET(CMAKE_CXX_FLAGS_RELEASE "-O3 -D_REENTRANT")
 
-<<<<<<< HEAD
-if(UNIX)
-  # GCC is not strict enough by default, so enable most of the warnings.
-  set(CMAKE_CXX_FLAGS
-    "${CMAKE_CXX_FLAGS} -Werror=all -Werror=extra -Wno-unknown-pragmas -Wno-sign-compare -Wno-unused-parameter -Wno-missing-field-initializers -Wno-unused-but-set-variable")
-endif(UNIX)
-
-=======
->>>>>>> devel
 #Set compiler according C++11 support
 include(CheckCXXCompilerFlag)
 CHECK_CXX_COMPILER_FLAG("-std=c++11" COMPILER_SUPPORTS_CXX11)
