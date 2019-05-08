@@ -47,7 +47,8 @@ void ProcessorRangeBearing::process(CaptureBasePtr _capture)
 
     // 2. cast incoming capture to the range-and-bearing type, add it to the keyframe
     CaptureRangeBearingPtr capture_rb = std::static_pointer_cast<CaptureRangeBearing>(_capture);
-    kf->addCapture(capture_rb);
+    // kf->addCapture(capture_rb);
+    capture_rb->link(kf);
 
     // 3. explore all observations in the capture
     for (SizeEigen i = 0; i < capture_rb->getIds().size(); i++)
@@ -70,9 +71,10 @@ void ProcessorRangeBearing::process(CaptureBasePtr _capture)
         {
             // new landmark:
             // - create landmark
-            lmk = std::make_shared<LandmarkPoint2D>(id, invObserve(range, bearing));
+            // lmk = std::make_shared<LandmarkPoint2D>(id, invObserve(range, bearing));
+            lmk = std::static_pointer_cast<LandmarkPoint2D>(LandmarkBase::emplace<LandmarkPoint2D>(getProblem()->getMap(), id, invObserve(range, bearing)));
             WOLF_TRACE("new   lmk(", id, "): ", lmk->getP()->getState().transpose());
-            getProblem()->getMap()->addLandmark(lmk);
+            // getProblem()->getMap()->addLandmark(lmk);
             // - add to known landmarks
             known_lmks.emplace(id, lmk);
         }
@@ -81,17 +83,23 @@ void ProcessorRangeBearing::process(CaptureBasePtr _capture)
         Vector2s rb(range,bearing);
         auto ftr = std::make_shared<FeatureRangeBearing>(rb,
                                                          getSensor()->getNoiseCov());
-        capture_rb->addFeature(ftr);
+        // capture_rb->addFeature(ftr);
+        FeatureBase::emplace<FeatureRangeBearing>(capture_rb, rb, getSensor()->getNoiseCov());
 
         // 6. create factor
         auto prc = shared_from_this();
-        auto ctr = std::make_shared<FactorRangeBearing>(capture_rb,
-                                                            lmk,
-                                                            prc,
-                                                            false,
-                                                            FAC_ACTIVE);
-        ftr->addFactor(ctr);
-        lmk->addConstrainedBy(ctr);
+        // auto ctr = std::make_shared<FactorRangeBearing>(capture_rb,
+        //                                                     lmk,
+        //                                                     prc,
+        //                                                     false,
+        //                                                     FAC_ACTIVE);
+        auto ctr = FactorBase::emplace<FactorRangeBearing>(ftr, capture_rb,
+                                                           lmk,
+                                                           prc,
+                                                           false,
+                                                           FAC_ACTIVE);
+        // ftr->addFactor(ctr);
+        // lmk->addConstrainedBy(ctr);
     }
 
 }

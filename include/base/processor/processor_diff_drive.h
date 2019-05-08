@@ -57,7 +57,6 @@ protected:
 
   /// @brief Intrinsic params
   ProcessorParamsDiffDrivePtr params_motion_diff_drive_;
-  MatrixXs unmeasured_perturbation_cov_;
 
   virtual void computeCurrentDelta(const Eigen::VectorXs& _data,
                                    const Eigen::MatrixXs& _data_cov,

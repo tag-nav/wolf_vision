@@ -60,6 +60,10 @@ target_link_libraries(gtest_converter ${PROJECT_NAME})
 wolf_add_gtest(gtest_eigen_predicates gtest_eigen_predicates.cpp)
 target_link_libraries(gtest_eigen_predicates ${PROJECT_NAME})
 
+# Node Emplace test
+wolf_add_gtest(gtest_emplace gtest_emplace.cpp)
+target_link_libraries(gtest_emplace ${PROJECT_NAME})
+
 # FeatureBase classes test
 wolf_add_gtest(gtest_feature_base gtest_feature_base.cpp)
 target_link_libraries(gtest_feature_base ${PROJECT_NAME})

@@ -35,21 +35,25 @@ TEST(ProcessorBase, KeyFrameCallback)
     Scalar dt = 0.01;
 
     // Wolf problem
-    ProblemPtr problem = Problem::create("PO 2D");
+    ProblemPtr problem = Problem::create("PO", 2);
 
     // Install tracker (sensor and processor)
-    SensorBasePtr sens_trk = make_shared<SensorBase>("FEATURE", std::make_shared<StateBlock>(Eigen::VectorXs::Zero(2)),
-                                                     std::make_shared<StateBlock>(Eigen::VectorXs::Zero(1)),
-                                                     std::make_shared<StateBlock>(Eigen::VectorXs::Zero(2)), 2);
+    // SensorBasePtr sens_trk = make_shared<SensorBase>("FEATURE", std::make_shared<StateBlock>(Eigen::VectorXs::Zero(2)),
+    //                                                  std::make_shared<StateBlock>(Eigen::VectorXs::Zero(1)),
+    //                                                  std::make_shared<StateBlock>(Eigen::VectorXs::Zero(2)), 2);
 
+    auto sens_trk = SensorBase::emplace<SensorBase>(problem->getHardware(), "FEATURE", std::make_shared<StateBlock>(Eigen::VectorXs::Zero(2)),
+                                                    std::make_shared<StateBlock>(Eigen::VectorXs::Zero(1)),
+                                                    std::make_shared<StateBlock>(Eigen::VectorXs::Zero(2)), 2);
     ProcessorParamsTrackerFeaturePtr params = std::make_shared<ProcessorParamsTrackerFeature>();
     params->time_tolerance            = dt/2;
     params->max_new_features          = 5;
     params->min_features_for_keyframe = 5;
-    shared_ptr<ProcessorTrackerFeatureDummy> proc_trk = make_shared<ProcessorTrackerFeatureDummy>(params);
+    // shared_ptr<ProcessorTrackerFeatureDummy> proc_trk = make_shared<ProcessorTrackerFeatureDummy>(params);
+    auto proc_trk = ProcessorBase::emplace<ProcessorTrackerFeatureDummy>(sens_trk, params);
 
-    problem->addSensor(sens_trk);
-    sens_trk->addProcessor(proc_trk);
+    // problem->addSensor(sens_trk);
+    // sens_trk->addProcessor(proc_trk);
 
     // Install odometer (sensor and processor)
     SensorBasePtr sens_odo = problem->installSensor("ODOM 2D", "odometer", Vector3s(0,0,0), "");
@@ -59,7 +63,7 @@ TEST(ProcessorBase, KeyFrameCallback)
 
     std::cout << "sensor & processor created and added to wolf problem" << std::endl;
 
-    // Sequence to test KeyFrame creations (callback calls)
+    // Sequence to test Key Frame creations (callback calls)
 
     // initialize
     TimeStamp   t(0.0);

@@ -13,6 +13,7 @@ struct ProcessorParamsIMU : public ProcessorParamsMotion
 {
   // ProcessorParamsIMU() = default;
     using ProcessorParamsMotion::ProcessorParamsMotion;
+    Scalar unmeasured_perturbation_std_ = 0.00001;  // TODO: pass in processor motion?
 };
 
 WOLF_PTR_TYPEDEFS(ProcessorIMU);
@@ -62,6 +63,7 @@ class ProcessorIMU : public ProcessorMotion{
 
     protected:
         ProcessorParamsIMUPtr params_motion_IMU_;
+        Eigen::Matrix<Scalar, 9, 9> unmeasured_perturbation_cov_;
 
     public:
         //for factory

@@ -99,6 +99,9 @@ class CaptureBase : public NodeBase, public std::enable_shared_from_this<Capture
         SizeEigen getCalibSize() const;
         virtual Eigen::VectorXs getCalibration() const;
         void setCalibration(const Eigen::VectorXs& _calib);
+        void link(FrameBasePtr);
+        template<typename classType, typename... T>
+        static std::shared_ptr<CaptureBase> emplace(FrameBasePtr _frm_ptr, T&&... all);
 
     protected:
         SizeEigen computeCalibSize() const;
@@ -115,6 +118,14 @@ class CaptureBase : public NodeBase, public std::enable_shared_from_this<Capture
 #include "base/state_block/state_block.h"
 
 namespace wolf{
+
+template<typename classType, typename... T>
+std::shared_ptr<CaptureBase> CaptureBase::emplace(FrameBasePtr _frm_ptr, T&&... all)
+{
+    CaptureBasePtr cpt = std::make_shared<classType>(std::forward<T>(all)...);
+    cpt->link(_frm_ptr);
+    return cpt;
+}
 
 inline SizeEigen CaptureBase::getCalibSize() const
 {

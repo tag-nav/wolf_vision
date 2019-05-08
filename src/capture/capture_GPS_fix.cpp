@@ -25,10 +25,11 @@ CaptureGPSFix::~CaptureGPSFix()
 void CaptureGPSFix::process()
 {
 	// EXTRACT AND ADD FEATURES
-    addFeature(std::make_shared<FeatureGPSFix>(data_,data_covariance_));
+    // addFeature(std::make_shared<FeatureGPSFix>(data_,data_covariance_));
 
     // ADD CONSTRAINT
-    getFeatureList().front()->addFactor(std::make_shared <FactorGPS2D>(getFeatureList().front()));
+    // getFeatureList().front()->addFactor(std::make_shared <FactorGPS2D>(getFeatureList().front()));
+    FactorBase::emplace<FactorGPS2D>(getFeatureList().front(), getFeatureList().front());
 }
 
 } //namespace wolf

@@ -104,7 +104,7 @@ int main()
     using namespace wolf;
 
     // Wolf problem and solver
-    ProblemPtr problem                      = Problem::create("PO 2D");
+    ProblemPtr problem                      = Problem::create("PO", 2);
     ceres::Solver::Options options;
     options.max_num_iterations              = 1000; // We depart far from solution, need a lot of iterations
     CeresManagerPtr ceres                   = std::make_shared<CeresManager>(problem, options);
@@ -225,7 +225,7 @@ int main()
             if (sb && !sb->isFixed())
                 sb->setState(sb->getState() + VectorXs::Random(sb->getSize()) * 0.5);       // We perturb A LOT !
     for (auto kf : problem->getTrajectory()->getFrameList())
-        if (kf->isKey())
+        if (kf->isKeyOrAux())
             for (auto sb : kf->getStateBlockVec())
                 if (sb && !sb->isFixed())
                     sb->setState(sb->getState() + VectorXs::Random(sb->getSize()) * 0.5);   // We perturb A LOT !
@@ -245,7 +245,7 @@ int main()
     WOLF_TRACE("======== COVARIANCES OF SOLVED PROBLEM =======")
     ceres->computeCovariances(SolverManager::CovarianceBlocksToBeComputed::ALL_MARGINALS);
     for (auto kf : problem->getTrajectory()->getFrameList())
-        if (kf->isKey())
+        if (kf->isKeyOrAux())
         {
             Eigen::MatrixXs cov;
             kf->getCovariance(cov);

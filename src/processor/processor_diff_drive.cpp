@@ -212,12 +212,13 @@ CaptureMotionPtr ProcessorDiffDrive::createCapture(const TimeStamp& _ts,
 FactorBasePtr ProcessorDiffDrive::emplaceFactor(FeatureBasePtr _feature,
                                                         CaptureBasePtr _capture_origin)
 {
-  FactorOdom2DPtr fac_odom =
-      std::make_shared<FactorOdom2D>(_feature, _capture_origin->getFrame(),
-                                         shared_from_this());
-
-  _feature->addFactor(fac_odom);
-  _capture_origin->getFrame()->addConstrainedBy(fac_odom);
+  // FactorOdom2DPtr fac_odom =
+  //     std::make_shared<FactorOdom2D>(_feature, _capture_origin->getFrame(),
+  //                                        shared_from_this());
+  auto fac_odom = FactorBase::emplace<FactorOdom2D>(_feature, _feature, _capture_origin->getFrame(),
+                                    shared_from_this());
+  // _feature->addFactor(fac_odom);
+  // _capture_origin->getFrame()->addConstrainedBy(fac_odom);
 
   return fac_odom;
 }

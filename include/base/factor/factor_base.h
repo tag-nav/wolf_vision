@@ -171,6 +171,10 @@ class FactorBase : public NodeBase, public std::enable_shared_from_this<FactorBa
          */
         void setProcessor(const ProcessorBasePtr& _processor_ptr);
 
+        void link(FeatureBasePtr);
+        template<typename classType, typename... T>
+        static std::shared_ptr<FactorBase> emplace(FeatureBasePtr _oth_ptr, T&&... all);
+
 //    protected:
 //        template<typename D>
 //        void print(const std::string& name, const Eigen::MatrixBase<D>& mat) const; // Do nothing if input Scalar type is ceres::Jet
@@ -208,6 +212,15 @@ namespace wolf{
 //        WOLF_TRACE(name, ":\n", mat);
 //    }
 //}
+
+template<typename classType, typename... T>
+std::shared_ptr<FactorBase> FactorBase::emplace(FeatureBasePtr _ftr_ptr, T&&... all)
+{
+    FactorBasePtr ctr = std::make_shared<classType>(std::forward<T>(all)...);
+    ctr->link(_ftr_ptr);
+    return ctr;
+}
+
 
 inline unsigned int FactorBase::id() const
 {

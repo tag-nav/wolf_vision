@@ -99,8 +99,6 @@ FeatureBasePtr CaptureBase::addFeature(FeatureBasePtr _ft_ptr)
 {
     //std::cout << "Adding feature" << std::endl;
     feature_list_.push_back(_ft_ptr);
-    _ft_ptr->setCapture(shared_from_this());
-    _ft_ptr->setProblem(getProblem());
     return _ft_ptr;
 }
 
@@ -111,8 +109,9 @@ void CaptureBase::addFeatureList(FeatureBasePtrList& _new_ft_list)
         feature_ptr->setCapture(shared_from_this());
         if (getProblem() != nullptr)
             feature_ptr->setProblem(getProblem());
+        feature_list_.push_back(feature_ptr);
     }
-    feature_list_.splice(feature_list_.end(), _new_ft_list);
+//    feature_list_.splice(feature_list_.end(), _new_ft_list);
 }
 
 void CaptureBase::getFactorList(FactorBasePtrList& _fac_list)
@@ -290,6 +289,21 @@ void CaptureBase::setCalibration(const VectorXs& _calib)
             sb->setState(_calib.segment(index, sb->getSize()));
             index += sb->getSize();
         }
+    }
+}
+
+void CaptureBase::link(FrameBasePtr _frm_ptr)
+{
+    if(_frm_ptr)
+    {
+        _frm_ptr->addCapture(shared_from_this());
+        this->setFrame(_frm_ptr);
+        this->setProblem(_frm_ptr->getProblem());
+        this->registerNewStateBlocks();
+    }
+    else
+    {
+        WOLF_WARN("Linking with a nullptr");
     }
 }
 

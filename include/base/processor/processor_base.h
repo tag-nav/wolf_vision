@@ -110,9 +110,11 @@ struct ProcessorParamsBase : public ParamsBase
 {
     ProcessorParamsBase() = default;
     ProcessorParamsBase(bool _voting_active,
-                        Scalar _time_tolerance)
-      : voting_active(_voting_active)
-      , time_tolerance(_time_tolerance)
+                        Scalar _time_tolerance,
+                        bool _voting_aux_active = false) :
+        voting_active(_voting_active),
+        voting_aux_active(_voting_aux_active),
+        time_tolerance(_time_tolerance)
     {
       //
     }
@@ -125,7 +127,8 @@ struct ProcessorParamsBase : public ParamsBase
 
     virtual ~ProcessorParamsBase() = default;
 
-    bool voting_active = false;
+    bool voting_active = false;     ///< Whether this processor is allowed to vote for a Key Frame or not
+    bool voting_aux_active = false; ///< Whether this processor is allowed to vote for an Auxiliary Frame or not
 
     ///< maximum time difference between a Keyframe time stamp and
     /// a particular Capture of this processor to allow assigning
@@ -165,7 +168,18 @@ class ProcessorBase : public NodeBase, public std::enable_shared_from_this<Proce
          */
         virtual bool voteForKeyFrame() = 0;
 
+        /** \brief Vote for Auxiliary Frame generation
+         *
+         * If a Auxiliary Frame criterion is validated, this function returns true,
+         * meaning that it wants to create a Auxiliary Frame at the \b last Capture.
+         *
+         * WARNING! This function only votes! It does not create Auxiliary Frames!
+         */
+        virtual bool voteForAuxFrame(){return false;};
+
         virtual bool permittedKeyFrame() final;
+
+        virtual bool permittedAuxFrame() final;
 
         /**\brief make a Frame with the provided Capture
          *
@@ -198,7 +212,14 @@ class ProcessorBase : public NodeBase, public std::enable_shared_from_this<Proce
 
         bool isVotingActive() const;
 
+        bool isVotingAuxActive() const;
+
         void setVotingActive(bool _voting_active = true);
+
+        void link(SensorBasePtr);
+        template<typename classType, typename... T>
+        static std::shared_ptr<ProcessorBase> emplace(SensorBasePtr _sen_ptr, T&&... all);
+        void setVotingAuxActive(bool _voting_active = true);
 };
 
 inline bool ProcessorBase::isVotingActive() const
@@ -206,9 +227,19 @@ inline bool ProcessorBase::isVotingActive() const
     return params_->voting_active;
 }
 
+inline bool ProcessorBase::isVotingAuxActive() const
+{
+    return params_->voting_aux_active;
+}
+
 inline void ProcessorBase::setVotingActive(bool _voting_active)
 {
     params_->voting_active = _voting_active;
+}
+
+inline void ProcessorBase::setVotingAuxActive(bool _voting_active)
+{
+    params_->voting_aux_active = _voting_active;
 }
 
 }
@@ -217,6 +248,14 @@ inline void ProcessorBase::setVotingActive(bool _voting_active)
 #include "base/factor/factor_base.h"
 
 namespace wolf {
+
+template<typename classType, typename... T>
+std::shared_ptr<ProcessorBase> ProcessorBase::emplace(SensorBasePtr _sen_ptr, T&&... all)
+{
+    ProcessorBasePtr prc = std::make_shared<classType>(std::forward<T>(all)...);
+    prc->link(_sen_ptr);
+    return prc;
+}
 
 inline bool ProcessorBase::isMotion()
 {

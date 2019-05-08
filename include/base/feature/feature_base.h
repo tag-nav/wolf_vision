@@ -36,12 +36,19 @@ class FeatureBase : public NodeBase, public std::enable_shared_from_this<Feature
         
     public:
 
+        typedef enum
+        {
+            UNCERTAINTY_IS_COVARIANCE,
+            UNCERTAINTY_IS_INFO,
+            UNCERTAINTY_IS_STDDEV
+        } UncertaintyType;
+
         /** \brief Constructor from capture pointer and measure
          * \param _tp type of feature -- see wolf.h
          * \param _measurement the measurement
          * \param _meas_covariance the noise of the measurement
          */
-        FeatureBase(const std::string& _type, const Eigen::VectorXs& _measurement, const Eigen::MatrixXs& _meas_covariance);
+        FeatureBase(const std::string& _type, const Eigen::VectorXs& _measurement, const Eigen::MatrixXs& _meas_uncertainty, UncertaintyType _uncertainty_type = UNCERTAINTY_IS_COVARIANCE);
 
         virtual ~FeatureBase();
         virtual void remove();
@@ -88,6 +95,10 @@ class FeatureBase : public NodeBase, public std::enable_shared_from_this<Feature
         // all factors
         void getFactorList(FactorBasePtrList & _fac_list);
 
+        void link(CaptureBasePtr);
+        template<typename classType, typename... T>
+        static std::shared_ptr<FeatureBase> emplace(CaptureBasePtr _cpt_ptr, T&&... all);
+
     private:
         Eigen::MatrixXs computeSqrtUpper(const Eigen::MatrixXs& _M) const;
 };
@@ -99,6 +110,14 @@ class FeatureBase : public NodeBase, public std::enable_shared_from_this<Feature
 #include "base/factor/factor_base.h"
 
 namespace wolf{
+
+    template<typename classType, typename... T>
+    std::shared_ptr<FeatureBase> FeatureBase::emplace(CaptureBasePtr _cpt_ptr, T&&... all)
+    {
+        FeatureBasePtr ftr = std::make_shared<classType>(std::forward<T>(all)...);
+        ftr->link(_cpt_ptr);
+        return ftr;
+    }
 
 inline unsigned int FeatureBase::getHits() const
 {

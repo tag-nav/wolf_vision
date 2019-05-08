@@ -81,7 +81,6 @@ class NodeBase
 
         void setType(const std::string& _type);
         void setName(const std::string& _name);
-
         ProblemPtr getProblem() const;
         virtual void setProblem(ProblemPtr _prob_ptr);
 };

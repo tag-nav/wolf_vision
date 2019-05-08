@@ -3,6 +3,7 @@
 
 // Fwd refs
 namespace wolf{
+class SolverManager;
 class HardwareBase;
 class TrajectoryBase;
 class MapBase;
@@ -36,6 +37,7 @@ enum Notification
  */
 class Problem : public std::enable_shared_from_this<Problem>
 {
+    friend SolverManager; // Enable SolverManager to acces protected functions (consumeXXXNotificationMap())
 
     protected:
         HardwareBasePtr     hardware_ptr_;
@@ -50,20 +52,23 @@ class Problem : public std::enable_shared_from_this<Problem>
         mutable std::mutex mut_state_block_notifications_;
         mutable std::mutex mut_covariances_;
         bool prior_is_set_;
+        std::string frame_structure_;
 
     private: // CAUTION: THESE METHODS ARE PRIVATE, DO NOT MAKE THEM PUBLIC !!
         Problem(const std::string& _frame_structure); // USE create() below !!
+        Problem(const std::string& _frame_structure, SizeEigen _dim); // USE create() below !!
         void setup();
 
     public:
-        static ProblemPtr create(const std::string& _frame_structure); // USE THIS AS A CONSTRUCTOR!
-        static ProblemPtr autoSetup(const std::string& _frame_structure, const std::string& _yaml_file);
+        static ProblemPtr create(const std::string& _frame_structure, SizeEigen _dim); // USE THIS AS A CONSTRUCTOR!
+        static ProblemPtr autoSetup(const std::string& _frame_structure, SizeEigen _dim, const std::string& _yaml_file);
         virtual ~Problem();
 
         // Properties -----------------------------------------
         SizeEigen getFrameStructureSize() const;
         void getFrameStructureSize(SizeEigen& _x_size, SizeEigen& _cov_size) const;
         SizeEigen getDim() const;
+        std::string getFrameStructure() const;
 
         // Hardware branch ------------------------------------
         HardwareBasePtr getHardware();
@@ -154,7 +159,8 @@ class Problem : public std::enable_shared_from_this<Problem>
 
         /** \brief Emplace frame from string frame_structure
          * \param _frame_structure String indicating the frame structure.
-         * \param _frame_key_type Either KEY_FRAME or NON_KEY_FRAME
+         * \param _dim variable indicating the dimension of the problem
+         * \param _frame_key_type Either KEY, AUXILIARY or NON_ESTIMATED
          * \param _frame_state State vector; must match the size and format of the chosen frame structure
          * \param _time_stamp Time stamp of the frame
          *
@@ -164,13 +170,15 @@ class Problem : public std::enable_shared_from_this<Problem>
          *   - If it is key-frame, update state-block lists in Problem
          */
         FrameBasePtr emplaceFrame(const std::string& _frame_structure, //
+                                  const SizeEigen _dim, //
                                   FrameType _frame_key_type, //
                                   const Eigen::VectorXs& _frame_state, //
                                   const TimeStamp& _time_stamp);
 
         /** \brief Emplace frame from string frame_structure without state
          * \param _frame_structure String indicating the frame structure.
-         * \param _frame_key_type Either KEY_FRAME or NON_KEY_FRAME
+         * \param _dim variable indicating the dimension of the problem
+         * \param _frame_key_type Either KEY, AUXILIARY or NON_ESTIMATED
          * \param _time_stamp Time stamp of the frame
          *
          * This acts as a Frame factory, but also takes care to update related lists in WolfProblem:
@@ -179,11 +187,12 @@ class Problem : public std::enable_shared_from_this<Problem>
          *   - If it is key-frame, update state-block lists in Problem
          */
         FrameBasePtr emplaceFrame(const std::string& _frame_structure, //
+                                  const SizeEigen _dim, //
                                   FrameType _frame_key_type, //
                                   const TimeStamp& _time_stamp);
 
         /** \brief Emplace frame from string frame_structure without structure
-         * \param _frame_key_type Either KEY_FRAME or NON_KEY_FRAME
+         * \param _frame_key_type Either KEY, AUXILIARY or NON_ESTIMATED
          * \param _frame_state State vector; must match the size and format of the chosen frame structure
          * \param _time_stamp Time stamp of the frame
          *
@@ -197,7 +206,7 @@ class Problem : public std::enable_shared_from_this<Problem>
                                   const TimeStamp& _time_stamp);
 
         /** \brief Emplace frame from string frame_structure without structure nor state
-         * \param _frame_key_type Either KEY_FRAME or NON_KEY_FRAME
+         * \param _frame_key_type Either KEY, AUXILIARY or NON_ESTIMATED
          * \param _time_stamp Time stamp of the frame
          *
          * This acts as a Frame factory, but also takes care to update related lists in WolfProblem:
@@ -209,23 +218,41 @@ class Problem : public std::enable_shared_from_this<Problem>
                                   const TimeStamp& _time_stamp);
 
         // Frame getters
-        FrameBasePtr    getLastFrame         ( );
-        FrameBasePtr    getLastKeyFrame      ( );
-        FrameBasePtr    closestKeyFrameToTimeStamp(const TimeStamp& _ts);
+        FrameBasePtr getLastFrame( ) const;
+        FrameBasePtr getLastKeyFrame( ) const;
+        FrameBasePtr getLastKeyOrAuxFrame( ) const;
+        FrameBasePtr closestKeyFrameToTimeStamp(const TimeStamp& _ts) const;
+        FrameBasePtr closestKeyOrAuxFrameToTimeStamp(const TimeStamp& _ts) const;
 
-        /** \brief Give the permission to a processor to create a new keyFrame
+        /** \brief Give the permission to a processor to create a new key Frame
          *
-         * This should implement a black list of processors that have forbidden keyframe creation.
+         * This should implement a black list of processors that have forbidden key frame creation.
          *   - This decision is made at problem level, not at processor configuration level.
-         *   - Therefore, if you want to permanently configure a processor for not creating keyframes, see Processor::voting_active_ and its accessors.
+         *   - Therefore, if you want to permanently configure a processor for not creating key frames, see Processor::voting_active_ and its accessors.
          */
         bool permitKeyFrame(ProcessorBasePtr _processor_ptr);
 
         /** \brief New key frame callback
          *
-         * New key frame callback: It should be called by any processor that creates a new keyframe. It calls the keyFrameCallback of the rest of processors.
+         * New key frame callback: It should be called by any processor that creates a new key frame. It calls the keyFrameCallback of the rest of processors.
          */
         void keyFrameCallback(FrameBasePtr _keyframe_ptr, //
+                              ProcessorBasePtr _processor_ptr, //
+                              const Scalar& _time_tolerance);
+
+        /** \brief Give the permission to a processor to create a new auxiliary Frame
+         *
+         * This should implement a black list of processors that have forbidden auxiliary frame creation.
+         *   - This decision is made at problem level, not at processor configuration level.
+         *   - Therefore, if you want to permanently configure a processor for not creating estimated frames, see Processor::voting_active_ and its accessors.
+         */
+        bool permitAuxFrame(ProcessorBasePtr _processor_ptr);
+
+        /** \brief New auxiliary frame callback
+         *
+         * New auxiliary frame callback: It should be called by any processor that creates a new auxiliary frame. It calls the auxiliaryFrameCallback of the processor motion.
+         */
+        void auxFrameCallback(FrameBasePtr _frame_ptr, //
                               ProcessorBasePtr _processor_ptr, //
                               const Scalar& _time_tolerance);
 
@@ -256,6 +283,7 @@ class Problem : public std::enable_shared_from_this<Problem>
         bool getCovarianceBlock(StateBlockPtr _state, Eigen::MatrixXs& _cov, const int _row_and_col = 0);
         bool getFrameCovariance(FrameBaseConstPtr _frame_ptr, Eigen::MatrixXs& _covariance);
         bool getLastKeyFrameCovariance(Eigen::MatrixXs& _covariance);
+        bool getLastKeyOrAuxFrameCovariance(Eigen::MatrixXs& _covariance);
         bool getLandmarkCovariance(LandmarkBaseConstPtr _landmark_ptr, Eigen::MatrixXs& _covariance);
 
         // Solver management ----------------------------------------
@@ -268,9 +296,13 @@ class Problem : public std::enable_shared_from_this<Problem>
          */
         void removeStateBlock(StateBlockPtr _state_ptr);
 
-        /** \brief Returns the map of factor notification to be handled by the solver (the map stored in this is emptied)
+        /** \brief Returns the size of the map of state block notification
          */
-        std::map<StateBlockPtr,Notification> consumeStateBlockNotificationMap();
+        SizeStd getStateBlockNotificationMapSize() const;
+
+        /** \brief Returns if the state block has been notified, and the notification via parameter
+         */
+        bool getStateBlockNotification(const StateBlockPtr& sb_ptr, Notification& notif) const;
 
         /** \brief Notifies a new factor to be added to the solver manager
          */
@@ -280,10 +312,24 @@ class Problem : public std::enable_shared_from_this<Problem>
          */
         void removeFactor(FactorBasePtr _factor_ptr);
 
+        /** \brief Returns the size of the map of factor notification
+         */
+        SizeStd getFactorNotificationMapSize() const;
+
+        /** \brief Returns if the factor has been notified, and the notification via parameter
+         */
+        bool getFactorNotification(const FactorBasePtr& fac_ptr, Notification& notif) const;
+
+    protected:
+        /** \brief Returns the map of state block notification to be handled by the solver (the map stored in this is emptied)
+         */
+        std::map<StateBlockPtr,Notification> consumeStateBlockNotificationMap();
+
         /** \brief Returns the map of factor notification to be handled by the solver (the map stored in this is emptied)
          */
         std::map<FactorBasePtr, Notification> consumeFactorNotificationMap();
 
+    public:
         // Print and check ---------------------------------------
         /**
          * \brief print wolf tree
@@ -327,11 +373,24 @@ inline std::map<StateBlockPtr,Notification> Problem::consumeStateBlockNotificati
     return std::move(state_block_notification_map_);
 }
 
+inline SizeStd Problem::getStateBlockNotificationMapSize() const
+{
+    std::lock_guard<std::mutex> lock(mut_state_block_notifications_);
+    return state_block_notification_map_.size();
+}
+
 inline std::map<FactorBasePtr,Notification> Problem::consumeFactorNotificationMap()
 {
     std::lock_guard<std::mutex> lock(mut_factor_notifications_);
     return std::move(factor_notification_map_);
 }
+
+inline wolf::SizeStd Problem::getFactorNotificationMapSize() const
+{
+    std::lock_guard<std::mutex> lock(mut_factor_notifications_);
+    return factor_notification_map_.size();
+}
+
 
 } // namespace wolf
 

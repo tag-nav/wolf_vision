@@ -29,17 +29,20 @@ TEST(CaptureAutodiff, ConstructorOdom2d)
     SensorOdom2DPtr sensor_ptr = std::make_shared<SensorOdom2D>(Vector3s::Zero(), intrinsics_odo);
 
     // CAPTURE
-    CaptureVoidPtr capture_ptr = std::make_shared<CaptureVoid>(TimeStamp(0), sensor_ptr);
-    fr2_ptr->addCapture(capture_ptr);
+    // CaptureVoidPtr capture_ptr = std::make_shared<CaptureVoid>(TimeStamp(0), sensor_ptr);
+    // fr2_ptr->addCapture(capture_ptr);
+    auto capture_ptr = CaptureBase::emplace<CaptureVoid>(fr2_ptr, TimeStamp(0), sensor_ptr);
 
     // FEATURE
-    FeatureBasePtr feature_ptr = std::make_shared<FeatureOdom2D>(Eigen::Vector3s::Zero(), Eigen::Matrix3s::Identity());
-    capture_ptr->addFeature(feature_ptr);
+    // FeatureBasePtr feature_ptr = std::make_shared<FeatureOdom2D>(Eigen::Vector3s::Zero(), Eigen::Matrix3s::Identity());
+    // capture_ptr->addFeature(feature_ptr);
+    auto feature_ptr = FeatureBase::emplace<FeatureOdom2D>(capture_ptr, Eigen::Vector3s::Zero(), Eigen::Matrix3s::Identity());
 
-    // CONSTRAINT
-    FactorOdom2DPtr factor_ptr = std::make_shared<FactorOdom2D>(feature_ptr, fr1_ptr);
-    feature_ptr->addFactor(factor_ptr);
-    fr1_ptr->addConstrainedBy(factor_ptr);
+    // FACTOR
+    // FactorOdom2DPtr factor_ptr = std::make_shared<FactorOdom2D>(feature_ptr, fr1_ptr);
+    // feature_ptr->addFactor(factor_ptr);
+    // fr1_ptr->addConstrainedBy(factor_ptr);
+    auto factor_ptr = FactorBase::emplace<FactorOdom2D>(feature_ptr, feature_ptr, fr1_ptr);
 
     ASSERT_TRUE(factor_ptr->getFeature());
     ASSERT_TRUE(factor_ptr->getFeature()->getCapture());
@@ -64,19 +67,24 @@ TEST(CaptureAutodiff, ResidualOdom2d)
     SensorOdom2DPtr sensor_ptr = std::make_shared<SensorOdom2D>(Vector3s::Zero(), intrinsics_odo);
 
     // CAPTURE
-    CaptureVoidPtr capture_ptr = std::make_shared<CaptureVoid>(TimeStamp(0), sensor_ptr);
-    fr2_ptr->addCapture(capture_ptr);
+    // CaptureVoidPtr capture_ptr = std::make_shared<CaptureVoid>(TimeStamp(0), sensor_ptr);
+    // fr2_ptr->addCapture(capture_ptr);
+    auto capture_ptr = CaptureBase::emplace<CaptureVoid>(fr2_ptr, TimeStamp(0), sensor_ptr);
+
 
     // FEATURE
     Eigen::Vector3s d;
     d << -1, -4, M_PI/2;
-    FeatureBasePtr feature_ptr = std::make_shared<FeatureOdom2D>(d, Eigen::Matrix3s::Identity());
-    capture_ptr->addFeature(feature_ptr);
+    // FeatureBasePtr feature_ptr = std::make_shared<FeatureOdom2D>(d, Eigen::Matrix3s::Identity());
+    // capture_ptr->addFeature(feature_ptr);
+    auto feature_ptr = FeatureBase::emplace<FeatureOdom2D>(capture_ptr, d, Eigen::Matrix3s::Identity());
 
-    // CONSTRAINT
-    FactorOdom2DPtr factor_ptr = std::make_shared<FactorOdom2D>(feature_ptr, fr1_ptr);
-    feature_ptr->addFactor(factor_ptr);
-    fr1_ptr->addConstrainedBy(factor_ptr);
+    // FACTOR
+    // FactorOdom2DPtr factor_ptr = std::make_shared<FactorOdom2D>(feature_ptr, fr1_ptr);
+    // feature_ptr->addFactor(factor_ptr);
+    // fr1_ptr->addConstrainedBy(factor_ptr);
+
+    auto factor_ptr = FactorBase::emplace<FactorOdom2D>(feature_ptr, feature_ptr, fr1_ptr);
 
     // EVALUATE
 
@@ -111,19 +119,22 @@ TEST(CaptureAutodiff, JacobianOdom2d)
     SensorOdom2DPtr sensor_ptr = std::make_shared<SensorOdom2D>(Vector3s::Zero(), intrinsics_odo);
 
     // CAPTURE
-    CaptureVoidPtr capture_ptr = std::make_shared<CaptureVoid>(TimeStamp(0), sensor_ptr);
-    fr2_ptr->addCapture(capture_ptr);
+    // CaptureVoidPtr capture_ptr = std::make_shared<CaptureVoid>(TimeStamp(0), sensor_ptr);
+    // fr2_ptr->addCapture(capture_ptr);
+    auto capture_ptr = CaptureBase::emplace<CaptureVoid>(fr2_ptr, TimeStamp(0), sensor_ptr);
 
     // FEATURE
     Eigen::Vector3s d;
     d << -1, -4, M_PI/2;
-    FeatureBasePtr feature_ptr = std::make_shared<FeatureOdom2D>(d, Eigen::Matrix3s::Identity());
-    capture_ptr->addFeature(feature_ptr);
+    // FeatureBasePtr feature_ptr = std::make_shared<FeatureOdom2D>(d, Eigen::Matrix3s::Identity());
+    // capture_ptr->addFeature(feature_ptr);
+    auto feature_ptr = FeatureBase::emplace<FeatureOdom2D>(capture_ptr, d, Eigen::Matrix3s::Identity());
 
-    // CONSTRAINT
-    FactorOdom2DPtr factor_ptr = std::make_shared<FactorOdom2D>(feature_ptr, fr1_ptr);
-    feature_ptr->addFactor(factor_ptr);
-    fr1_ptr->addConstrainedBy(factor_ptr);
+    // FACTOR
+    // FactorOdom2DPtr factor_ptr = std::make_shared<FactorOdom2D>(feature_ptr, fr1_ptr);
+    // feature_ptr->addFactor(factor_ptr);
+    // fr1_ptr->addConstrainedBy(factor_ptr);
+    auto factor_ptr = FactorBase::emplace<FactorOdom2D>(feature_ptr, feature_ptr, fr1_ptr);
 
     // COMPUTE JACOBIANS
 
@@ -193,22 +204,26 @@ TEST(CaptureAutodiff, AutodiffVsAnalytic)
     SensorOdom2DPtr sensor_ptr = std::make_shared<SensorOdom2D>(Vector3s::Zero(), intrinsics_odo);
 
     // CAPTURE
-    CaptureVoidPtr capture_ptr = std::make_shared<CaptureVoid>(TimeStamp(0), sensor_ptr);
-    fr2_ptr->addCapture(capture_ptr);
+    // CaptureVoidPtr capture_ptr = std::make_shared<CaptureVoid>(TimeStamp(0), sensor_ptr);
+    // fr2_ptr->addCapture(capture_ptr);
+    auto capture_ptr = CaptureBase::emplace<CaptureVoid>(fr2_ptr, TimeStamp(0), sensor_ptr);
 
     // FEATURE
     Eigen::Vector3s d;
     d << -1, -4, M_PI/2;
-    FeatureBasePtr feature_ptr = std::make_shared<FeatureOdom2D>(d, Eigen::Matrix3s::Identity());
-    capture_ptr->addFeature(feature_ptr);
+    // FeatureBasePtr feature_ptr = std::make_shared<FeatureOdom2D>(d, Eigen::Matrix3s::Identity());
+    // capture_ptr->addFeature(feature_ptr);
+    auto feature_ptr = FeatureBase::emplace<FeatureOdom2D>(capture_ptr, d, Eigen::Matrix3s::Identity());
 
-    // CONSTRAINTS
-    FactorOdom2DPtr fac_autodiff_ptr = std::make_shared<FactorOdom2D>(feature_ptr, fr1_ptr);
-    feature_ptr->addFactor(fac_autodiff_ptr);
-    fr1_ptr->addConstrainedBy(fac_autodiff_ptr);
-    FactorOdom2DAnalyticPtr fac_analytic_ptr = std::make_shared<FactorOdom2DAnalytic>(feature_ptr, fr1_ptr);
-    feature_ptr->addFactor(fac_analytic_ptr);
-    fr1_ptr->addConstrainedBy(fac_analytic_ptr);
+    // FACTOR
+    // FactorOdom2DPtr fac_autodiff_ptr = std::make_shared<FactorOdom2D>(feature_ptr, fr1_ptr);
+    // feature_ptr->addFactor(fac_autodiff_ptr);
+    // fr1_ptr->addConstrainedBy(fac_autodiff_ptr);
+    auto fac_autodiff_ptr = FactorBase::emplace<FactorOdom2D>(feature_ptr, feature_ptr, fr1_ptr);
+    // FactorOdom2DAnalyticPtr fac_analytic_ptr = std::make_shared<FactorOdom2DAnalytic>(feature_ptr, fr1_ptr);
+    // feature_ptr->addFactor(fac_analytic_ptr);
+    // fr1_ptr->addConstrainedBy(fac_analytic_ptr);
+    auto fac_analytic_ptr = FactorBase::emplace<FactorOdom2DAnalytic>(feature_ptr, feature_ptr, fr1_ptr);
 
     // COMPUTE JACOBIANS
 

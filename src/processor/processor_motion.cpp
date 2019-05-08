@@ -65,7 +65,16 @@ void ProcessorMotion::splitBuffer(const wolf::CaptureMotionPtr& _capture_source,
     // Update the existing capture
     _capture_source->setOriginFrame(_keyframe_target);
 
-    // re-integrate existing buffer -- note: the result of re-integration is stored in the same buffer!
+//    // Get optimized calibration params from 'origin' keyframe
+//    VectorXs calib_preint_optim = _capture_source->getOriginFrame()->getCaptureOf(getSensor())->getCalibration();
+//
+//    // Write the calib params into the capture before re-integration
+//    _capture_source->setCalibrationPreint(calib_preint_optim);
+
+    // re-integrate target capture's buffer -- note: the result of re-integration is stored in the same buffer!
+    reintegrateBuffer(_capture_target);
+
+    // re-integrate source capture's buffer -- note: the result of re-integration is stored in the same buffer!
     reintegrateBuffer(_capture_source);
 }
 
@@ -99,19 +108,24 @@ void ProcessorMotion::process(CaptureBasePtr _incoming_ptr)
             TimeStamp ts_from_callback = keyframe_from_callback->getTimeStamp();
 
             // find the capture whose buffer is affected by the new keyframe
-            auto existing_capture = findCaptureContainingTimeStamp(ts_from_callback);
+            auto existing_capture = findCaptureContainingTimeStamp(ts_from_callback); // k
 
             // Find the frame acting as the capture's origin
-            auto keyframe_origin = existing_capture->getOriginFrame();
+            auto keyframe_origin = existing_capture->getOriginFrame(); // i
+
+            auto capture_origin = std::static_pointer_cast<CaptureMotion>(keyframe_origin->getCaptureOf(getSensor()));
+
+            // Get calibration params for preintegration from origin, since it has chances to have optimized values
+            VectorXs calib_origin = capture_origin->getCalibration();
 
             // emplace a new motion capture to the new keyframe
-            auto capture_for_keyframe_callback = emplaceCapture(keyframe_from_callback,
+            auto capture_for_keyframe_callback = emplaceCapture(keyframe_from_callback, // j
                                                                 getSensor(),
                                                                 ts_from_callback,
                                                                 Eigen::VectorXs::Zero(data_size_),
-                                                                existing_capture->getDataCovariance(),
-                                                                existing_capture->getCalibration(),
-                                                                existing_capture->getCalibration(),
+                                                                capture_origin->getDataCovariance(),
+                                                                calib_origin,
+                                                                calib_origin,
                                                                 keyframe_origin);
 
             // split the buffer
@@ -151,15 +165,17 @@ void ProcessorMotion::process(CaptureBasePtr _incoming_ptr)
             // Find the frame acting as the capture's origin
             auto keyframe_origin = last_ptr_->getOriginFrame();
 
+            // Get calibration params for preintegration from origin, since it has chances to have optimized values
+            VectorXs calib_origin = origin_ptr_->getCalibration();
+
             // emplace a new motion capture to the new keyframe
-            VectorXs calib = last_ptr_->getCalibration();
             auto capture_for_keyframe_callback = emplaceCapture(keyframe_from_callback,
                                                                 getSensor(),
                                                                 ts_from_callback,
                                                                 Eigen::VectorXs::Zero(data_size_),
-                                                                last_ptr_->getDataCovariance(),
-                                                                calib,
-                                                                calib,
+                                                                origin_ptr_->getDataCovariance(),
+                                                                calib_origin,
+                                                                calib_origin,
                                                                 keyframe_origin);
 
             // split the buffer
@@ -193,7 +209,7 @@ void ProcessorMotion::process(CaptureBasePtr _incoming_ptr)
     last_ptr_->getFrame()->setTimeStamp(getCurrentTimeStamp());
     last_ptr_->getFrame()->setState(getCurrentState());
 
-    if (voteForKeyFrame() && permittedKeyFrame())
+    if (permittedKeyFrame() && voteForKeyFrame())
     {
         // Set the frame of last_ptr as key
         auto key_frame_ptr = last_ptr_->getFrame();
@@ -206,7 +222,7 @@ void ProcessorMotion::process(CaptureBasePtr _incoming_ptr)
         auto fac_ptr = emplaceFactor(key_feature_ptr, origin_ptr_);
 
         // create a new frame
-        auto new_frame_ptr = getProblem()->emplaceFrame(NON_KEY_FRAME,
+        auto new_frame_ptr = getProblem()->emplaceFrame(NON_ESTIMATED,
                                                         getCurrentState(),
                                                         getCurrentTimeStamp());
         // create a new capture
@@ -272,8 +288,7 @@ bool ProcessorMotion::getState(const TimeStamp& _ts, Eigen::VectorXs& _x)
         VectorXs delta            = capture_motion->correctDelta( motion.delta_integr_, delta_step);
 
         // Compose on top of origin state using the buffered time stamp, not the query time stamp
-        // TODO Interpolate the delta to produce a state at the query time stamp _ts
-        Scalar dt = motion.ts_ - capture_motion->getBuffer().get().front().ts_; // = _ts - capture_motion->getOrigin()->getTimeStamp();
+        Scalar dt = motion.ts_ - capture_motion->getBuffer().get().front().ts_;
         statePlusDelta(state_0, delta, dt, _x);
     }
     else
@@ -288,7 +303,7 @@ bool ProcessorMotion::getState(const TimeStamp& _ts, Eigen::VectorXs& _x)
 
 FrameBasePtr ProcessorMotion::setOrigin(const Eigen::VectorXs& _x_origin, const TimeStamp& _ts_origin)
 {
-    FrameBasePtr key_frame_ptr = getProblem()->emplaceFrame(KEY_FRAME, _x_origin, _ts_origin);
+    FrameBasePtr key_frame_ptr = getProblem()->emplaceFrame(KEY, _x_origin, _ts_origin);
     setOrigin(key_frame_ptr);
 
     return key_frame_ptr;
@@ -314,7 +329,7 @@ void ProcessorMotion::setOrigin(FrameBasePtr _origin_frame)
 
     // ---------- LAST ----------
     // Make non-key-frame for last Capture
-    auto new_frame_ptr = getProblem()->emplaceFrame(NON_KEY_FRAME,
+    auto new_frame_ptr = getProblem()->emplaceFrame(NON_ESTIMATED,
                                                     _origin_frame->getState(),
                                                     _origin_frame->getTimeStamp());
     // emplace (emtpy) last Capture
@@ -489,38 +504,84 @@ Motion ProcessorMotion::interpolate(const Motion& _ref1, const Motion& _ref2, co
     // Fraction of the time interval
     Scalar tau    = (_ts - _ref1.ts_) / (_ref2.ts_ - _ref1.ts_);
 
-    if (tau < 0.5)
-    {
-        // _ts is closest to _ref1
-        Motion interpolated                 ( _ref1 );
-        interpolated.ts_                    = _ts;
-        interpolated.data_                  . setZero();
-        interpolated.data_cov_              . setZero();
-        interpolated.delta_                 = deltaZero();
-        interpolated.delta_cov_             . setZero();
-        interpolated.jacobian_delta_integr_ . setIdentity();
-        interpolated.jacobian_delta_        . setZero();
 
-        _second = _ref2;
 
-        return interpolated;
-    }
-    else
-    {
-        // _ts is closest to _ref2
-        Motion interpolated                 ( _ref2 );
-        interpolated.ts_                    = _ts;
 
-        _second                             = _ref2;
-        _second.data_                       . setZero();
-        _second.data_cov_                   . setZero();
-        _second.delta_                      = deltaZero();
-        _second.delta_cov_                  . setZero();
-        _second.jacobian_delta_integr_      . setIdentity();
-        _second.jacobian_delta_             . setZero();
+    Motion interpolated(_ref1);  
+    interpolated.ts_        = _ts;
+    interpolated.data_      = (1-tau)*_ref1.data_ + tau*_ref2.data_;
+    interpolated.data_cov_  = (1-tau)*_ref1.data_cov_ + tau*_ref2.data_cov_;  // bof
+    computeCurrentDelta(interpolated.data_,
+                        interpolated.data_cov_,
+                        calib_preint_,
+                        _ts.get() - _ref1.ts_.get(),
+                        interpolated.delta_,
+                        interpolated.delta_cov_,
+                        interpolated.jacobian_calib_);
+    deltaPlusDelta(_ref1.delta_integr_,
+                   interpolated.delta_,
+                   _ts.get() - _ref1.ts_.get(),
+                   interpolated.delta_integr_,
+                   interpolated.jacobian_delta_integr_,
+                   interpolated.jacobian_delta_);
 
-        return interpolated;
-    }
+    _second.ts_       = _ref2.ts_;
+    _second.data_     = tau*_ref1.data_ + (1-tau)*_ref2.data_;
+    _second.data_cov_ = tau*_ref1.data_cov_ + (1-tau)*_ref2.data_cov_;  // bof
+    computeCurrentDelta(_second.data_,
+                        _second.data_cov_,
+                        calib_preint_,
+                        _ref2.ts_.get() - _ts.get(),
+                        _second.delta_,
+                        _second.delta_cov_,
+                        _second.jacobian_calib_);
+    deltaPlusDelta(_second.delta_integr_,
+                   _second.delta_,
+                   _second.ts_.get() - _ref1.ts_.get(),
+                   _second.delta_integr_,
+                   _second.jacobian_delta_integr_,
+                   _second.jacobian_delta_);
+
+    return interpolated;
+
+
+
+
+    // if (tau < 0.5)
+    // {
+    //     // _ts is closest to _ref1
+    //     Motion interpolated                 ( _ref1 );
+    //     // interpolated.ts_                    = _ref1.ts_;
+    //     // interpolated.data_                  = _ref1.data_;
+    //     // interpolated.data_cov_              = _ref1.data_cov_;
+    //     interpolated.delta_                 = deltaZero();
+    //     interpolated.delta_cov_             . setZero();
+    //     // interpolated.delta_integr_          = _ref1.delta_integr_;
+    //     // interpolated.delta_integr_cov_      = _ref1.delta_integr_cov_;
+    //     interpolated.jacobian_delta_integr_ . setIdentity();
+    //     interpolated.jacobian_delta_        . setZero();
+
+    //     _second = _ref2;
+
+    //     return interpolated;
+    // }
+    // else
+    // {
+    //     // _ts is closest to _ref2
+    //     Motion interpolated                 ( _ref2 );
+
+    //     _second                             = _ref2;
+    //     // _second.data_                       = _ref2.data_;
+    //     // _second.data_cov_                   = _ref2.data_cov_;
+    //     _second.delta_                      = deltaZero();
+    //     _second.delta_cov_                  . setZero();
+    //     // _second.delta_integr_               = _ref2.delta_integr_;
+    //     // _second.delta_integr_cov_           = _ref2.delta_integr_cov_;
+    //     _second.jacobian_delta_integr_      . setIdentity();
+    //     _second.jacobian_delta_             . setZero();
+
+    //     return interpolated;
+    // }
 
 }
 
@@ -571,14 +632,16 @@ CaptureMotionPtr ProcessorMotion::emplaceCapture(const FrameBasePtr& _frame_own,
     capture->setCalibrationPreint(_calib_preint);
 
     // add to wolf tree
-    _frame_own->addCapture(capture);
+    // _frame_own->addCapture(capture);
+    capture->link(_frame_own);
     return capture;
 }
 
 FeatureBasePtr ProcessorMotion::emplaceFeature(CaptureMotionPtr _capture_motion)
 {
     FeatureBasePtr feature = createFeature(_capture_motion);
-    _capture_motion->addFeature(feature);
+    // _capture_motion->addFeature(feature);
+    feature->link(_capture_motion);
     return feature;
 }
 

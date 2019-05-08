@@ -34,7 +34,7 @@ class FeatureIMU_test : public testing::Test
         using std::static_pointer_cast;
 
         // Wolf problem
-        problem = Problem::create("POV 3D");
+        problem = Problem::create("POV", 3);
         Eigen::VectorXs IMU_extrinsics(7);
         IMU_extrinsics << 0,0,0, 0,0,0,1; // IMU pose in the robot
         IntrinsicsIMUPtr sen_imu_params = std::make_shared<IntrinsicsIMU>();
@@ -57,7 +57,7 @@ class FeatureIMU_test : public testing::Test
         x0 << 0,0,0,  0,0,0,1,  0,0,0;
         MatrixXs P0; P0.setIdentity(9,9);
         origin_frame = problem->setPrior(x0, P0, 0.0, 0.01);
-    
+
     // Create one capture to store the IMU data arriving from (sensor / callback / file / etc.)
     // give the capture a big covariance, otherwise it will be so small that it won't pass following assertions
         imu_ptr = std::make_shared<CaptureIMU>(t, sensor_ptr, data_, Eigen::Matrix6s::Identity(), Eigen::Vector6s::Zero());
@@ -77,9 +77,8 @@ class FeatureIMU_test : public testing::Test
     //create Frame
         ts = problem->getProcessorMotion()->getBuffer().get().back().ts_;
         state_vec = problem->getProcessorMotion()->getCurrentState();
-   	    last_frame = std::make_shared<FrameBase>(KEY_FRAME, ts, std::make_shared<StateBlock>(state_vec.head(3)), std::make_shared<StateBlock>(state_vec.segment(3,4)), std::make_shared<StateBlock>(state_vec.head(3)));
-        problem->getTrajectory()->addFrame(last_frame);
-        
+        last_frame = problem->emplaceFrame(KEY, state_vec, ts);
+
     //create a feature
         delta_preint = problem->getProcessorMotion()->getMotion().delta_integr_;
         delta_preint_cov = problem->getProcessorMotion()->getMotion().delta_integr_cov_ + MatrixXs::Identity(9,9)*1e-08;
@@ -99,10 +98,10 @@ class FeatureIMU_test : public testing::Test
         // code here will be called just after the test completes
         // ok to through exceptions from here if need be
         /*
-            You can do deallocation of resources in TearDown or the destructor routine. 
-                However, if you want exception handling you must do it only in the TearDown code because throwing an exception 
+            You can do deallocation of resources in TearDown or the destructor routine.
+                However, if you want exception handling you must do it only in the TearDown code because throwing an exception
                 from the destructor results in undefined behavior.
-            The Google assertion macros may throw exceptions in platforms where they are enabled in future releases. 
+            The Google assertion macros may throw exceptions in platforms where they are enabled in future releases.
                 Therefore, it's a good idea to use assertion macros in the TearDown code for better maintenance.
         */
     }

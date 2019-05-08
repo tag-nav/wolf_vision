@@ -25,7 +25,7 @@ class FactorIMU : public FactorAutodiff<FactorIMU, 15, 3, 4, 3, 6, 3, 4, 3, 6>
 
         virtual ~FactorIMU() = default;
 
-        /* \brief : compute the residual from the state blocks being iterated by the solver.
+        /** \brief : compute the residual from the state blocks being iterated by the solver.
             -> computes the expected measurement
             -> corrects actual measurement with new bias
             -> compares the corrected measurement with the expected one
@@ -41,8 +41,14 @@ class FactorIMU : public FactorAutodiff<FactorIMU, 15, 3, 4, 3, 6, 3, 4, 3, 6>
                          const T* const _v2,
                          const T* const _b2,
                          T* _res) const;
-        
-        /* \brief : compute the residual from the state blocks being iterated by the solver. (same as operator())
+
+        /** \brief Estimation error given the states in the wolf tree
+         *
+         */
+        Eigen::Vector9s error();
+
+
+        /** \brief : compute the residual from the state blocks being iterated by the solver. (same as operator())
             -> computes the expected measurement
             -> corrects actual measurement with new bias
             -> compares the corrected measurement with the expected one
@@ -71,7 +77,7 @@ class FactorIMU : public FactorAutodiff<FactorIMU, 15, 3, 4, 3, 6, 3, 4, 3, 6>
                       const Eigen::MatrixBase<D1> &     _wb2,
                       Eigen::MatrixBase<D3> &           _res) const;
 
-        /* Function expectation(...)
+        /** Function expectation(...)
          * params :
          * Vector3s _p1 : position in imu frame
          * Vector4s _q1 : orientation quaternion in imu frame
@@ -96,7 +102,7 @@ class FactorIMU : public FactorAutodiff<FactorIMU, 15, 3, 4, 3, 6, 3, 4, 3, 6>
                          Eigen::QuaternionBase<D4> &        _qe,
                          Eigen::MatrixBase<D3> &            _ve) const;
 
-        /* \brief : return the expected delta given the state blocks in the wolf tree
+        /** \brief : return the expected delta given the state blocks in the wolf tree
         */
         Eigen::VectorXs expectation() const;
 
@@ -121,7 +127,7 @@ class FactorIMU : public FactorAutodiff<FactorIMU, 15, 3, 4, 3, 6, 3, 4, 3, 6>
         const Scalar dt_; ///< delta-time and delta-time-squared between keyframes
         const Scalar ab_rate_stdev_, wb_rate_stdev_; //stdev for standard_deviation (= sqrt(variance))
         
-        /* bias covariance and bias residuals
+        /** bias covariance and bias residuals
          *
          * continuous bias covariance matrix for accelerometer would then be A_r = diag(ab_stdev_^2, ab_stdev_^2, ab_stdev_^2)
          * To compute bias residuals, we will need to do (sqrt(A_r)).inverse() * ab_error
@@ -141,10 +147,10 @@ class FactorIMU : public FactorAutodiff<FactorIMU, 15, 3, 4, 3, 6, 3, 4, 3, 6>
 ///////////////////// IMPLEMENTAITON ////////////////////////////
 
 inline FactorIMU::FactorIMU(const FeatureIMUPtr&    _ftr_ptr,
-                                    const CaptureIMUPtr&    _cap_origin_ptr,
-                                    const ProcessorBasePtr& _processor_ptr,
-                                    bool                    _apply_loss_function,
-                                    FactorStatus        _status) :
+                            const CaptureIMUPtr&    _cap_origin_ptr,
+                            const ProcessorBasePtr& _processor_ptr,
+                            bool                    _apply_loss_function,
+                            FactorStatus        _status) :
                 FactorAutodiff<FactorIMU, 15, 3, 4, 3, 6, 3, 4, 3, 6>( // ...
                         "IMU",
                         _cap_origin_ptr->getFrame(),
@@ -183,14 +189,14 @@ inline FactorIMU::FactorIMU(const FeatureIMUPtr&    _ftr_ptr,
 
 template<typename T>
 inline bool FactorIMU::operator ()(const T* const _p1,
-                                       const T* const _q1,
-                                       const T* const _v1,
-                                       const T* const _b1,
-                                       const T* const _p2,
-                                       const T* const _q2,
-                                       const T* const _v2,
-                                       const T* const _b2,
-                                       T* _res) const
+                                   const T* const _q1,
+                                   const T* const _v1,
+                                   const T* const _b1,
+                                   const T* const _p2,
+                                   const T* const _q2,
+                                   const T* const _v2,
+                                   const T* const _b2,
+                                   T* _res) const
 {
     using namespace Eigen;
 
@@ -214,18 +220,42 @@ inline bool FactorIMU::operator ()(const T* const _p1,
     return true;
 }
 
+Eigen::Vector9s FactorIMU::error()
+{
+    Vector6s bias = capture_other_ptr_.lock()->getCalibration();
+
+    Map<const Vector3s > acc_bias(bias.data());
+    Map<const Vector3s > gyro_bias(bias.data() + 3);
+
+    Eigen::Vector9s delta_exp = expectation();
+
+    Eigen::Vector9s delta_preint = getMeasurement();
+
+    Eigen::Vector9s delta_step;
+
+    delta_step.head<3>()     = dDp_dab_ * (acc_bias - acc_bias_preint_ ) + dDp_dwb_ * (gyro_bias - gyro_bias_preint_);
+    delta_step.segment<3>(3) =                                       dDq_dwb_ * (gyro_bias - gyro_bias_preint_);
+    delta_step.tail<3>()     = dDv_dab_ * (acc_bias - acc_bias_preint_ ) + dDv_dwb_ * (gyro_bias - gyro_bias_preint_);
+
+    Eigen::VectorXs delta_corr = imu::plus(delta_preint, delta_step);
+
+    Eigen::Vector9s res = imu::diff(delta_exp, delta_corr);
+
+    return res;
+}
+
 template<typename D1, typename D2, typename D3>
 inline bool FactorIMU::residual(const Eigen::MatrixBase<D1> &       _p1,
-                                    const Eigen::QuaternionBase<D2> &   _q1,
-                                    const Eigen::MatrixBase<D1> &       _v1,
-                                    const Eigen::MatrixBase<D1> &       _ab1,
-                                    const Eigen::MatrixBase<D1> &       _wb1,
-                                    const Eigen::MatrixBase<D1> &       _p2,
-                                    const Eigen::QuaternionBase<D2> &   _q2,
-                                    const Eigen::MatrixBase<D1> &       _v2,
-                                    const Eigen::MatrixBase<D1> &       _ab2,
-                                    const Eigen::MatrixBase<D1> &       _wb2,
-                                    Eigen::MatrixBase<D3> &             _res) const
+                                const Eigen::QuaternionBase<D2> &   _q1,
+                                const Eigen::MatrixBase<D1> &       _v1,
+                                const Eigen::MatrixBase<D1> &       _ab1,
+                                const Eigen::MatrixBase<D1> &       _wb1,
+                                const Eigen::MatrixBase<D1> &       _p2,
+                                const Eigen::QuaternionBase<D2> &   _q2,
+                                const Eigen::MatrixBase<D1> &       _v2,
+                                const Eigen::MatrixBase<D1> &       _ab2,
+                                const Eigen::MatrixBase<D1> &       _wb2,
+                                Eigen::MatrixBase<D3> &             _res) const
 {
 
     /*  Help for the IMU residual function

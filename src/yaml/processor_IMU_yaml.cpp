@@ -29,13 +29,15 @@ static ProcessorParamsBasePtr createProcessorIMUParams(const std::string & _file
         YAML::Node kf_vote = config["keyframe vote"];
 
         ProcessorParamsIMUPtr params = std::make_shared<ProcessorParamsIMU>();
+        params->time_tolerance = config["time tolerance"]           .as<Scalar>();
+        params->unmeasured_perturbation_std_ = config["unmeasured perturbation std"].as<Scalar>();
 
+        params->unmeasured_perturbation_std = config["unmeasured perturbation std"].as<Scalar>();
         params->max_time_span       = kf_vote["max time span"]      .as<Scalar>();
         params->max_buff_length     = kf_vote["max buffer length"]  .as<SizeEigen  >();
         params->dist_traveled       = kf_vote["dist traveled"]      .as<Scalar>();
         params->angle_turned        = kf_vote["angle turned"]       .as<Scalar>();
         params->voting_active       = kf_vote["voting_active"]      .as<bool>();
-
         return params;
     }
 

@@ -108,6 +108,7 @@ class ProcessorTrackerLandmark : public ProcessorTracker
          * \param _landmarks_in input list of landmarks to be found in incoming
          * \param _features_incoming_out returned list of incoming features corresponding to a landmark of _landmarks_in
          * \param _feature_landmark_correspondences returned map of landmark correspondences: _feature_landmark_correspondences[_feature_out_ptr] = landmark_in_ptr
+         * \return the number of landmarks found
          */
         virtual unsigned int findLandmarks(const LandmarkBasePtrList&  _landmarks_in,
                                            FeatureBasePtrList&         _features_incoming_out,
@@ -136,7 +137,7 @@ class ProcessorTrackerLandmark : public ProcessorTracker
          * \param _features_last_out The list of detected Features.
          * \return The number of detected Features.
          *
-         * This function detects Features that do not correspond to known Features/Landmarks in the system.
+         * This function detects Features that do not correspond to known Landmarks in the system.
          *
          * The function is called in ProcessorTrackerLandmark::processNew() to set the member new_features_last_,
          * the list of newly detected features of the capture last_ptr_.

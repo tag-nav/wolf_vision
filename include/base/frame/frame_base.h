@@ -18,12 +18,13 @@ class StateBlock;
 
 namespace wolf {
 
-/** \brief Enumeration of frame types: key-frame or non-key-frame
+/** \brief Enumeration of frame types
  */
 typedef enum
 {
-    NON_KEY_FRAME = 0,  ///< Regular frame. It does not play at optimization.
-    KEY_FRAME = 1       ///< key frame. It plays at optimizations.
+    KEY = 2,          ///< key frame. It plays at optimizations (estimated).
+    AUXILIARY = 1,    ///< auxiliary frame. It plays at optimizations (estimated).
+    NON_ESTIMATED = 0 ///< regular frame. It does not play at optimization.
 } FrameType;
 
 //class FrameBase
@@ -64,6 +65,8 @@ class FrameBase : public NodeBase, public std::enable_shared_from_this<FrameBase
          **/        
         FrameBase(const FrameType & _tp, const TimeStamp& _ts, StateBlockPtr _p_ptr, StateBlockPtr _o_ptr = nullptr, StateBlockPtr _v_ptr = nullptr);
 
+        FrameBase(const std::string _frame_structure, const SizeEigen _dim, const FrameType & _tp, const TimeStamp& _ts, const Eigen::VectorXs& _x);
+
         virtual ~FrameBase();
         virtual void remove();
 
@@ -71,9 +74,14 @@ class FrameBase : public NodeBase, public std::enable_shared_from_this<FrameBase
     public:
         unsigned int id();
 
-        // KeyFrame / NonKeyFrame
+        // get type
         bool isKey() const;
+        bool isAux() const;
+        bool isKeyOrAux() const;
+
+        // set type
         void setKey();
+        void setAux();
 
         // Frame values ------------------------------------------------
     public:
@@ -138,6 +146,9 @@ class FrameBase : public NodeBase, public std::enable_shared_from_this<FrameBase
         virtual FactorBasePtr addConstrainedBy(FactorBasePtr _fac_ptr);
         unsigned int getHits() const;
         FactorBasePtrList& getConstrainedByList();
+        void link(TrajectoryBasePtr);
+        template<typename classType, typename... T>
+        static std::shared_ptr<FrameBase> emplace(TrajectoryBasePtr _ptr, T&&... all);
 
     public:
         static FrameBasePtr create_PO_2D (const FrameType & _tp,
@@ -162,6 +173,14 @@ class FrameBase : public NodeBase, public std::enable_shared_from_this<FrameBase
 
 namespace wolf {
 
+template<typename classType, typename... T>
+std::shared_ptr<FrameBase> FrameBase::emplace(TrajectoryBasePtr _ptr, T&&... all)
+{
+    FrameBasePtr frm = std::make_shared<classType>(std::forward<T>(all)...);
+    frm->link(_ptr);
+    return frm;
+}
+
 inline unsigned int FrameBase::id()
 {
     return frame_id_;
@@ -169,7 +188,17 @@ inline unsigned int FrameBase::id()
 
 inline bool FrameBase::isKey() const
 {
-    return (type_ == KEY_FRAME);
+    return (type_ == KEY);
+}
+
+inline bool FrameBase::isAux() const
+{
+    return (type_ == AUXILIARY);
+}
+
+inline bool FrameBase::isKeyOrAux() const
+{
+    return (type_ == KEY || type_ == AUXILIARY);
 }
 
 inline void FrameBase::getTimeStamp(TimeStamp& _ts) const

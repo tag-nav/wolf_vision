@@ -123,7 +123,7 @@ TEST(Odom2D, FactorFix_and_FactorOdom2D)
     Vector3s            delta (2,0,0);
     Matrix3s delta_cov; delta_cov << .02, 0, 0, 0, .025, .02, 0, .02, .02;
 
-    ProblemPtr          Pr = Problem::create("PO 2D");
+    ProblemPtr          Pr = Problem::create("PO", 2);
     CeresManager        ceres_manager(Pr);
 
     // KF0 and absolute prior
@@ -131,19 +131,17 @@ TEST(Odom2D, FactorFix_and_FactorOdom2D)
 
     // KF1 and motion from KF0
     t += dt;
-    FrameBasePtr        F1 = Pr->emplaceFrame(KEY_FRAME, Vector3s::Zero(), t);
-    CaptureBasePtr      C1 = F1->addCapture(std::make_shared<CaptureBase>("ODOM 2D", t));
-    FeatureBasePtr      f1 = C1->addFeature(std::make_shared<FeatureBase>("ODOM 2D", delta, delta_cov));
-    FactorBasePtr   c1 = f1->addFactor(std::make_shared<FactorOdom2D>(f1, F0, nullptr));
-    F0->addConstrainedBy(c1);
+    FrameBasePtr        F1 = Pr->emplaceFrame(KEY, Vector3s::Zero(), t);
+    auto C1 = CaptureBase::emplace<CaptureBase>(F1, "ODOM 2D", t);
+    auto f1 = FeatureBase::emplace<FeatureBase>(C1, "ODOM 2D", delta, delta_cov);
+    auto c1 = FactorBase::emplace<FactorOdom2D>(f1, f1, F0, nullptr);
 
     // KF2 and motion from KF1
     t += dt;
-    FrameBasePtr        F2 = Pr->emplaceFrame(KEY_FRAME, Vector3s::Zero(), t);
-    CaptureBasePtr      C2 = F2->addCapture(std::make_shared<CaptureBase>("ODOM 2D", t));
-    FeatureBasePtr      f2 = C2->addFeature(std::make_shared<FeatureBase>("ODOM 2D", delta, delta_cov));
-    FactorBasePtr   c2 = f2->addFactor(std::make_shared<FactorOdom2D>(f2, F1, nullptr));
-    F1->addConstrainedBy(c2);
+    FrameBasePtr        F2 = Pr->emplaceFrame(KEY, Vector3s::Zero(), t);
+    auto C2 = CaptureBase::emplace<CaptureBase>(F2, "ODOM 2D", t);
+    auto f2 = FeatureBase::emplace<FeatureBase>(C2, "ODOM 2D", delta, delta_cov);
+    auto c2 = FactorBase::emplace<FactorOdom2D>(f2, f2, F1, nullptr);
 
     ASSERT_TRUE(Pr->check(0));
 
@@ -194,7 +192,7 @@ TEST(Odom2D, VoteForKfAndSolve)
     int N = 7; // number of process() steps
 
     // Create Wolf tree nodes
-    ProblemPtr problem = Problem::create("PO 2D");
+    ProblemPtr problem = Problem::create("PO", 2);
     SensorBasePtr sensor_odom2d = problem->installSensor("ODOM 2D", "odom", Vector3s(0,0,0));
     ProcessorParamsOdom2DPtr params(std::make_shared<ProcessorParamsOdom2D>());
     params->voting_active   = true;
@@ -322,14 +320,14 @@ TEST(Odom2D, KF_callback)
     //                          KF11
 
     // Create Wolf tree nodes
-    ProblemPtr problem = Problem::create("PO 2D");
+    ProblemPtr problem = Problem::create("PO", 2);
     SensorBasePtr sensor_odom2d = problem->installSensor("ODOM 2D", "odom", Vector3s(0,0,0));
     ProcessorParamsOdom2DPtr params(std::make_shared<ProcessorParamsOdom2D>());
     params->dist_traveled   = 100;
     params->angle_turned    = 6.28;
     params->max_time_span   = 100;
     params->cov_det         = 100;
-    params->unmeasured_perturbation_std = 0.001;
+    params->unmeasured_perturbation_std = 0.000001;
     Matrix3s unmeasured_cov = params->unmeasured_perturbation_std*params->unmeasured_perturbation_std*Matrix3s::Identity();
     ProcessorBasePtr prc_base = problem->installProcessor("ODOM 2D", "odom", sensor_odom2d, params);
     ProcessorOdom2DPtr processor_odom2d = std::static_pointer_cast<ProcessorOdom2D>(prc_base);
@@ -404,7 +402,7 @@ TEST(Odom2D, KF_callback)
     std::cout << "-----------------------------\nSplit after last KF; time: " << t_split << std::endl;
 
     Vector3s x_split = processor_odom2d->getState(t_split);
-    FrameBasePtr keyframe_2 = problem->emplaceFrame(KEY_FRAME, x_split, t_split);
+    FrameBasePtr keyframe_2 = problem->emplaceFrame(KEY, x_split, t_split);
 
     ASSERT_TRUE(problem->check(0));
     processor_odom2d->keyFrameCallback(keyframe_2, dt/2);
@@ -436,7 +434,7 @@ TEST(Odom2D, KF_callback)
     problem->print(4,1,1,1);
 
     x_split = processor_odom2d->getState(t_split);
-    FrameBasePtr keyframe_1 = problem->emplaceFrame(KEY_FRAME, x_split, t_split);
+    FrameBasePtr keyframe_1 = problem->emplaceFrame(KEY, x_split, t_split);
 
     ASSERT_TRUE(problem->check(0));
     processor_odom2d->keyFrameCallback(keyframe_1, dt/2);

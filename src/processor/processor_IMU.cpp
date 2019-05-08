@@ -13,6 +13,7 @@ ProcessorIMU::ProcessorIMU(ProcessorParamsIMUPtr _params_motion_IMU) :
     jacobian_delta_preint_.setIdentity(9,9);                                    // dDp'/dDp, dDv'/dDv, all zeros
     jacobian_delta_.setIdentity(9,9);                                           //
     jacobian_calib_.setZero(9,6);
+    unmeasured_perturbation_cov_ = pow(params_motion_IMU_->unmeasured_perturbation_std_, 2.0) * Eigen::Matrix<Scalar, 9, 9>::Identity();
 }
 
 ProcessorIMU::~ProcessorIMU()
@@ -35,8 +36,6 @@ ProcessorBasePtr ProcessorIMU::create(const std::string& _unique_name, const Pro
 
 bool ProcessorIMU::voteForKeyFrame()
 {
-    if(!isVotingActive())
-        return false;
     // time span
     if (getBuffer().get().back().ts_ - getBuffer().get().front().ts_ > params_motion_IMU_->max_time_span)
     {
@@ -202,24 +201,25 @@ CaptureMotionPtr ProcessorIMU::createCapture(const TimeStamp& _ts,
 
 FeatureBasePtr ProcessorIMU::createFeature(CaptureMotionPtr _capture_motion)
 {
-    FeatureIMUPtr key_feature_ptr = std::make_shared<FeatureIMU>(
+    FeatureIMUPtr feature = std::make_shared<FeatureIMU>(
             _capture_motion->getBuffer().get().back().delta_integr_,
-            _capture_motion->getBuffer().get().back().delta_integr_cov_,
+            _capture_motion->getBuffer().get().back().delta_integr_cov_ + unmeasured_perturbation_cov_,
             _capture_motion->getBuffer().getCalibrationPreint(),
             _capture_motion->getBuffer().get().back().jacobian_calib_);
-    return key_feature_ptr;
+    return feature;
 }
 
 FactorBasePtr ProcessorIMU::emplaceFactor(FeatureBasePtr _feature_motion, CaptureBasePtr _capture_origin)
 {
     CaptureIMUPtr cap_imu = std::static_pointer_cast<CaptureIMU>(_capture_origin);
     FeatureIMUPtr ftr_imu = std::static_pointer_cast<FeatureIMU>(_feature_motion);
-    FactorIMUPtr fac_imu = std::make_shared<FactorIMU>(ftr_imu, cap_imu, shared_from_this());
+    // FactorIMUPtr fac_imu = std::make_shared<FactorIMU>(ftr_imu, cap_imu, shared_from_this());
+    auto fac_imu = FactorBase::emplace<FactorIMU>(_feature_motion, ftr_imu, cap_imu, shared_from_this());
 
     // link ot wolf tree
-    _feature_motion->addFactor(fac_imu);
-    _capture_origin->addConstrainedBy(fac_imu);
-    _capture_origin->getFrame()->addConstrainedBy(fac_imu);
+    // _feature_motion->addFactor(fac_imu);
+    // _capture_origin->addConstrainedBy(fac_imu);
+    // _capture_origin->getFrame()->addConstrainedBy(fac_imu);
 
     return fac_imu;
 }

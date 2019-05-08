@@ -45,25 +45,25 @@ message(STATUS "Configured to compile in ${CMAKE_BUILD_TYPE} mode.")
 SET(CMAKE_CXX_FLAGS_DEBUG "-g -Wall -D_REENTRANT")
 SET(CMAKE_CXX_FLAGS_RELEASE "-O3 -D_REENTRANT")
 
-if(UNIX)
-  # GCC is not strict enough by default, so enable most of the warnings.
-  set(CMAKE_CXX_FLAGS
-    "${CMAKE_CXX_FLAGS} -Werror=all -Werror=extra -Wno-unknown-pragmas -Wno-sign-compare -Wno-unused-parameter -Wno-missing-field-initializers")
-endif(UNIX)
-
 #Set compiler according C++11 support
 include(CheckCXXCompilerFlag)
 CHECK_CXX_COMPILER_FLAG("-std=c++11" COMPILER_SUPPORTS_CXX11)
 CHECK_CXX_COMPILER_FLAG("-std=c++0x" COMPILER_SUPPORTS_CXX0X)
 if(COMPILER_SUPPORTS_CXX11)
 		message(STATUS "The compiler ${CMAKE_CXX_COMPILER} has C++11 support.")
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 elseif(COMPILER_SUPPORTS_CXX0X)
 		message(STATUS "The compiler ${CMAKE_CXX_COMPILER} has C++0x support.")
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x")
 else()
-        message(STATUS "The compiler ${CMAKE_CXX_COMPILER} has no C++11 support. Please use a different C++ compiler.")
+  message(STATUS "The compiler ${CMAKE_CXX_COMPILER} has no C++11 support. Please use a different C++ compiler.")
 endif()
+
+if(UNIX)
+  # GCC is not strict enough by default, so enable most of the warnings.
+  set(CMAKE_CXX_FLAGS
+    "${CMAKE_CXX_FLAGS} -Werror=all -Werror=extra -Wno-unknown-pragmas -Wno-sign-compare -Wno-unused-parameter -Wno-missing-field-initializers")
+endif(UNIX)
 
 
 #OPTION(BUILD_DOC "Build Documentation" OFF)
@@ -125,17 +125,17 @@ FIND_PACKAGE(faramotics QUIET) #faramotics is not required
 IF(faramotics_FOUND)
 	FIND_PACKAGE(GLUT REQUIRED)
 	FIND_PACKAGE(pose_state_time REQUIRED)
-    MESSAGE("Faramotics Library FOUND: Faramotics related sources will be built.")
+  MESSAGE("Faramotics Library FOUND: Faramotics related sources will be built.")
 ENDIF(faramotics_FOUND)
 
 FIND_PACKAGE(laser_scan_utils QUIET) #laser_scan_utils is not required
 IF(laser_scan_utils_FOUND)
-    MESSAGE("laser_scan_utils Library FOUND: laser_scan_utils related sources will be built.")
+  MESSAGE("laser_scan_utils Library FOUND: laser_scan_utils related sources will be built.")
 ENDIF(laser_scan_utils_FOUND)
 
 FIND_PACKAGE(raw_gps_utils QUIET) #raw_gps_utils is not required
 IF(raw_gps_utils_FOUND)
-    MESSAGE("raw_gps_utils Library FOUND: raw_gps_utils related sources will be built.")
+  MESSAGE("raw_gps_utils Library FOUND: raw_gps_utils related sources will be built.")
 ENDIF(raw_gps_utils_FOUND)
 
 # Vision Utils
@@ -149,8 +149,13 @@ ENDIF(vision_utils_FOUND)
 # Cereal
 FIND_PACKAGE(cereal QUIET)
 IF(cereal_FOUND)
-    MESSAGE("cereal Library FOUND: cereal related sources will be built.")
+  MESSAGE("cereal Library FOUND: cereal related sources will be built.")
 ENDIF(cereal_FOUND)
+
+IF(APRILTAG_LIBRARY)
+    SET(Apriltag_FOUND TRUE)
+    MESSAGE("apriltag Library FOUND in ${APRILTAG_LIBRARY}: apriltag related sources will be built.")
+ENDIF(APRILTAG_LIBRARY)
 
 # YAML with yaml-cpp
 INCLUDE (${PROJECT_SOURCE_DIR}/cmake_modules/FindYamlCpp.cmake)
@@ -251,6 +256,10 @@ ENDIF(YAMLCPP_FOUND)
 IF(GLOG_FOUND)
 INCLUDE_DIRECTORIES(${GLOG_INCLUDE_DIR})
 ENDIF(GLOG_FOUND)
+
+IF(APRILTAG_INCLUDE_DIR)
+    INCLUDE_DIRECTORIES(${APRILTAG_INCLUDE_DIR})
+ENDIF(APRILTAG_INCLUDE_DIR)
 
 #HEADERS
 
@@ -633,6 +642,7 @@ IF (vision_utils_FOUND)
     src/feature/feature_point_image.cpp
     )
 ENDIF(vision_utils_FOUND)
+
 #SUBDIRECTORIES
 add_subdirectory(hello_wolf)
 add_subdirectory(hello_plugin)
@@ -671,7 +681,7 @@ IF(YAMLCPP_FOUND)
       )
   ENDIF(vision_utils_FOUND)
 ENDIF(YAMLCPP_FOUND)
-
+  
 # create the shared library
 ADD_LIBRARY(${PROJECT_NAME} 
   SHARED 
@@ -727,6 +737,8 @@ ENDIF (YAMLCPP_FOUND)
 IF (GLOG_FOUND)
     TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${GLOG_LIBRARY})
 ENDIF (GLOG_FOUND)
+#check if this is done correctly
+
 IF (GLOG_FOUND)
     IF(BUILD_TESTS)
         MESSAGE("Building tests.")

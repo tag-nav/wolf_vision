@@ -45,7 +45,7 @@ int main(int argc, char** argv) {
         l->load();
         loaders.push_back(l);
     }
-    ProblemPtr problem = Problem::create("PO 2D");
+    ProblemPtr problem = Problem::create("PO", 2);
     auto sensorMap = map<string, SensorBasePtr>();
     auto procesorMap = map<string, ProcessorBasePtr>();
     for(auto s : server.getSensors()){

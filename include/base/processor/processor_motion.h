@@ -28,6 +28,7 @@ struct ProcessorParamsMotion : public ProcessorParamsBase
         unsigned int max_buff_length  = 10;
         Scalar dist_traveled    = 5;
         Scalar angle_turned     = 0.5;
+        Scalar unmeasured_perturbation_std  = 1e-4;
     ProcessorParamsMotion() = default;
     ProcessorParamsMotion(std::string _unique_name, const paramsServer& _server):
         ProcessorParamsBase(_unique_name, _server)
@@ -36,6 +37,7 @@ struct ProcessorParamsMotion : public ProcessorParamsBase
       max_buff_length = _server.getParam<unsigned int>(_unique_name + "/max_buff_length", "10");
       dist_traveled   = _server.getParam<Scalar>(_unique_name + "/dist_traveled", "5");
       angle_turned    = _server.getParam<Scalar>(_unique_name + "/angle_turned", "0.5");
+      unmeasured_perturbation_std = _server.getParam<Scalar>(_unique_name + "/unmeasured_perturbation_std", "1e-4");
     }
 };
 
@@ -482,6 +484,7 @@ class ProcessorMotion : public ProcessorBase
         Eigen::MatrixXs jacobian_delta_;        ///< jacobian of delta composition w.r.t current delta
         Eigen::MatrixXs jacobian_calib_;        ///< jacobian of delta preintegration wrt calibration params
         Eigen::MatrixXs jacobian_delta_calib_;  ///< jacobian of delta wrt calib params
+        Eigen::MatrixXs unmeasured_perturbation_cov_; ///< Covariance of unmeasured DoF to avoid singularity
 };
 
 }

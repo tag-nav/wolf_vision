@@ -6,7 +6,7 @@ namespace wolf {
 
 unsigned int FeatureBase::feature_id_count_ = 0;
 
-FeatureBase::FeatureBase(const std::string& _type, const Eigen::VectorXs& _measurement, const Eigen::MatrixXs& _meas_covariance) :
+FeatureBase::FeatureBase(const std::string& _type, const Eigen::VectorXs& _measurement, const Eigen::MatrixXs& _meas_uncertainty, UncertaintyType _uncertainty_type) :
 	NodeBase("FEATURE", _type),
     capture_ptr_(),
     feature_id_(++feature_id_count_),
@@ -14,8 +14,21 @@ FeatureBase::FeatureBase(const std::string& _type, const Eigen::VectorXs& _measu
     landmark_id_(0),
 	measurement_(_measurement)
 {
-    setMeasurementCovariance(_meas_covariance);
-//    std::cout << "constructed      +f" << id() << std::endl;
+    switch (_uncertainty_type)
+    {
+        case UNCERTAINTY_IS_INFO :
+            setMeasurementInformation(_meas_uncertainty);
+            break;
+        case UNCERTAINTY_IS_COVARIANCE :
+            setMeasurementCovariance(_meas_uncertainty);
+            break;
+        case UNCERTAINTY_IS_STDDEV :
+            WOLF_ERROR("STDEV case Not implemented yet");
+            break;
+        default :
+            break;
+    }
+    //    std::cout << "constructed      +f" << id() << std::endl;
 }
 
 FeatureBase::~FeatureBase()
@@ -54,16 +67,6 @@ void FeatureBase::remove()
 FactorBasePtr FeatureBase::addFactor(FactorBasePtr _co_ptr)
 {
     factor_list_.push_back(_co_ptr);
-    _co_ptr->setFeature(shared_from_this());
-    _co_ptr->setProblem(getProblem());
-    // add factor to be added in solver
-    if (getProblem() != nullptr)
-    {
-        if (_co_ptr->getStatus() == FAC_ACTIVE)
-            getProblem()->addFactor(_co_ptr);
-    }
-    else
-        WOLF_TRACE("WARNING: ADDING CONSTRAINT ", _co_ptr->id(), " TO FEATURE ", this->id(), " NOT CONNECTED WITH PROBLEM.");
     return _co_ptr;
 }
 
@@ -141,6 +144,20 @@ Eigen::MatrixXs FeatureBase::computeSqrtUpper(const Eigen::MatrixXs & _info) con
     R = eval.cwiseSqrt().asDiagonal() * es.eigenvectors().real().transpose();
 
     return R;
+}
+
+void FeatureBase::link(CaptureBasePtr _cpt_ptr)
+{
+    if(_cpt_ptr)
+    {
+        _cpt_ptr->addFeature(shared_from_this());
+        this->setCapture(_cpt_ptr);
+        this->setProblem(_cpt_ptr->getProblem());
+    }
+    else
+    {
+        WOLF_WARN("Linking with nullptr");
+    }
 }
 
 } // namespace wolf

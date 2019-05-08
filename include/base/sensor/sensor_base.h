@@ -181,6 +181,9 @@ class SensorBase : public NodeBase, public std::enable_shared_from_this<SensorBa
         Eigen::MatrixXs getNoiseCov();
         void setExtrinsicDynamic(bool _extrinsic_dynamic);
         void setIntrinsicDynamic(bool _intrinsic_dynamic);
+        void link(HardwareBasePtr);
+        template<typename classType, typename... T>
+        static std::shared_ptr<SensorBase> emplace(HardwareBasePtr _hwd_ptr, T&&... all);
 
     protected:
         SizeEigen computeCalibSize() const;
@@ -197,6 +200,14 @@ class SensorBase : public NodeBase, public std::enable_shared_from_this<SensorBa
 #include "base/processor/processor_base.h"
 
 namespace wolf{
+
+template<typename classType, typename... T>
+std::shared_ptr<SensorBase> SensorBase::emplace(HardwareBasePtr _hwd_ptr, T&&... all)
+{
+    SensorBasePtr sen = std::make_shared<classType>(std::forward<T>(all)...);
+    sen->link(_hwd_ptr);
+    return sen;
+}
 
 inline unsigned int SensorBase::id()
 {

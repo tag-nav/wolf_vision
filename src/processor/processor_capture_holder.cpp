@@ -52,7 +52,8 @@ void ProcessorCaptureHolder::keyFrameCallback(FrameBasePtr _keyframe_ptr,
 
     if (frame_ptr != _keyframe_ptr)
     {
-      _keyframe_ptr->addCapture(existing_capture);
+      // _keyframe_ptr->addCapture(existing_capture);
+        existing_capture->link(_keyframe_ptr);
 
       //WOLF_INFO("Adding capture laser !");
 
