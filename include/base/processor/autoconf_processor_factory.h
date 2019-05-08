@@ -5,8 +5,8 @@
  *      \author: jsola
  */
 
-#ifndef NEW_PROCESSOR_FACTORY_H_
-#define NEW_PROCESSOR_FACTORY_H_
+#ifndef AUTOCONF_PROCESSOR_FACTORY_H_
+#define AUTOCONF_PROCESSOR_FACTORY_H_
 
 namespace wolf
 {
@@ -168,17 +168,17 @@ namespace wolf
 typedef Factory<ProcessorBase,
         const std::string&,
         const paramsServer&,
-        const SensorBasePtr> NewProcessorFactory;
+        const SensorBasePtr> AutoConfProcessorFactory;
 template<>
-inline std::string NewProcessorFactory::getClass()
+inline std::string AutoConfProcessorFactory::getClass()
 {
-  return "NewProcessorFactory";
+    return "AutoConfProcessorFactory";
 }
 
 
-#define WOLF_REGISTER_PROCESSORN(ProcessorType, ProcessorName) \
-  namespace{ const bool WOLF_UNUSED ProcessorName##New##Registered = \
-    wolf::NewProcessorFactory::get().registerCreator(ProcessorType, ProcessorName::createNew); }\
+#define WOLF_REGISTER_PROCESSOR_AUTO(ProcessorType, ProcessorName) \
+  namespace{ const bool WOLF_UNUSED ProcessorName##AutoConf##Registered = \
+    wolf::AutoConfProcessorFactory::get().registerCreator(ProcessorType, ProcessorName::createAutoConf); }\
 
 } /* namespace wolf */
 

@@ -385,7 +385,7 @@ SET(HDRS_LANDMARK
   include/base/landmark/landmark_polyline_2D.h
   )
 SET(HDRS_PROCESSOR
-  include/base/processor/new_processor_factory.h
+  include/base/processor/autoconf_processor_factory.h
   include/base/processor/diff_drive_tools.h
   include/base/processor/diff_drive_tools.hpp
   include/base/processor/motion_buffer.h
@@ -410,7 +410,7 @@ SET(HDRS_PROCESSOR
   include/base/processor/track_matrix.h
   )
 SET(HDRS_SENSOR
-  include/base/sensor/new_sensor_factory.h
+  include/base/sensor/autoconf_sensor_factory.h
   include/base/sensor/sensor_GPS.h
   include/base/sensor/sensor_GPS_fix.h
   include/base/sensor/sensor_IMU.h

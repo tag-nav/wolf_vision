@@ -58,7 +58,7 @@ SensorBasePtr SensorOdom2D::create(const std::string& _unique_name, const Eigen:
     return odo;
 }
 
-SensorBasePtr SensorOdom2D::createNew(const std::string& _unique_name, const paramsServer& _server)
+SensorBasePtr SensorOdom2D::createAutoConf(const std::string& _unique_name, const paramsServer& _server)
 {
     // Eigen::VectorXs _extrinsics_po = Eigen::Vector3s(0,0,0);
     Eigen::VectorXs _extrinsics_po = _server.getParam<Eigen::VectorXs>(_unique_name + "/extrinsic/pos", "[0,0,0]");
@@ -79,7 +79,7 @@ SensorBasePtr SensorOdom2D::createNew(const std::string& _unique_name, const par
 namespace wolf {
 WOLF_REGISTER_SENSOR("ODOM 2D", SensorOdom2D)
 } // namespace wolf
-#include "base/sensor/new_sensor_factory.h"
+#include "base/sensor/autoconf_sensor_factory.h"
 namespace wolf {
-WOLF_REGISTER_SENSORN("ODOM 2D", SensorOdom2D)
+WOLF_REGISTER_SENSOR_AUTO("ODOM 2D", SensorOdom2D)
 } // namespace wolf

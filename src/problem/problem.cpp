@@ -146,7 +146,7 @@ SensorBasePtr Problem::installSensor(const std::string& _sen_type, //
                                          const std::string& _unique_sensor_name, //
                                          const paramsServer& _server)
     {
-        SensorBasePtr sen_ptr = NewSensorFactory::get().create(uppercase(_sen_type), _unique_sensor_name, _server);
+        SensorBasePtr sen_ptr = AutoConfSensorFactory::get().create(uppercase(_sen_type), _unique_sensor_name, _server);
         addSensor(sen_ptr);
         return sen_ptr;
     }
@@ -203,7 +203,7 @@ ProcessorBasePtr Problem::installProcessor(const std::string& _prc_type, //
     SensorBasePtr sen_ptr = getSensor(_corresponding_sensor_name);
     if (sen_ptr == nullptr)
         throw std::runtime_error("Sensor not found. Cannot bind Processor.");
-    ProcessorBasePtr prc_ptr = NewProcessorFactory::get().create(uppercase(_prc_type), _unique_processor_name, _server, sen_ptr);
+    ProcessorBasePtr prc_ptr = AutoConfProcessorFactory::get().create(uppercase(_prc_type), _unique_processor_name, _server, sen_ptr);
     prc_ptr->configure(sen_ptr);
     sen_ptr->addProcessor(prc_ptr);
 

@@ -88,7 +88,7 @@ class ProcessorOdom2D : public ProcessorMotion
         // Factory method
     public:
         static ProcessorBasePtr create(const std::string& _unique_name, const ProcessorParamsBasePtr _params, const SensorBasePtr sensor_ptr = nullptr);
-        static ProcessorBasePtr createNew(const std::string& _unique_name, const paramsServer& _server, const SensorBasePtr sensor_ptr = nullptr);
+        static ProcessorBasePtr createAutoConf(const std::string& _unique_name, const paramsServer& _server, const SensorBasePtr sensor_ptr = nullptr);
 };
 
 inline Eigen::VectorXs ProcessorOdom2D::deltaZero() const

@@ -58,7 +58,7 @@ class SensorOdom2D : public SensorBase
 
 	public:
         static SensorBasePtr create(const std::string& _unique_name, const Eigen::VectorXs& _extrinsics_pq, const IntrinsicsBasePtr _intrinsics);
-        static SensorBasePtr createNew(const std::string& _unique_name, const paramsServer& _server);
+        static SensorBasePtr createAutoConf(const std::string& _unique_name, const paramsServer& _server);
 
 };
 

@@ -132,7 +132,7 @@
 -===============================================================
 +====================== /home/jcasals/workspace/wip/wolf/src/core/include/core/problem.h ==================================
 -===============================================================
-+====================== /home/jcasals/workspace/wip/wolf/src/core/include/core/new_processor_factory.h ==================================
++====================== /home/jcasals/workspace/wip/wolf/src/core/include/core/autoconf_processor_factory.h ==================================
 -===============================================================
 +====================== /home/jcasals/workspace/wip/wolf/src/core/include/core/state_homogeneous_3D.h ==================================
 -===============================================================
@@ -146,7 +146,7 @@
 -===============================================================
 +====================== /home/jcasals/workspace/wip/wolf/src/core/include/core/processor_tracker_feature.h ==================================
 -===============================================================
-+====================== /home/jcasals/workspace/wip/wolf/src/core/include/core/new_sensor_factory.h ==================================
++====================== /home/jcasals/workspace/wip/wolf/src/core/include/core/autoconf_sensor_factory.h ==================================
 -===============================================================
 +====================== /home/jcasals/workspace/wip/wolf/src/core/include/core/constraint_analytic.h ==================================
 -===============================================================
@@ -273,8 +273,8 @@
 #include "factory.h"
 #include "sensor_factory.h"
 #include "processor_factory.h"
-#include "new_sensor_factory.h"
-#include "new_processor_factory.h"
+#include "autoconf_sensor_factory.h"
+#include "autoconf_processor_factory.h"
 #include "constraint_base.h"
 #include "state_block.h"
 #include "processor_motion.h"

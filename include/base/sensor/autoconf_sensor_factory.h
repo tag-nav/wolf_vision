@@ -5,8 +5,8 @@
  *      \author: jsola
  */
 
-#ifndef NEW_SENSOR_FACTORY_H_
-#define NEW_SENSOR_FACTORY_H_
+#ifndef AUTOCONF_SENSOR_FACTORY_H_
+#define AUTOCONF_SENSOR_FACTORY_H_
 
 namespace wolf
 {
@@ -210,17 +210,17 @@ namespace wolf
 
 typedef Factory<SensorBase,
                 const std::string&,
-                const paramsServer&> NewSensorFactory;
+                const paramsServer&> AutoConfSensorFactory;
 
 template<>
-inline std::string NewSensorFactory::getClass()
+inline std::string AutoConfSensorFactory::getClass()
 {
-  return "NewSensorFactory";
+  return "AutoConfSensorFactory";
 }
 
-#define WOLF_REGISTER_SENSORN(SensorType, SensorName) \
-  namespace{ const bool WOLF_UNUSED SensorName##New##Registered = \
-    NewSensorFactory::get().registerCreator(SensorType, SensorName::createNew); }\
+#define WOLF_REGISTER_SENSOR_AUTO(SensorType, SensorName) \
+  namespace{ const bool WOLF_UNUSED SensorName##AutConf##Registered = \
+     AutoConfSensorFactory::get().registerCreator(SensorType, SensorName::createAutoConf); } \
 
 } /* namespace wolf */
 

@@ -110,7 +110,7 @@ ProcessorBasePtr ProcessorRangeBearing::create(const std::string& _unique_name, 
     return prc;
 }
 
-ProcessorBasePtr ProcessorRangeBearing::createNew(const std::string& _unique_name,
+ProcessorBasePtr ProcessorRangeBearing::createAutoConf(const std::string& _unique_name,
                                                   const paramsServer& _server,
                                                   const SensorBasePtr _sensor_ptr)
 {
@@ -185,9 +185,9 @@ namespace wolf
 {
 WOLF_REGISTER_PROCESSOR("RANGE BEARING", ProcessorRangeBearing)
 } // namespace wolf
-#include "base/processor/new_processor_factory.h"
+#include "base/processor/autoconf_processor_factory.h"
 namespace wolf
 {
-WOLF_REGISTER_PROCESSORN("RANGE BEARING", ProcessorRangeBearing)
+WOLF_REGISTER_PROCESSOR_AUTO("RANGE BEARING", ProcessorRangeBearing)
 } // namespace wolf
 

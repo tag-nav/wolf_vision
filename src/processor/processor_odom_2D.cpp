@@ -188,7 +188,7 @@ ProcessorBasePtr ProcessorOdom2D::create(const std::string& _unique_name, const 
 
     return prc_ptr;
 }
-ProcessorBasePtr ProcessorOdom2D::createNew(const std::string& _unique_name, const paramsServer& _server, const SensorBasePtr sensor_ptr)
+ProcessorBasePtr ProcessorOdom2D::createAutoConf(const std::string& _unique_name, const paramsServer& _server, const SensorBasePtr sensor_ptr)
 {
 
     ProcessorOdom2DPtr prc_ptr;
@@ -216,7 +216,7 @@ ProcessorBasePtr ProcessorOdom2D::createNew(const std::string& _unique_name, con
 namespace wolf {
 WOLF_REGISTER_PROCESSOR("ODOM 2D", ProcessorOdom2D)
 } // namespace wolf
-#include "base/processor/new_processor_factory.h"
+#include "base/processor/autoconf_processor_factory.h"
 namespace wolf {
-    WOLF_REGISTER_PROCESSORN("ODOM 2D", ProcessorOdom2D)
+    WOLF_REGISTER_PROCESSOR_AUTO("ODOM 2D", ProcessorOdom2D)
 } // namespace wolf
