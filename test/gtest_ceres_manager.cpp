@@ -543,7 +543,7 @@ TEST(CeresManager, AddLocalParam)
 
 TEST(CeresManager, FactorsRemoveLocalParam)
 {
-    ProblemPtr P = Problem::create("PO 3D");
+    ProblemPtr P = Problem::create("PO", 3);
     CeresManagerWrapperPtr ceres_manager_ptr = std::make_shared<CeresManagerWrapper>(P);
 
     // Create (and add) 2 factors quaternion
@@ -585,7 +585,7 @@ TEST(CeresManager, FactorsRemoveLocalParam)
 
 TEST(CeresManager, FactorsUpdateLocalParam)
 {
-    ProblemPtr P = Problem::create("PO 3D");
+    ProblemPtr P = Problem::create("PO", 3);
     CeresManagerWrapperPtr ceres_manager_ptr = std::make_shared<CeresManagerWrapper>(P);
 
     // Create (and add) 2 factors quaternion

@@ -74,7 +74,7 @@ TEST(Problem, Sensors)
 
 TEST(Problem, Processor)
 {
-    ProblemPtr P = Problem::create("PO 3D");
+    ProblemPtr P = Problem::create("PO", 3);
 
     // check motion processor is null
     ASSERT_FALSE(P->getProcessorMotion());
@@ -99,7 +99,7 @@ TEST(Problem, Processor)
 TEST(Problem, Installers)
 {
     std::string wolf_root = _WOLF_ROOT_DIR;
-    ProblemPtr P = Problem::create("PO 3D");
+    ProblemPtr P = Problem::create("PO", 3);
     Eigen::Vector7s xs;
 
     SensorBasePtr    S = P->installSensor   ("ODOM 3D", "odometer",        xs,         wolf_root + "/src/examples/sensor_odom_3D.yaml");
@@ -164,7 +164,7 @@ TEST(Problem, SetOrigin_PO_2D)
 
 TEST(Problem, SetOrigin_PO_3D)
 {
-    ProblemPtr P = Problem::create("PO 3D");
+    ProblemPtr P = Problem::create("PO", 3);
     TimeStamp       t0(0);
     Eigen::VectorXs x0(7); x0 << 1,2,3,4,5,6,7;
     Eigen::MatrixXs P0(6,6); P0.setIdentity(); P0 *= 0.1; // P0 is 0.1*Id
@@ -228,7 +228,7 @@ TEST(Problem, StateBlocks)
 {
     std::string wolf_root = _WOLF_ROOT_DIR;
 
-    ProblemPtr P = Problem::create("PO 3D");
+    ProblemPtr P = Problem::create("PO", 3);
     Eigen::Vector7s xs;
 
     // 2 state blocks, fixed
@@ -289,7 +289,7 @@ TEST(Problem, Covariances)
 {
     std::string wolf_root = _WOLF_ROOT_DIR;
 
-    ProblemPtr P = Problem::create("PO 3D");
+    ProblemPtr P = Problem::create("PO", 3);
     Eigen::Vector7s xs;
 
     SensorBasePtr    Sm = P->installSensor   ("ODOM 3D", "odometer",xs, wolf_root + "/src/examples/sensor_odom_3D.yaml");
