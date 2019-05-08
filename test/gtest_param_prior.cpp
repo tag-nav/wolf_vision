@@ -16,7 +16,7 @@
 
 using namespace wolf;
 
-ProblemPtr problem_ptr = Problem::create("PO 3D");
+ProblemPtr problem_ptr = Problem::create("PO", 3);
 CeresManagerPtr ceres_mgr_ptr = std::make_shared<CeresManager>(problem_ptr);
 Eigen::Vector7s initial_extrinsics((Eigen::Vector7s() << 1, 2, 3, 1, 0, 0, 0).finished());
 Eigen::Vector7s prior_extrinsics((Eigen::Vector7s() << 10, 20, 30, 0, 0, 0, 1).finished());

@@ -4,6 +4,7 @@
 //Wolf includes
 #include "core/processor/processor_tracker_feature.h"
 #include "vision/capture/capture_image.h"
+#include "core/utils/params_server.hpp"
 
 // Vision utils
 #include <vision_utils.h>
@@ -26,6 +27,17 @@ struct ProcessorParamsTrackerFeatureTrifocal : public ProcessorParamsTrackerFeat
         int min_response_new_feature;
         Scalar pixel_noise_std; ///< std noise of the pixel
         int min_track_length_for_factor; ///< Minimum track length of a matched feature to create a factor
+    ProcessorParamsTrackerFeatureTrifocal() = default;
+    ProcessorParamsTrackerFeatureTrifocal(std::string _unique_name, const paramsServer& _server):
+        ProcessorParamsTrackerFeature(_unique_name, _server)
+    {
+        yaml_file_params_vision_utils = _server.getParam<std::string>(_unique_name + "/yaml_file_params_vision_utils");
+        n_cells_h = _server.getParam<int>(_unique_name + "/n_cells_h");
+        n_cells_v = _server.getParam<int>(_unique_name + "/n_cells_v");
+        min_response_new_feature = _server.getParam<int>(_unique_name + "/min_response_new_feature");
+        pixel_noise_std = _server.getParam<Scalar>(_unique_name + "/pixel_noise_std");
+        min_track_length_for_factor = _server.getParam<int>(_unique_name + "/min_track_length_for_factor");
+    }
 };
 
 WOLF_PTR_TYPEDEFS(ProcessorTrackerFeatureTrifocal);

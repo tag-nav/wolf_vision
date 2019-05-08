@@ -107,7 +107,7 @@ class SolverManagerWrapper : public SolverManager
 
 TEST(SolverManager, Create)
 {
-    ProblemPtr P = Problem::create("PO 2D");
+    ProblemPtr P = Problem::create("PO", 2);
     SolverManagerWrapperPtr solver_manager_ptr = std::make_shared<SolverManagerWrapper>(P);
 
     // check double pointers to branches
@@ -116,7 +116,7 @@ TEST(SolverManager, Create)
 
 TEST(SolverManager, AddStateBlock)
 {
-    ProblemPtr P = Problem::create("PO 2D");
+    ProblemPtr P = Problem::create("PO", 2);
     SolverManagerWrapperPtr solver_manager_ptr = std::make_shared<SolverManagerWrapper>(P);
 
     // Create State block
@@ -135,7 +135,7 @@ TEST(SolverManager, AddStateBlock)
 
 TEST(SolverManager, DoubleAddStateBlock)
 {
-    ProblemPtr P = Problem::create("PO 2D");
+    ProblemPtr P = Problem::create("PO", 2);
     SolverManagerWrapperPtr solver_manager_ptr = std::make_shared<SolverManagerWrapper>(P);
 
     // Create State block
@@ -160,7 +160,7 @@ TEST(SolverManager, DoubleAddStateBlock)
 
 TEST(SolverManager, UpdateStateBlock)
 {
-    ProblemPtr P = Problem::create("PO 2D");
+    ProblemPtr P = Problem::create("PO", 2);
     SolverManagerWrapperPtr solver_manager_ptr = std::make_shared<SolverManagerWrapper>(P);
 
     // Create State block
@@ -208,7 +208,7 @@ TEST(SolverManager, UpdateStateBlock)
 
 TEST(SolverManager, AddUpdateStateBlock)
 {
-    ProblemPtr P = Problem::create("PO 2D");
+    ProblemPtr P = Problem::create("PO", 2);
     SolverManagerWrapperPtr solver_manager_ptr = std::make_shared<SolverManagerWrapper>(P);
 
     // Create State block
@@ -246,7 +246,7 @@ TEST(SolverManager, AddUpdateStateBlock)
 
 TEST(SolverManager, AddUpdateLocalParamStateBlock)
 {
-    ProblemPtr P = Problem::create("PO 2D");
+    ProblemPtr P = Problem::create("PO", 2);
     SolverManagerWrapperPtr solver_manager_ptr = std::make_shared<SolverManagerWrapper>(P);
 
     // Create State block
@@ -289,7 +289,7 @@ TEST(SolverManager, AddUpdateLocalParamStateBlock)
 
 TEST(SolverManager, AddLocalParamRemoveLocalParamStateBlock)
 {
-    ProblemPtr P = Problem::create("PO 2D");
+    ProblemPtr P = Problem::create("PO", 2);
     SolverManagerWrapperPtr solver_manager_ptr = std::make_shared<SolverManagerWrapper>(P);
 
     // Create State block
@@ -336,7 +336,7 @@ TEST(SolverManager, AddLocalParamRemoveLocalParamStateBlock)
 
 TEST(SolverManager, RemoveStateBlock)
 {
-    ProblemPtr P = Problem::create("PO 2D");
+    ProblemPtr P = Problem::create("PO", 2);
     SolverManagerWrapperPtr solver_manager_ptr = std::make_shared<SolverManagerWrapper>(P);
 
     // Create State block
@@ -361,7 +361,7 @@ TEST(SolverManager, RemoveStateBlock)
 
 TEST(SolverManager, AddRemoveStateBlock)
 {
-    ProblemPtr P = Problem::create("PO 2D");
+    ProblemPtr P = Problem::create("PO", 2);
     SolverManagerWrapperPtr solver_manager_ptr = std::make_shared<SolverManagerWrapper>(P);
 
     // Create State block
@@ -383,7 +383,7 @@ TEST(SolverManager, AddRemoveStateBlock)
 
 TEST(SolverManager, RemoveUpdateStateBlock)
 {
-    ProblemPtr P = Problem::create("PO 2D");
+    ProblemPtr P = Problem::create("PO", 2);
     SolverManagerWrapperPtr solver_manager_ptr = std::make_shared<SolverManagerWrapper>(P);
 
     // Create State block
@@ -402,7 +402,7 @@ TEST(SolverManager, RemoveUpdateStateBlock)
 
 TEST(SolverManager, DoubleRemoveStateBlock)
 {
-    ProblemPtr P = Problem::create("PO 2D");
+    ProblemPtr P = Problem::create("PO", 2);
     SolverManagerWrapperPtr solver_manager_ptr = std::make_shared<SolverManagerWrapper>(P);
 
     // Create State block
@@ -427,7 +427,7 @@ TEST(SolverManager, DoubleRemoveStateBlock)
 
 TEST(SolverManager, AddUpdatedStateBlock)
 {
-    ProblemPtr P = Problem::create("PO 2D");
+    ProblemPtr P = Problem::create("PO", 2);
     SolverManagerWrapperPtr solver_manager_ptr = std::make_shared<SolverManagerWrapper>(P);
 
     // Create State block
@@ -496,7 +496,7 @@ TEST(SolverManager, AddUpdatedStateBlock)
 
 TEST(SolverManager, AddFactor)
 {
-    ProblemPtr P = Problem::create("PO 2D");
+    ProblemPtr P = Problem::create("PO", 2);
     SolverManagerWrapperPtr solver_manager_ptr = std::make_shared<SolverManagerWrapper>(P);
 
     // Create State block
@@ -505,9 +505,9 @@ TEST(SolverManager, AddFactor)
 
     // Create (and add) factor point 2d
     FrameBasePtr        F = P->emplaceFrame(KEY, P->zeroState(), TimeStamp(0));
-    CaptureBasePtr      C = F->addCapture(std::make_shared<CaptureVoid>(0, nullptr));
-    FeatureBasePtr      f = C->addFeature(std::make_shared<FeatureBase>("ODOM 2D", Vector3s::Zero(), Matrix3s::Identity()));
-    FactorPose2DPtr c = std::static_pointer_cast<FactorPose2D>(f->addFactor(std::make_shared<FactorPose2D>(f)));
+    auto C = CaptureBase::emplace<CaptureVoid>(F, 0, nullptr);
+    auto f = FeatureBase::emplace<FeatureBase>(C, "ODOM 2D", Vector3s::Zero(), Matrix3s::Identity());
+    FactorPose2DPtr c = std::static_pointer_cast<FactorPose2D>(FactorBase::emplace<FactorPose2D>(f, f));
 
     // notification
     Notification notif;
@@ -523,7 +523,7 @@ TEST(SolverManager, AddFactor)
 
 TEST(SolverManager, RemoveFactor)
 {
-    ProblemPtr P = Problem::create("PO 2D");
+    ProblemPtr P = Problem::create("PO", 2);
     SolverManagerWrapperPtr solver_manager_ptr = std::make_shared<SolverManagerWrapper>(P);
 
     // Create State block
@@ -532,9 +532,9 @@ TEST(SolverManager, RemoveFactor)
 
     // Create (and add) factor point 2d
     FrameBasePtr        F = P->emplaceFrame(KEY, P->zeroState(), TimeStamp(0));
-    CaptureBasePtr      C = F->addCapture(std::make_shared<CaptureVoid>(0, nullptr));
-    FeatureBasePtr      f = C->addFeature(std::make_shared<FeatureBase>("ODOM 2D", Vector3s::Zero(), Matrix3s::Identity()));
-    FactorPose2DPtr c = std::static_pointer_cast<FactorPose2D>(f->addFactor(std::make_shared<FactorPose2D>(f)));
+    auto C = CaptureBase::emplace<CaptureVoid>(F, 0, nullptr);
+    auto f = FeatureBase::emplace<FeatureBase>(C, "ODOM 2D", Vector3s::Zero(), Matrix3s::Identity());
+    FactorPose2DPtr c = std::static_pointer_cast<FactorPose2D>(FactorBase::emplace<FactorPose2D>(f, f));
 
     // update solver
     solver_manager_ptr->update();
@@ -556,7 +556,7 @@ TEST(SolverManager, RemoveFactor)
 
 TEST(SolverManager, AddRemoveFactor)
 {
-    ProblemPtr P = Problem::create("PO 2D");
+    ProblemPtr P = Problem::create("PO", 2);
     SolverManagerWrapperPtr solver_manager_ptr = std::make_shared<SolverManagerWrapper>(P);
 
     // Create State block
@@ -565,9 +565,10 @@ TEST(SolverManager, AddRemoveFactor)
 
     // Create (and add) factor point 2d
     FrameBasePtr        F = P->emplaceFrame(KEY, P->zeroState(), TimeStamp(0));
-    CaptureBasePtr      C = F->addCapture(std::make_shared<CaptureVoid>(0, nullptr));
-    FeatureBasePtr      f = C->addFeature(std::make_shared<FeatureBase>("ODOM 2D", Vector3s::Zero(), Matrix3s::Identity()));
-    FactorPose2DPtr c = std::static_pointer_cast<FactorPose2D>(f->addFactor(std::make_shared<FactorPose2D>(f)));
+
+    auto C = CaptureBase::emplace<CaptureVoid>(F, 0, nullptr);
+    auto f = FeatureBase::emplace<FeatureBase>(C, "ODOM 2D", Vector3s::Zero(), Matrix3s::Identity());
+    FactorPose2DPtr c = std::static_pointer_cast<FactorPose2D>(FactorBase::emplace<FactorPose2D>(f, f));
 
     // notification
     Notification notif;
@@ -590,7 +591,7 @@ TEST(SolverManager, AddRemoveFactor)
 
 TEST(SolverManager, DoubleRemoveFactor)
 {
-    ProblemPtr P = Problem::create("PO 2D");
+    ProblemPtr P = Problem::create("PO", 2);
     SolverManagerWrapperPtr solver_manager_ptr = std::make_shared<SolverManagerWrapper>(P);
 
     // Create State block
@@ -599,9 +600,10 @@ TEST(SolverManager, DoubleRemoveFactor)
 
     // Create (and add) factor point 2d
     FrameBasePtr        F = P->emplaceFrame(KEY, P->zeroState(), TimeStamp(0));
-    CaptureBasePtr      C = F->addCapture(std::make_shared<CaptureVoid>(0, nullptr));
-    FeatureBasePtr      f = C->addFeature(std::make_shared<FeatureBase>("ODOM 2D", Vector3s::Zero(), Matrix3s::Identity()));
-    FactorPose2DPtr c = std::static_pointer_cast<FactorPose2D>(f->addFactor(std::make_shared<FactorPose2D>(f)));
+
+    auto C = CaptureBase::emplace<CaptureVoid>(F, 0, nullptr);
+    auto f = FeatureBase::emplace<FeatureBase>(C, "ODOM 2D", Vector3s::Zero(), Matrix3s::Identity());
+    FactorPose2DPtr c = std::static_pointer_cast<FactorPose2D>(FactorBase::emplace<FactorPose2D>(f, f));
 
     // update solver
     solver_manager_ptr->update();

@@ -47,7 +47,7 @@ struct DummySolverManager : public SolverManager
 
 TEST(Problem, create)
 {
-    ProblemPtr P = Problem::create("POV 3D");
+    ProblemPtr P = Problem::create("POV", 3);
 
     // check double pointers to branches
     ASSERT_EQ(P, P->getHardware()->getProblem());
@@ -60,11 +60,12 @@ TEST(Problem, create)
 
 TEST(Problem, Sensors)
 {
-    ProblemPtr P = Problem::create("POV 3D");
+    ProblemPtr P = Problem::create("POV", 3);
 
     // add a dummy sensor
-    SensorBasePtr S = std::make_shared<SensorBase>("Dummy", nullptr, nullptr, nullptr, 2, false);
-    P->addSensor(S);
+    // SensorBasePtr S = std::make_shared<SensorBase>("Dummy", nullptr, nullptr, nullptr, 2, false);
+    // P->addSensor(S);
+    auto S = SensorBase::emplace<SensorBase>(P->getHardware(), "Dummy", nullptr, nullptr, nullptr, 2, false);
 
     // check pointers
     ASSERT_EQ(P, S->getProblem());
@@ -74,18 +75,20 @@ TEST(Problem, Sensors)
 
 TEST(Problem, Processor)
 {
-    ProblemPtr P = Problem::create("PO 3D");
+    ProblemPtr P = Problem::create("PO", 3);
 
     // check motion processor is null
     ASSERT_FALSE(P->getProcessorMotion());
 
     // add a motion sensor and processor
-    SensorBasePtr Sm = std::make_shared<SensorOdom3D>((Eigen::Vector7s()<<0,0,0, 0,0,0,1).finished(), IntrinsicsOdom3D()); // with dummy intrinsics
-    P->addSensor(Sm);
+    // SensorBasePtr Sm = std::make_shared<SensorOdom3D>((Eigen::Vector7s()<<0,0,0, 0,0,0,1).finished(), IntrinsicsOdom3D()); // with dummy intrinsics
+    // P->addSensor(Sm);
+    auto Sm = SensorBase::emplace<SensorOdom3D>(P->getHardware(), (Eigen::Vector7s()<<0,0,0, 0,0,0,1).finished(), IntrinsicsOdom3D());
 
     // add motion processor
-    ProcessorMotionPtr Pm = std::make_shared<ProcessorOdom3D>(std::make_shared<ProcessorParamsOdom3D>());
-    Sm->addProcessor(Pm);
+    // ProcessorMotionPtr Pm = std::make_shared<ProcessorOdom3D>(std::make_shared<ProcessorParamsOdom3D>());
+    // Sm->addProcessor(Pm);
+    auto Pm = std::static_pointer_cast<ProcessorMotion>(ProcessorBase::emplace<ProcessorOdom3D>(Sm, std::make_shared<ProcessorParamsOdom3D>()));
 
     // check motion processor IS NOT set by addSensor <-- using InstallProcessor it should, see test Installers
     ASSERT_FALSE(P->getProcessorMotion());
@@ -99,7 +102,7 @@ TEST(Problem, Processor)
 TEST(Problem, Installers)
 {
     std::string wolf_root = _WOLF_ROOT_DIR;
-    ProblemPtr P = Problem::create("PO 3D");
+    ProblemPtr P = Problem::create("PO", 3);
     Eigen::Vector7s xs;
 
     SensorBasePtr    S = P->installSensor   ("ODOM 3D", "odometer",        xs,         wolf_root + "/src/examples/sensor_odom_3D.yaml");
@@ -109,8 +112,9 @@ TEST(Problem, Installers)
     params->time_tolerance = 0.1;
     params->max_new_features = 5;
     params->min_features_for_keyframe = 10;
-    ProcessorBasePtr pt = std::make_shared<ProcessorTrackerFeatureDummy>(ProcessorTrackerFeatureDummy(params));
-    S->addProcessor(pt);
+    // ProcessorBasePtr pt = std::make_shared<ProcessorTrackerFeatureDummy>(ProcessorTrackerFeatureDummy(params));
+    auto pt = ProcessorBase::emplace<ProcessorTrackerFeatureDummy>(S, ProcessorTrackerFeatureDummy(params));
+    // S->addProcessor(pt);
 
     // check motion processor IS NOT set
     ASSERT_FALSE(P->getProcessorMotion());
@@ -127,7 +131,7 @@ TEST(Problem, Installers)
 
 TEST(Problem, SetOrigin_PO_2D)
 {
-    ProblemPtr P = Problem::create("PO 2D");
+    ProblemPtr P = Problem::create("PO", 2);
     TimeStamp       t0(0);
     Eigen::VectorXs x0(3); x0 << 1,2,3;
     Eigen::MatrixXs P0(3,3); P0.setIdentity(); P0 *= 0.1; // P0 is 0.1*Id
@@ -164,7 +168,7 @@ TEST(Problem, SetOrigin_PO_2D)
 
 TEST(Problem, SetOrigin_PO_3D)
 {
-    ProblemPtr P = Problem::create("PO 3D");
+    ProblemPtr P = Problem::create("PO", 3);
     TimeStamp       t0(0);
     Eigen::VectorXs x0(7); x0 << 1,2,3,4,5,6,7;
     Eigen::MatrixXs P0(6,6); P0.setIdentity(); P0 *= 0.1; // P0 is 0.1*Id
@@ -201,11 +205,11 @@ TEST(Problem, SetOrigin_PO_3D)
 
 TEST(Problem, emplaceFrame_factory)
 {
-    ProblemPtr P = Problem::create("PO 2D");
+    ProblemPtr P = Problem::create("PO", 2);
 
-    FrameBasePtr f0 = P->emplaceFrame("PO 2D",    KEY, VectorXs(3),  TimeStamp(0.0));
-    FrameBasePtr f1 = P->emplaceFrame("PO 3D",    KEY, VectorXs(7),  TimeStamp(1.0));
-    FrameBasePtr f2 = P->emplaceFrame("POV 3D",   KEY, VectorXs(10), TimeStamp(2.0));
+    FrameBasePtr f0 = P->emplaceFrame("PO", 2,    KEY, VectorXs(3),  TimeStamp(0.0));
+    FrameBasePtr f1 = P->emplaceFrame("PO", 3,    KEY, VectorXs(7),  TimeStamp(1.0));
+    FrameBasePtr f2 = P->emplaceFrame("POV", 3,   KEY, VectorXs(10), TimeStamp(2.0));
 
     //    std::cout << "f0: type PO 2D?    "  << f0->getType() << std::endl;
     //    std::cout << "f1: type PO 3D?    "  << f1->getType() << std::endl;
@@ -228,7 +232,7 @@ TEST(Problem, StateBlocks)
 {
     std::string wolf_root = _WOLF_ROOT_DIR;
 
-    ProblemPtr P = Problem::create("PO 3D");
+    ProblemPtr P = Problem::create("PO", 3);
     Eigen::Vector7s xs;
 
     // 2 state blocks, fixed
@@ -243,13 +247,13 @@ TEST(Problem, StateBlocks)
     params->time_tolerance            = 0.1;
     params->max_new_features          = 5;
     params->min_features_for_keyframe = 10;
-    ProcessorBasePtr pt = std::make_shared<ProcessorTrackerFeatureDummy>(ProcessorTrackerFeatureDummy(params));
-
-    St->addProcessor(pt);
+    // ProcessorBasePtr pt = std::make_shared<ProcessorTrackerFeatureDummy>(ProcessorTrackerFeatureDummy(params));
+    auto pt = ProcessorBase::emplace<ProcessorTrackerFeatureDummy>(St, ProcessorTrackerFeatureDummy(params));
+    // St->addProcessor(pt);
     ProcessorBasePtr pm = P->installProcessor("ODOM 3D",            "odom integrator",      "odometer", wolf_root + "/src/examples/processor_odom_3D.yaml");
 
     // 2 state blocks, estimated
-    auto KF = P->emplaceFrame("PO 3D", KEY, xs, 0);
+    auto KF = P->emplaceFrame("PO", 3, KEY, xs, 0);
     ASSERT_EQ(P->getStateBlockNotificationMapSize(), (SizeStd)(2 + 3 + 2));
 
     // Notifications
@@ -289,7 +293,7 @@ TEST(Problem, Covariances)
 {
     std::string wolf_root = _WOLF_ROOT_DIR;
 
-    ProblemPtr P = Problem::create("PO 3D");
+    ProblemPtr P = Problem::create("PO", 3);
     Eigen::Vector7s xs;
 
     SensorBasePtr    Sm = P->installSensor   ("ODOM 3D", "odometer",xs, wolf_root + "/src/examples/sensor_odom_3D.yaml");
@@ -299,14 +303,15 @@ TEST(Problem, Covariances)
     params->time_tolerance            = 0.1;
     params->max_new_features          = 5;
     params->min_features_for_keyframe = 10;
-    ProcessorBasePtr pt = std::make_shared<ProcessorTrackerFeatureDummy>(ProcessorTrackerFeatureDummy(params));
+    // ProcessorBasePtr pt = std::make_shared<ProcessorTrackerFeatureDummy>(ProcessorTrackerFeatureDummy(params));
+    auto pt = ProcessorBase::emplace<ProcessorTrackerFeatureDummy>(St, ProcessorTrackerFeatureDummy(params));
 
-    St->addProcessor(pt);
+    // St->addProcessor(pt);
     ProcessorBasePtr pm = P->installProcessor("ODOM 3D",            "odom integrator",      "odometer", wolf_root + "/src/examples/processor_odom_3D.yaml");
 
     // 4 state blocks, estimated
     St->unfixExtrinsics();
-    FrameBasePtr F = P->emplaceFrame("PO 3D", KEY, xs, 0);
+    FrameBasePtr F = P->emplaceFrame("PO", 3, KEY, xs, 0);
 
     // set covariance (they are not computed without a solver)
     P->addCovarianceBlock(F->getP(), Eigen::Matrix3s::Identity());
