@@ -172,12 +172,14 @@ include/vision/capture/capture_image.h
 SET(HDRS_FACTOR
 include/vision/factor/factor_autodiff_trifocal.h
 include/vision/factor/factor_AHP.h
+include/vision/factor/factor_pixelHP.h
   )
 SET(HDRS_FEATURE
 include/vision/feature/feature_point_image.h
   )
 SET(HDRS_LANDMARK
   include/vision/landmark/landmark_AHP.h
+  include/vision/landmark/landmark_HP.h
   )
 SET(HDRS_PROCESSOR
 include/vision/processor/processor_tracker_feature_trifocal.h
@@ -211,6 +213,7 @@ src/feature/feature_point_image.cpp
   )
 SET(SRCS_LANDMARK
 src/landmark/landmark_AHP.cpp
+src/landmark/landmark_HP.cpp
   )
 SET(SRCS_PROCESSOR
 src/processor/processor_tracker_feature_trifocal.cpp

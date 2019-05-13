@@ -1,5 +1,5 @@
 /*
- * processor_tracker_feature_oriol.h
+ * processor_bundle_adjustment.h
  *
  *  Created on: May 3, 2019
  *      Author: ovendrell
@@ -11,12 +11,14 @@
 //wolf includes
 #include "core/processor/processor_tracker_feature.h"
 #include "vision/capture/capture_image.h"
+#include "vision/landmark/landmark_HP.h"
 
 //vision utils includes
 #include "vision_utils/vision_utils.h"
 #include "vision_utils/detectors.h"
 #include "vision_utils/descriptors.h"
 #include "vision_utils/matchers.h"
+#include "../factor/factor_pixelHP.h"
 
 namespace wolf{
 
@@ -26,6 +28,10 @@ struct ProcessorParamsBundleAdjustment : public ProcessorParamsTrackerFeature
 {
         std::string yaml_file_params_vision_utils;
 
+        bool delete_ambiguities;
+
+        Scalar pixel_noise_std; ///< std noise of the pixel
+        int min_track_length_for_factor; ///< Minimum track length of a matched feature to create a factor
 
 };
 
@@ -38,20 +44,25 @@ class ProcessorBundleAdjustment : public ProcessorTrackerFeature
         vision_utils::DescriptorBasePtr des_ptr_;
         vision_utils::MatcherBasePtr mat_ptr_;
 
-        ProcessorParamsBundleAdjustmentPtr params_tracker_feature_oriol_;  // Configuration parameters
+        ProcessorParamsBundleAdjustmentPtr params_bundle_adjustment_;  // Configuration parameters
 
         CaptureImagePtr capture_image_last_;
         CaptureImagePtr capture_image_incoming_;
 
         Matrix2s        pixel_cov_;
 
+
+        //TODO: correct to add this?
+        std::map<size_t, LandmarkBasePtr> lmk_track_map_; //LandmarkTrackMap;
+
+
     public:
         /** \brief Class constructor
         */
-        ProcessorBundleAdjustment(ProcessorParamsBundleAdjustmentPtr _params_tracker_feature_oriol);
+        ProcessorBundleAdjustment(ProcessorParamsBundleAdjustmentPtr _params_bundle_adjustment);
         /** \brief Class destructor
         */
-        virtual ~ProcessorBundleAdjustment();
+        //virtual ~ProcessorBundleAdjustment();
 
     public:
 
@@ -127,11 +138,28 @@ class ProcessorBundleAdjustment : public ProcessorTrackerFeature
          */
         virtual FactorBasePtr createFactor(FeatureBasePtr _feature_ptr, FeatureBasePtr _feature_other_ptr) override;
 
+        virtual LandmarkBasePtr createLandmark(FeatureBasePtr _feature_ptr);
+
+        /** \brief Establish factors between features in Captures \b last and \b origin
+         */
+        virtual void establishFactors() override;
+
     public:
         /// @brief Factory method
         static ProcessorBasePtr create(const std::string& _unique_name,
                                        const ProcessorParamsBasePtr _params,
                                        const SensorBasePtr _sensor_ptr);
+
+    private:
+
+        cv::Mat image_debug_;
+
+    public:
+
+        /**
+         * \brief Return Image for debug purposes
+         */
+        cv::Mat getImageDebug();
 };
 
 } //namespace wolf

@@ -19,3 +19,7 @@ target_link_libraries(gtest_sensor_camera ${PROJECT_NAME} ${wolf_LIBRARY} ${Open
 # ProcessorFeatureTrifocal test
 wolf_add_gtest(gtest_processor_tracker_feature_trifocal gtest_processor_tracker_feature_trifocal.cpp)
 target_link_libraries(gtest_processor_tracker_feature_trifocal ${PROJECT_NAME} ${wolf_LIBRARY} ${OpenCV_LIBS} ${vision_utils_LIBRARY})
+
+# ProcessorBundleAdjustment test
+wolf_add_gtest(gtest_processor_bundle_adjustment gtest_processor_bundle_adjustment.cpp)
+target_link_libraries(gtest_processor_bundle_adjustment ${PROJECT_NAME} ${wolf_LIBRARY} ${OpenCV_LIBS} ${vision_utils_LIBRARY})

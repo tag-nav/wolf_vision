@@ -12,7 +12,7 @@ algorithm:
     grid horiz cells: 13
     grid vert cells:  10
     min response new features: 50   
-    min track length for constraint: 3
+    min track length for factor: 3
     
 noise:
     pixel noise std: 1 # pixels
