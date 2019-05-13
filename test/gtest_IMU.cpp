@@ -87,7 +87,7 @@ class Process_Factor_IMU : public testing::Test
             string wolf_root = _WOLF_ROOT_DIR;
 
             //===================================== SETTING PROBLEM
-            problem = Problem::create("POV 3D");
+            problem = Problem::create("POV", 3);
 
             // CERES WRAPPER
             ceres::Solver::Options ceres_options;

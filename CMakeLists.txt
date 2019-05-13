@@ -11,6 +11,7 @@ SET(CMAKE_MACOSX_RPATH 1)
 
 # The project name
 PROJECT(vision)
+set(PLUGIN_NAME wolf${PROJECT_NAME})
 
 
 SET(EXECUTABLE_OUTPUT_PATH ${CMAKE_CURRENT_SOURCE_DIR}/bin)
@@ -61,7 +62,7 @@ if(BUILD_TESTS)
     enable_testing()
 endif()
 
-MESSAGE("Starting ${PROJECT_NAME} CMakeLists ...")
+MESSAGE("Starting ${PLUGIN_NAME} CMakeLists ...")
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
 
 #CMAKE modules
@@ -180,6 +181,7 @@ include/vision/feature/feature_point_image.h
 SET(HDRS_LANDMARK
   include/vision/landmark/landmark_AHP.h
   include/vision/landmark/landmark_HP.h
+  include/vision/landmark/landmark_point_3D.h
   )
 SET(HDRS_PROCESSOR
 include/vision/processor/processor_tracker_feature_trifocal.h
@@ -214,6 +216,7 @@ src/feature/feature_point_image.cpp
 SET(SRCS_LANDMARK
 src/landmark/landmark_AHP.cpp
 src/landmark/landmark_HP.cpp
+src/landmark/landmark_point_3D.cpp
   )
 SET(SRCS_PROCESSOR
 src/processor/processor_tracker_feature_trifocal.cpp
@@ -257,7 +260,7 @@ src/yaml/processor_bundle_adjustment_yaml.cpp
 # ENDIF(Ceres_FOUND)
 
 # create the shared library
-ADD_LIBRARY(${PROJECT_NAME}
+ADD_LIBRARY(${PLUGIN_NAME}
   SHARED
   ${SRCS_CAPTURE}
   ${SRCS_COMMON}
@@ -273,23 +276,23 @@ ADD_LIBRARY(${PROJECT_NAME}
   ${SRCS_WRAPPER}
   ${SRCS_YAML}
   )
-TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${CMAKE_THREAD_LIBS_INIT})
-TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${wolf_LIBRARY})
+TARGET_LINK_LIBRARIES(${PLUGIN_NAME} ${CMAKE_THREAD_LIBS_INIT})
+TARGET_LINK_LIBRARIES(${PLUGIN_NAME} ${wolf_LIBRARY})
 
-TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${OpenCV_LIBS})
-TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${vision_utils_LIBRARY})
+TARGET_LINK_LIBRARIES(${PLUGIN_NAME} ${OpenCV_LIBS})
+TARGET_LINK_LIBRARIES(${PLUGIN_NAME} ${vision_utils_LIBRARY})
 
 #Link the created libraries
 #===============EXAMPLE=========================
 # IF (Ceres_FOUND)
-#     TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${CERES_LIBRARIES})
+#     TARGET_LINK_LIBRARIES(${PLUGIN_NAME} ${CERES_LIBRARIES})
 # ENDIF(Ceres_FOUND)
 
 
 #Build tests
 #===============EXAMPLE=========================
 IF (GLOG_FOUND)
-    TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${GLOG_LIBRARY})
+    TARGET_LINK_LIBRARIES(${PLUGIN_NAME} ${GLOG_LIBRARY})
 ENDIF (GLOG_FOUND)
 IF (GLOG_FOUND)
     IF(BUILD_TESTS)
@@ -301,12 +304,12 @@ ENDIF (GLOG_FOUND)
 #install library
 
 #=============================================================
-INSTALL(TARGETS ${PROJECT_NAME} EXPORT ${PROJECT_NAME}Targets
+INSTALL(TARGETS ${PLUGIN_NAME} EXPORT ${PLUGIN_NAME}Targets
       RUNTIME DESTINATION bin
       LIBRARY DESTINATION lib/iri-algorithms
       ARCHIVE DESTINATION lib/iri-algorithms)
 
-install(EXPORT ${PROJECT_NAME}Targets DESTINATION lib/cmake/${PROJECT_NAME})
+install(EXPORT ${PLUGIN_NAME}Targets DESTINATION lib/cmake/${PLUGIN_NAME})
 #install headers
 INSTALL(FILES ${HDRS_DTASSC}
   DESTINATION include/iri-algorithms/wolf/plugin_${PROJECT_NAME}/${PROJECT_NAME}/association)
@@ -339,27 +342,22 @@ INSTALL(FILES ${HDRS_SERIALIZATION}
 INSTALL(FILES ${HDRS_YAML}
   DESTINATION include/iri-algorithms/wolf/plugin_${PROJECT_NAME}/${PROJECT_NAME}/yaml)
 
-INSTALL(FILES "${CMAKE_SOURCE_DIR}/cmake_modules/Findwolf${PROJECT_NAME}.cmake"
-  DESTINATION "lib/cmake/wolf${PROJECT_NAME}")
+# INSTALL(FILES "${CMAKE_SOURCE_DIR}/cmake_modules/Find${PLUGIN_NAME}.cmake"
+#   DESTINATION "lib/cmake/${PLUGIN_NAME}")
+INSTALL(FILES "${CMAKE_SOURCE_DIR}/cmake_modules/${PLUGIN_NAME}Config.cmake" DESTINATION "lib/cmake/${PLUGIN_NAME}")
 FILE(WRITE ${PROJECT_NAME}.found "")
 INSTALL(FILES ${PROJECT_NAME}.found
   DESTINATION include/iri-algorithms/wolf/plugin_${PROJECT_NAME})
-#install Find*.cmake
-configure_file("${CMAKE_SOURCE_DIR}/cmake_modules/wolf${PROJECT_NAME}Config.cmake"
-               "${CMAKE_BINARY_DIR}/wolf${PROJECT_NAME}Config.cmake" @ONLY)
-# configure_file("${CMAKE_SOURCE_DIR}/cmake_modules/Findwolf${PROJECT_NAME}.cmake"
-#                "${CMAKE_BINARY_DIR}/Findwolf${PROJECT_NAME}.cmake" @ONLY)
 
 INSTALL(FILES "${WOLF_CONFIG_DIR}/config.h"
 DESTINATION include/iri-algorithms/wolf/internal)
 
-# INSTALL(FILES "${CMAKE_BINARY_DIR}/cmake_modules/Findwolf${PROJECT_NAME}.cmake"
-#   DESTINATION "lib/cmake/${PROJECT_NAME}")
-INSTALL(FILES "${CMAKE_BINARY_DIR}/wolf${PROJECT_NAME}Config.cmake" DESTINATION "lib/cmake/wolf${PROJECT_NAME}")
+# INSTALL(FILES "${CMAKE_BINARY_DIR}/cmake_modules/Findwolf${PLUGIN_NAME}.cmake"
+#   DESTINATION "lib/cmake/${PLUGIN_NAME}")
 
 INSTALL(DIRECTORY ${SPDLOG_INCLUDE_DIRS} DESTINATION "include/iri-algorithms/")
 
-export(PACKAGE wolf_${PROJECT_NAME})
+export(PACKAGE ${PLUGIN_NAME})
 
 FIND_PACKAGE(Doxygen)
 

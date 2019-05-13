@@ -9,17 +9,18 @@ include_directories(${GTEST_INCLUDE_DIRS})
 #                                                         #
 # Create a specific test executable for gtest_example     #
 wolf_add_gtest(gtest_example gtest_example.cpp)           #
-target_link_libraries(gtest_example ${PROJECT_NAME})      #
+target_link_libraries(gtest_example ${PLUGIN_NAME})      #
 #                                                         #
 ###########################################################
 
 wolf_add_gtest(gtest_sensor_camera gtest_sensor_camera.cpp)
-target_link_libraries(gtest_sensor_camera ${PROJECT_NAME} ${wolf_LIBRARY} ${OpenCV_LIBS} ${vision_utils_LIBRARY})
+target_link_libraries(gtest_sensor_camera ${PLUGIN_NAME} ${wolf_LIBRARY} ${OpenCV_LIBS} ${vision_utils_LIBRARY})
 
 # ProcessorFeatureTrifocal test
 wolf_add_gtest(gtest_processor_tracker_feature_trifocal gtest_processor_tracker_feature_trifocal.cpp)
-target_link_libraries(gtest_processor_tracker_feature_trifocal ${PROJECT_NAME} ${wolf_LIBRARY} ${OpenCV_LIBS} ${vision_utils_LIBRARY})
+target_link_libraries(gtest_processor_tracker_feature_trifocal ${PLUGIN_NAME} ${wolf_LIBRARY} ${OpenCV_LIBS} ${vision_utils_LIBRARY})
+target_link_libraries(gtest_processor_tracker_feature_trifocal ${PLUGIN_NAME} ${wolf_LIBRARY} ${OpenCV_LIBS} ${vision_utils_LIBRARY})
 
 # ProcessorBundleAdjustment test
 wolf_add_gtest(gtest_processor_bundle_adjustment gtest_processor_bundle_adjustment.cpp)
-target_link_libraries(gtest_processor_bundle_adjustment ${PROJECT_NAME} ${wolf_LIBRARY} ${OpenCV_LIBS} ${vision_utils_LIBRARY})
+target_link_libraries(gtest_processor_bundle_adjustment ${PLUGIN_NAME} ${wolf_LIBRARY} ${OpenCV_LIBS} ${vision_utils_LIBRARY})

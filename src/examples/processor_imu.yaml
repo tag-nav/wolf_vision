@@ -2,6 +2,7 @@ processor type: "IMU"              # This must match the KEY used in the SensorF
 processor name: "Main imu"        # This is ignored. The name provided to the SensorFactory prevails
 time tolerance: 0.001         # Time tolerance for joining KFs
 unmeasured perturbation std: 0.00001
+time tolerance: 0.0025         # Time tolerance for joining KFs
 keyframe vote:
     max time span:      2.0   # seconds
     max buffer length:  20000    # motion deltas

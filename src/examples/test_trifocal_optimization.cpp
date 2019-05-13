@@ -84,7 +84,7 @@ int main(int argc, char** argv)
     // ===============================================
 
     // Wolf problem
-    ProblemPtr problem = Problem::create("PO 3D");
+    ProblemPtr problem = Problem::create("PO", 3);
 
     // CERES WRAPPER
     CeresManagerPtr ceres_manager;

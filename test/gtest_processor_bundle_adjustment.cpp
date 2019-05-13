@@ -25,7 +25,7 @@ TEST(ProcessorBundleAdjustment, installCamera)
     params->distortion = Eigen::Vector3s( 0, 0, 0 );
 
     // Wolf problem
-	ProblemPtr problem = Problem::create("PO 3D");
+	ProblemPtr problem = Problem::create("PO", 3);
 
 	// Install camera
 	auto sen = problem->installSensor("CAMERA", "camera", extrinsics, params);
@@ -48,7 +48,7 @@ TEST(ProcessorBundleAdjustment, installProcessor)
     std::string wolf_root = _WOLF_ROOT_DIR;
 
     // Wolf problem
-    ProblemPtr problem = Problem::create("PO 3D");
+    ProblemPtr problem = Problem::create("PO", 3);
 
     // Install camera
     IntrinsicsCameraPtr intr = std::make_shared<IntrinsicsCamera>(); // TODO init params or read from YAML

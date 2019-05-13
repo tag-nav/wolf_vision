@@ -71,15 +71,17 @@ TEST(ProcessorTrackerFeatureTrifocal, KeyFrameCallback)
     Scalar dt = 0.01;
 
     // Wolf problem
-    ProblemPtr problem = Problem::create("PO 3D");
+    ProblemPtr problem = Problem::create("PO", 3);
 
     // Install tracker (sensor and processor)
     IntrinsicsCameraPtr intr = make_shared<IntrinsicsCamera>(); // TODO init params or read from YAML
     intr->width  = 640;
     intr->height = 480;
-    SensorCameraPtr sens_trk = make_shared<SensorCamera>((Eigen::Vector7s()<<0,0,0, 0,0,0,1).finished(),
-                                                         intr);
+    // SensorCameraPtr sens_trk = make_shared<SensorCamera>((Eigen::Vector7s()<<0,0,0, 0,0,0,1).finished(),
+    //                                                      intr);
 
+    auto sens_trk = SensorBase::emplace<SensorCamera>(problem->getHardware(), (Eigen::Vector7s()<<0,0,0, 0,0,0,1).finished(),
+                                                      intr);
     ProcessorParamsTrackerFeatureTrifocalPtr params_tracker_feature_trifocal = std::make_shared<ProcessorParamsTrackerFeatureTrifocal>();
     params_tracker_feature_trifocal->pixel_noise_std                = 1.0;
     params_tracker_feature_trifocal->voting_active                  = true;
@@ -93,11 +95,12 @@ TEST(ProcessorTrackerFeatureTrifocal, KeyFrameCallback)
     params_tracker_feature_trifocal->n_cells_v                      = 10;
     params_tracker_feature_trifocal->yaml_file_params_vision_utils  = wolf_root + "/src/examples/processor_tracker_feature_trifocal_vision_utils.yaml";
 
-    ProcessorTrackerFeatureTrifocalPtr proc_trk = make_shared<ProcessorTrackerFeatureTrifocal>(params_tracker_feature_trifocal);
+    // ProcessorTrackerFeatureTrifocalPtr proc_trk = make_shared<ProcessorTrackerFeatureTrifocal>(params_tracker_feature_trifocal);
+    auto proc_trk = std::static_pointer_cast<ProcessorTrackerFeatureTrifocal>(ProcessorBase::emplace<ProcessorTrackerFeatureTrifocal>(sens_trk, params_tracker_feature_trifocal));
     proc_trk->configure(sens_trk);
 
-    problem->addSensor(sens_trk);
-    sens_trk->addProcessor(proc_trk);
+    // problem->addSensor(sens_trk);
+    // sens_trk->addProcessor(proc_trk);
 
     // Install odometer (sensor and processor)
     IntrinsicsOdom3DPtr params = std::make_shared<IntrinsicsOdom3D>();
@@ -125,7 +128,8 @@ TEST(ProcessorTrackerFeatureTrifocal, KeyFrameCallback)
     // Track
     cv::Mat image(intr->height, intr->width, CV_8UC3); // OpenCV cv::Mat(rows, cols)
     image *= 0; // TODO see if we want to use a real image
-    CaptureImagePtr capt_trk = make_shared<CaptureImage>(t, sens_trk, image);
+    SensorCameraPtr sens_trk_cam = std::static_pointer_cast<SensorCamera>(sens_trk);
+    CaptureImagePtr capt_trk = make_shared<CaptureImage>(t, sens_trk_cam, image);
     proc_trk->process(capt_trk);
 
     problem->print(2,0,1,0);
@@ -140,7 +144,7 @@ TEST(ProcessorTrackerFeatureTrifocal, KeyFrameCallback)
         proc_odo->process(capt_odo);
 
         // Track
-        capt_trk = make_shared<CaptureImage>(t, sens_trk, image);
+        capt_trk = make_shared<CaptureImage>(t, sens_trk_cam, image);
         proc_trk->process(capt_trk);
 
         problem->print(2,0,1,0);
