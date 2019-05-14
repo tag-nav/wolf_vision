@@ -11,8 +11,8 @@
 
 using namespace wolf;
 
-std::string wolf_root = "/home/ovendrell/dev/vision";
-//std::string wolf_root = _WOLF_VISION_ROOT_DIR;
+// std::string wolf_root = "/home/ovendrell/dev/vision";
+std::string wolf_root = _WOLF_VISION_ROOT_DIR;
 
 class ProcessorBundleAdjustmentDummy : public ProcessorBundleAdjustment
 {
