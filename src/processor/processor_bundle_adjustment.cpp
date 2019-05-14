@@ -45,7 +45,7 @@ ProcessorBundleAdjustment::ProcessorBundleAdjustment(ProcessorParamsBundleAdjust
 
 void ProcessorBundleAdjustment::configure(SensorBasePtr _sensor)
 {
-    //TODO: Implement
+    //TODO: Implement if needed
 }
 
 void ProcessorBundleAdjustment::preProcess()
@@ -95,7 +95,7 @@ void ProcessorBundleAdjustment::preProcess()
 
 void ProcessorBundleAdjustment::postProcess()
 {
-	//TODO: visualization
+	//TODO: check visualization
 
     std::map<int,std::list<vision_utils::KeyPointEnhanced> > kp_enh_tracks;
 

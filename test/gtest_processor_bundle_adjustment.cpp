@@ -6,11 +6,13 @@
 #include "core/sensor/sensor_factory.h"
 #include "vision/processor/processor_bundle_adjustment.h"
 #include "vision/capture/capture_image.h"
+#include "vision/internal/config.h"
 
 
 using namespace wolf;
 
 std::string wolf_root = "/home/ovendrell/dev/vision";
+//std::string wolf_root = _WOLF_VISION_ROOT_DIR;
 
 class ProcessorBundleAdjustmentDummy : public ProcessorBundleAdjustment
 {
@@ -69,7 +71,7 @@ TEST(ProcessorBundleAdjustment, installProcessor)
     // Install processor
     ProcessorParamsBundleAdjustmentPtr params = std::make_shared<ProcessorParamsBundleAdjustment>();
     params->delete_ambiguities = true;
-    params->yaml_file_params_vision_utils = wolf_root + "/src/examples/processor_bundle_adjustment_vision_utils.yaml";
+    params->yaml_file_params_vision_utils = wolf_root + "/demos/processor_bundle_adjustment_vision_utils.yaml";
     params->pixel_noise_std                = 1.0;
     params->min_track_length_for_factor = 3;
     params->voting_active = true;
@@ -89,7 +91,7 @@ TEST(ProcessorBundleAdjustment, preProcess)
     // Create processor
     ProcessorParamsBundleAdjustmentPtr params = std::make_shared<ProcessorParamsBundleAdjustment>();
     params->delete_ambiguities = true;
-    params->yaml_file_params_vision_utils = wolf_root + "/src/examples/processor_bundle_adjustment_vision_utils.yaml";
+    params->yaml_file_params_vision_utils = wolf_root + "/demos/processor_bundle_adjustment_vision_utils.yaml";
     params->pixel_noise_std                = 1.0;
     params->min_track_length_for_factor = 3;
     params->voting_active = true;
@@ -98,10 +100,10 @@ TEST(ProcessorBundleAdjustment, preProcess)
     auto proc_dummy = std::make_shared<ProcessorBundleAdjustmentDummy>(params);
 
     // Put an image on incoming_ptr_
-    CaptureImagePtr image_inc_ptr = proc_dummy->createCaptureImage(wolf_root + "/src/examples/Test_gazebo_x00cm_y00cm.jpg");
+    CaptureImagePtr image_inc_ptr = proc_dummy->createCaptureImage(wolf_root + "/demos/Test_gazebo_x00cm_y00cm.jpg");
     proc_dummy->setInc(image_inc_ptr);
     // Put an image on last_ptr_
-    CaptureImagePtr image_last_ptr = proc_dummy->createCaptureImage(wolf_root + "/src/examples/Test_gazebo_x00cm_y00cm.jpg", true);
+    CaptureImagePtr image_last_ptr = proc_dummy->createCaptureImage(wolf_root + "/demos/Test_gazebo_x00cm_y00cm.jpg", true);
     proc_dummy->setLast(image_last_ptr);
     // Test dpreProcess
     proc_dummy->preProcess();
@@ -118,7 +120,7 @@ TEST(ProcessorBundleAdjustment, detectNewFeatures)
     // Create processor
     ProcessorParamsBundleAdjustmentPtr params = std::make_shared<ProcessorParamsBundleAdjustment>();
     params->delete_ambiguities = true;
-    params->yaml_file_params_vision_utils = wolf_root + "/src/examples/processor_bundle_adjustment_vision_utils.yaml";
+    params->yaml_file_params_vision_utils = wolf_root + "/demos/processor_bundle_adjustment_vision_utils.yaml";
     params->pixel_noise_std                = 1.0;
     params->min_track_length_for_factor = 3;
     params->voting_active = true;
@@ -128,7 +130,7 @@ TEST(ProcessorBundleAdjustment, detectNewFeatures)
     FeatureBasePtrList feat_list = std::list<FeatureBasePtr>();
 
     // Put an image on last_ptr_
-    CaptureImagePtr image_last_ptr = proc_dummy->createCaptureImage(wolf_root + "/src/examples/Test_gazebo_x00cm_y00cm.jpg", true);
+    CaptureImagePtr image_last_ptr = proc_dummy->createCaptureImage(wolf_root + "/demos/Test_gazebo_x00cm_y00cm.jpg", true);
     ASSERT_NE(image_last_ptr->keypoints_.size(), 0);
     proc_dummy->setLast(image_last_ptr);
 
@@ -137,7 +139,7 @@ TEST(ProcessorBundleAdjustment, detectNewFeatures)
     ASSERT_EQ(num, 0);
 
     // Put an image on incoming_ptr_
-    CaptureImagePtr image_inc_ptr = proc_dummy->createCaptureImage(wolf_root + "/src/examples/Test_gazebo_x00cm_y00cm.jpg");
+    CaptureImagePtr image_inc_ptr = proc_dummy->createCaptureImage(wolf_root + "/demos/Test_gazebo_x00cm_y00cm.jpg");
     proc_dummy->setInc(image_inc_ptr);
 
     // Test detectNewFeatures
@@ -153,6 +155,126 @@ TEST(ProcessorBundleAdjustment, detectNewFeatures)
     unsigned int num3 = proc_dummy->detectNewFeatures(params->max_new_features, feat_list);
     ASSERT_EQ(num3, params->max_new_features);
 }
+
+TEST(ProcessorBundleAdjustment, trackFeatures)
+{
+//    std::string wolf_root = _WOLF_ROOT_DIR;
+
+    // Create processor
+    ProcessorParamsBundleAdjustmentPtr params = std::make_shared<ProcessorParamsBundleAdjustment>();
+    params->delete_ambiguities = true;
+    params->yaml_file_params_vision_utils = wolf_root + "/demos/processor_bundle_adjustment_vision_utils.yaml";
+    params->pixel_noise_std                = 1.0;
+    params->min_track_length_for_factor = 3;
+    params->voting_active = true;
+    params->max_new_features = 5;
+    auto proc_dummy = std::make_shared<ProcessorBundleAdjustmentDummy>(params);
+
+    //fill feat_last list
+    FeatureBasePtrList feat_list = std::list<FeatureBasePtr>();
+    CaptureImagePtr image_last_ptr = proc_dummy->createCaptureImage(wolf_root + "/demos/Test_gazebo_x00cm_y00cm.jpg", true);
+    proc_dummy->setLast(image_last_ptr);
+    CaptureImagePtr image_inc_ptr = proc_dummy->createCaptureImage(wolf_root + "/demos/Test_gazebo_x00cm_y00cm.jpg");
+    proc_dummy->setInc(image_inc_ptr);
+    proc_dummy->preProcess();
+    CaptureImagePtr last = std::static_pointer_cast<CaptureImage>(proc_dummy->getLast());
+    proc_dummy->detectNewFeatures(params->max_new_features, feat_list);
+    //Test trackFeatures
+    FeatureBasePtrList feat_list_out = std::list<FeatureBasePtr>();
+    FeatureMatchMap feat_correspondance = FeatureMatchMap();
+    proc_dummy->trackFeatures(feat_list, feat_list_out, feat_correspondance);
+    ASSERT_EQ(feat_list.size(), feat_list_out.size());
+}
+
+TEST(ProcessorBundleAdjustment, postProcess)
+{
+//    std::string wolf_root = _WOLF_ROOT_DIR;
+
+	    // Create processor
+	    ProcessorParamsBundleAdjustmentPtr params = std::make_shared<ProcessorParamsBundleAdjustment>();
+	    params->delete_ambiguities = true;
+	    params->yaml_file_params_vision_utils = wolf_root + "/demos/processor_bundle_adjustment_vision_utils.yaml";
+	    params->pixel_noise_std                = 1.0;
+	    params->min_track_length_for_factor = 3;
+	    params->voting_active = true;
+	    params->max_new_features = 5;
+	    auto proc_dummy = std::make_shared<ProcessorBundleAdjustmentDummy>(params);
+
+	    //fill feat_last list
+	    FeatureBasePtrList feat_list = std::list<FeatureBasePtr>();
+	    CaptureImagePtr image_last_ptr = proc_dummy->createCaptureImage(wolf_root + "/demos/Test_gazebo_x00cm_y00cm.jpg", true);
+	    proc_dummy->setLast(image_last_ptr);
+	    CaptureImagePtr image_inc_ptr = proc_dummy->createCaptureImage(wolf_root + "/demos/Test_gazebo_x00cm_y00cm.jpg");
+	    proc_dummy->setInc(image_inc_ptr);
+	    proc_dummy->preProcess();
+	    CaptureImagePtr last = std::static_pointer_cast<CaptureImage>(proc_dummy->getLast());
+	    proc_dummy->detectNewFeatures(params->max_new_features, feat_list);
+	    //Test trackFeatures
+	    FeatureBasePtrList feat_list_out = std::list<FeatureBasePtr>();
+	    FeatureMatchMap feat_correspondance = FeatureMatchMap();
+	    proc_dummy->trackFeatures(feat_list, feat_list_out, feat_correspondance);
+
+	    proc_dummy->postProcess();
+
+}
+/*
+TEST(ProcessorBundleAdjustment,fullTest)
+{
+	//    std::string wolf_root = _WOLF_ROOT_DIR;
+	//    std::cout << wolf_root << std::endl;
+
+	// Wolf problem
+	ProblemPtr problem = Problem::create("PO", 3);
+
+	// Install camera
+	IntrinsicsCameraPtr intr = std::make_shared<IntrinsicsCamera>(); // TODO init params or read from YAML
+	intr->width  = 640;
+	intr->height = 480;
+	auto sens_cam = problem->installSensor("CAMERA", "camera", (Eigen::Vector7s() << 0,0,0,  0,0,0,1).finished(), intr);
+
+	// Install processor
+	ProcessorParamsBundleAdjustmentPtr params = std::make_shared<ProcessorParamsBundleAdjustment>();
+	params->delete_ambiguities = true;
+	params->yaml_file_params_vision_utils = wolf_root + "/demos/processor_bundle_adjustment_vision_utils.yaml";
+	params->pixel_noise_std                = 1.0;
+	params->min_track_length_for_factor = 3;
+	params->voting_active = true;
+	params->max_new_features = 5;
+	auto proc = problem->installProcessor("TRACKER BUNDLE ADJUSTMENT", "processor", sens_cam, params);
+
+    // initialize
+    Scalar dt = 0.01
+    TimeStamp   t(0.0);
+    Vector7s    x; x << 0,0,0, 0,0,0,1;
+    Matrix6s    P = Matrix6s::Identity() * 0.000001;
+    problem->setPrior(x, P, t, dt/2);             // KF1
+
+    // Track
+    cv::Mat image(intr->height, intr->width, CV_8UC3); // OpenCV cv::Mat(rows, cols)
+    image *= 0; // TODO see if we want to use a real image
+    SensorCameraPtr sens_trk_cam = std::static_pointer_cast<SensorCamera>(sens_cam);
+    CaptureImagePtr capt_trk = make_shared<CaptureImage>(t, sens_trk_cam, image);
+    proc->process(capt_trk);
+
+    problem->print(2,0,1,0);
+
+    for (size_t ii=0; ii<8; ii++ )
+    {
+        // Move
+        t = t+dt;
+        WOLF_INFO("----------------------- ts: ", t , " --------------------------");
+
+        // Track
+        capt_trk = make_shared<CaptureImage>(t, sens_trk_cam, image);
+        proc_trk->process(capt_trk);
+
+        problem->print(2,0,1,0);
+
+        // Only odom creating KFs
+        ASSERT_TRUE( problem->getLastKeyFrame()->getType().compare("PO 3D")==0 );
+    }
+}
+}*/
 
 
 int main(int argc, char **argv)
