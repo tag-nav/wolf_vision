@@ -72,10 +72,10 @@ void ProcessorBundleAdjustment::preProcess()
         {
         	std::map<int,int> ambiguities_map;
         	for (auto match : capture_image_incoming_->matches_from_precedent_)
-        		if (ambiguities_map.count(match.trainIdx))
-        			ambiguities_map[match.trainIdx] = 0;
-        		else
-        			ambiguities_map[match.trainIdx] = 1;
+        		if (ambiguities_map.count(match.trainIdx)) //if ambiguity
+        			ambiguities_map[match.trainIdx] = 1; //ambiguity true
+        		else //if not ambiguity
+        			ambiguities_map[match.trainIdx] = 0; //ambiguity false
         	// Set capture map of match indices
         	for (auto match : capture_image_incoming_->matches_from_precedent_)
         	{
