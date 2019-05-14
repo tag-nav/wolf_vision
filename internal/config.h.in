@@ -31,6 +31,6 @@
 
 #cmakedefine _WOLF_TRACE
 
-#define _WOLF_ROOT_DIR "${_WOLF_ROOT_DIR}"
+#define _WOLF_${UPPER_NAME}_ROOT_DIR "${_WOLF_ROOT_DIR}"
 
 #endif /* WOLF_INTERNAL_CONFIG_H_ */
