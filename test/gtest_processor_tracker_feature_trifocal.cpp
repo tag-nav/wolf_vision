@@ -9,6 +9,7 @@
 #include "core/processor/processor_odom_3D.h"
 #include "vision/capture/capture_image.h"
 #include "vision/sensor/sensor_camera.h"
+#include "vision/internal/config.h"
 
 using namespace Eigen;
 using namespace wolf;
@@ -66,7 +67,7 @@ TEST(ProcessorTrackerFeatureTrifocal, KeyFrameCallback)
     using std::static_pointer_cast;
     using Eigen::Vector2s;
 
-    std::string wolf_root = _WOLF_ROOT_DIR;
+    std::string wolf_root = _WOLF_VISION_ROOT_DIR;
 
     Scalar dt = 0.01;
 
