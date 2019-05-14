@@ -93,7 +93,8 @@ TEST(ProcessorTrackerFeatureTrifocal, KeyFrameCallback)
     params_tracker_feature_trifocal->min_response_new_feature       = 25;
     params_tracker_feature_trifocal->n_cells_h                      = 10;
     params_tracker_feature_trifocal->n_cells_v                      = 10;
-    params_tracker_feature_trifocal->yaml_file_params_vision_utils  = wolf_root + "/src/examples/processor_tracker_feature_trifocal_vision_utils.yaml";
+    params_tracker_feature_trifocal->yaml_file_params_vision_utils  = wolf_root + "/demos/processor_tracker_feature_trifocal_vision_utils.yaml";
+    std::cout << "yaml path: " << params_tracker_feature_trifocal->yaml_file_params_vision_utils << std::endl;
 
     // ProcessorTrackerFeatureTrifocalPtr proc_trk = make_shared<ProcessorTrackerFeatureTrifocal>(params_tracker_feature_trifocal);
     auto proc_trk = std::static_pointer_cast<ProcessorTrackerFeatureTrifocal>(ProcessorBase::emplace<ProcessorTrackerFeatureTrifocal>(sens_trk, params_tracker_feature_trifocal));

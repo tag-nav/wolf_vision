@@ -59,7 +59,7 @@ macro(wolf_report_not_found REASON_MSG)
 endmacro(wolf_report_not_found)
 
 if(NOT wolfvision_FOUND)
-  wolf_report_not_found("TROUBLE DUDE.")
+  wolf_report_not_found("Something went wrong while setting up wolf vision.")
 endif(NOT wolfvision_FOUND)
 # Set the include directories for wolf (itself).
 set(wolfvision_FOUND TRUE)
