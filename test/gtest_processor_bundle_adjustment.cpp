@@ -47,7 +47,7 @@ class ProcessorBundleAdjustmentDummy : public ProcessorBundleAdjustment
 };
 
 // Use the following in case you want to initialize tests with predefines variables or methods.
-//class ProcessorBundleAdjustment_class : public testing::Test{
+//class ProcessorBundleAdjustment_class : public testing::demo{
 //    public:
 //        virtual void SetUp()
 //        {
@@ -100,12 +100,12 @@ TEST(ProcessorBundleAdjustment, preProcess)
     auto proc_dummy = std::make_shared<ProcessorBundleAdjustmentDummy>(params);
 
     // Put an image on incoming_ptr_
-    CaptureImagePtr image_inc_ptr = proc_dummy->createCaptureImage(wolf_root + "/demos/Test_gazebo_x00cm_y00cm.jpg");
+    CaptureImagePtr image_inc_ptr = proc_dummy->createCaptureImage(wolf_root + "/demos/demo_gazebo_x00cm_y00cm.jpg");
     proc_dummy->setInc(image_inc_ptr);
     // Put an image on last_ptr_
-    CaptureImagePtr image_last_ptr = proc_dummy->createCaptureImage(wolf_root + "/demos/Test_gazebo_x00cm_y00cm.jpg", true);
+    CaptureImagePtr image_last_ptr = proc_dummy->createCaptureImage(wolf_root + "/demos/demo_gazebo_x00cm_y00cm.jpg", true);
     proc_dummy->setLast(image_last_ptr);
-    // Test dpreProcess
+    // demo dpreProcess
     proc_dummy->preProcess();
     CaptureImagePtr inc = std::static_pointer_cast<CaptureImage>(proc_dummy->getIncoming());
     CaptureImagePtr last = std::static_pointer_cast<CaptureImage>(proc_dummy->getLast());
@@ -130,19 +130,19 @@ TEST(ProcessorBundleAdjustment, detectNewFeatures)
     FeatureBasePtrList feat_list = std::list<FeatureBasePtr>();
 
     // Put an image on last_ptr_
-    CaptureImagePtr image_last_ptr = proc_dummy->createCaptureImage(wolf_root + "/demos/Test_gazebo_x00cm_y00cm.jpg", true);
+    CaptureImagePtr image_last_ptr = proc_dummy->createCaptureImage(wolf_root + "/demos/demo_gazebo_x00cm_y00cm.jpg", true);
     ASSERT_NE(image_last_ptr->keypoints_.size(), 0);
     proc_dummy->setLast(image_last_ptr);
 
-    // Test detectNewFeatures
+    // demo detectNewFeatures
     unsigned int num = proc_dummy->detectNewFeatures(params->max_new_features, feat_list);
     ASSERT_EQ(num, 0);
 
     // Put an image on incoming_ptr_
-    CaptureImagePtr image_inc_ptr = proc_dummy->createCaptureImage(wolf_root + "/demos/Test_gazebo_x00cm_y00cm.jpg");
+    CaptureImagePtr image_inc_ptr = proc_dummy->createCaptureImage(wolf_root + "/demos/demo_gazebo_x00cm_y00cm.jpg");
     proc_dummy->setInc(image_inc_ptr);
 
-    // Test detectNewFeatures
+    // demo detectNewFeatures
     unsigned int num2 = proc_dummy->detectNewFeatures(params->max_new_features, feat_list);
     ASSERT_EQ(num2, 0);
 
@@ -151,7 +151,7 @@ TEST(ProcessorBundleAdjustment, detectNewFeatures)
     CaptureImagePtr last = std::static_pointer_cast<CaptureImage>(proc_dummy->getLast());
     ASSERT_NE(last->map_index_to_next_.size(),0);
 
-    // Test detectNewFeatures
+    // demo detectNewFeatures
     unsigned int num3 = proc_dummy->detectNewFeatures(params->max_new_features, feat_list);
     ASSERT_EQ(num3, params->max_new_features);
 }
@@ -172,14 +172,14 @@ TEST(ProcessorBundleAdjustment, trackFeatures)
 
     //fill feat_last list
     FeatureBasePtrList feat_list = std::list<FeatureBasePtr>();
-    CaptureImagePtr image_last_ptr = proc_dummy->createCaptureImage(wolf_root + "/demos/Test_gazebo_x00cm_y00cm.jpg", true);
+    CaptureImagePtr image_last_ptr = proc_dummy->createCaptureImage(wolf_root + "/demos/demo_gazebo_x00cm_y00cm.jpg", true);
     proc_dummy->setLast(image_last_ptr);
-    CaptureImagePtr image_inc_ptr = proc_dummy->createCaptureImage(wolf_root + "/demos/Test_gazebo_x00cm_y00cm.jpg");
+    CaptureImagePtr image_inc_ptr = proc_dummy->createCaptureImage(wolf_root + "/demos/demo_gazebo_x00cm_y00cm.jpg");
     proc_dummy->setInc(image_inc_ptr);
     proc_dummy->preProcess();
     CaptureImagePtr last = std::static_pointer_cast<CaptureImage>(proc_dummy->getLast());
     proc_dummy->detectNewFeatures(params->max_new_features, feat_list);
-    //Test trackFeatures
+    //demo trackFeatures
     FeatureBasePtrList feat_list_out = std::list<FeatureBasePtr>();
     FeatureMatchMap feat_correspondance = FeatureMatchMap();
     proc_dummy->trackFeatures(feat_list, feat_list_out, feat_correspondance);
@@ -202,14 +202,14 @@ TEST(ProcessorBundleAdjustment, postProcess)
 
 	    //fill feat_last list
 	    FeatureBasePtrList feat_list = std::list<FeatureBasePtr>();
-	    CaptureImagePtr image_last_ptr = proc_dummy->createCaptureImage(wolf_root + "/demos/Test_gazebo_x00cm_y00cm.jpg", true);
+	    CaptureImagePtr image_last_ptr = proc_dummy->createCaptureImage(wolf_root + "/demos/demo_gazebo_x00cm_y00cm.jpg", true);
 	    proc_dummy->setLast(image_last_ptr);
-	    CaptureImagePtr image_inc_ptr = proc_dummy->createCaptureImage(wolf_root + "/demos/Test_gazebo_x00cm_y00cm.jpg");
+	    CaptureImagePtr image_inc_ptr = proc_dummy->createCaptureImage(wolf_root + "/demos/demo_gazebo_x00cm_y00cm.jpg");
 	    proc_dummy->setInc(image_inc_ptr);
 	    proc_dummy->preProcess();
 	    CaptureImagePtr last = std::static_pointer_cast<CaptureImage>(proc_dummy->getLast());
 	    proc_dummy->detectNewFeatures(params->max_new_features, feat_list);
-	    //Test trackFeatures
+	    //demo trackFeatures
 	    FeatureBasePtrList feat_list_out = std::list<FeatureBasePtr>();
 	    FeatureMatchMap feat_correspondance = FeatureMatchMap();
 	    proc_dummy->trackFeatures(feat_list, feat_list_out, feat_correspondance);
@@ -218,7 +218,7 @@ TEST(ProcessorBundleAdjustment, postProcess)
 
 }
 /*
-TEST(ProcessorBundleAdjustment,fullTest)
+TEST(ProcessorBundleAdjustment,fulldemo)
 {
 	//    std::string wolf_root = _WOLF_ROOT_DIR;
 	//    std::cout << wolf_root << std::endl;
