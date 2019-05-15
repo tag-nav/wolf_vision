@@ -9,6 +9,7 @@
 #include "core/processor/processor_odom_3D.h"
 #include "vision/capture/capture_image.h"
 #include "vision/sensor/sensor_camera.h"
+#include "vision/internal/config.h"
 
 using namespace Eigen;
 using namespace wolf;
@@ -66,7 +67,7 @@ TEST(ProcessorTrackerFeatureTrifocal, KeyFrameCallback)
     using std::static_pointer_cast;
     using Eigen::Vector2s;
 
-    std::string wolf_root = _WOLF_ROOT_DIR;
+    std::string wolf_root = _WOLF_VISION_ROOT_DIR;
 
     Scalar dt = 0.01;
 
@@ -94,7 +95,6 @@ TEST(ProcessorTrackerFeatureTrifocal, KeyFrameCallback)
     params_tracker_feature_trifocal->n_cells_h                      = 10;
     params_tracker_feature_trifocal->n_cells_v                      = 10;
     params_tracker_feature_trifocal->yaml_file_params_vision_utils  = wolf_root + "/demos/processor_tracker_feature_trifocal_vision_utils.yaml";
-    std::cout << "yaml path: " << params_tracker_feature_trifocal->yaml_file_params_vision_utils << std::endl;
 
     // ProcessorTrackerFeatureTrifocalPtr proc_trk = make_shared<ProcessorTrackerFeatureTrifocal>(params_tracker_feature_trifocal);
     auto proc_trk = std::static_pointer_cast<ProcessorTrackerFeatureTrifocal>(ProcessorBase::emplace<ProcessorTrackerFeatureTrifocal>(sens_trk, params_tracker_feature_trifocal));
