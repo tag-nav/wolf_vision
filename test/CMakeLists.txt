@@ -13,6 +13,10 @@ target_link_libraries(gtest_example ${PLUGIN_NAME})      #
 #                                                         #
 ###########################################################
 
+# Pinhole test
+wolf_add_gtest(gtest_pinhole gtest_pinhole.cpp)
+target_link_libraries(gtest_pinhole ${PLUGIN_NAME} ${wolf_LIBRARY})
+
 wolf_add_gtest(gtest_sensor_camera gtest_sensor_camera.cpp)
 target_link_libraries(gtest_sensor_camera ${PLUGIN_NAME} ${wolf_LIBRARY} ${OpenCV_LIBS} ${vision_utils_LIBRARY})
 
