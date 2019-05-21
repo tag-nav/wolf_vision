@@ -103,17 +103,17 @@ MESSAGE("vision_utils Library FOUND: vision related sources will be built.")
 SET(PRINT_INFO_VU false)
 FIND_PACKAGE(OpenCV REQUIRED)
 
-FIND_PACKAGE(Ceres QUIET) #Ceres is not required
-IF(Ceres_FOUND)
-    MESSAGE("Ceres Library FOUND: Ceres related sources will be built.")
-ENDIF(Ceres_FOUND)
-
-INCLUDE (${PROJECT_SOURCE_DIR}/cmake_modules/FindYamlCpp.cmake)
+FIND_PACKAGE(YamlCpp REQUIRED)
 IF(YAMLCPP_FOUND)
     MESSAGE("yaml-cpp Library FOUND: yaml-cpp related sources will be built.")
 ELSEIF(YAMLCPP_FOUND)
     MESSAGE("yaml-cpp Library NOT FOUND!")
 ENDIF(YAMLCPP_FOUND)
+
+FIND_PACKAGE(Ceres QUIET) #Ceres is not required
+IF(Ceres_FOUND)
+    MESSAGE("Ceres Library FOUND: Ceres related sources will be built.")
+ENDIF(Ceres_FOUND)
 
 FIND_PATH(
     Suitesparse_INCLUDE_DIRS
@@ -152,7 +152,8 @@ INCLUDE_DIRECTORIES(${EIGEN_INCLUDE_DIRS})
 INCLUDE_DIRECTORIES(${wolf_INCLUDE_DIRS})
 INCLUDE_DIRECTORIES(${vision_utils_INCLUDE_DIR})
 INCLUDE_DIRECTORIES(${OpenCV_INCLUDE_DIRS})
-include_directories(BEFORE "include")
+INCLUDE_DIRECTORIES(BEFORE "include")
+INCLUDE_DIRECTORIES(${YAMLCPP_INCLUDE_DIR})
 IF(Ceres_FOUND)
     INCLUDE_DIRECTORIES(${CERES_INCLUDE_DIRS})
 ENDIF(Ceres_FOUND)
