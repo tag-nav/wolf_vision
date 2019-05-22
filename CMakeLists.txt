@@ -187,7 +187,7 @@ SET(HDRS_PROCESSOR
 include/vision/processor/processor_tracker_feature_trifocal.h
 include/vision/processor/processor_params_image.h
 include/vision/processor/processor_tracker_landmark_image.h
-include/vision/processor/processor_tracker_feature_image.h
+#include/vision/processor/processor_tracker_feature_image.h
 include/vision/processor/processor_bundle_adjustment.h
   )
 SET(HDRS_SENSOR
@@ -220,7 +220,7 @@ src/landmark/landmark_point_3D.cpp
   )
 SET(SRCS_PROCESSOR
 src/processor/processor_tracker_feature_trifocal.cpp
-src/processor/processor_tracker_feature_image.cpp
+#src/processor/processor_tracker_feature_image.cpp
 src/processor/processor_tracker_landmark_image.cpp
 src/processor/processor_bundle_adjustment.cpp
   )
