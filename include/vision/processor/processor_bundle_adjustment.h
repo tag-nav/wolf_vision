@@ -79,7 +79,7 @@ class ProcessorBundleAdjustment : public ProcessorTrackerFeature
          *   - initializing counters, flags, or any derived variables
          *   - initializing algorithms needed for processing the derived data
          */
-        virtual void preProcess();
+        virtual void preProcess() override;
 
         /** Post-process
          *
@@ -91,7 +91,7 @@ class ProcessorBundleAdjustment : public ProcessorTrackerFeature
          *   - resetting and/or clearing variables and/or algorithms at the end of processing
          *   - drawing / printing / logging the results of the processing
          */
-        virtual void postProcess();
+        virtual void postProcess() override;
 
         /** \brief Track provided features from \b last to \b incoming
          * \param _features_last_in input list of features in \b last to track
