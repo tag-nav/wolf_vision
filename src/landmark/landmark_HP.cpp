@@ -6,7 +6,7 @@
 
 namespace wolf {
 
-/* Landmark - Anchored Homogeneous Point*/
+/* Landmark - Homogeneous Point*/
 LandmarkHP::LandmarkHP(Eigen::Vector4s _position_homogeneous,
 						 SensorBasePtr _sensor,
                          cv::Mat _2D_descriptor) :

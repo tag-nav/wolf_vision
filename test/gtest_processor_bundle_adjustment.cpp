@@ -1,20 +1,21 @@
 
-#include "utils_gtest.h"
-#include "vision_utils.h"
-
+// this plugin includes
 #include "vision/sensor/sensor_camera.h"
-#include "core/sensor/sensor_factory.h"
 #include "vision/processor/processor_bundle_adjustment.h"
 #include "vision/factor/factor_pixelHP.h"
 #include "vision/landmark/landmark_HP.h"
 #include "vision/capture/capture_image.h"
 #include "vision/internal/config.h"
+#include "utils_gtest.h"
+
+// wolf includes
+#include <core/sensor/sensor_factory.h>
 
 // Vision utils includes
-#include <vision_utils.h>
-#include <sensors.h>
-#include <common_class/buffer.h>
-#include <common_class/frame.h>
+#include <vision_utils/vision_utils.h>
+#include <vision_utils/sensors.h>
+#include <vision_utils/common_class/buffer.h>
+#include <vision_utils/common_class/frame.h>
 
 using namespace wolf;
 
@@ -113,7 +114,7 @@ TEST(ProcessorBundleAdjustment, installProcessor)
     std::cout << "sensor & processor created and added to wolf problem" << std::endl;
 
     ASSERT_EQ(proc->getProblem(), problem);
-    ASSERT_TRUE(problem->check());
+    ASSERT_TRUE(problem->check(0));
 }
 
 TEST(ProcessorBundleAdjustment, preProcess)
@@ -255,7 +256,7 @@ TEST(ProcessorBundleAdjustment, createLandmark)
 	cap0->addFeature(fea0);
 	fea0->link(cap0);
 
-	ASSERT_TRUE(problem_ptr->check(1));
+	ASSERT_TRUE(problem_ptr->check(0));
 
 	LandmarkBasePtr lmk = proc_bundle_adj->createLandmark(fea0);
 	LandmarkHPPtr lmk_hp = std::static_pointer_cast<LandmarkHP>(lmk);

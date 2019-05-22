@@ -4,19 +4,18 @@
  *  Created on: May 16, 2019
  *      Author: ovendrell
  */
-#include "core/factor/factor_block_absolute.h"
-#include "core/factor/factor_quaternion_absolute.h"
-
 #include "utils_gtest.h"
 #include "vision/factor/factor_pixelHP.h"
 #include "vision/landmark/landmark_HP.h"
 #include "vision/capture/capture_image.h"
-#include "core/ceres_wrapper/ceres_manager.h"
 #include "vision/processor/processor_bundle_adjustment.h"
 #include "vision/internal/config.h"
-#include "core/math/pinhole_tools.h"
 
-#include "core/ceres_wrapper/ceres_manager.h"
+#include <core/factor/factor_block_absolute.h>
+#include <core/factor/factor_quaternion_absolute.h>
+#include <core/ceres_wrapper/ceres_manager.h>
+#include <core/math/pinhole_tools.h>
+#include <core/ceres_wrapper/ceres_manager.h>
 
 using namespace wolf;
 using namespace Eigen;
