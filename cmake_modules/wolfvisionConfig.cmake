@@ -11,7 +11,7 @@ ENDIF(wolfvision_INCLUDE_DIR)
 
 FIND_LIBRARY(
     wolfvision_LIBRARY
-    NAMES libwolfvision.so
+    NAMES libwolfvision.so libwolfvision.dylib
     PATHS /usr/local/lib/iri-algorithms)
 IF(wolfvision_LIBRARY)
   MESSAGE("Found vision lib: ${wolfvision_LIBRARY}")
