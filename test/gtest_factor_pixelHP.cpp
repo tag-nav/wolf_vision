@@ -31,7 +31,7 @@ class FactorPixelHPTest : public testing::Test{
         Quaternions quat1,  quat2,  quat3,  quat_cam;
         Vector4s    vquat1, vquat2, vquat3, vquat_cam; // quaternions as vectors
         Vector7s    pose1,  pose2,  pose3,  pose_cam;
-        Vector4s    lmkHP1;
+        Vector4s    lmkHP1, lmkHP2, lmkHP3, lmkHP4;
 
         ProblemPtr      problem;
         CeresManagerPtr ceres_manager;
@@ -45,6 +45,9 @@ class FactorPixelHPTest : public testing::Test{
         FeaturePointImagePtr  f1, f2, f3;
 
         LandmarkHPPtr L1;
+        LandmarkHPPtr L2;
+        LandmarkHPPtr L3;
+        LandmarkHPPtr L4;
 
         FactorPixelHPPtr c1;
         FactorPixelHPPtr c2;
@@ -114,9 +117,9 @@ class FactorPixelHPTest : public testing::Test{
              */
 
             // all frames look to the origin
-            pos1   << 2, 1, 1;
-            pos2   << 1, 2, 1;
-            pos3   << 1, 1, 2;
+            pos1   << 1, 0, 0;
+            pos2   << 0, 1, 0;
+            pos3   << 0, 0, 1;
             euler1 << 0, 0     ,  M_PI   ;
             euler2 << 0, 0     , -M_PI_2 ;
             euler3 << 0, M_PI_2,  M_PI   ;
@@ -129,11 +132,16 @@ class FactorPixelHPTest : public testing::Test{
             pose1  << pos1, vquat1;
             pose2  << pos2, vquat2;
             pose3  << pos3, vquat3;
-            lmkHP1 << 1, 1, 1, 1/sqrt(3);
+
+            //landmarks
+            lmkHP1 << 0, 0, 0, 1;
+            lmkHP2 << 0, 0, 0, 1;
+            lmkHP3 << 0, 0, 0, 1;
+            lmkHP4 << 0, 0, 0, 1;
 
             // camera at the robot origin looking forward
             pos_cam   <<  0, 0, 0;
-            euler_cam << 0,0,0;//-M_PI_2, 0, -M_PI_2;
+            euler_cam << -M_PI_2, 0, -M_PI_2;
             quat_cam  =  e2q(euler_cam);
             vquat_cam =  quat_cam.coeffs();
             pose_cam  << pos_cam, vquat_cam;
@@ -145,7 +153,7 @@ class FactorPixelHPTest : public testing::Test{
 
             // Install sensor and processor
         	IntrinsicsCameraPtr intr = std::make_shared<IntrinsicsCamera>();
-        	intr->pinhole_model_raw = Eigen::Vector4s(0,0,1,1);
+        	intr->pinhole_model_raw = Eigen::Vector4s(320,240,320,320);
         	intr->width  = 640;
         	intr->height = 480;
             S      = problem->installSensor("CAMERA", "camera", pose_cam, intr);
@@ -197,7 +205,7 @@ class FactorPixelHPTest : public testing::Test{
         }
 };
 
-TEST(ProcessorFactorPixelHP, test)
+TEST(ProcessorFactorPixelHP, testZeroResidual)
 {
 	//Build problem
 	ProblemPtr problem_ptr = Problem::create("PO", 3);
@@ -266,15 +274,15 @@ TEST_F(FactorPixelHPTest, testSolveLandmark)
 	F3->fix();
 	L1->unfix();
 
-	auto orig = L1->getState();
+	auto orig = L1->point();
 	std::string report = ceres_manager->solve(wolf::SolverManager::ReportVerbosity::FULL);
 
 	std::cout << report << std::endl;
 
 	std::cout << orig.transpose() << std::endl;
-	std::cout << L1->getState().transpose() << std::endl;
+	std::cout << L1->point().transpose() << std::endl;
 
-	ASSERT_MATRIX_APPROX(L1->getState(), orig, 1e-6);
+	ASSERT_MATRIX_APPROX(L1->point(), orig, 1e-6);
 
 }
 
@@ -288,16 +296,16 @@ TEST_F(FactorPixelHPTest, testSolveLandmarkAltered)
 	F3->fix();
 	L1->unfix();
 
-	auto orig = L1->getState();
+	auto orig = L1->point();
 	L1->getP()->setState(L1->getState() + Vector4s::Random());
 	std::string report = ceres_manager->solve(wolf::SolverManager::ReportVerbosity::FULL);
 
 	std::cout << report << std::endl;
 
 	std::cout << orig.transpose() << std::endl;
-	std::cout << L1->getState().transpose() << std::endl;
+	std::cout << L1->point().transpose() << std::endl;
 
-	ASSERT_MATRIX_APPROX(L1->getState(), orig, 1e-6);
+	ASSERT_MATRIX_APPROX(L1->point(), orig, 1e-6);
 
 }
 
@@ -322,12 +330,18 @@ TEST_F(FactorPixelHPTest, testSolveFramePosition)
 	F1->getO()->fix();
 	F1->getP()->unfix();
 
-	std::string brief_report = ceres_manager->solve(wolf::SolverManager::ReportVerbosity::BRIEF);
+	std::string report = ceres_manager->solve(wolf::SolverManager::ReportVerbosity::FULL);
+
+	std::cout << report << std::endl;
 
 	std::cout << orig.transpose() << std::endl;
 	std::cout << F1->getP()->getState().transpose() << std::endl;
 
-	ASSERT_MATRIX_APPROX(F1->getP()->getState(), orig, 1e-6);
+	//ASSERT_MATRIX_APPROX(F1->getP()->getState(), orig, 1e-6);
+
+	Eigen::VectorXs expect = c1->expectation();
+	ASSERT_FLOAT_EQ(expect(0,0),f1->getMeasurement()(0,0));
+	ASSERT_FLOAT_EQ(expect(1,0),f1->getMeasurement()(1,0));
 
 }
 

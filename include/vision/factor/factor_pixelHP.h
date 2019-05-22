@@ -114,7 +114,7 @@ inline void FactorPixelHP::expectation(const T* const _frame_p,
     using namespace Eigen;
 
     // All involved transforms typedef
-    typedef Eigen::Transform<T, 3, Eigen::Affine> TransformType;
+    typedef Eigen::Transform<T, 3, Eigen::Isometry> TransformType;
 
     // world to current robot transform
     Map<const Matrix<T, 3, 1> > p_w_r(_frame_p);
@@ -136,8 +136,8 @@ inline void FactorPixelHP::expectation(const T* const _frame_p,
 
     // hmg point in current camera frame C
     Eigen::Map<const Eigen::Matrix<T, 4, 1> > landmark_hmg(_lmk_hmg);
-    Eigen::Matrix<T, 4, 1> landmark_hmg_c = T_r_c .inverse(Eigen::Affine)
-                                           * T_w_r .inverse(Eigen::Affine)
+    Eigen::Matrix<T, 4, 1> landmark_hmg_c = T_r_c .inverse(Eigen::Isometry)
+                                           * T_w_r .inverse(Eigen::Isometry)
                                            * landmark_hmg;
 
     //std::cout << "p_w_r = \n\t" << _frame_p[0] << "\n\t" << _frame_p[1] << "\n\t" << _frame_p[2] << "\n";
@@ -149,13 +149,16 @@ inline void FactorPixelHP::expectation(const T* const _frame_p,
     // lmk direction vector
     Eigen::Matrix<T, 3, 1> v_dir = landmark_hmg_c.head(3);
 
+    // lmk inverse distance
+    T rho = landmark_hmg_c(3);
+
     // camera parameters
     Matrix<T, 4, 1> intrinsic = intrinsic_.cast<T>();
     Eigen::Matrix<T, Eigen::Dynamic, 1> distortion = distortion_.cast<T>();
 
     // project point and exit
     Eigen::Map<Eigen::Matrix<T, 2, 1> > expectation(_expectation);
-    expectation = pinhole::projectPoint(intrinsic, distortion, v_dir);
+    expectation = pinhole::projectPoint(intrinsic, distortion, v_dir/rho);
 
     std::cout << "expectation = \n\t" << expectation(0) << "\n\t" << expectation(1) << "\n";
 

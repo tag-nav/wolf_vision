@@ -263,10 +263,10 @@ LandmarkBasePtr ProcessorBundleAdjustment::createLandmark(FeatureBasePtr _featur
     vec_homogeneous = {point3D(0),point3D(1),point3D(2),1/distance};
 
     //TODO: lmk from camera to world coordinate frame.
-    Transform<Scalar,3,Affine> T_w_r
+    Transform<Scalar,3,Isometry> T_w_r
         = Translation<Scalar,3>(_feature_ptr->getFrame()->getP()->getState())
         * Quaternions(_feature_ptr->getFrame()->getO()->getState().data());
-    Transform<Scalar,3,Affine> T_r_c
+    Transform<Scalar,3,Isometry> T_r_c
 		= Translation<Scalar,3>(_feature_ptr->getCapture()->getSensorP()->getState())
         * Quaternions(_feature_ptr->getCapture()->getSensorO()->getState().data());
     Eigen::Matrix<Scalar, 4, 1> vec_homogeneous_w = T_w_r
