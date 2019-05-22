@@ -322,9 +322,10 @@ TEST_F(FactorPixelHPTest, testSolveFramePosition)
 
 	//change state
 	Vector3s position;
-	position << 1,0.2,0;
+	position << 2.0, 2.0, 2.0;
 	auto ori = F1->getO()->getState();
 	Vector7s state;
+	state << position, ori;
 	F1->setState(state);
 
 	F1->getO()->fix();
@@ -337,7 +338,11 @@ TEST_F(FactorPixelHPTest, testSolveFramePosition)
 	std::cout << orig.transpose() << std::endl;
 	std::cout << F1->getP()->getState().transpose() << std::endl;
 
-	//ASSERT_MATRIX_APPROX(F1->getP()->getState(), orig, 1e-6);
+	// This test is no good because it checks 3 DoF and only 2DoF are observable.
+    //ASSERT_MATRIX_APPROX(F1->getP()->getState(), orig, 1e-6);
+	// We use the following alternative:
+	// Frame must be in the X axis, so Y=0 and Z=0
+    ASSERT_MATRIX_APPROX(F1->getP()->getState().tail(2), orig.tail(2), 1e-6);
 
 	Eigen::VectorXs expect = c1->expectation();
 	ASSERT_FLOAT_EQ(expect(0,0),f1->getMeasurement()(0,0));
