@@ -144,7 +144,7 @@ inline void FactorPixelHP::expectation(const T* const _frame_p,
 //    std::cout << "q_w_r = \n\t" << _frame_o[0] << "\n\t" << _frame_o[1] << "\n\t" << _frame_o[2] << "\n\t" << _frame_o[3] << "\n";
 //    std::cout << "p_r_c = \n\t" << _sensor_p[0] << "\n\t" << _sensor_p[1] << "\n\t" << _sensor_p[2] << "\n";
 //    std::cout << "q_r_c = \n\t" << _sensor_o[0] << "\n\t" << _sensor_o[1] << "\n\t" << _sensor_o[2] << "\n\t" << _sensor_o[3] << "\n";
-    std::cout << "landmark_hmg_c = \n\t" << landmark_hmg_c(0) << "\n\t" << landmark_hmg_c(1) << "\n\t" << landmark_hmg_c(2) << "\n\t" << landmark_hmg_c(3) << "\n";
+//    std::cout << "landmark_hmg_c = \n\t" << landmark_hmg_c(0) << "\n\t" << landmark_hmg_c(1) << "\n\t" << landmark_hmg_c(2) << "\n\t" << landmark_hmg_c(3) << "\n";
 
     // lmk direction vector
     Eigen::Matrix<T, 3, 1> v_dir = landmark_hmg_c.head(3);
@@ -160,7 +160,7 @@ inline void FactorPixelHP::expectation(const T* const _frame_p,
     Eigen::Map<Eigen::Matrix<T, 2, 1> > expectation(_expectation);
     expectation = pinhole::projectPoint(intrinsic, distortion, v_dir/rho);
 
-    std::cout << "expectation = \n\t" << expectation(0) << "\n\t" << expectation(1) << "\n";
+//    std::cout << "expectation = \n\t" << expectation(0) << "\n\t" << expectation(1) << "\n";
 
 }
 
