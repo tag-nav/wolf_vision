@@ -3,9 +3,9 @@
 #include "core/utils/logging.h"
 
 #include "core/ceres_wrapper/ceres_manager.h"
-#include "core/processor/processor_tracker_feature_trifocal.h"
-#include "core/capture/capture_image.h"
-#include "core/factor/factor_autodiff_trifocal.h"
+#include "vision/processor/processor_tracker_feature_trifocal.h"
+#include "vision/capture/capture_image.h"
+#include "vision/factor/factor_autodiff_trifocal.h"
 
 using namespace Eigen;
 using namespace wolf;

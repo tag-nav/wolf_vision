@@ -5,6 +5,8 @@
 #include "vision/sensor/sensor_camera.h"
 #include "core/sensor/sensor_factory.h"
 #include "vision/processor/processor_bundle_adjustment.h"
+#include "vision/factor/factor_pixelHP.h"
+#include "vision/landmark/landmark_HP.h"
 #include "vision/capture/capture_image.h"
 #include "vision/internal/config.h"
 
@@ -16,7 +18,6 @@
 
 using namespace wolf;
 
-//std::string wolf_root = "/home/ovendrell/dev/vision";
 std::string wolf_root = _WOLF_VISION_ROOT_DIR;
 
 class ProcessorBundleAdjustmentDummy : public ProcessorBundleAdjustment
@@ -219,7 +220,48 @@ TEST(ProcessorBundleAdjustment, establishFactors)
 
 TEST(ProcessorBundleAdjustment, createLandmark)
 {
-	std::cout << "EMPTY Test\n";
+	//Build problem
+	ProblemPtr problem_ptr = Problem::create("PO", 3);
+
+    // Install sensor
+    IntrinsicsCameraPtr intr = std::make_shared<IntrinsicsCamera>();
+    intr->width  = 640;
+    intr->height = 480;
+    auto sens_cam = problem_ptr->installSensor("CAMERA", "camera", (Eigen::Vector7s() << 0,0,0,  0,0,0,1).finished(), intr);
+    SensorCameraPtr camera = std::static_pointer_cast<SensorCamera>(sens_cam);
+    // Install processor
+    ProcessorParamsBundleAdjustmentPtr params = std::make_shared<ProcessorParamsBundleAdjustment>();
+    params->delete_ambiguities = true;
+    params->yaml_file_params_vision_utils = wolf_root + "/demos/processor_bundle_adjustment_vision_utils.yaml";
+    params->pixel_noise_std                = 1.0;
+    params->min_track_length_for_factor = 3;
+    params->voting_active = true;
+    params->max_new_features = 5;
+    auto proc = problem_ptr->installProcessor("TRACKER BUNDLE ADJUSTMENT", "processor", sens_cam, params);
+    ProcessorBundleAdjustmentPtr proc_bundle_adj = std::static_pointer_cast<ProcessorBundleAdjustment>(proc);
+
+    //Frame
+	FrameBasePtr frm0 = problem_ptr->emplaceFrame(KEY, problem_ptr->zeroState(), TimeStamp(0));
+
+	// Capture, feature and factor
+	auto cap0 = std::static_pointer_cast<CaptureImage>(CaptureImage::emplace<CaptureImage>(frm0, TimeStamp(0), camera, cv::Mat::zeros(480,640, 1)));
+
+	cv::Point2f p = cv::Point2f(240, 320);
+	cv::KeyPoint kp = cv::KeyPoint(p, 32.0f);
+	cv::Mat des = cv::Mat::zeros(1,8, CV_8U);
+
+	FeaturePointImagePtr fea0 = std::make_shared<FeaturePointImage>(kp, 0, des, Eigen::Matrix2s::Identity()* pow(1, 2));
+	fea0->setCapture(cap0);
+	cap0->addFeature(fea0);
+	fea0->link(cap0);
+
+	ASSERT_TRUE(problem_ptr->check(1));
+
+	LandmarkBasePtr lmk = proc_bundle_adj->createLandmark(fea0);
+	LandmarkHPPtr lmk_hp = std::static_pointer_cast<LandmarkHP>(lmk);
+	problem_ptr->addLandmark(lmk_hp);
+
+	ASSERT_EQ(problem_ptr->getMap()->getLandmarkList().size(), 1);
 }
 
 
@@ -230,6 +272,7 @@ TEST(ProcessorBundleAdjustment, process)
 
     // Install camera
     IntrinsicsCameraPtr intr = std::make_shared<IntrinsicsCamera>(); // TODO init params or read from YAML
+    intr->pinhole_model_raw = Eigen::Vector4s(0,0,1,1);  //TODO: important, must be initialized
     intr->width  = 640;
     intr->height = 480;
     SensorCameraPtr sens_cam = std::static_pointer_cast<SensorCamera>(problem->installSensor("CAMERA", "camera", (Eigen::Vector7s() << 0,0,0,  0,0,0,1).finished(), intr));
@@ -274,6 +317,7 @@ TEST(ProcessorBundleAdjustment, process)
 	CaptureImagePtr image_inc_ptr4 = proc_dummy->createCaptureImage(wolf_root + "/demos/demo_gazebo_x00cm_y00cm.jpg", sens_cam);
 	proc_dummy->process(image_inc_ptr4);
 	ASSERT_EQ(image_inc_ptr4->getFeatureList().size(), params->max_new_features);
+
 }
 
 TEST(ProcessorBundleAdjustment, processVideo)
@@ -283,6 +327,7 @@ TEST(ProcessorBundleAdjustment, processVideo)
 
     // Install camera
     IntrinsicsCameraPtr intr = std::make_shared<IntrinsicsCamera>(); // TODO init params or read from YAML
+    intr->pinhole_model_raw = Eigen::Vector4s(0,0,1,1);
     intr->width  = 640;
     intr->height = 480;
     SensorCameraPtr sens_cam = std::static_pointer_cast<SensorCamera>(problem->installSensor("CAMERA", "camera", (Eigen::Vector7s() << 0,0,0,  0,0,0,1).finished(), intr));
@@ -295,13 +340,13 @@ TEST(ProcessorBundleAdjustment, processVideo)
     params->min_track_length_for_factor = 3;
     params->voting_active = true;
     params->max_new_features = 400;
-    params->min_features_for_keyframe = 0;
+    params->min_features_for_keyframe = 50;
     auto proc = problem->installProcessor("TRACKER BUNDLE ADJUSTMENT", "processor", sens_cam, params);
 	auto proc_dummy = std::static_pointer_cast<ProcessorBundleAdjustmentDummy>(proc);
 
 	//==================================vision_utils ============================================
 	vision_utils::SensorCameraPtr sen_ptr = std::make_shared<vision_utils::SensorCamera>();
-	sen_ptr->open("/home/ovendrell/eclipse-workspace/ddm_triad/data/video/VID4b.mp4");
+	sen_ptr->open("/home/ovendrell/eclipse-workspace/ddm_triad/data/video/VID4b.mp4"); //TODO: this should be a demo
 				//"/home/ovendrell/dev/vision_utils/src/test/data/test_usb_cam.mp4");
 
     unsigned int buffer_size = 10;
@@ -324,16 +369,29 @@ TEST(ProcessorBundleAdjustment, processVideo)
     for(int frame_count = 0; frame_count<150; ++frame_count)
     {
     	t += dt;
-    	std::cout << "Avis 0" << std::endl;
         // Image ---------------------------------------------
         frame_buff.add( vision_utils::setFrame(sen_ptr->getImage(), frame_count) );
-        std::cout << "Avis 1" << std::endl;
         CaptureImagePtr image = std::make_shared<CaptureImage>(t, camera, frame_buff.back()->getImage());
-        std::cout << "Avis 2" << std::endl;
         /* process */
         camera->process(image);
-        std::cout << "FEATURES:" << image->getFeatureList().size() << std::endl;
-        std::cout << "MATCHES:" << image->matches_from_precedent_.size() << std::endl;
+//        std::cout << "FEATURES:" << image->getFeatureList().size() << std::endl;
+//        std::cout << "MATCHES:" << image->matches_from_precedent_.size() << std::endl;
+
+        //Debug lines
+//        if (frame_count > 4 && frame_count < 10)
+//        {
+//        	FactorBasePtrList fac_list;
+//        	assert(image->getFeatureList().size()!=0);
+//        	image->getFactorList(fac_list);
+//        	assert(fac_list.size()!=0);
+//        	typedef std::list<FactorBasePtr>::iterator iter;
+//        	for (iter it =fac_list.begin(); it != fac_list.end(); ++it)
+//        	{
+//        		auto fac = std::static_pointer_cast<FactorPixelHP>(*it);
+//        		Eigen::VectorXs exp = fac->expectation();
+//        		std::cout << exp << std::endl;
+//        	}
+//        }
 
     }
 }

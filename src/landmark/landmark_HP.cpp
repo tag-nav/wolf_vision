@@ -37,7 +37,7 @@ Eigen::Vector3s LandmarkHP::point() const
 {
     using namespace Eigen;
 
-    /* TODO:
+    /* TODO: done when creating the landmark
     Transform<Scalar,3,Affine> T_w_r
         = Translation<Scalar,3>(getAnchorFrame()->getP()->getState())
         * Quaternions(getAnchorFrame()->getO()->getState().data());
