@@ -6,7 +6,7 @@
  */
 
 
-#include "utils_gtest.h"
+#include <core/utils/utils_gtest.h>
 
 #include "vision/sensor/sensor_camera.h"
 #include "core/sensor/sensor_factory.h"

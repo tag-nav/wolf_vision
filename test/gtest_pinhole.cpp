@@ -6,7 +6,7 @@
  */
 
 #include "core/math/pinhole_tools.h"
-#include "utils_gtest.h"
+#include <core/utils/utils_gtest.h>
 
 using namespace Eigen;
 using namespace wolf;
