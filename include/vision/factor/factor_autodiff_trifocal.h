@@ -6,8 +6,8 @@
 #include "core/factor/factor_autodiff.h"
 #include "vision/sensor/sensor_camera.h"
 
-#include <common_class/trifocaltensor.h>
-#include <vision_utils.h>
+#include <vision_utils/common_class/trifocaltensor.h>
+#include <vision_utils/vision_utils.h>
 
 namespace wolf
 {

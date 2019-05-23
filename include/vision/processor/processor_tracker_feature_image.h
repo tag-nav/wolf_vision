@@ -12,10 +12,10 @@
 #include "vision/processor/processor_params_image.h"
 
 // vision_utils
-#include <detectors/detector_base.h>
-#include <descriptors/descriptor_base.h>
-#include <matchers/matcher_base.h>
-#include <algorithms/activesearch/alg_activesearch.h>
+#include <vision_utils/detectors/detector_base.h>
+#include <vision_utils/descriptors/descriptor_base.h>
+#include <vision_utils/matchers/matcher_base.h>
+#include <vision_utils/algorithms/activesearch/alg_activesearch.h>
 
 // General includes
 #include <cmath>

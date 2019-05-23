@@ -2,10 +2,10 @@
 #include "vision/processor/processor_tracker_feature_image.h"
 
 // Vision utils
-#include <detectors.h>
-#include <descriptors.h>
-#include <matchers.h>
-#include <algorithms.h>
+#include <vision_utils/detectors.h>
+#include <vision_utils/descriptors.h>
+#include <vision_utils/matchers.h>
+#include <vision_utils/algorithms.h>
 
 // standard libs
 #include <bitset>

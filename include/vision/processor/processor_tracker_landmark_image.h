@@ -9,10 +9,10 @@
 #include "core/processor/processor_tracker_landmark.h"
 #include "core/common/wolf.h"
 
-#include <algorithms/activesearch/alg_activesearch.h>
-#include <descriptors/descriptor_base.h>
-#include <detectors/detector_base.h>
-#include <matchers/matcher_base.h>
+#include <vision_utils/algorithms/activesearch/alg_activesearch.h>
+#include <vision_utils/descriptors/descriptor_base.h>
+#include <vision_utils/detectors/detector_base.h>
+#include <vision_utils/matchers/matcher_base.h>
 
 #include <opencv2/core/mat.hpp>
 #include <opencv2/core/mat.inl.hpp>
