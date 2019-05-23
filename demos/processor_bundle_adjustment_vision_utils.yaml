@@ -2,30 +2,32 @@ sensor:
   type: "USB_CAM"
 
 detector:
-  type: "GFTT"
-  maxCorners: 1000
-  qualityLevel: 0.01
-  minDistance: 1.0
-  blockSize: 3
-  k: 0.04
+  type: "ORB"         
+  nfeatures: 400
+  scale factor: 1.0
+  nlevels: 1
+  edge threshold: 31   # 16
+  first level: 0 
+  WTA_K: 2            # See: http://docs.opencv.org/trunk/db/d95/classcv_1_1ORB.html#a180ae17d3300cf2c619aa240d9b607e5
+  score type: 1      #enum { kBytes = 32, HARRIS_SCORE=0, FAST_SCORE=1 };
+  patch size: 31      # 31
 
 descriptor:
   type: "ORB"         
-  nfeatures: 1000
-  scale factor: 1.2
+  nfeatures: 400
+  scale factor: 1.0
   nlevels: 1
-  edge threshold: 8   # 16
+  edge threshold: 31   # 16
   first level: 0 
   WTA_K: 2            # See: http://docs.opencv.org/trunk/db/d95/classcv_1_1ORB.html#a180ae17d3300cf2c619aa240d9b607e5
   score type: 1       #enum { kBytes = 32, HARRIS_SCORE=0, FAST_SCORE=1 };
-  patch size: 15      # 31
-  
+  patch size: 31      # 31
+
 matcher:
-  type: "BRUTEFORCE_HAMMING" # BRUTEFORCE, BRUTEFORCE_HAMMING, BRUTEFORCE_HAMMING_2, BRUTEFORCE_L1, FLANNBASED
-  match type: 2    #  Match type. MATCH = 1, KNNMATCH = 2, RADIUSMATCH = 3
-  min normalized score: 0.9
+  type: "FLANNBASED"  # BRUTEFORCE, BRUTEFORCE_HAMMING, BRUTEFORCE_HAMMING_2, BRUTEFORCE_L1, FLANNBASED
+  match type: 1     #  Match type. MATCH = 1, KNNMATCH = 2, RADIUSMATCH = 3
   filtering:
-    ransac epipolar distance: 1  # Distance to epipolar [pixels]
-    ransac confidence prob: 0.98 # Confidence probability
-    max match euclidean dist: 50 # Max euclidean distance to consider a match as inlier    
+    ransac epipolar distance: 3  # Distance to epipolar [pixels]
+    ransac confidence prob: 0.97 # Confidence probability
+    max match euclidean dist: 20 # Max euclidean distance to consider a match as inlier       
     
