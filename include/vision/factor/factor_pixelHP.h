@@ -128,12 +128,6 @@ inline void FactorPixelHP::expectation(const T* const _frame_p,
     Map<const Quaternion<T> >  	q_r_c(_sensor_o);
     TransformType       		T_r_c = t_r_c * q_r_c;
 
-//    CaptureBasePtr      capture = this->getFeature()->getCapture();
-//    Translation<T, 3>   t_r_c  (capture->getSensorP()->getState().cast<T>());
-//    Quaternions         q_r_c_s(Eigen::Vector4s(capture->getSensorO()->getState()));
-//    Quaternion<T>       q_r_c = q_r_c_s.cast<T>();
-//    TransformType       T_R_C = t_r_c * q_r_c;
-
     // hmg point in current camera frame C
     Eigen::Map<const Eigen::Matrix<T, 4, 1> > landmark_hmg(_lmk_hmg);
     Eigen::Matrix<T, 4, 1> landmark_hmg_c = T_r_c .inverse(Eigen::Isometry)

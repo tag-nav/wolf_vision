@@ -12,7 +12,7 @@ SensorCamera::SensorCamera(const Eigen::VectorXs& _extrinsics, const IntrinsicsC
                 img_width_(_intrinsics.width), //
                 img_height_(_intrinsics.height), //
                 distortion_(_intrinsics.distortion), //
-                correction_(distortion_.size()==0 ? 0 : distortion_.size() + 1), // make correction vector slightly larger in size than the distortion vector
+                correction_(distortion_.size()==0 ? 0 : distortion_.size()), // make correction vector slightly larger in size than the distortion vector
                 pinhole_model_raw_(_intrinsics.pinhole_model_raw), //
                 pinhole_model_rectified_(_intrinsics.pinhole_model_rectified), //
                 using_raw_(true)

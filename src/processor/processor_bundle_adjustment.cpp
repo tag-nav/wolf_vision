@@ -274,10 +274,10 @@ LandmarkBasePtr ProcessorBundleAdjustment::createLandmark(FeatureBasePtr _featur
                                            * vec_homogeneous;
 
 
-    std::cout << "Point2D: " << point2D.transpose() << std::endl;
-    std::cout << "Point3D: " << point3D.transpose() << std::endl;
-    std::cout << "Hmg_c: " << vec_homogeneous.transpose() << std::endl;
-    std::cout << "Hmg_w: " << vec_homogeneous_w.transpose() << std::endl;
+//    std::cout << "Point2D: " << point2D.transpose() << std::endl;
+//    std::cout << "Point3D: " << point3D.transpose() << std::endl;
+//    std::cout << "Hmg_c: " << vec_homogeneous.transpose() << std::endl;
+//    std::cout << "Hmg_w: " << vec_homogeneous_w.transpose() << std::endl;
     //vec_homogeneous_w = vec_homogeneous;
 
     LandmarkHPPtr lmk_hp_ptr = std::make_shared<LandmarkHP>(vec_homogeneous_w, getSensor(), feat_point_image_ptr->getDescriptor());
