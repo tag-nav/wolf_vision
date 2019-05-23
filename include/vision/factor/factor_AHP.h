@@ -2,11 +2,11 @@
 #define FACTOR_AHP_H
 
 //Wolf includes
-#include "core/factor/factor_autodiff.h"
 #include "vision/landmark/landmark_AHP.h"
 #include "vision/sensor/sensor_camera.h"
-//#include "core/feature/feature_point_image.h"
-#include "core/math/pinhole_tools.h"
+#include "vision/math/pinhole_tools.h"
+
+#include "core/factor/factor_autodiff.h"
 
 #include <iomanip> //setprecision
 
