@@ -250,11 +250,11 @@ Scalar ProcessorTrackerFeatureImage::match(cv::Mat _target_descriptor, cv::Mat _
 FactorBasePtr ProcessorTrackerFeatureImage::createFactor(FeatureBasePtr _feature_ptr,
                                                           FeatureBasePtr _feature_other_ptr)
 {
-    FactorEpipolarPtr const_epipolar_ptr = std::make_shared<FactorEpipolar>(_feature_ptr, _feature_other_ptr,
+    FactorFeatureDummyPtr const_dummy_ptr = std::make_shared<FactorFeatureDummy>(_feature_ptr, _feature_other_ptr,
                                                                                     shared_from_this());
     //    _feature_ptr->addFactor(const_epipolar_ptr);
     //    _feature_other_ptr->addConstrainedBy(const_epipolar_ptr);
-    return const_epipolar_ptr;
+    return const_dummy_ptr;
 }
 
 unsigned int ProcessorTrackerFeatureImage::detect(cv::Mat _image, cv::Rect& _roi, std::vector<cv::KeyPoint>& _new_keypoints,
