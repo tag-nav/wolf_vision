@@ -352,7 +352,7 @@ INSTALL(FILES ${PROJECT_NAME}.found
   DESTINATION include/iri-algorithms/wolf/plugin_${PROJECT_NAME})
 
 INSTALL(FILES "${WOLF_CONFIG_DIR}/config.h"
-  DESTINATION include/iri-algorithms/wolf/${PROJECT_NAME}/${PROJECT_NAME}/internal)
+  DESTINATION include/iri-algorithms/wolf/plugin_${PROJECT_NAME}/${PROJECT_NAME}/internal)
 
 # INSTALL(FILES "${CMAKE_BINARY_DIR}/cmake_modules/Findwolf${PLUGIN_NAME}.cmake"
 #   DESTINATION "lib/cmake/${PLUGIN_NAME}")
