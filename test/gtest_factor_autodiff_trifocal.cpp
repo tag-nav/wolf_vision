@@ -1,11 +1,12 @@
-#include "utils_gtest.h"
+#include <core/utils/utils_gtest.h>
 
 #include "core/utils/logging.h"
 
 #include "core/ceres_wrapper/ceres_manager.h"
-#include "core/processor/processor_tracker_feature_trifocal.h"
-#include "core/capture/capture_image.h"
-#include "core/factor/factor_autodiff_trifocal.h"
+#include "vision/processor/processor_tracker_feature_trifocal.h"
+#include "vision/capture/capture_image.h"
+#include "vision/factor/factor_autodiff_trifocal.h"
+#include "vision/internal/config.h"
 
 using namespace Eigen;
 using namespace wolf;
@@ -39,7 +40,7 @@ class FactorAutodiffTrifocalTest : public testing::Test{
 
         virtual void SetUp() override
         {
-            std::string wolf_root = _WOLF_ROOT_DIR;
+            std::string wolf_root = _WOLF_VISION_ROOT_DIR;
 
             // configuration
             /*
@@ -124,14 +125,14 @@ class FactorAutodiffTrifocalTest : public testing::Test{
             ceres_manager = std::make_shared<CeresManager>(problem, options);
 
             // Install sensor and processor
-            S      = problem->installSensor("CAMERA", "canonical", pose_cam, wolf_root + "/src/examples/camera_params_canonical.yaml");
+            S      = problem->installSensor("CAMERA", "canonical", pose_cam, wolf_root + "/demos/camera_params_canonical.yaml");
             camera = std::static_pointer_cast<SensorCamera>(S);
 
             ProcessorParamsTrackerFeatureTrifocalPtr params_tracker_feature_trifocal_trifocal = std::make_shared<ProcessorParamsTrackerFeatureTrifocal>();
             params_tracker_feature_trifocal_trifocal->time_tolerance                = 1.0/2;
             params_tracker_feature_trifocal_trifocal->max_new_features              = 5;
             params_tracker_feature_trifocal_trifocal->min_features_for_keyframe     = 5;
-            params_tracker_feature_trifocal_trifocal->yaml_file_params_vision_utils = wolf_root + "/src/examples/processor_tracker_feature_trifocal_vision_utils.yaml";
+            params_tracker_feature_trifocal_trifocal->yaml_file_params_vision_utils = wolf_root + "/demos/processor_tracker_feature_trifocal_vision_utils.yaml";
 
             ProcessorBasePtr proc = problem->installProcessor("TRACKER FEATURE TRIFOCAL", "trifocal", camera, params_tracker_feature_trifocal_trifocal);
             proc_trifocal = std::static_pointer_cast<ProcessorTrackerFeatureTrifocal>(proc);

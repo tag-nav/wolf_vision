@@ -6,7 +6,7 @@
 
 namespace wolf {
 
-/* Landmark - Anchored Homogeneous Point*/
+/* Landmark - Homogeneous Point*/
 LandmarkHP::LandmarkHP(Eigen::Vector4s _position_homogeneous,
 						 SensorBasePtr _sensor,
                          cv::Mat _2D_descriptor) :
@@ -37,7 +37,7 @@ Eigen::Vector3s LandmarkHP::point() const
 {
     using namespace Eigen;
 
-    /* TODO:
+    /* TODO: done when creating the landmark
     Transform<Scalar,3,Affine> T_w_r
         = Translation<Scalar,3>(getAnchorFrame()->getP()->getState())
         * Quaternions(getAnchorFrame()->getO()->getState().data());

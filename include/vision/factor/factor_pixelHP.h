@@ -77,8 +77,9 @@ inline FactorPixelHP::FactorPixelHP(const FeatureBasePtr&   _ftr_ptr,
 															_ftr_ptr->getCapture()->getSensorP(),
 															_ftr_ptr->getCapture()->getSensorO(),
                                                             _landmark_ptr->getP()),
-        intrinsic_(_ftr_ptr->getCapture()->getSensor()->getIntrinsic()->getState()) //TODO: what to do with intrinsic?
+        intrinsic_(_ftr_ptr->getCapture()->getSensor()->getIntrinsic()->getState()) //TODO: intrinsic
 {
+//	std::cout << "FactorPixelHP::Constructor\n";
     // obtain some intrinsics from provided sensor
     distortion_ = (std::static_pointer_cast<SensorCamera>(_ftr_ptr->getCapture()->getSensor()))->getDistortionVector();
 }
@@ -113,29 +114,37 @@ inline void FactorPixelHP::expectation(const T* const _frame_p,
     using namespace Eigen;
 
     // All involved transforms typedef
-    typedef Eigen::Transform<T, 3, Eigen::Affine> TransformType;
+    typedef Eigen::Transform<T, 3, Eigen::Isometry> TransformType;
 
     // world to current robot transform
     Map<const Matrix<T, 3, 1> > p_w_r(_frame_p);
     Translation<T, 3>           t_w_r(p_w_r);
     Map<const Quaternion<T> >   q_w_r(_frame_o);
-    TransformType               T_W_R = t_w_r * q_w_r;
+    TransformType               T_w_r = t_w_r * q_w_r;
 
     // current robot to current camera transform
-    CaptureBasePtr      capture = this->getFeature()->getCapture();
-    Translation<T, 3>   t_r_c  (capture->getSensorP()->getState().cast<T>());
-    Quaternions         q_r_c_s(Eigen::Vector4s(capture->getSensorO()->getState()));
-    Quaternion<T>       q_r_c = q_r_c_s.cast<T>();
-    TransformType       T_R_C = t_r_c * q_r_c;
+    Map<const Matrix<T, 3, 1> > p_r_c(_sensor_p);
+    Translation<T, 3>           t_r_c(p_r_c);
+    Map<const Quaternion<T> >  	q_r_c(_sensor_o);
+    TransformType       		T_r_c = t_r_c * q_r_c;
 
     // hmg point in current camera frame C
     Eigen::Map<const Eigen::Matrix<T, 4, 1> > landmark_hmg(_lmk_hmg);
-    Eigen::Matrix<T, 4, 1> landmark_hmg_c = T_R_C .inverse(Eigen::Affine)
-                                           * T_W_R .inverse(Eigen::Affine)
+    Eigen::Matrix<T, 4, 1> landmark_hmg_c = T_r_c .inverse(Eigen::Isometry)
+                                           * T_w_r .inverse(Eigen::Isometry)
                                            * landmark_hmg;
 
-    // lmk direction vector   //TODO:
+    //std::cout << "p_w_r = \n\t" << _frame_p[0] << "\n\t" << _frame_p[1] << "\n\t" << _frame_p[2] << "\n";
+//    std::cout << "q_w_r = \n\t" << _frame_o[0] << "\n\t" << _frame_o[1] << "\n\t" << _frame_o[2] << "\n\t" << _frame_o[3] << "\n";
+//    std::cout << "p_r_c = \n\t" << _sensor_p[0] << "\n\t" << _sensor_p[1] << "\n\t" << _sensor_p[2] << "\n";
+//    std::cout << "q_r_c = \n\t" << _sensor_o[0] << "\n\t" << _sensor_o[1] << "\n\t" << _sensor_o[2] << "\n\t" << _sensor_o[3] << "\n";
+//    std::cout << "landmark_hmg_c = \n\t" << landmark_hmg_c(0) << "\n\t" << landmark_hmg_c(1) << "\n\t" << landmark_hmg_c(2) << "\n\t" << landmark_hmg_c(3) << "\n";
+
+    // lmk direction vector
     Eigen::Matrix<T, 3, 1> v_dir = landmark_hmg_c.head(3);
+
+    // lmk inverse distance
+    T rho = landmark_hmg_c(3);
 
     // camera parameters
     Matrix<T, 4, 1> intrinsic = intrinsic_.cast<T>();
@@ -143,7 +152,10 @@ inline void FactorPixelHP::expectation(const T* const _frame_p,
 
     // project point and exit
     Eigen::Map<Eigen::Matrix<T, 2, 1> > expectation(_expectation);
-    expectation = pinhole::projectPoint(intrinsic, distortion, v_dir);
+    expectation = pinhole::projectPoint(intrinsic, distortion, v_dir/rho);
+
+//    std::cout << "expectation = \n\t" << expectation(0) << "\n\t" << expectation(1) << "\n";
+
 }
 
 template<typename T>
