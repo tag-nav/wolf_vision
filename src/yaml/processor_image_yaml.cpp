@@ -5,6 +5,8 @@
  *      \author: jsola
  */
 
+#include "vision/processor/processor_params_image.h"
+
 // wolf yaml
 #include "core/yaml/yaml_conversion.h"
 
@@ -13,8 +15,6 @@
 
 // yaml-cpp library
 #include <yaml-cpp/yaml.h>
-
-#include "vision/processor/processor_params_image.h"
 
 namespace wolf
 {

@@ -5,11 +5,10 @@
  *      Author: asantamaria
  */
 
-// wolf yaml
-#include "vision/processor/processor_tracker_feature_trifocal.h"
-#include "core/yaml/yaml_conversion.h"
-
 // wolf
+#include "vision/processor/processor_tracker_feature_trifocal.h"
+
+#include "core/yaml/yaml_conversion.h"
 #include "core/common/factory.h"
 
 // yaml-cpp library
