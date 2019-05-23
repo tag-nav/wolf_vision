@@ -4,12 +4,12 @@
  *  Created on: May 16, 2019
  *      Author: ovendrell
  */
-#include "utils_gtest.h"
 #include "vision/factor/factor_pixelHP.h"
 #include "vision/landmark/landmark_HP.h"
 #include "vision/capture/capture_image.h"
 #include "vision/processor/processor_bundle_adjustment.h"
 #include "vision/internal/config.h"
+#include <core/utils/utils_gtest.h>
 
 #include <core/factor/factor_block_absolute.h>
 #include <core/factor/factor_quaternion_absolute.h>

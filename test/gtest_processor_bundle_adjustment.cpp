@@ -6,7 +6,7 @@
 #include "vision/landmark/landmark_HP.h"
 #include "vision/capture/capture_image.h"
 #include "vision/internal/config.h"
-#include "utils_gtest.h"
+#include <core/utils/utils_gtest.h>
 
 // wolf includes
 #include <core/sensor/sensor_factory.h>
