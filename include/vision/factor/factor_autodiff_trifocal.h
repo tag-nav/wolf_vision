@@ -271,7 +271,7 @@ inline void FactorAutodiffTrifocal::expectation(const MatrixBase<D1>&     _wtr1,
 {
 
         typedef Translation<T, 3> TranslationType;
-        typedef Eigen::Transform<T, 3, Eigen::Affine> TransformType;
+        typedef Eigen::Transform<T, 3, Eigen::Isometry> TransformType;
 
         // All input Transforms
         TransformType wHr1 = TranslationType(_wtr1) * _wqr1;
