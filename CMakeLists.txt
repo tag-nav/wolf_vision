@@ -165,6 +165,7 @@ ENDIF(Ceres_FOUND)
 SET(HDRS_COMMON
   )
 SET(HDRS_MATH
+include/vision/math/pinhole_tools.h
   )
 SET(HDRS_UTILS
   )
