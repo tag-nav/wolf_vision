@@ -5,7 +5,8 @@
  *      Author: jsola
  */
 
-#include "core/math/pinhole_tools.h"
+#include "vision/math/pinhole_tools.h"
+
 #include <core/utils/utils_gtest.h>
 
 using namespace Eigen;

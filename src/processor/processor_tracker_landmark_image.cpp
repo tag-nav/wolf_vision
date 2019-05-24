@@ -2,22 +2,23 @@
 
 #include "vision/capture/capture_image.h"
 #include "vision/factor/factor_AHP.h"
-#include "core/feature/feature_base.h"
 #include "vision/feature/feature_point_image.h"
+#include "vision/math/pinhole_tools.h"
+#include "vision/sensor/sensor_camera.h"
+
+#include "core/feature/feature_base.h"
 #include "core/frame/frame_base.h"
 #include "core/utils/logging.h"
 #include "core/map/map_base.h"
-#include "core/math/pinhole_tools.h"
 #include "core/problem/problem.h"
-#include "vision/sensor/sensor_camera.h"
 #include "core/state_block/state_block.h"
 #include "core/common/time_stamp.h"
 
 // vision_utils
-#include <detectors.h>
-#include <descriptors.h>
-#include <matchers.h>
-#include <algorithms.h>
+#include <vision_utils/detectors.h>
+#include <vision_utils/descriptors.h>
+#include <vision_utils/matchers.h>
+#include <vision_utils/algorithms.h>
 
 #include <Eigen/Geometry>
 #include <iomanip> //setprecision

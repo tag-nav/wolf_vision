@@ -1,15 +1,15 @@
-#include <core/utils/utils_gtest.h>
-
-#include "core/common/wolf.h"
-#include "core/utils/logging.h"
-
-#include "vision_utils.h"
 
 #include "vision/processor/processor_tracker_feature_trifocal.h"
-#include "core/processor/processor_odom_3D.h"
 #include "vision/capture/capture_image.h"
 #include "vision/sensor/sensor_camera.h"
 #include "vision/internal/config.h"
+
+#include <core/utils/utils_gtest.h>
+#include "core/common/wolf.h"
+#include "core/utils/logging.h"
+#include "core/processor/processor_odom_3D.h"
+
+#include "vision_utils/vision_utils.h"
 
 using namespace Eigen;
 using namespace wolf;

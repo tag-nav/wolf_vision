@@ -1,6 +1,7 @@
-#include "vision/sensor/sensor_camera.h"
 
-#include "core/math/pinhole_tools.h"
+#include "vision/sensor/sensor_camera.h"
+#include "vision/math/pinhole_tools.h"
+
 #include "core/state_block/state_block.h"
 #include "core/state_block/state_quaternion.h"
 
