@@ -1,11 +1,12 @@
-processor type: "TRACKER FEATURE TRIFOCAL"
-processor name: "tracker feature trifocal example"
+processor type: "TRACKER BUNDLE ADJUSTMENT"
+processor name: "tracker bundle adjustment example"
 
 vision_utils:
-    YAML file params: processor_tracker_feature_trifocal_vision_utils.yaml
+    YAML file params: processor_bundle_adjustment_vision_utils.yaml
 
 algorithm:
     time tolerance: 0.005
+    delete ambiguities: true
     voting active: false
     minimum features for keyframe: 40
     maximum new features: 100
