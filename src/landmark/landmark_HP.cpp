@@ -38,10 +38,10 @@ Eigen::Vector3s LandmarkHP::point() const
     using namespace Eigen;
 
     /* TODO: done when creating the landmark
-    Transform<Scalar,3,Affine> T_w_r
+    Transform<Scalar,3,Isometry> T_w_r
         = Translation<Scalar,3>(getAnchorFrame()->getP()->getState())
         * Quaternions(getAnchorFrame()->getO()->getState().data());
-    Transform<Scalar,3,Affine> T_r_c
+    Transform<Scalar,3,Isometry> T_r_c
         = Translation<Scalar,3>(getAnchorSensor()->getP()->getState())
         * Quaternions(getAnchorSensor()->getO()->getState().data());
     */

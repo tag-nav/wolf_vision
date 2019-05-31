@@ -116,7 +116,7 @@ inline void FactorAHP::expectation(const T* const _current_frame_p,
     using namespace Eigen;
 
     // All involved transforms typedef
-    typedef Eigen::Transform<T, 3, Eigen::Affine> TransformType;
+    typedef Eigen::Transform<T, 3, Eigen::Isometry> TransformType;
 
     // world to anchor robot transform
     Map<const Matrix<T, 3, 1> > p_w_r0(_anchor_frame_p);
@@ -144,8 +144,8 @@ inline void FactorAHP::expectation(const T* const _current_frame_p,
 
     // hmg point in current camera frame C1
     Eigen::Map<const Eigen::Matrix<T, 4, 1> > landmark_hmg_c0(_lmk_hmg);
-    Eigen::Matrix<T, 4, 1> landmark_hmg_c1 = T_R1_C1.inverse(Eigen::Affine)
-                                           * T_W_R1. inverse(Eigen::Affine)
+    Eigen::Matrix<T, 4, 1> landmark_hmg_c1 = T_R1_C1.inverse(Eigen::Isometry)
+                                           * T_W_R1. inverse(Eigen::Isometry)
                                            * T_W_R0
                                            * T_R0_C0
                                            * landmark_hmg_c0;
