@@ -46,7 +46,7 @@ static ProcessorParamsBasePtr createProcessorParamsTrackerFeatureTrifocal(const 
         params->time_tolerance                  = algorithm["time tolerance"]                 .as<Scalar>();
         params->voting_active                   = algorithm["voting active"]                  .as<bool>();
         params->min_features_for_keyframe       = algorithm["minimum features for keyframe"]  .as<unsigned int>();
-        params->max_new_features                = algorithm["maximum new features"]           .as<unsigned int>();
+        params->max_new_features                = algorithm["maximum new features"]           .as<int>();
         params->n_cells_h                       = algorithm["grid horiz cells"]               .as<int>();
         params->n_cells_v                       = algorithm["grid vert cells"]                .as<int>();
         params->min_response_new_feature        = algorithm["min response new features"]      .as<int>();
