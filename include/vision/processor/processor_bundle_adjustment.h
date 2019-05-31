@@ -12,6 +12,8 @@
 #include "core/processor/processor_tracker_feature.h"
 #include "vision/capture/capture_image.h"
 #include "vision/landmark/landmark_HP.h"
+#include "vision/math/pinhole_tools.h"
+#include "vision/sensor/sensor_camera.h"
 
 //vision utils includes
 #include "vision_utils/vision_utils.h"
@@ -144,6 +146,8 @@ class ProcessorBundleAdjustment : public ProcessorTrackerFeature
          */
         virtual void establishFactors() override;
 
+        void setParams(const ProcessorParamsBundleAdjustmentPtr _params);
+
     public:
         /// @brief Factory method
         static ProcessorBasePtr create(const std::string& _unique_name,
@@ -161,6 +165,11 @@ class ProcessorBundleAdjustment : public ProcessorTrackerFeature
          */
         cv::Mat getImageDebug();
 };
+
+inline cv::Mat ProcessorBundleAdjustment::getImageDebug()
+{
+    return image_debug_;
+}
 
 } //namespace wolf
 

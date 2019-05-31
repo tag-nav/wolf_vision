@@ -122,6 +122,51 @@ void ProcessorBundleAdjustment::postProcess()
     // DEBUG
     image_debug_ = vision_utils::buildImageProcessed((std::static_pointer_cast<CaptureImage>(last_ptr_))->getImage(), kp_enh_tracks);
 
+//    typedef std::map<size_t, LandmarkBasePtr>::iterator iter;
+//    for(iter it = lmk_track_map_.begin(); it != lmk_track_map_.end(); ++it)
+//    {
+//    	Vector3s point3D = std::static_pointer_cast<LandmarkHP>(it->second)->point();
+//    	SensorCameraPtr camera = std::static_pointer_cast<SensorCamera>(getSensor());
+//    	Vector2s point2D = pinhole::projectPoint(getSensor()->getIntrinsic()->getState(), camera->getDistortionVector(), point3D);
+//    	cv::Point point = cv::Point(point2D(0), point2D(1));
+//    	cv::circle(image_debug_, point, 1, cv::Scalar(0,0,255) , 1 , 8);
+//    }
+
+//    for (auto const & feat_base : last_ptr_->getFeatureList())
+//    {
+//        FeaturePointImagePtr feat = std::static_pointer_cast<FeaturePointImage>(feat_base);
+//        unsigned int track_id = feat->trackId();
+//        Vector3s point3D = std::static_pointer_cast<LandmarkHP>(lmk_track_map_[track_id])->point();
+//    	SensorCameraPtr camera = std::static_pointer_cast<SensorCamera>(getSensor());
+//    	Vector2s point2D = pinhole::projectPoint(getSensor()->getIntrinsic()->getState(), camera->getDistortionVector(), point3D);
+//    	cv::Point point = cv::Point(point2D(0), point2D(1));
+//    	cv::circle(image_debug_, point, 1, cv::Scalar(0,0,255) , 1 , 8);
+//    }
+
+    list<FeatureBasePtr> snapshot = track_matrix_.snapshotAsList(last_ptr_);
+    for (auto const & feat_base : snapshot)
+    {
+        FeaturePointImagePtr feat = std::static_pointer_cast<FeaturePointImage>(feat_base);
+        unsigned int track_id = feat->trackId();
+		if (lmk_track_map_.count(track_id))
+        {
+			Vector3s point3D = std::static_pointer_cast<LandmarkHP>(lmk_track_map_[track_id])->point();
+		    Transform<Scalar,3,Isometry> T_w_r
+		        = Translation<Scalar,3>(feat_base->getFrame()->getP()->getState())
+		        * Quaternions(feat_base->getFrame()->getO()->getState().data());
+		    Transform<Scalar,3,Isometry> T_r_c
+				= Translation<Scalar,3>(feat_base->getCapture()->getSensorP()->getState())
+		        * Quaternions(feat_base->getCapture()->getSensorO()->getState().data());
+		    Eigen::Matrix<Scalar, 3, 1> point3D_c = T_r_c.inverse()
+												   * T_w_r.inverse()
+		                                           * point3D;
+    		SensorCameraPtr camera = std::static_pointer_cast<SensorCamera>(getSensor());
+    		Vector2s point2D = pinhole::projectPoint(getSensor()->getIntrinsic()->getState(), camera->getDistortionVector(), point3D_c);
+    		cv::Point point = cv::Point(point2D(0), point2D(1));
+    		cv::circle(image_debug_, point, 3, cv::Scalar(0,0,255) , 1 , 8);
+		}
+	}
+
     cv::imshow("DEBUG VIEW", image_debug_);
     cv::waitKey(1);
 }
@@ -156,7 +201,8 @@ unsigned int ProcessorBundleAdjustment::trackFeatures(const FeatureBasePtrList& 
             }
         }
     }
-    return _feature_correspondences.size();
+//    return _feature_correspondences.size();
+    return _features_incoming_out.size();
 }
 
 
@@ -253,14 +299,18 @@ LandmarkBasePtr ProcessorBundleAdjustment::createLandmark(FeatureBasePtr _featur
     Eigen::Vector2s point2D = _feature_ptr->getMeasurement();
 
     Eigen::Vector3s point3D;
-    point3D = pinhole::backprojectPoint(getSensor()->getIntrinsic()->getState(),(std::static_pointer_cast<SensorCamera>(getSensor()))->getCorrectionVector(), point2D);
-    point3D.normalize();
+    point3D = pinhole::backprojectPoint(
+    		getSensor()->getIntrinsic()->getState(),
+    		(std::static_pointer_cast<SensorCamera>(getSensor()))->getCorrectionVector(),
+			point2D);
+
 
 
     //Scalar distance = params_bundle_adjustment_->distance; // arbitrary value
     Scalar distance = 1;
-    Eigen::Vector4s vec_homogeneous;
-    vec_homogeneous = {point3D(0),point3D(1),point3D(2),1/distance};
+    Eigen::Vector4s vec_homogeneous_c;
+    vec_homogeneous_c = {point3D(0),point3D(1),point3D(2),point3D.norm()/distance};
+    vec_homogeneous_c.normalize();
 
     //TODO: lmk from camera to world coordinate frame.
     Transform<Scalar,3,Isometry> T_w_r
@@ -271,7 +321,7 @@ LandmarkBasePtr ProcessorBundleAdjustment::createLandmark(FeatureBasePtr _featur
         * Quaternions(_feature_ptr->getCapture()->getSensorO()->getState().data());
     Eigen::Matrix<Scalar, 4, 1> vec_homogeneous_w = T_w_r
                                            * T_r_c
-                                           * vec_homogeneous;
+                                           * vec_homogeneous_c;
 
 
 //    std::cout << "Point2D: " << point2D.transpose() << std::endl;
@@ -280,13 +330,17 @@ LandmarkBasePtr ProcessorBundleAdjustment::createLandmark(FeatureBasePtr _featur
 //    std::cout << "Hmg_w: " << vec_homogeneous_w.transpose() << std::endl;
     //vec_homogeneous_w = vec_homogeneous;
 
-    LandmarkHPPtr lmk_hp_ptr = std::make_shared<LandmarkHP>(vec_homogeneous_w, getSensor(), feat_point_image_ptr->getDescriptor());
+    LandmarkBasePtr lmk_hp_ptr = LandmarkBase::emplace<LandmarkHP>(getProblem()->getMap(), vec_homogeneous_w, getSensor(), feat_point_image_ptr->getDescriptor());
     _feature_ptr->setLandmarkId(lmk_hp_ptr->id());
     return lmk_hp_ptr;
 }
 
 void ProcessorBundleAdjustment::establishFactors()
 {
+
+	if (origin_ptr_ == last_ptr_)
+		return;
+
 
 	TrackMatches matches_origin_inc = track_matrix_.matches(origin_ptr_, last_ptr_);
 
@@ -296,12 +350,8 @@ void ProcessorBundleAdjustment::establishFactors()
         FeatureBasePtr feature_origin = pair_trkid_pair.second.first;
         FeatureBasePtr feature_last   = pair_trkid_pair.second.second;
 
-//        assert(feature_origin!=nullptr && "null feature origin");
-//        assert(feature_last!=nullptr && "null feature last");
-//        assert(feature_origin->getCapture()!=nullptr);
-//        assert(feature_last->getCapture()!=nullptr);
-//        assert(feature_last->getCapture()->getFrame()!=nullptr && feature_last->getCapture()->getFrame()->isKey());
-//        assert(feature_origin->getCapture()->getFrame()!=nullptr && feature_origin->getCapture()->getFrame()->isKey());
+        assert(feature_origin!=feature_last && "feature: origin equal last");
+        assert(feature_origin->getCapture()!=feature_last->getCapture() && "capture: origin equal last");
 
         if (lmk_track_map_.count(trkid)==0) //if the track doesn't have landmark associated -> we need a map: map[track_id] = landmarkptr
         {
@@ -309,7 +359,6 @@ void ProcessorBundleAdjustment::establishFactors()
         	LandmarkBasePtr lmk = createLandmark(feature_origin);
         	assert(lmk!=nullptr);
         	LandmarkHPPtr lmk_hp = std::static_pointer_cast<LandmarkHP>(lmk);
-        	getProblem()->addLandmark(lmk_hp);
         	//add Landmark to map: map[track_id] = landmarkptr
         	lmk_track_map_[trkid] = lmk;
 
@@ -318,20 +367,8 @@ void ProcessorBundleAdjustment::establishFactors()
 //        	assert(feature_origin->getCapture()->getSensorP() != nullptr);
 //        	assert(feature_origin->getCapture()->getSensorO() != nullptr);
 //        	assert(lmk->getP() != nullptr);
-        	FactorPixelHPPtr fac_ptr_origin = std::make_shared<FactorPixelHP>(feature_origin, lmk_hp, shared_from_this());
-            if (fac_ptr_origin != nullptr) // factor links
-            {
-				feature_origin->addFactor(fac_ptr_origin);
-            	fac_ptr_origin->link(feature_origin);
-            	lmk->addConstrainedBy(fac_ptr_origin);
-            }
-        	FactorPixelHPPtr fac_ptr_last = std::make_shared<FactorPixelHP>(feature_last, lmk_hp, shared_from_this());
-            if (fac_ptr_last != nullptr) // factor links
-            {
-            	feature_last->addFactor(fac_ptr_last);
-            	fac_ptr_last->link(feature_last);
-            	lmk->addConstrainedBy(fac_ptr_last);
-            }
+        	FactorBase::emplace<FactorPixelHP>(feature_origin, feature_origin, lmk_hp, shared_from_this());
+        	FactorBase::emplace<FactorPixelHP>(feature_last, feature_last, lmk_hp, shared_from_this());
         }
         else
         {
@@ -339,15 +376,14 @@ void ProcessorBundleAdjustment::establishFactors()
         	LandmarkHPPtr lmk_hp = std::static_pointer_cast<LandmarkHP>(lmk);
 
         	//Create factor
-        	FactorPixelHPPtr fac_ptr_last = std::make_shared<FactorPixelHP>(feature_last, lmk_hp, shared_from_this());
-            if (fac_ptr_last != nullptr) // factor links
-            {
-            	feature_last->addFactor(fac_ptr_last);
-            	fac_ptr_last->link(feature_last);
-            	lmk->addConstrainedBy(fac_ptr_last);
-            }
+        	FactorBase::emplace<FactorPixelHP>(feature_last, feature_last, lmk_hp, shared_from_this());
         }
     }
+}
+
+void ProcessorBundleAdjustment::setParams(const ProcessorParamsBundleAdjustmentPtr _params)
+{
+    params_bundle_adjustment_ = _params;
 }
 
 ProcessorBasePtr ProcessorBundleAdjustment::create(const std::string& _unique_name,
