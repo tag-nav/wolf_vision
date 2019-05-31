@@ -290,7 +290,7 @@ TARGET_LINK_LIBRARIES(${PLUGIN_NAME} ${vision_utils_LIBRARY})
 #     TARGET_LINK_LIBRARIES(${PLUGIN_NAME} ${CERES_LIBRARIES})
 # ENDIF(Ceres_FOUND)
 
-
+add_subdirectory(demos)
 #Build tests
 #===============EXAMPLE=========================
 IF (GLOG_FOUND)
