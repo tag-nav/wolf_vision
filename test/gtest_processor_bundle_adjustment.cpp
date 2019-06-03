@@ -261,7 +261,6 @@ TEST(ProcessorBundleAdjustment, createLandmark)
 
 	LandmarkBasePtr lmk = proc_bundle_adj->createLandmark(fea0);
 	LandmarkHPPtr lmk_hp = std::static_pointer_cast<LandmarkHP>(lmk);
-	problem_ptr->addLandmark(lmk_hp);
 
 	ASSERT_EQ(problem_ptr->getMap()->getLandmarkList().size(), 1);
 }
