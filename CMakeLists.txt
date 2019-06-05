@@ -92,9 +92,6 @@ ENDIF(BUILD_EXAMPLES OR BUILD_TESTS)
 
 #find dependencies.
 # ============EXAMPLE==================
-FIND_PACKAGE(Eigen3 3.2.92 REQUIRED)
-
-FIND_PACKAGE(Threads REQUIRED)
 
 FIND_PACKAGE(wolf REQUIRED)
 
@@ -102,32 +99,6 @@ FIND_PACKAGE(vision_utils REQUIRED)
 MESSAGE("vision_utils Library FOUND: vision related sources will be built.")
 SET(PRINT_INFO_VU false)
 FIND_PACKAGE(OpenCV REQUIRED)
-
-FIND_PACKAGE(YamlCpp REQUIRED)
-IF(YAMLCPP_FOUND)
-    MESSAGE("yaml-cpp Library FOUND: yaml-cpp related sources will be built.")
-ELSEIF(YAMLCPP_FOUND)
-    MESSAGE("yaml-cpp Library NOT FOUND!")
-ENDIF(YAMLCPP_FOUND)
-
-FIND_PACKAGE(Ceres QUIET) #Ceres is not required
-IF(Ceres_FOUND)
-    MESSAGE("Ceres Library FOUND: Ceres related sources will be built.")
-ENDIF(Ceres_FOUND)
-
-FIND_PATH(
-    Suitesparse_INCLUDE_DIRS
-    NAMES SuiteSparse_config.h
-    PATHS /usr/include/suitesparse /usr/local/include/suitesparse)
-MESSAGE("Found suitesparse_INCLUDE_DIRS:" ${Suitesparse_INCLUDE_DIRS})
-
-IF(Suitesparse_INCLUDE_DIRS)
-   SET(Suitesparse_FOUND TRUE)
-   MESSAGE("Suitesparse FOUND: wolf_solver will be built.")
-ELSE (Suitesparse_INCLUDE_DIRS)
-   SET(Suitesparse_FOUND FALSE)
-   MESSAGE(FATAL_ERROR "Suitesparse NOT FOUND")
-ENDIF (Suitesparse_INCLUDE_DIRS)
 
 # Define the directory where will be the configured config.h
 SET(WOLF_CONFIG_DIR ${PROJECT_BINARY_DIR}/conf/${PROJECT_NAME}/internal)
@@ -148,17 +119,10 @@ include_directories("${PROJECT_BINARY_DIR}/conf")
 
 #INCLUDES SECTION
 # ============EXAMPLE==================
-INCLUDE_DIRECTORIES(${EIGEN_INCLUDE_DIRS})
-INCLUDE_DIRECTORIES(${wolf_INCLUDE_DIR})
+INCLUDE_DIRECTORIES(${wolf_INCLUDE_DIRS})
 INCLUDE_DIRECTORIES(${vision_utils_INCLUDE_DIR})
 INCLUDE_DIRECTORIES(${OpenCV_INCLUDE_DIRS})
 INCLUDE_DIRECTORIES(BEFORE "include")
-INCLUDE_DIRECTORIES(${YAMLCPP_INCLUDE_DIR})
-IF(Ceres_FOUND)
-    INCLUDE_DIRECTORIES(${CERES_INCLUDE_DIRS})
-ENDIF(Ceres_FOUND)
-
-
 
 #HEADERS
 
@@ -272,9 +236,7 @@ ADD_LIBRARY(${PLUGIN_NAME}
   ${SRCS_WRAPPER}
   ${SRCS_YAML}
   )
-TARGET_LINK_LIBRARIES(${PLUGIN_NAME} ${CMAKE_THREAD_LIBS_INIT})
-TARGET_LINK_LIBRARIES(${PLUGIN_NAME} ${wolf_LIBRARY})
-TARGET_LINK_LIBRARIES(${PLUGIN_NAME} ${YAMLCPP_LIBRARY})
+TARGET_LINK_LIBRARIES(${PLUGIN_NAME} ${wolf_LIBRARIES})
 TARGET_LINK_LIBRARIES(${PLUGIN_NAME} ${OpenCV_LIBS})
 TARGET_LINK_LIBRARIES(${PLUGIN_NAME} ${vision_utils_LIBRARY})
 
@@ -287,15 +249,10 @@ TARGET_LINK_LIBRARIES(${PLUGIN_NAME} ${vision_utils_LIBRARY})
 
 #Build tests
 #===============EXAMPLE=========================
-IF (GLOG_FOUND)
-    TARGET_LINK_LIBRARIES(${PLUGIN_NAME} ${GLOG_LIBRARY})
-ENDIF (GLOG_FOUND)
-IF (GLOG_FOUND)
-    IF(BUILD_TESTS)
-        MESSAGE("Building tests.")
-        add_subdirectory(test)
-    ENDIF(BUILD_TESTS)
-ENDIF (GLOG_FOUND)
+IF(BUILD_TESTS)
+  MESSAGE("Building tests.")
+  add_subdirectory(test)
+ENDIF(BUILD_TESTS)
 
 #install library
 
