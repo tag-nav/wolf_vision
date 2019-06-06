@@ -206,6 +206,19 @@ unsigned int ProcessorBundleAdjustment::trackFeatures(const FeatureBasePtrList& 
     return _features_incoming_out.size();
 }
 
+bool ProcessorBundleAdjustment::isInlier(const cv::KeyPoint& _kp_last, const cv::KeyPoint& _kp_incoming)
+{
+    // List of conditions
+    bool inlier = true;
+
+    // A. Check euclidean norm
+    inlier = inlier && (cv::norm(_kp_incoming.pt-_kp_last.pt) < mat_ptr_->getParams()->max_match_euclidean_dist);
+
+    // B. add your new condition test here
+    // inlier = inlier && ...
+
+    return inlier;
+}
 
 bool ProcessorBundleAdjustment::is_tracked(int& _kp_idx)
 {

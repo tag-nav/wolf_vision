@@ -118,6 +118,7 @@ class ProcessorBundleAdjustment : public ProcessorTrackerFeature
          */
         virtual bool voteForKeyFrame() override;
 
+        bool isInlier(const cv::KeyPoint& _kp_incoming, const cv::KeyPoint& _kp_last);
 
         bool is_tracked(int& kp_idx_);
         /** \brief Detect new Features
