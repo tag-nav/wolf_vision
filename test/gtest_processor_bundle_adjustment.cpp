@@ -333,68 +333,6 @@ TEST(ProcessorBundleAdjustment, processNew)
 	std::cout << "EMPTY Test\n";
 }
 
-//TEST(ProcessorBundleAdjustment, processVideo)
-//{
-//    // Wolf problem
-//    ProblemPtr problem = Problem::create("PO", 3);
-//
-//    // Install camera
-//    IntrinsicsCameraPtr intr = std::make_shared<IntrinsicsCamera>(); // TODO init params or read from YAML
-//    intr->pinhole_model_raw = Eigen::Vector4s(0,0,1,1);
-//    intr->width  = 640;
-//    intr->height = 480;
-//    SensorCameraPtr sens_cam = std::static_pointer_cast<SensorCamera>(problem->installSensor("CAMERA", "camera", (Eigen::Vector7s() << 0,0,0,  0,0,0,1).finished(), intr));
-//
-//    // Install processor
-//    ProcessorParamsBundleAdjustmentPtr params = std::make_shared<ProcessorParamsBundleAdjustment>();
-//    params->delete_ambiguities = true;
-//    params->yaml_file_params_vision_utils = wolf_root + "/demos/processor_bundle_adjustment_vision_utils.yaml";
-//    params->pixel_noise_std                = 1.0;
-//    params->min_track_length_for_factor = 3;
-//    params->voting_active = true;
-//    params->max_new_features = 400;
-//    params->min_features_for_keyframe = 50;
-//    auto proc = problem->installProcessor("TRACKER BUNDLE ADJUSTMENT", "processor", sens_cam, params);
-//	auto proc_dummy = std::static_pointer_cast<ProcessorBundleAdjustmentDummy>(proc);
-//
-//	//==================================vision_utils ============================================
-//	vision_utils::SensorCameraPtr sen_ptr = std::make_shared<vision_utils::SensorCamera>();
-//	sen_ptr->open("/home/ovendrell/eclipse-workspace/ddm_triad/data/video/VID4b.mp4"); //TODO: this should be a demo
-//				//"/home/ovendrell/dev/vision_utils/src/test/data/test_usb_cam.mp4");
-//
-//    unsigned int buffer_size = 10;
-//    vision_utils::Buffer<vision_utils::FramePtr> frame_buff(buffer_size);
-//    frame_buff.add( vision_utils::setFrame(sen_ptr->getImage(), 0) );
-//
-//    unsigned int img_width  = frame_buff.back()->getImage().cols;
-//    unsigned int img_height = frame_buff.back()->getImage().rows;
-//    std::cout << "Image size: " << img_width << "x" << img_height << std::endl;
-//    //==================================vision_utils ============================================
-//
-//    SensorCameraPtr camera = std::static_pointer_cast<SensorCamera>(sens_cam);
-//    camera->setImgWidth(img_width);
-//    camera->setImgHeight(img_height);
-//    ProcessorBundleAdjustmentPtr proc_bundle_adj = std::static_pointer_cast<ProcessorBundleAdjustment>(proc);
-//
-//    TimeStamp t = 0;
-//    // main loop
-//    Scalar dt = 0.04;
-//    for(int frame_count = 0; frame_count<150; ++frame_count)
-//    {
-//    	t += dt;
-//        // Image ---------------------------------------------
-//        frame_buff.add( vision_utils::setFrame(sen_ptr->getImage(), frame_count) );
-//        CaptureImagePtr image = std::make_shared<CaptureImage>(t, camera, frame_buff.back()->getImage());
-//        /* process */
-//        camera->process(image);
-////        //Debug lines
-////        std::cout << "FEATURES:" << image->getFeatureList().size() << std::endl;
-////        std::cout << "MATCHES:" << image->matches_from_precedent_.size() << std::endl;
-//    }
-//}
-
-
-
 int main(int argc, char **argv)
 {
     testing::InitGoogleTest(&argc, argv);
