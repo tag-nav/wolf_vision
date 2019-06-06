@@ -166,7 +166,8 @@ void ProcessorBundleAdjustment::postProcess()
     		cv::circle(image_debug_, point, 3, cv::Scalar(0,0,255) , 1 , 8);
 		}
 	}
-
+    cv::namedWindow("DEBUG VIEW", cv::WINDOW_NORMAL);
+    cv::resizeWindow("DEBUG VIEW", 800,600);
     cv::imshow("DEBUG VIEW", image_debug_);
     cv::waitKey(1);
 }
