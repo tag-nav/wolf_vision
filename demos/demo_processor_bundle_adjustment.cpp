@@ -84,92 +84,6 @@ int main(int argc, char** argv)
 {
     std::cout << std::endl << "==================== processor bundle adjustment test ======================" << std::endl;
 
-//    std::cout << "______________________________Get image from driver_________________________" << std::endl;
-//    // Sensor or sensor recording
-//
-//    int num_cams = 1;
-//
-//    // Get own path
-//    std::string argv_str(argv[0]);
-//
-//    std::cout << argv[0] << "\n";
-//
-//    std::string pbase = argv_str.substr(0, argv_str.find_last_of("/"));
-//    std::string paramspath = pbase + "/../demos/demo_processor_bundle_adjustment_params.xml";
-//
-//    std::cout << paramspath << "\n";
-//
-//    std::cout << std::endl;
-//    std::cout << "******************************" << std::endl;
-//    std::cout << "* ----  mvBlueFOX3 ---- *" << std::endl;
-//    std::cout << "******************************" << std::endl;
-//    std::cout << std::endl;
-//    std::cout << "Please, choose the device to test from the following list:" << std::endl;
-//    std::cout << std::endl;
-//
-//    std::vector<std::string> serial;
-//    serial.resize(num_cams);
-//    serial[0] = GetSerialFromUser();
-//
-//    std::vector<std::string> window_name;
-//    window_name.resize(num_cams);
-//    window_name[0] = serial[0];
-//
-//
-//    mvIMPACT::acquire::DeviceManager devMgr_;       // Device Manager.
-//    std::vector<CMvbluefox3::CMvbluefox3*> cam_ptr; // Device.
-//
-//    try {
-//      cam_ptr.resize(num_cams);
-//      for (int ii = 0; ii < num_cams; ++ii)
-//      {
-//        cam_ptr[ii] = NULL;
-//
-//        if( !serial[ii].empty() )
-//        {
-//          std::cout << "Trying to open device with serial: " << serial[ii] << std::endl;
-//
-//          if (devMgr_.getDeviceBySerial(serial[ii]) == 0)
-//            std::cout << "No device found! Unable to continue. " << std::endl;
-//        else
-//          cam_ptr[ii] = new CMvbluefox3::CMvbluefox3(devMgr_.getDeviceBySerial(serial[ii]),paramspath);
-//        }
-//        else
-//          std::cout << "Device cannot be found because serial number is not specified." << std::endl;
-//      }
-//
-////      std::cout << "Acquiring images." << std::endl << ">WARNING: depending on OpenCV compilation flags, visualization might experience hard delays (e.g. if \"init done\" appears in the following line)" << std::endl;
-//      for (int ii = 0; ii < num_cams; ++ii)
-//        cv::namedWindow( window_name[ii], cv::WINDOW_NORMAL );
-//
-//      while (true)
-//      {
-//        for (int ii = 0; ii < num_cams; ++ii)
-//        {
-//          cv::Mat image;
-//          cam_ptr[ii]->GetImageCV(image);
-//          cv::imshow( window_name[ii], image );
-//        }
-//        if(cv::waitKey(30) >= 0) break;
-//      }
-//
-//      cv::destroyAllWindows();
-//
-//      std::cout << "[Camera test]: Finished successfully." << std::endl;
-//    }catch (CMvbluefox3::CmvBlueFOX3Exception& e) {
-//      std::cout << e.what() << std::endl;
-//    }
-//
-//    for (int ii = 0; ii < num_cams; ++ii)
-//    {
-//      if (cam_ptr[ii] != NULL)
-//      {
-//        cam_ptr[ii] = NULL;
-//        delete [] cam_ptr[ii];
-//      }
-//    }
-//
-
     vision_utils::SensorCameraPtr sen_ptr = vision_utils::askUserSource(argc, argv);
     if (sen_ptr==NULL)
         return 0;
@@ -191,6 +105,7 @@ int main(int argc, char** argv)
     options.function_tolerance = 1e-4;
     CeresManagerPtr ceres_manager = std::make_shared<CeresManager>(problem, options);
 
+
     // Install camera
 //    IntrinsicsCameraPtr intr = std::make_shared<IntrinsicsCamera>(); // TODO init params or read from YAML
 //    intr->pinhole_model_raw = Eigen::Vector4s(320,240,320,320);
@@ -209,9 +124,12 @@ int main(int argc, char** argv)
     params->pixel_noise_std                = 1.0;
     params->min_track_length_for_factor = 3;
     params->voting_active = true;
-    params->max_new_features = 200;
-    params->min_features_for_keyframe = 50;
+    params->max_new_features = 15;
+    params->min_features_for_keyframe = 5;
     params->time_tolerance = 0.01;
+    params->n_cells_h = 13;
+    params-> n_cells_v = 10;
+    params->min_response_new_feature = -1;
     auto proc = problem->installProcessor("TRACKER BUNDLE ADJUSTMENT", "processor", sens_cam, params);
     ProcessorBundleAdjustmentPtr proc_bundle_adj = std::static_pointer_cast<ProcessorBundleAdjustment>(proc);
 
@@ -242,12 +160,14 @@ int main(int argc, char** argv)
             std::cout << report << std::endl;
             if (number_of_KFs > 5)
             	break;
-
         }
+//        problem->print(4,1,1,0);
+
+        cv::waitKey();//1e7);
 
     }
 
-    problem->print(1,0,1,0);
+//    problem->print(1,0,1,0);
 
     return 0;
 }
