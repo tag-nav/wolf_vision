@@ -78,6 +78,9 @@ class ProcessorBundleAdjustmentDummy : public ProcessorBundleAdjustment
 		    	im->keypoints_ = det_ptr_->detect(im->getImage());
 		    	// Compute Descriptors
 		    	im->descriptors_ = des_ptr_->getDescriptor(im->getImage(), im->keypoints_);
+		        // Create and fill incoming grid
+		        im->grid_features_ = std::make_shared<vision_utils::FeatureIdxGrid>(im->getImage().rows, im->getImage().cols, params_bundle_adjustment_->n_cells_v, params_bundle_adjustment_->n_cells_h);
+		        im->grid_features_->insert(im->keypoints_);
 		    }
 		    return im;
 		}
@@ -128,6 +131,9 @@ TEST(ProcessorBundleAdjustment, preProcess)
     params->min_track_length_for_factor = 3;
     params->voting_active = true;
     params->max_new_features = 5;
+    params->n_cells_h = 50;
+    params-> n_cells_v = 50;
+    params->min_response_new_feature = 50;
 
     auto proc_dummy = std::make_shared<ProcessorBundleAdjustmentDummy>(params);
 
@@ -155,6 +161,9 @@ TEST(ProcessorBundleAdjustment, detectNewFeatures)
     params->min_track_length_for_factor = 3;
     params->voting_active = true;
     params->max_new_features = 5;
+    params->n_cells_h = 20;
+    params-> n_cells_v = 15;
+    params->min_response_new_feature = 0;
     auto proc_dummy = std::make_shared<ProcessorBundleAdjustmentDummy>(params);
 
     FeatureBasePtrList feat_list = std::list<FeatureBasePtr>();
@@ -183,7 +192,7 @@ TEST(ProcessorBundleAdjustment, detectNewFeatures)
 
     // demo detectNewFeatures
     unsigned int num3 = proc_dummy->detectNewFeatures(params->max_new_features, feat_list);
-    ASSERT_EQ(num3, params->max_new_features);
+    ASSERT_LE(num3, params->max_new_features);
 }
 
 TEST(ProcessorBundleAdjustment, trackFeatures)
@@ -196,6 +205,9 @@ TEST(ProcessorBundleAdjustment, trackFeatures)
     params->min_track_length_for_factor = 3;
     params->voting_active = true;
     params->max_new_features = 5;
+    params->n_cells_h = 50;
+    params-> n_cells_v = 50;
+    params->min_response_new_feature = 50;
     auto proc_dummy = std::make_shared<ProcessorBundleAdjustmentDummy>(params);
 
     //fill feat_last list
@@ -286,6 +298,9 @@ TEST(ProcessorBundleAdjustment, process)
     params->min_track_length_for_factor = 3;
     params->voting_active = true;
     params->max_new_features = 5;
+    params->n_cells_h = 50;
+    params-> n_cells_v = 50;
+    params->min_response_new_feature = 50;
     auto proc = problem->installProcessor("TRACKER BUNDLE ADJUSTMENT", "processor", sens_cam, params);
 	auto proc_dummy = std::static_pointer_cast<ProcessorBundleAdjustmentDummy>(proc);
 

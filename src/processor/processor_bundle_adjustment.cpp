@@ -55,8 +55,22 @@ void ProcessorBundleAdjustment::preProcess()
     capture_image_incoming_ = std::static_pointer_cast<CaptureImage>(incoming_ptr_);
     // Detect KeyPoints
     capture_image_incoming_->keypoints_ = det_ptr_->detect(capture_image_incoming_->getImage());
+
+    //Sort keypoints by response if needed
+    if (!capture_image_incoming_->keypoints_.empty())
+    	vision_utils::sortByResponse(capture_image_incoming_->keypoints_, CV_SORT_DESCENDING);
+
     // Compute Descriptors
     capture_image_incoming_->descriptors_ = des_ptr_->getDescriptor(capture_image_incoming_->getImage(), capture_image_incoming_->keypoints_);
+
+    std::cout << "before fill grid " << std::endl;
+
+    // Create and fill incoming grid
+    capture_image_incoming_->grid_features_ = std::make_shared<vision_utils::FeatureIdxGrid>(capture_image_incoming_->getImage().rows, capture_image_incoming_->getImage().cols, params_bundle_adjustment_->n_cells_v, params_bundle_adjustment_->n_cells_h);
+
+    capture_image_incoming_->grid_features_->insert(capture_image_incoming_->keypoints_);
+
+    std::cout << "after fill grid done " << std::endl;
 
 
     if (last_ptr_ != nullptr)
@@ -90,7 +104,20 @@ void ProcessorBundleAdjustment::preProcess()
         		capture_image_last_->map_index_to_next_[match.trainIdx] = match.queryIdx; // map[last] = incoming
 
         }
+
+//        cv::Mat img_mat = cv::Mat(capture_image_incoming_->getImage().rows, capture_image_incoming_->getImage().cols, capture_image_incoming_->getImage().type());
+//
+//        cv::drawMatches(capture_image_incoming_->getImage(), 		 capture_image_incoming_->getKeypoints(),
+//        				capture_image_last_->getImage(),     capture_image_last_->getKeypoints(),
+//						capture_image_incoming_->matches_from_precedent_, img_mat);
+//
+//        cv::namedWindow("MATCHES VIEW", cv::WINDOW_NORMAL);
+//        cv::resizeWindow("MATCHES VIEW", 800,600);
+//        cv::imshow("MATCHES VIEW", img_mat);
     }
+
+    std::cout << "preProcess() done " << std::endl;
+
 }
 
 void ProcessorBundleAdjustment::postProcess()
@@ -122,26 +149,28 @@ void ProcessorBundleAdjustment::postProcess()
     // DEBUG
     image_debug_ = vision_utils::buildImageProcessed((std::static_pointer_cast<CaptureImage>(last_ptr_))->getImage(), kp_enh_tracks);
 
-//    typedef std::map<size_t, LandmarkBasePtr>::iterator iter;
-//    for(iter it = lmk_track_map_.begin(); it != lmk_track_map_.end(); ++it)
-//    {
-//    	Vector3s point3D = std::static_pointer_cast<LandmarkHP>(it->second)->point();
-//    	SensorCameraPtr camera = std::static_pointer_cast<SensorCamera>(getSensor());
-//    	Vector2s point2D = pinhole::projectPoint(getSensor()->getIntrinsic()->getState(), camera->getDistortionVector(), point3D);
-//    	cv::Point point = cv::Point(point2D(0), point2D(1));
-//    	cv::circle(image_debug_, point, 1, cv::Scalar(0,0,255) , 1 , 8);
-//    }
-
-//    for (auto const & feat_base : last_ptr_->getFeatureList())
-//    {
-//        FeaturePointImagePtr feat = std::static_pointer_cast<FeaturePointImage>(feat_base);
-//        unsigned int track_id = feat->trackId();
-//        Vector3s point3D = std::static_pointer_cast<LandmarkHP>(lmk_track_map_[track_id])->point();
-//    	SensorCameraPtr camera = std::static_pointer_cast<SensorCamera>(getSensor());
-//    	Vector2s point2D = pinhole::projectPoint(getSensor()->getIntrinsic()->getState(), camera->getDistortionVector(), point3D);
-//    	cv::Point point = cv::Point(point2D(0), point2D(1));
-//    	cv::circle(image_debug_, point, 1, cv::Scalar(0,0,255) , 1 , 8);
-//    }
+    Snapshot snapshot_last = track_matrix_.snapshot(last_ptr_);
+//	getProblem()->print(4,1,1,0);
+    for (auto pair : track_matrix_.snapshot(origin_ptr_))
+    {
+    	if (snapshot_last.count(pair.first)==0)
+    	{
+    		if (!(pair.second->getFactorList()).empty())
+    		{
+				auto factor = pair.second->getFactorList().front();
+				if (factor)
+				{
+					auto lmk = factor->getLandmarkOther();
+					if (lmk)
+					{
+//						lmk->remove();
+//	    	    		track_matrix_.remove(pair.second->trackId());
+					}
+				}
+    		}
+    	}
+    }
+	getProblem()->print(4,1,1,0);
 
     list<FeatureBasePtr> snapshot = track_matrix_.snapshotAsList(last_ptr_);
     for (auto const & feat_base : snapshot)
@@ -187,18 +216,25 @@ unsigned int ProcessorBundleAdjustment::trackFeatures(const FeatureBasePtrList& 
             {
                 // Get kp incoming and keypoint last
                 cv::KeyPoint kp_inc = capture_image_incoming_->keypoints_.at(index_inc);
-                //cv::KeyPoint kp_last = capture_image_last_->keypoints_.at(feat_last_->getIndexKeyPoint());
+//                cv::KeyPoint kp_last = capture_image_last_->keypoints_.at(feat_last->getIndexKeyPoint());
 
-                FeaturePointImagePtr feat_inc = std::make_shared<FeaturePointImage>(kp_inc, index_inc,
-                                                                                        capture_image_incoming_->descriptors_.row(index_inc),
-                                                                                        pixel_cov_);
+//                if (isInlier(kp_last, kp_inc))
+//                {
+					FeaturePointImagePtr feat_inc = std::make_shared<FeaturePointImage>(kp_inc, index_inc,
+																							capture_image_incoming_->descriptors_.row(index_inc),
+																							pixel_cov_);
 
-                _features_incoming_out.push_back(feat_inc);
+					_features_incoming_out.push_back(feat_inc);
 
-                auto feature_match_ptr = std::make_shared<FeatureMatch>();
-                feature_match_ptr->feature_ptr_= feat_last;
-                feature_match_ptr->normalized_score_ = 1.0;//capture_image_incoming_->matches_normalized_scores_.at(index_inc);
-                _feature_correspondences[feat_inc] = feature_match_ptr;
+					auto feature_match_ptr = std::make_shared<FeatureMatch>();
+					feature_match_ptr->feature_ptr_= feat_last;
+					feature_match_ptr->normalized_score_ = 1.0;//capture_image_incoming_->matches_normalized_scores_.at(index_inc);
+					_feature_correspondences[feat_inc] = feature_match_ptr;
+
+
+					// hit cell to acknowledge there's a tracked point in that cell
+					capture_image_incoming_->grid_features_->hitTrackingCell(kp_inc);
+//                }
             }
         }
     }
@@ -238,27 +274,81 @@ unsigned int ProcessorBundleAdjustment::detectNewFeatures(const int& _max_new_fe
 {
     //TODO: efficient implementation?
 
-    typedef std::map<int,int>::iterator iter;
+////Simpler method to detect new features without using Grid Features form vision_utils
+//    typedef std::map<int,int>::iterator iter;
+//
+//    for (iter it = capture_image_last_->map_index_to_next_.begin(); it!=capture_image_last_->map_index_to_next_.end(); ++it)
+//    {
+//        if (_features_last_out.size() >= _max_new_features)
+//        		break;
+//
+//        else if(!is_tracked(it->second))
+//        {
+//            //add to _features_last_out
+//            int idx_last = it->first;
+//            cv::KeyPoint kp_last = capture_image_last_->keypoints_.at(idx_last);
+//            FeaturePointImagePtr feat_last_ = std::make_shared<FeaturePointImage>(kp_last, idx_last,
+//                                                                                 capture_image_last_->descriptors_.row(idx_last),
+//                                                                                 pixel_cov_);
+//            _features_last_out.push_back(feat_last_);
+//
+//        }
+//    }
+//
+//    return _features_last_out.size();
 
-    for (iter it = capture_image_last_->map_index_to_next_.begin(); it!=capture_image_last_->map_index_to_next_.end(); ++it)
-    {
-        if (_features_last_out.size() >= _max_new_features)
-        		break;
+	for (unsigned int n_iterations = 0; _max_new_features == -1 || n_iterations < _max_new_features; ++n_iterations)
+	{
+		Eigen::Vector2i cell_last;
+		assert(capture_image_last_->grid_features_!=nullptr);
+		if (capture_image_last_->grid_features_->pickEmptyTrackingCell(cell_last))
+		{
+			// Get best keypoint in cell
+			vision_utils::FeatureIdxMap cell_feat_map = capture_image_last_->grid_features_->getFeatureIdxMap(cell_last(0), cell_last(1), params_bundle_adjustment_->min_response_new_feature);
+			bool found_feature_in_cell = false;
 
-        else if(!is_tracked(it->second))
-        {
-            //add to _features_last_out
-            int idx_last = it->first;
-            cv::KeyPoint kp_last = capture_image_last_->keypoints_.at(idx_last);
-            FeaturePointImagePtr feat_last_ = std::make_shared<FeaturePointImage>(kp_last, idx_last,
-                                                                                 capture_image_last_->descriptors_.row(idx_last),
-                                                                                 pixel_cov_);
-            _features_last_out.push_back(feat_last_);
+			for (auto target_last_pair_response_idx : cell_feat_map)
+			{
+				// Get KeyPoint in last
+				unsigned int index_last = target_last_pair_response_idx.second;
+				cv::KeyPoint kp_last = capture_image_last_->keypoints_.at(index_last);
+				assert(target_last_pair_response_idx.first == kp_last.response && "[ProcessorTrackerFeatureTrifocal::detectNewFeatures]: response mismatch.");
 
-        }
-    }
+				// Check if there is match with incoming, if not we do not want it
+				if (capture_image_last_->map_index_to_next_.count(index_last))
+				{
+					// matching keypoint in incoming
+//                  	      unsigned int index_incoming = capture_image_last_->map_index_to_next_[index_last];
+//                      	  cv::KeyPoint kp_incoming = capture_image_incoming_->keypoints_.at(index_incoming);
 
-    return _features_last_out.size();
+					// validate match with extra tests
+//					if (isInlier( kp_incoming, kp_last))
+//					{
+						// Create WOLF feature
+						FeaturePointImagePtr ftr_point_last = std::make_shared<FeaturePointImage>(
+								kp_last,
+								index_last,
+								capture_image_last_->descriptors_.row(index_last),
+								pixel_cov_);
+
+						_features_last_out.push_back(ftr_point_last);
+
+						// hit cell to acknowledge there's a tracked point in that cell
+						capture_image_last_->grid_features_->hitTrackingCell(kp_last);
+
+						found_feature_in_cell = true;
+
+						break; // Good kp found for this grid.
+//                    }
+				}
+			}
+			if (!found_feature_in_cell)
+				capture_image_last_->grid_features_->blockTrackingCell(cell_last);
+		}
+		else
+			break; // There are no empty cells
+	}
+	return _features_last_out.size();
 }
 
 
@@ -294,6 +384,8 @@ bool ProcessorBundleAdjustment::voteForKeyFrame()
 	//        WOLF_TRACE("VOTE DOWN");
 	//    if (vote_time)
 	//        WOLF_TRACE("VOTE TIME");
+	    if (vote_down)
+	    	WOLF_INFO("Creating KF. Number of features: ", incoming_ptr_->getFeatureList().size());
 
 	    return vote_up || vote_down || vote_time;
 }
@@ -345,6 +437,9 @@ LandmarkBasePtr ProcessorBundleAdjustment::createLandmark(FeatureBasePtr _featur
     //vec_homogeneous_w = vec_homogeneous;
 
     LandmarkBasePtr lmk_hp_ptr = LandmarkBase::emplace<LandmarkHP>(getProblem()->getMap(), vec_homogeneous_w, getSensor(), feat_point_image_ptr->getDescriptor());
+
+//    std::cout << "LANDMARKS CREATED AND ADDED to MAP: " << getProblem()->getMap()->getLandmarkList().size() << std::endl;
+
     _feature_ptr->setLandmarkId(lmk_hp_ptr->id());
     return lmk_hp_ptr;
 }
@@ -361,6 +456,8 @@ void ProcessorBundleAdjustment::establishFactors()
     for (auto const & pair_trkid_pair : matches_origin_inc)
     {
         size_t trkid = pair_trkid_pair.first;
+        if (track_matrix_.trackSize(trkid)<params_bundle_adjustment_->min_track_length_for_factor)
+        	continue;
         FeatureBasePtr feature_origin = pair_trkid_pair.second.first;
         FeatureBasePtr feature_last   = pair_trkid_pair.second.second;
 

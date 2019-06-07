@@ -28,12 +28,18 @@ WOLF_STRUCT_PTR_TYPEDEFS(ProcessorParamsBundleAdjustment);
 
 struct ProcessorParamsBundleAdjustment : public ProcessorParamsTrackerFeature
 {
-        std::string yaml_file_params_vision_utils;
+	std::string yaml_file_params_vision_utils;
 
-        bool delete_ambiguities;
+	bool delete_ambiguities;
 
-        Scalar pixel_noise_std; ///< std noise of the pixel
-        int min_track_length_for_factor; ///< Minimum track length of a matched feature to create a factor
+	int n_cells_h;
+	int n_cells_v;
+	int min_response_new_feature;
+
+	Scalar pixel_noise_std; ///< std noise of the pixel
+	int min_track_length_for_factor; ///< Minimum track length of a matched feature to create a factor
+
+	ProcessorParamsBundleAdjustment() = default;
 
 };
 
@@ -165,11 +171,30 @@ class ProcessorBundleAdjustment : public ProcessorTrackerFeature
          * \brief Return Image for debug purposes
          */
         cv::Mat getImageDebug();
+
+        /**
+         * \brief Return list of Features tracked in a Capture
+         */
+        std::list<FeatureBasePtr> trackedFeatures(const CaptureBasePtr& _capture_ptr);
+        /**
+        * \brief Return list of Landmarks
+        */
+        std::list<LandmarkBasePtr> currentLandmarks();
 };
 
 inline cv::Mat ProcessorBundleAdjustment::getImageDebug()
 {
     return image_debug_;
+}
+
+inline std::list<FeatureBasePtr> ProcessorBundleAdjustment::trackedFeatures(const CaptureBasePtr& _capture_ptr)
+{
+	return track_matrix_.snapshotAsList(_capture_ptr);
+}
+
+inline std::list<LandmarkBasePtr> ProcessorBundleAdjustment::currentLandmarks()
+{
+	return getProblem()->getMap()->getLandmarkList();
 }
 
 } //namespace wolf
