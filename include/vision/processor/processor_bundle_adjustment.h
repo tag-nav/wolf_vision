@@ -101,12 +101,18 @@ class ProcessorBundleAdjustment : public ProcessorTrackerFeature
          */
         virtual void postProcess() override;
 
-        /** \brief Track provided features from \b last to \b incoming
-         * \param _features_last_in input list of features in \b last to track
-         * \param _features_incoming_out returned list of features found in \b incoming
+        /** \brief Track provided features in \b _capture
+         * \param _features_in input list of features in \b last to track
+         * \param _capture the capture in which the _features_in should be searched
+         * \param _features_out returned list of features found in \b _capture
          * \param _feature_correspondences returned map of correspondences: _feature_correspondences[feature_out_ptr] = feature_in_ptr
+         *
+         * \return the number of features tracked
          */
-        virtual unsigned int trackFeatures(const FeatureBasePtrList& _features_last_in, FeatureBasePtrList& _features_incoming_out, FeatureMatchMap& _feature_correspondences) override;
+        virtual unsigned int trackFeatures(const FeatureBasePtrList& _features_in,
+                                           const CaptureBasePtr& _capture,
+                                           FeatureBasePtrList& _features_out,
+                                           FeatureMatchMap& _feature_correspondences) override;
 
         /** \brief Correct the drift in incoming feature by re-comparing against the corresponding feature in origin.
          * \param _origin_feature input feature in origin capture tracked
@@ -127,27 +133,38 @@ class ProcessorBundleAdjustment : public ProcessorTrackerFeature
         bool isInlier(const cv::KeyPoint& _kp_incoming, const cv::KeyPoint& _kp_last);
 
         bool is_tracked(int& kp_idx_);
+
         /** \brief Detect new Features
-         * \param _max_features maximum number of features detected
+         * \param _max_features maximum number of features detected (-1: unlimited. 0: none)
+         * \param _capture The capture in which the new features should be detected.
+         * \param _features_out The list of detected Features in _capture.
          * \return The number of detected Features.
          *
          * This function detects Features that do not correspond to known Features/Landmarks in the system.
          *
-         * The function sets _features_last_out, the list of newly detected features in Capture last.
+         * IMPORTANT: The features in _features_out should be emplaced. Don't use `make_shared`, use `FeatureBase::emplace` instead.
+         * Then, they will be already linked to the _capture.
+         * If you detect all the features at once in preprocess(), you should either emplace them (`FeatureBase::emplace()`) and remove the not returned features in _features_out (`FeatureBase::remove()`),
+         * or create them (`make_shared()`) and link all the returned features in _features_out (`FeatureBase::link(_capture)`).
+         *
+         * The function is called in ProcessorTrackerFeature::processNew() to set the member new_features_last_,
+         * the list of newly detected features of the capture last_ptr_.
          */
-        virtual unsigned int detectNewFeatures(const int& _max_new_features, FeatureBasePtrList& _features_last_out) override;
+        virtual unsigned int detectNewFeatures(const int& _max_new_features,
+                                               const CaptureBasePtr& _capture,
+                                               FeatureBasePtrList& _features_out) override;
 
-        /** \brief Create a new factor and link it to the wolf tree
+        /** \brief Emplaces a new factor
          * \param _feature_ptr pointer to the parent Feature
          * \param _feature_other_ptr pointer to the other feature constrained.
          *
          * Implement this method in derived classes.
          *
-         * This function creates a factor of the appropriate type for the derived processor.
+         * This function emplaces a factor of the appropriate type for the derived processor.
          */
-        virtual FactorBasePtr createFactor(FeatureBasePtr _feature_ptr, FeatureBasePtr _feature_other_ptr) override;
+        virtual FactorBasePtr emplaceFactor(FeatureBasePtr _feature_ptr, FeatureBasePtr _feature_other_ptr) override;
 
-        virtual LandmarkBasePtr createLandmark(FeatureBasePtr _feature_ptr);
+        virtual LandmarkBasePtr emplaceLandmark(FeatureBasePtr _feature_ptr);
 
         /** \brief Establish factors between features in Captures \b last and \b origin
          */

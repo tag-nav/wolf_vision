@@ -202,9 +202,12 @@ void ProcessorBundleAdjustment::postProcess()
 }
 
 
-unsigned int ProcessorBundleAdjustment::trackFeatures(const FeatureBasePtrList& _features_last_in, FeatureBasePtrList& _features_incoming_out, FeatureMatchMap& _feature_correspondences)
+unsigned int ProcessorBundleAdjustment::trackFeatures(const FeatureBasePtrList& _features_in,
+                                                      const CaptureBasePtr& _capture,
+                                                      FeatureBasePtrList& _features_out,
+                                                      FeatureMatchMap& _feature_correspondences)
 {
-    for (auto feat_base: _features_last_in)
+    for (auto feat_base: _features_in)
     {
         FeaturePointImagePtr feat_last = std::static_pointer_cast<FeaturePointImage>(feat_base);
 
@@ -220,11 +223,13 @@ unsigned int ProcessorBundleAdjustment::trackFeatures(const FeatureBasePtrList& 
 
 //                if (isInlier(kp_last, kp_inc))
 //                {
-					FeaturePointImagePtr feat_inc = std::make_shared<FeaturePointImage>(kp_inc, index_inc,
-																							capture_image_incoming_->descriptors_.row(index_inc),
-																							pixel_cov_);
+					FeatureBasePtr feat_inc = FeatureBase::emplace<FeaturePointImage>(_capture,
+					                                                                  kp_inc,
+					                                                                  index_inc,
+					                                                                  capture_image_incoming_->descriptors_.row(index_inc),
+					                                                                  pixel_cov_);
 
-					_features_incoming_out.push_back(feat_inc);
+					_features_out.push_back(feat_inc);
 
 					auto feature_match_ptr = std::make_shared<FeatureMatch>();
 					feature_match_ptr->feature_ptr_= feat_last;
@@ -239,7 +244,7 @@ unsigned int ProcessorBundleAdjustment::trackFeatures(const FeatureBasePtrList& 
         }
     }
 //    return _feature_correspondences.size();
-    return _features_incoming_out.size();
+    return _features_out.size();
 }
 
 bool ProcessorBundleAdjustment::isInlier(const cv::KeyPoint& _kp_last, const cv::KeyPoint& _kp_incoming)
@@ -270,7 +275,9 @@ bool ProcessorBundleAdjustment::is_tracked(int& _kp_idx)
     return false;
 }
 
-unsigned int ProcessorBundleAdjustment::detectNewFeatures(const int& _max_new_features, FeatureBasePtrList& _features_last_out)
+unsigned int ProcessorBundleAdjustment::detectNewFeatures(const int& _max_new_features,
+                                                          const CaptureBasePtr& _capture,
+                                                          FeatureBasePtrList& _features_out)
 {
     //TODO: efficient implementation?
 
@@ -279,23 +286,23 @@ unsigned int ProcessorBundleAdjustment::detectNewFeatures(const int& _max_new_fe
 //
 //    for (iter it = capture_image_last_->map_index_to_next_.begin(); it!=capture_image_last_->map_index_to_next_.end(); ++it)
 //    {
-//        if (_features_last_out.size() >= _max_new_features)
+//        if (_features_out.size() >= _max_new_features)
 //        		break;
 //
 //        else if(!is_tracked(it->second))
 //        {
-//            //add to _features_last_out
+//            //add to _features_out
 //            int idx_last = it->first;
 //            cv::KeyPoint kp_last = capture_image_last_->keypoints_.at(idx_last);
 //            FeaturePointImagePtr feat_last_ = std::make_shared<FeaturePointImage>(kp_last, idx_last,
 //                                                                                 capture_image_last_->descriptors_.row(idx_last),
 //                                                                                 pixel_cov_);
-//            _features_last_out.push_back(feat_last_);
+//            _features_out.push_back(feat_last_);
 //
 //        }
 //    }
 //
-//    return _features_last_out.size();
+//    return _features_out.size();
 
 	for (unsigned int n_iterations = 0; _max_new_features == -1 || n_iterations < _max_new_features; ++n_iterations)
 	{
@@ -325,13 +332,13 @@ unsigned int ProcessorBundleAdjustment::detectNewFeatures(const int& _max_new_fe
 //					if (isInlier( kp_incoming, kp_last))
 //					{
 						// Create WOLF feature
-						FeaturePointImagePtr ftr_point_last = std::make_shared<FeaturePointImage>(
-								kp_last,
-								index_last,
-								capture_image_last_->descriptors_.row(index_last),
-								pixel_cov_);
+						FeatureBasePtr ftr_point_last = FeatureBase::emplace<FeaturePointImage>(_capture,
+                                                                                                kp_last,
+                                                                                                index_last,
+                                                                                                capture_image_last_->descriptors_.row(index_last),
+                                                                                                pixel_cov_);
 
-						_features_last_out.push_back(ftr_point_last);
+						_features_out.push_back(ftr_point_last);
 
 						// hit cell to acknowledge there's a tracked point in that cell
 						capture_image_last_->grid_features_->hitTrackingCell(kp_last);
@@ -348,7 +355,7 @@ unsigned int ProcessorBundleAdjustment::detectNewFeatures(const int& _max_new_fe
 		else
 			break; // There are no empty cells
 	}
-	return _features_last_out.size();
+	return _features_out.size();
 }
 
 
@@ -391,7 +398,7 @@ bool ProcessorBundleAdjustment::voteForKeyFrame()
 }
 
 
-FactorBasePtr ProcessorBundleAdjustment::createFactor(FeatureBasePtr _feature_ptr, FeatureBasePtr _feature_other_ptr)
+FactorBasePtr ProcessorBundleAdjustment::emplaceFactor(FeatureBasePtr _feature_ptr, FeatureBasePtr _feature_other_ptr)
 {
     /* This function is no creating any factor.
      *  We create factors with establishFactors()
@@ -399,7 +406,7 @@ FactorBasePtr ProcessorBundleAdjustment::createFactor(FeatureBasePtr _feature_pt
     return FactorBasePtr();
 }
 
-LandmarkBasePtr ProcessorBundleAdjustment::createLandmark(FeatureBasePtr _feature_ptr)
+LandmarkBasePtr ProcessorBundleAdjustment::emplaceLandmark(FeatureBasePtr _feature_ptr)
 {
     FeaturePointImagePtr feat_point_image_ptr = std::static_pointer_cast<FeaturePointImage>( _feature_ptr);
     Eigen::Vector2s point2D = _feature_ptr->getMeasurement();
@@ -467,7 +474,7 @@ void ProcessorBundleAdjustment::establishFactors()
         if (lmk_track_map_.count(trkid)==0) //if the track doesn't have landmark associated -> we need a map: map[track_id] = landmarkptr
         {
         	//createLandmark
-        	LandmarkBasePtr lmk = createLandmark(feature_origin);
+        	LandmarkBasePtr lmk = emplaceLandmark(feature_origin);
         	assert(lmk!=nullptr);
         	LandmarkHPPtr lmk_hp = std::static_pointer_cast<LandmarkHP>(lmk);
         	//add Landmark to map: map[track_id] = landmarkptr

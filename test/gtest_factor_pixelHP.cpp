@@ -243,16 +243,11 @@ TEST(ProcessorFactorPixelHP, testZeroResidual)
 	cv::KeyPoint kp = cv::KeyPoint(p, 32.0f);
 	cv::Mat des = cv::Mat::zeros(1,8, CV_8U);
 
-	FeaturePointImagePtr fea0 = std::make_shared<FeaturePointImage>(kp, 0, des, Eigen::Matrix2s::Identity()* pow(1, 2));
-	fea0->setCapture(cap0);
-	cap0->addFeature(fea0);
-	fea0->link(cap0);
+	FeatureBasePtr fea0 = FeatureBase::emplace<FeaturePointImage>(cap0, kp, 0, des, Eigen::Matrix2s::Identity()* pow(1, 2));
 
 	// Landmark
-	LandmarkBasePtr lmk = proc_bundle_adj->createLandmark(fea0);
+	LandmarkBasePtr lmk = proc_bundle_adj->emplaceLandmark(fea0);
 	LandmarkHPPtr lmk_hp = std::static_pointer_cast<LandmarkHP>(lmk);
-	problem_ptr->addLandmark(lmk_hp);
-	lmk->link(problem_ptr->getMap());
 
 	// Factor
 	auto fac0 = FactorBase::emplace<FactorPixelHP>(fea0, fea0, lmk_hp, proc);

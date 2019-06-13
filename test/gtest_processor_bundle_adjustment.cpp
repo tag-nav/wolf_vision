@@ -174,7 +174,7 @@ TEST(ProcessorBundleAdjustment, detectNewFeatures)
     proc_dummy->setLast(image_last_ptr);
 
     // demo detectNewFeatures
-    unsigned int num = proc_dummy->detectNewFeatures(params->max_new_features, feat_list);
+    unsigned int num = proc_dummy->detectNewFeatures(params->max_new_features, image_last_ptr, feat_list);
     ASSERT_EQ(num, 0);
 
     // Put an image on incoming_ptr_
@@ -182,7 +182,7 @@ TEST(ProcessorBundleAdjustment, detectNewFeatures)
     proc_dummy->setInc(image_inc_ptr);
 
     // demo detectNewFeatures
-    unsigned int num2 = proc_dummy->detectNewFeatures(params->max_new_features, feat_list);
+    unsigned int num2 = proc_dummy->detectNewFeatures(params->max_new_features, image_last_ptr, feat_list);
     ASSERT_EQ(num2, 0);
 
     // preProcess Incoming to fill last_ptr_ map_index_to_next_
@@ -191,7 +191,7 @@ TEST(ProcessorBundleAdjustment, detectNewFeatures)
     ASSERT_NE(last->map_index_to_next_.size(),0);
 
     // demo detectNewFeatures
-    unsigned int num3 = proc_dummy->detectNewFeatures(params->max_new_features, feat_list);
+    unsigned int num3 = proc_dummy->detectNewFeatures(params->max_new_features, image_last_ptr, feat_list);
     ASSERT_LE(num3, params->max_new_features);
 }
 
@@ -218,11 +218,11 @@ TEST(ProcessorBundleAdjustment, trackFeatures)
     proc_dummy->setInc(image_inc_ptr);
     proc_dummy->preProcess();
     CaptureImagePtr last = std::static_pointer_cast<CaptureImage>(proc_dummy->getLast());
-    proc_dummy->detectNewFeatures(params->max_new_features, feat_list);
+    proc_dummy->detectNewFeatures(params->max_new_features, last, feat_list);
     //demo trackFeatures
     FeatureBasePtrList feat_list_out = std::list<FeatureBasePtr>();
     FeatureMatchMap feat_correspondance = FeatureMatchMap();
-    proc_dummy->trackFeatures(feat_list, feat_list_out, feat_correspondance);
+    proc_dummy->trackFeatures(feat_list, image_inc_ptr, feat_list_out, feat_correspondance);
     ASSERT_EQ(feat_list.size(), feat_list_out.size());
 }
 
@@ -232,7 +232,7 @@ TEST(ProcessorBundleAdjustment, establishFactors)
 	std::cout << "EMPTY Test\n";
 }
 
-TEST(ProcessorBundleAdjustment, createLandmark)
+TEST(ProcessorBundleAdjustment, emplaceLandmark)
 {
 	//Build problem
 	ProblemPtr problem_ptr = Problem::create("PO", 3);
@@ -265,13 +265,11 @@ TEST(ProcessorBundleAdjustment, createLandmark)
 	cv::Mat des = cv::Mat::zeros(1,8, CV_8U);
 
 	FeaturePointImagePtr fea0 = std::make_shared<FeaturePointImage>(kp, 0, des, Eigen::Matrix2s::Identity()* pow(1, 2));
-	fea0->setCapture(cap0);
-	cap0->addFeature(fea0);
 	fea0->link(cap0);
 
 	ASSERT_TRUE(problem_ptr->check(0));
 
-	LandmarkBasePtr lmk = proc_bundle_adj->createLandmark(fea0);
+	LandmarkBasePtr lmk = proc_bundle_adj->emplaceLandmark(fea0);
 	LandmarkHPPtr lmk_hp = std::static_pointer_cast<LandmarkHP>(lmk);
 
 	ASSERT_EQ(problem_ptr->getMap()->getLandmarkList().size(), 1);
