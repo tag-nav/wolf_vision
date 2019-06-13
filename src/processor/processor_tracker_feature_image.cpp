@@ -76,14 +76,16 @@ void ProcessorTrackerFeatureImage::postProcess()
 {
 }
 
-unsigned int ProcessorTrackerFeatureImage::trackFeatures(const FeatureBasePtrList& _features_last_in, FeatureBasePtrList& _features_incoming_out,
-                                           FeatureMatchMap& _feature_matches)
+unsigned int ProcessorTrackerFeatureImage::trackFeatures(const FeatureBasePtrList& _features_in,
+                                                         const CaptureBasePtr& _capture,
+                                                         FeatureBasePtrList& _features_out,
+                                                         FeatureMatchMap& _feature_matches)
 {
     KeyPointVector candidate_keypoints;
     cv::Mat candidate_descriptors;
     DMatchVector cv_matches;
 
-    for (auto feature_base_ptr : _features_last_in)
+    for (auto feature_base_ptr : _features_in)
     {
         FeaturePointImagePtr feature_ptr = std::static_pointer_cast<FeaturePointImage>(feature_base_ptr);
 
@@ -102,13 +104,14 @@ unsigned int ProcessorTrackerFeatureImage::trackFeatures(const FeatureBasePtrLis
             Scalar normalized_score = match(target_descriptor,candidate_descriptors,cv_matches);
             if ( normalized_score > mat_ptr_->getParams()->min_norm_score )
             {
-                FeaturePointImagePtr incoming_point_ptr = std::make_shared<FeaturePointImage>(
-                        candidate_keypoints[cv_matches[0].trainIdx],
-                        cv_matches[0].trainIdx,
-                        (candidate_descriptors.row(cv_matches[0].trainIdx)),
-                        Eigen::Matrix2s::Identity()*params_tracker_feature_image_->pixel_noise_var);
-                incoming_point_ptr->setIsKnown(feature_ptr->isKnown());
-                _features_incoming_out.push_back(incoming_point_ptr);
+                auto incoming_point_ptr = FeatureBase::emplace<FeaturePointImage>(_capture,
+                                                                                  candidate_keypoints[cv_matches[0].trainIdx],
+                                                                                  cv_matches[0].trainIdx,
+                                                                                  (candidate_descriptors.row(cv_matches[0].trainIdx)),
+                                                                                  Eigen::Matrix2s::Identity()*params_tracker_feature_image_->pixel_noise_var);
+
+                std::static_pointer_cast<FeaturePointImage>(incoming_point_ptr)->setIsKnown(feature_ptr->isKnown());
+                _features_out.push_back(incoming_point_ptr);
 
                 _feature_matches[incoming_point_ptr] = std::make_shared<FeatureMatch>(FeatureMatch({feature_base_ptr, normalized_score}));
             }
@@ -126,8 +129,8 @@ unsigned int ProcessorTrackerFeatureImage::trackFeatures(const FeatureBasePtrLis
             tracker_roi_.pop_back();
         }
     }
-//    std::cout << "TrackFeatures - Number of Features tracked: " << _features_incoming_out.size() << std::endl;
-    return _features_incoming_out.size();
+//    std::cout << "TrackFeatures - Number of Features tracked: " << _features_out.size() << std::endl;
+    return _features_out.size();
 }
 
 bool ProcessorTrackerFeatureImage::correctFeatureDrift(const FeatureBasePtr _origin_feature, const FeatureBasePtr _last_feature, FeatureBasePtr _incoming_feature)
@@ -185,7 +188,9 @@ bool ProcessorTrackerFeatureImage::correctFeatureDrift(const FeatureBasePtr _ori
     }
 }
 
-unsigned int ProcessorTrackerFeatureImage::detectNewFeatures(const int& _max_new_features, FeatureBasePtrList& _features_last_out)
+unsigned int ProcessorTrackerFeatureImage::detectNewFeatures(const int& _max_new_features,
+                                                             const CaptureBasePtr& _capture,
+                                                             FeatureBasePtrList& _features_out)
 {
     cv::Rect roi;
     KeyPointVector new_keypoints;
@@ -212,13 +217,15 @@ unsigned int ProcessorTrackerFeatureImage::detectNewFeatures(const int& _max_new
                 if(new_keypoints[0].response > params_tracker_feature_image_activesearch_ptr_->min_response_new_feature)
                 {
                     std::cout << "response: " << new_keypoints[0].response << std::endl;
-                    FeaturePointImagePtr point_ptr = std::make_shared<FeaturePointImage>(
-                            new_keypoints[0],
-                            0,
-                            new_descriptors.row(index),
-                            Eigen::Matrix2s::Identity()*params_tracker_feature_image_->pixel_noise_var);
-                    point_ptr->setIsKnown(false);
-                    _features_last_out.push_back(point_ptr);
+                    auto point_ptr = FeatureBase::emplace<FeaturePointImage>(_capture,
+                                                                             new_keypoints[0],
+                                                                             0,
+                                                                             new_descriptors.row(index),
+                                                                             Eigen::Matrix2s::Identity()*params_tracker_feature_image_->pixel_noise_var);
+
+                    std::static_pointer_cast<FeaturePointImage>(point_ptr)->setIsKnown(false);
+
+                    _features_out.push_back(point_ptr);
 
                     active_search_ptr_->hitCell(new_keypoints[0]);
 
@@ -247,14 +254,10 @@ Scalar ProcessorTrackerFeatureImage::match(cv::Mat _target_descriptor, cv::Mat _
     return normalized_score;
 }
 
-FactorBasePtr ProcessorTrackerFeatureImage::createFactor(FeatureBasePtr _feature_ptr,
+FactorBasePtr ProcessorTrackerFeatureImage::emplaceFactor(FeatureBasePtr _feature_ptr,
                                                           FeatureBasePtr _feature_other_ptr)
 {
-    FactorFeatureDummyPtr const_dummy_ptr = std::make_shared<FactorFeatureDummy>(_feature_ptr, _feature_other_ptr,
-                                                                                    shared_from_this());
-    //    _feature_ptr->addFactor(const_epipolar_ptr);
-    //    _feature_other_ptr->addConstrainedBy(const_epipolar_ptr);
-    return const_dummy_ptr;
+    return FactorBase::emplace<FactorFeatureDummy>(_feature_ptr, _feature_ptr, _feature_other_ptr, shared_from_this());
 }
 
 unsigned int ProcessorTrackerFeatureImage::detect(cv::Mat _image, cv::Rect& _roi, std::vector<cv::KeyPoint>& _new_keypoints,

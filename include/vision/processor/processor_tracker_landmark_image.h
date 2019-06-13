@@ -109,14 +109,18 @@ class ProcessorTrackerLandmarkImage : public ProcessorTrackerLandmark
          */
         void postProcess();
 
-        //Pure virtual
-        /** \brief Find provided landmarks in the incoming capture
-         * \param _landmarks_in input list of landmarks to be found in incoming
-         * \param _features_incoming_out returned list of incoming features corresponding to a landmark of _landmarks_in
+        /** \brief Find provided landmarks as features in the provided capture
+         * \param _landmarks_in input list of landmarks to be found
+         * \param _capture the capture in which the _landmarks_in should be searched
+         * \param _features_out returned list of features  found in \b _capture corresponding to a landmark of _landmarks_in
          * \param _feature_landmark_correspondences returned map of landmark correspondences: _feature_landmark_correspondences[_feature_out_ptr] = landmark_in_ptr
+         *
+         * \return the number of landmarks found
          */
-        virtual unsigned int findLandmarks(const LandmarkBasePtrList& _landmarks_in, FeatureBasePtrList& _features_incoming_out,
-                                           LandmarkMatchMap& _feature_landmark_correspondences);
+        virtual unsigned int findLandmarks(const LandmarkBasePtrList& _landmarks_in,
+                                           const CaptureBasePtr& _capture,
+                                           FeatureBasePtrList& _features_out,
+                                           LandmarkMatchMap& _feature_landmark_correspondences) override;
 
         /** \brief Vote for KeyFrame generation
          *
@@ -129,30 +133,36 @@ class ProcessorTrackerLandmarkImage : public ProcessorTrackerLandmark
 
         /** \brief Detect new Features
          * \param _max_features maximum number of features detected (-1: unlimited. 0: none)
-         * \param _features_last_out The list of detected Features.
+         * \param _capture The capture in which the new features should be detected.
+         * \param _features_out The list of detected Features in _capture.
          * \return The number of detected Features.
          *
          * This function detects Features that do not correspond to known Features/Landmarks in the system.
          *
+         * IMPORTANT: The features in _features_out should be emplaced. Don't use `make_shared`, use `FeatureBase::emplace` instead.
+         * Then, they will be already linked to the _capture.
+         * If you detect all the features at once in `preprocess()`, you should either emplace them (`FeatureBase::emplace()`) and remove the not returned features in _features_out (`FeatureBase::remove()`),
+         * or create them (`make_shared()`) and link all the returned features in _features_out (`FeatureBase::link(_capture)`).
+         *
          * The function is called in ProcessorTrackerLandmark::processNew() to set the member new_features_last_,
          * the list of newly detected features of the capture last_ptr_.
          */
-        virtual unsigned int detectNewFeatures(const int& _max_new_features, FeatureBasePtrList& _features_last_out);
+        virtual unsigned int detectNewFeatures(const int& _max_new_features,
+                                               const CaptureBasePtr& _capture,
+                                               FeatureBasePtrList& _features_out) override;
 
-        /** \brief Create one landmark
-         *
-         * Implement in derived classes to build the type of landmark you need for this tracker.
+        /** \brief Emplaces one landmark
          */
-        virtual LandmarkBasePtr createLandmark(FeatureBasePtr _feature_ptr);
+        virtual LandmarkBasePtr emplaceLandmark(FeatureBasePtr _feature_ptr) override;
 
     public:
         static ProcessorBasePtr create(const std::string& _unique_name, const ProcessorParamsBasePtr _params, const SensorBasePtr sensor_ptr = nullptr);
 
-        /** \brief Create a new factor
+        /** \brief Emplaces a new factor
          * \param _feature_ptr pointer to the Feature to constrain
          * \param _landmark_ptr LandmarkBase pointer to the Landmark constrained.
          */
-        virtual FactorBasePtr createFactor(FeatureBasePtr _feature_ptr, LandmarkBasePtr _landmark_ptr);
+        virtual FactorBasePtr emplaceFactor(FeatureBasePtr _feature_ptr, LandmarkBasePtr _landmark_ptr) override;
 
         //Other functions
     private:
