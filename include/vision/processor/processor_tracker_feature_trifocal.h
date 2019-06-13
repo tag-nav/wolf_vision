@@ -73,12 +73,18 @@ class ProcessorTrackerFeatureTrifocal : public ProcessorTrackerFeature
         virtual ~ProcessorTrackerFeatureTrifocal();
         virtual void configure(SensorBasePtr _sensor) override;
 
-        /** \brief Track provided features from \b last to \b incoming
-         * \param _features_last_in input list of features in \b last to track
-         * \param _features_incoming_out returned list of features found in \b incoming
-         * \param _feature_matches returned map of correspondences: _feature_matches[feature_out_ptr] = feature_in_ptr
+        /** \brief Track provided features in \b _capture
+         * \param _features_in input list of features in \b last to track
+         * \param _capture the capture in which the _features_in should be searched
+         * \param _features_out returned list of features found in \b _capture
+         * \param _feature_correspondences returned map of correspondences: _feature_correspondences[feature_out_ptr] = feature_in_ptr
+         *
+         * \return the number of features tracked
          */
-        virtual unsigned int trackFeatures(const FeatureBasePtrList& _features_last_in, FeatureBasePtrList& _features_incoming_out, FeatureMatchMap& _feature_matches) override;
+        virtual unsigned int trackFeatures(const FeatureBasePtrList& _features_in,
+                                           const CaptureBasePtr& _capture,
+                                           FeatureBasePtrList& _features_out,
+                                           FeatureMatchMap& _feature_correspondences) override;
 
         /** \brief Correct the drift in incoming feature by re-comparing against the corresponding feature in origin.
          * \param _origin_feature input feature in origin capture tracked
@@ -98,7 +104,8 @@ class ProcessorTrackerFeatureTrifocal : public ProcessorTrackerFeature
 
         /** \brief Detect new Features
          * \param _max_features maximum number of features detected (-1: unlimited. 0: none)
-         * \param _features_last_out The list of detected Features.
+         * \param _capture The capture in which the new features should be detected.
+         * \param _features_out The list of detected Features in _capture.
          * \return The number of detected Features.
          *
          * This function detects Features that do not correspond to known Features/Landmarks in the system.
@@ -106,17 +113,17 @@ class ProcessorTrackerFeatureTrifocal : public ProcessorTrackerFeature
          * The function is called in ProcessorTrackerFeature::processNew() to set the member new_features_last_,
          * the list of newly detected features of the capture last_ptr_.
          */
-        virtual unsigned int detectNewFeatures(const int& _max_new_features, FeatureBasePtrList& _features_last_out) override;
+        virtual unsigned int detectNewFeatures(const int& _max_new_features,
+                                               const CaptureBasePtr& _capture,
+                                               FeatureBasePtrList& _features_out) override;
 
-        /** \brief Create a new factor and link it to the wolf tree
+        /** \brief Emplaces a new factor
          * \param _feature_ptr pointer to the parent Feature
          * \param _feature_other_ptr pointer to the other feature constrained.
          *
-         * Implement this method in derived classes.
-         *
-         * This function creates a factor of the appropriate type for the derived processor.
+         * This function emplaces a factor of the appropriate type for the derived processor.
          */
-        virtual FactorBasePtr createFactor(FeatureBasePtr _feature_ptr, FeatureBasePtr _feature_other_ptr) override;
+        virtual FactorBasePtr emplaceFactor(FeatureBasePtr _feature_ptr, FeatureBasePtr _feature_other_ptr) override;
 
         //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 

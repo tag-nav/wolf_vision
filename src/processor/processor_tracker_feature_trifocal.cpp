@@ -81,7 +81,9 @@ bool ProcessorTrackerFeatureTrifocal::isInlier(const cv::KeyPoint& _kp_last, con
 }
 
 
-unsigned int ProcessorTrackerFeatureTrifocal::detectNewFeatures(const int& _max_new_features, FeatureBasePtrList& _features_last_out)
+unsigned int ProcessorTrackerFeatureTrifocal::detectNewFeatures(const int& _max_new_features,
+                                                                const CaptureBasePtr& _capture,
+                                                                FeatureBasePtrList& _features_out)
 {
 //    // DEBUG =====================================
 //    clock_t debug_tStart;
@@ -116,14 +118,14 @@ unsigned int ProcessorTrackerFeatureTrifocal::detectNewFeatures(const int& _max_
                     // validate match with extra tests
                     if (isInlier( kp_incoming, kp_last))
                     {
-                        // Create WOLF feature
-                        FeaturePointImagePtr ftr_point_last = std::make_shared<FeaturePointImage>(
-                                kp_last,
-                                index_last,
-                                capture_image_last_->descriptors_.row(index_last),
-                                pixel_cov_);
+                        // Emplace WOLF feature
+                        auto ftr_point_last = FeatureBase::emplace<FeaturePointImage>(_capture,
+                                                                                      kp_last,
+                                                                                      index_last,
+                                                                                      capture_image_last_->descriptors_.row(index_last),
+                                                                                      pixel_cov_);
 
-                        _features_last_out.push_back(ftr_point_last);
+                        _features_out.push_back(ftr_point_last);
 
                         // hit cell to acknowledge there's a tracked point in that cell
                         capture_image_last_->grid_features_->hitTrackingCell(kp_last);
@@ -147,10 +149,13 @@ unsigned int ProcessorTrackerFeatureTrifocal::detectNewFeatures(const int& _max_
 //    WOLF_TRACE("--> TIME: detect new features: TOTAL ",debug_comp_time_);
 //    WOLF_TRACE("======== END DETECT NEW FEATURES =========");
 
-    return _features_last_out.size();
+    return _features_out.size();
 }
 
-unsigned int ProcessorTrackerFeatureTrifocal::trackFeatures(const FeatureBasePtrList& _features_last_in, FeatureBasePtrList& _features_incoming_out, FeatureMatchMap& _feature_matches)
+unsigned int ProcessorTrackerFeatureTrifocal::trackFeatures(const FeatureBasePtrList& _features_in,
+                                                            const CaptureBasePtr& _capture,
+                                                            FeatureBasePtrList& _features_out,
+                                                            FeatureMatchMap& _feature_matches)
 {
 //    // DEBUG =====================================
 //    clock_t debug_tStart;
@@ -159,7 +164,7 @@ unsigned int ProcessorTrackerFeatureTrifocal::trackFeatures(const FeatureBasePtr
 //    WOLF_TRACE("======== TrackFeatures =========");
 //    // ===========================================
 
-    for (auto feature_base_last_ : _features_last_in)
+    for (auto feature_base_last_ : _features_in)
     {
         FeaturePointImagePtr feature_last_ = std::static_pointer_cast<FeaturePointImage>(feature_base_last_);
 
@@ -175,13 +180,13 @@ unsigned int ProcessorTrackerFeatureTrifocal::trackFeatures(const FeatureBasePtr
 
                 if (isInlier(kp_last, kp_incoming))
                 {
-                    FeaturePointImagePtr ftr_point_incoming = std::make_shared<FeaturePointImage>(
-                            kp_incoming,
-                            index_incoming,
-                            capture_image_incoming_->descriptors_.row(index_incoming),
-                            pixel_cov_);
+                    auto ftr_point_incoming = FeatureBase::emplace<FeaturePointImage>(_capture,
+                                                                                      kp_incoming,
+                                                                                      index_incoming,
+                                                                                      capture_image_incoming_->descriptors_.row(index_incoming),
+                                                                                      pixel_cov_);
 
-                    _features_incoming_out.push_back(ftr_point_incoming);
+                    _features_out.push_back(ftr_point_incoming);
 
                     _feature_matches[ftr_point_incoming] = std::make_shared<FeatureMatch>(FeatureMatch({feature_last_, capture_image_incoming_->matches_normalized_scores_.at(index_incoming)}));
 
@@ -198,7 +203,7 @@ unsigned int ProcessorTrackerFeatureTrifocal::trackFeatures(const FeatureBasePtr
 //    WOLF_TRACE("--> TIME: track: ",debug_comp_time_);
 //    WOLF_TRACE("======== END TRACK FEATURES =========");
 
-    return _features_incoming_out.size();
+    return _features_out.size();
 }
 
 bool ProcessorTrackerFeatureTrifocal::correctFeatureDrift(const FeatureBasePtr _origin_feature, const FeatureBasePtr _last_feature, FeatureBasePtr _incoming_feature)
@@ -358,19 +363,19 @@ void ProcessorTrackerFeatureTrifocal::postProcess()
     cv::waitKey(1);
 }
 
-FactorBasePtr ProcessorTrackerFeatureTrifocal::createFactor(FeatureBasePtr _feature_ptr, FeatureBasePtr _feature_other_ptr)
+FactorBasePtr ProcessorTrackerFeatureTrifocal::emplaceFactor(FeatureBasePtr _feature_ptr, FeatureBasePtr _feature_other_ptr)
 {
     // NOTE: This function cannot be implemented because the API lacks an input to feature_prev_origin.
     // Therefore, we implement establishFactors() instead and do all the job there.
     // This function remains empty, and with a warning or even an error issued in case someone calls it.
-    std::cout << "033[1;33m [WARN]:033[0m ProcessorTrackerFeatureTrifocal::createFactor is empty." << std::endl;
+    std::cout << "033[1;33m [WARN]:033[0m ProcessorTrackerFeatureTrifocal::emplaceFactor is empty." << std::endl;
     FactorBasePtr return_var{}; //TODO: fill this variable
     return return_var;
 }
 
 void ProcessorTrackerFeatureTrifocal::establishFactors()
 {
-//    WOLF_TRACE("===== ESTABLISH CONSTRAINT =====");
+//    WOLF_TRACE("===== ESTABLISH FACTORS =====");
 
     if (initialized_)
     {
@@ -426,13 +431,13 @@ void ProcessorTrackerFeatureTrifocal::establishFactors()
                 assert(ftr_mid != ftr_first && "First and middle features are the same!");
                 assert(ftr_mid != ftr_last  && "Last and middle features are the same!");
 
-                // make factor
+                // emplace factor
                 auto ctr = FactorBase::emplace<FactorAutodiffTrifocal>(ftr_last, ftr_first, ftr_mid, ftr_last, shared_from_this(), false, FAC_ACTIVE);
             }
         }
     }
 
-//    WOLF_TRACE("===== END ESTABLISH CONSTRAINT =====");
+//    WOLF_TRACE("===== END ESTABLISH FACTORS =====");
 
 }
 
