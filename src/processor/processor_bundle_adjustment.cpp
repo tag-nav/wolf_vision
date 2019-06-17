@@ -63,15 +63,10 @@ void ProcessorBundleAdjustment::preProcess()
     // Compute Descriptors
     capture_image_incoming_->descriptors_ = des_ptr_->getDescriptor(capture_image_incoming_->getImage(), capture_image_incoming_->keypoints_);
 
-    std::cout << "before fill grid " << std::endl;
-
     // Create and fill incoming grid
     capture_image_incoming_->grid_features_ = std::make_shared<vision_utils::FeatureIdxGrid>(capture_image_incoming_->getImage().rows, capture_image_incoming_->getImage().cols, params_bundle_adjustment_->n_cells_v, params_bundle_adjustment_->n_cells_h);
 
     capture_image_incoming_->grid_features_->insert(capture_image_incoming_->keypoints_);
-
-    std::cout << "after fill grid done " << std::endl;
-
 
     if (last_ptr_ != nullptr)
     {
@@ -149,28 +144,28 @@ void ProcessorBundleAdjustment::postProcess()
     // DEBUG
     image_debug_ = vision_utils::buildImageProcessed((std::static_pointer_cast<CaptureImage>(last_ptr_))->getImage(), kp_enh_tracks);
 
-    Snapshot snapshot_last = track_matrix_.snapshot(last_ptr_);
-//	getProblem()->print(4,1,1,0);
-    for (auto pair : track_matrix_.snapshot(origin_ptr_))
-    {
-    	if (snapshot_last.count(pair.first)==0)
-    	{
-    		if (!(pair.second->getFactorList()).empty())
-    		{
-				auto factor = pair.second->getFactorList().front();
-				if (factor)
-				{
-					auto lmk = factor->getLandmarkOther();
-					if (lmk)
-					{
-//						lmk->remove();
-//	    	    		track_matrix_.remove(pair.second->trackId());
-					}
-				}
-    		}
-    	}
-    }
-	getProblem()->print(4,1,1,0);
+//    Snapshot snapshot_last = track_matrix_.snapshot(last_ptr_);
+////	getProblem()->print(4,1,1,0);
+//    for (auto pair : track_matrix_.snapshot(origin_ptr_))
+//    {
+//    	if (snapshot_last.count(pair.first)==0)
+//    	{
+//    		if (!(pair.second->getFactorList()).empty())
+//    		{
+//				auto factor = pair.second->getFactorList().front();
+//				if (factor)
+//				{
+//					auto lmk = factor->getLandmarkOther();
+//					if (lmk)
+//					{
+////						lmk->remove();
+////	    	    		track_matrix_.remove(pair.second->trackId());
+//					}
+//				}
+//    		}
+//    	}
+//    }
+//	//getProblem()->print(1,1,1,0);
 
     list<FeatureBasePtr> snapshot = track_matrix_.snapshotAsList(last_ptr_);
     for (auto const & feat_base : snapshot)
@@ -495,6 +490,7 @@ void ProcessorBundleAdjustment::establishFactors()
         	//Create factor
         	FactorBase::emplace<FactorPixelHP>(feature_last, feature_last, lmk_hp, shared_from_this());
         }
+
     }
 }
 
