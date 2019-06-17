@@ -345,7 +345,7 @@ unsigned int ProcessorBundleAdjustment::detectNewFeatures(const int& _max_new_fe
 
 						found_feature_in_cell = true;
 
-						break; // Good kp found for this grid.
+//						break; // Good kp found for this grid. //Use to have only one keypoint per grid
 //                    }
 				}
 			}
