@@ -463,30 +463,29 @@ void ProcessorBundleAdjustment::establishFactors()
     for (auto const & pair_trkid_pair : matches_origin_inc)
     {
         size_t trkid = pair_trkid_pair.first;
+        //if track size is lower than a minimum, don't establish any factor.
         if (track_matrix_.trackSize(trkid)<params_bundle_adjustment_->min_track_length_for_factor)
         	continue;
+
         FeatureBasePtr feature_origin = pair_trkid_pair.second.first;
         FeatureBasePtr feature_last   = pair_trkid_pair.second.second;
 
-        assert(feature_origin!=feature_last && "feature: origin equal last");
-        assert(feature_origin->getCapture()!=feature_last->getCapture() && "capture: origin equal last");
-
         if (lmk_track_map_.count(trkid)==0) //if the track doesn't have landmark associated -> we need a map: map[track_id] = landmarkptr
         {
-        	//createLandmark
+        	//emplaceLandmark
         	LandmarkBasePtr lmk = emplaceLandmark(feature_origin);
-        	assert(lmk!=nullptr);
         	LandmarkHPPtr lmk_hp = std::static_pointer_cast<LandmarkHP>(lmk);
-        	//add Landmark to map: map[track_id] = landmarkptr
+
+        	//add only one Landmark to map: map[track_id] = landmarkptr
         	lmk_track_map_[trkid] = lmk;
 
-        	//create factors
-//        	assert(feature_origin->getCapture()->getSensor() != nullptr);
-//        	assert(feature_origin->getCapture()->getSensorP() != nullptr);
-//        	assert(feature_origin->getCapture()->getSensorO() != nullptr);
-//        	assert(lmk->getP() != nullptr);
-        	FactorBase::emplace<FactorPixelHP>(feature_origin, feature_origin, lmk_hp, shared_from_this());
-        	FactorBase::emplace<FactorPixelHP>(feature_last, feature_last, lmk_hp, shared_from_this());
+        	//emplace a factor for each feature in the track (only for keyframes)
+        	Track full_track = track_matrix_.trackAtKeyframes(trkid);
+        	for (auto it=full_track.begin(); it!=full_track.end(); ++it)
+        	{
+        		FactorBase::emplace<FactorPixelHP>(it->second, it->second, lmk_hp, shared_from_this());
+        	}
+
         }
         else
         {
