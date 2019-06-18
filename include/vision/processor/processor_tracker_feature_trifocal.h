@@ -38,6 +38,16 @@ struct ProcessorParamsTrackerFeatureTrifocal : public ProcessorParamsTrackerFeat
         pixel_noise_std = _server.getParam<Scalar>(_unique_name + "/pixel_noise_std");
         min_track_length_for_factor = _server.getParam<int>(_unique_name + "/min_track_length_for_factor");
     }
+    std::string print()
+    {
+        return "\n" + ProcessorParamsTrackerFeature::print()
+            + "yaml_file_params_vision_utils: " + yaml_file_params_vision_utils + "\n"
+            + "n_cells_h: " + std::to_string(n_cells_h) + "\n"
+            + "n_cells_v: " + std::to_string(n_cells_v) + "\n"
+            + "min_response_new_feature: " + std::to_string(min_response_new_feature) + "\n"
+            + "pixel_noise_std: " + std::to_string(pixel_noise_std) + "\n"
+            + "min_track_length_for_factor: " + std::to_string(min_track_length_for_factor) + "\n";
+    }
 };
 
 WOLF_PTR_TYPEDEFS(ProcessorTrackerFeatureTrifocal);
