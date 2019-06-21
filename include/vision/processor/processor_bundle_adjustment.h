@@ -14,6 +14,7 @@
 #include "vision/landmark/landmark_HP.h"
 #include "vision/math/pinhole_tools.h"
 #include "vision/sensor/sensor_camera.h"
+#include "core/math/rotations.h"
 
 //vision utils includes
 #include "vision_utils/vision_utils.h"
@@ -57,11 +58,19 @@ class ProcessorBundleAdjustment : public ProcessorTrackerFeature
         CaptureImagePtr capture_image_last_;
         CaptureImagePtr capture_image_incoming_;
 
+        SensorCameraPtr camera;
+
         Matrix2s        pixel_cov_;
+
+        cv::Mat tvec_;
+        cv::Mat rvec_;
 
 
         //TODO: correct to add this?
         std::map<size_t, LandmarkBasePtr> lmk_track_map_; //LandmarkTrackMap;
+
+    private:
+        int frame_count_;
 
 
     public:
@@ -70,7 +79,10 @@ class ProcessorBundleAdjustment : public ProcessorTrackerFeature
         ProcessorBundleAdjustment(ProcessorParamsBundleAdjustmentPtr _params_bundle_adjustment);
         /** \brief Class destructor
         */
-        //virtual ~ProcessorBundleAdjustment();
+        virtual ~ProcessorBundleAdjustment()
+        {
+            //
+        }
 
     public:
 
