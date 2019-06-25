@@ -165,7 +165,6 @@ FactorAutodiffTrifocal::FactorAutodiffTrifocal(const FeatureBasePtr& _feature_1_
         camera_ptr_(std::static_pointer_cast<SensorCamera>(_processor_ptr->getSensor())),
         sqrt_information_upper(Matrix3s::Zero())
 {
-    setFeature(_feature_own_ptr); //< this sets the own feature, the one owning this constraint, which can be seen as feature 3 (newest)
     Matrix3s K_inv           = camera_ptr_->getIntrinsicMatrix().inverse();
     pixel_canonical_1_      = K_inv * Vector3s(_feature_1_ptr->getMeasurement(0), _feature_1_ptr->getMeasurement(1), 1.0);
     pixel_canonical_2_      = K_inv * Vector3s(_feature_2_ptr->getMeasurement(0), _feature_2_ptr->getMeasurement(1), 1.0);
@@ -201,9 +200,9 @@ FactorAutodiffTrifocal::FactorAutodiffTrifocal(const FeatureBasePtr& _feature_1_
     Matrix<Scalar,3,2> J_e_u3 = J_e_m3 * J_m_u;
 
     // Error covariances induced by each of the measurement covariance // canonical units
-    Matrix3s Q1 = J_e_u1 * getFeaturePrev() ->getMeasurementCovariance() * J_e_u1.transpose();
-    Matrix3s Q2 = J_e_u2 * getFeatureOther()->getMeasurementCovariance() * J_e_u2.transpose();
-    Matrix3s Q3 = J_e_u3 * getFeature()     ->getMeasurementCovariance() * J_e_u3.transpose();
+    Matrix3s Q1 = J_e_u1 * _feature_1_ptr   ->getMeasurementCovariance() * J_e_u1.transpose(); // FIXME: changed getFeaturePrev() by _feature_1_ptr
+    Matrix3s Q2 = J_e_u2 * _feature_2_ptr   ->getMeasurementCovariance() * J_e_u2.transpose(); // FIXME: changed getFeatureOther() by _feature_2_ptr
+    Matrix3s Q3 = J_e_u3 * _feature_own_ptr ->getMeasurementCovariance() * J_e_u3.transpose(); // FIXME: changed getFeature() by _feature_own_ptr
 
     // Total error covariance // canonical units
     Matrix3s Q = Q1 + Q2 + Q3;
