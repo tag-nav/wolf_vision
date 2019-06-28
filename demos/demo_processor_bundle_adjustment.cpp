@@ -122,14 +122,14 @@ int main(int argc, char** argv)
     params->delete_ambiguities = true;
     params->yaml_file_params_vision_utils = wolf_vision_root + "/demos/processor_bundle_adjustment_vision_utils.yaml";
     params->pixel_noise_std                = 1.0;
-    params->min_track_length_for_factor = 3;
+    params->min_track_length_for_factor = 1;
     params->voting_active = true;
-    params->max_new_features = 15;
-    params->min_features_for_keyframe = 5;
+    params->max_new_features = 200;
+    params->min_features_for_keyframe = 50;
     params->time_tolerance = 0.01;
-    params->n_cells_h = 13;
-    params-> n_cells_v = 10;
-    params->min_response_new_feature = -1;
+    params->n_cells_h = 20;
+    params-> n_cells_v = 17;
+    params->min_response_new_feature = 10;
     auto proc = problem->installProcessor("TRACKER BUNDLE ADJUSTMENT", "processor", sens_cam, params);
     ProcessorBundleAdjustmentPtr proc_bundle_adj = std::static_pointer_cast<ProcessorBundleAdjustment>(proc);
 
