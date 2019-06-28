@@ -419,7 +419,7 @@ void ProcessorBundleAdjustment::postProcess()
 
     		cv::circle(image_debug_, point, 3, cv::Scalar(0,0,255) , 1 , 8);
     		std::string id = std::to_string(lmk_track_map_[track_id]->id());
-    		cv::putText(image_debug_, id, point, cv::FONT_HERSHEY_DUPLEX, 1.0, CV_RGB(0,255,0),2);
+    		cv::putText(image_debug_, id, point, cv::FONT_HERSHEY_DUPLEX, 0.5, CV_RGB(0,255,0),2);
 		}
 	}
 
