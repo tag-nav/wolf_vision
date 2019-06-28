@@ -321,22 +321,27 @@ void ProcessorBundleAdjustment::postProcess()
 //	}
 
     //delete landmarks
-    getProblem()->check(1);
+    getProblem()->print(4,1,0,0);
+    std::list<LandmarkBasePtr> lmks_to_remove;
     for (auto & lmk : getProblem()->getMap()->getLandmarkList())
     {
         if (lmk->getConstrainedByList().size()==1)
         {
-            if (lmk->getConstrainedByList().front()->getFeature()->getCapture() != last_ptr_)
+            if (lmk->getConstrainedByList().front()->getFeature()->getCapture() != origin_ptr_)
             {
                 WOLF_INFO("Removing landmark: ", lmk->id());
                 lmk_track_map_.erase(lmk->getConstrainedByList().front()->getFeature()->trackId());
                 WOLF_INFO("Lmk deleted from track map: ", lmk->id());
-               lmk->remove();
-               WOLF_INFO("Lmk deleted: ", lmk->id());
+                lmks_to_remove.push_back(lmk);
            }
         }
     }
-    getProblem()->check(1);
+    for (auto & lmk : lmks_to_remove)
+    {
+        lmk->remove();
+        WOLF_INFO("Lmk deleted: ", lmk->id());
+    }
+    getProblem()->check(0);
 
 
     // draw debug image ======================================================================================
