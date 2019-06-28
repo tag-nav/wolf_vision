@@ -304,7 +304,8 @@ TEST(ProcessorBundleAdjustment, process)
 
 	//1ST TIME
 	CaptureImagePtr image_inc_ptr = proc_dummy->createCaptureImage(wolf_vision_root + "/demos/demo_gazebo_x00cm_y00cm.jpg", sens_cam);
-	proc_dummy->process(image_inc_ptr);
+	image_inc_ptr->process();
+//	proc_dummy->process(image_inc_ptr);
 	ASSERT_EQ(proc_dummy->getTrackMatrix().numTracks(), 0);
 	ASSERT_EQ(problem->getMap()->getLandmarkList().size(), 0);
 
@@ -315,7 +316,8 @@ TEST(ProcessorBundleAdjustment, process)
 //	proc_dummy->getProcessKnown();
 //	proc_dummy->getProcessNew(params->max_new_features);
 //	proc_dummy->establishFactors();
-	proc_dummy->process(image_inc_ptr2);
+	image_inc_ptr2->process();
+//	proc_dummy->process(image_inc_ptr2);
 	ASSERT_LE(proc_dummy->getTrackMatrix().numTracks(), params->max_new_features);
 	ASSERT_NE(problem->getMap(), nullptr);
 	ASSERT_EQ(problem->getMap()->getLandmarkList().empty(), true);
@@ -325,12 +327,14 @@ TEST(ProcessorBundleAdjustment, process)
 	CaptureImagePtr image_inc_ptr3 = proc_dummy->createCaptureImage(wolf_vision_root + "/demos/demo_gazebo_x00cm_y00cm.jpg", sens_cam);
 	assert(proc_dummy->getOrigin()!=nullptr);
 	assert(proc_dummy->getLast()!= nullptr && proc_dummy->getLast()!=proc_dummy->getOrigin());
-	proc_dummy->process(image_inc_ptr3);
+	image_inc_ptr3->process();
+//	proc_dummy->process(image_inc_ptr3);
 	ASSERT_LE(proc_dummy->getTrackMatrix().numTracks(), params->max_new_features);
 
 	//4TH TIME -- RUNNING
 	CaptureImagePtr image_inc_ptr4 = proc_dummy->createCaptureImage(wolf_vision_root + "/demos/demo_gazebo_x00cm_y00cm.jpg", sens_cam);
-	proc_dummy->process(image_inc_ptr4);
+	image_inc_ptr4->process();
+//	proc_dummy->process(image_inc_ptr4);
 	ASSERT_LE(image_inc_ptr4->getFeatureList().size(), params->max_new_features);
 
 }
