@@ -30,6 +30,15 @@ struct ProcessorParamsTrackerFeatureImage : public ProcessorParamsTrackerFeature
         pixel_noise_std = _server.getParam<Scalar>(_unique_name + "/pixel_noise_std");
         pixel_noise_var = _server.getParam<Scalar>(_unique_name + "/pixel_noise_var");
     }
+    std::string print()
+    {
+        return "\n" + ProcessorParamsTrackerFeature::print()
+            + "yaml_file_params_vision_utils: " + yaml_file_params_vision_utils + "\n"
+            + "min_response_for_new_features: " + std::to_string(min_response_for_new_features) + "\n"
+            + "distance: " + std::to_string(distance) + "\n"
+            + "pixel_noise_std: " + std::to_string(pixel_noise_std) + "\n"
+            + "pixel_noise_var: " + std::to_string(pixel_noise_var) + "\n";
+    }
 };
 
 WOLF_STRUCT_PTR_TYPEDEFS(ProcessorParamsTrackerLandmarkImage);
@@ -53,6 +62,15 @@ struct ProcessorParamsTrackerLandmarkImage : public ProcessorParamsTrackerLandma
 
         pixel_noise_std = _server.getParam<Scalar>(_unique_name + "/pixel_noise_std");
         pixel_noise_var = _server.getParam<Scalar>(_unique_name + "/pixel_noise_var");
+    }
+    std::string print()
+    {
+        return "\n" + ProcessorParamsTrackerLandmark::print()
+            + "yaml_file_params_vision_utils: " + yaml_file_params_vision_utils + "\n"
+            + "min_response_for_new_features: " + std::to_string(min_response_for_new_features) + "\n"
+            + "distance: " + std::to_string(distance) + "\n"
+            + "pixel_noise_std: " + std::to_string(pixel_noise_std) + "\n"
+            + "pixel_noise_var: " + std::to_string(pixel_noise_var) + "\n";
     }
 };
 }

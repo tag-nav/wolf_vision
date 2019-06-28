@@ -48,8 +48,18 @@ if(UNIX)
 endif(UNIX)
 
 
-#OPTION(BUILD_DOC "Build Documentation" OFF)
-OPTION(BUILD_TESTS "Build Unit tests" ON)
+IF(NOT BUILD_TESTS)
+  OPTION(BUILD_TESTS "Build Unit tests" ON)
+ENDIF(NOT BUILD_TESTS)
+
+IF(NOT BUILD_DEMOS)
+  OPTION(BUILD_DEMOS "Build Demos" OFF)
+ENDIF(NOT BUILD_DEMOS)
+
+IF(NOT BUILD_DOC)
+  OPTION(BUILD_DOC "Build Documentation" OFF)
+ENDIF(NOT BUILD_DOC)
+
 #############
 ## Testing ##
 #############
@@ -77,9 +87,6 @@ IF((CMAKE_BUILD_TYPE MATCHES DEBUG) OR (CMAKE_BUILD_TYPE MATCHES debug) OR (CMAK
 ENDIF()
 
 option(_WOLF_TRACE "Enable wolf tracing macro" ON)
-
-# option(BUILD_EXAMPLES "Build examples" OFF)
-set(BUILD_TESTS true)
 
 # Does this has any other interest
 # but for the examples ?

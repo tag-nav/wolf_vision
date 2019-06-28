@@ -31,6 +31,15 @@ struct IntrinsicsCamera : public IntrinsicsBase
         pinhole_model_rectified = _server.getParam<Eigen::Vector4s>(_unique_name + "/pinhole_model_rectified");
         distortion = _server.getParam<Eigen::VectorXs>(_unique_name + "/distortion");
     }
+    std::string print()
+    {
+        return "\n" + IntrinsicsBase::print()
+            + "width: " + std::to_string(width) + "\n"
+            + "height: " + std::to_string(height) + "\n"
+            + "pinhole: " + converter<std::string>::convert(pinhole_model_raw) + "\n"
+            + "pinhole: " + converter<std::string>::convert(pinhole_model_rectified) + "\n"
+            + "distortion: " + converter<std::string>::convert(distortion) + "\n";
+    }
         virtual ~IntrinsicsCamera() = default;
 };
 

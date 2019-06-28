@@ -131,8 +131,7 @@ TEST(ProcessorTrackerFeatureTrifocal, KeyFrameCallback)
     image *= 0; // TODO see if we want to use a real image
     SensorCameraPtr sens_trk_cam = std::static_pointer_cast<SensorCamera>(sens_trk);
     CaptureImagePtr capt_trk = make_shared<CaptureImage>(t, sens_trk_cam, image);
-    capt_trk->process();
-//    proc_trk->process(capt_trk);
+    sens_trk_cam->process(capt_trk);
 
     problem->print(2,0,1,0);
 
@@ -143,13 +142,11 @@ TEST(ProcessorTrackerFeatureTrifocal, KeyFrameCallback)
         WOLF_INFO("----------------------- ts: ", t , " --------------------------");
 
         capt_odo->setTimeStamp(t);
-        capt_odo->process();
-//        proc_odo->process(capt_odo);
+        sens_odo->process(capt_odo);
 
         // Track
         capt_trk = make_shared<CaptureImage>(t, sens_trk_cam, image);
-        capt_trk->process();
-//        proc_trk->process(capt_trk);
+        sens_trk_cam->process(capt_trk);
 
         problem->print(2,0,1,0);
 

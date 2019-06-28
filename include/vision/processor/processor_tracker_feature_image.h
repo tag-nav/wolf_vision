@@ -9,7 +9,9 @@
 #include <core/state_block/state_block.h>
 #include <core/state_block/state_quaternion.h>
 #include <core/processor/processor_tracker_feature.h>
-#include <core/factor/factor_feature_dummy.h>
+#include <core/dummy/factor_feature_dummy.h>
+#include "vision/processor/processor_params_image.h"
+
 
 // vision_utils
 #include <vision_utils/detectors/detector_base.h>
