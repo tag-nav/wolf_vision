@@ -15,6 +15,7 @@
 #include <yaml-cpp/yaml.h>
 
 #include "vision/processor/processor_params_image.h"
+#include "vision/internal/config.h"
 
 namespace wolf
 {
@@ -38,9 +39,9 @@ static ProcessorParamsBasePtr createProcessorParamsImage(const std::string & _fi
    	    {
    	        if (p->yaml_file_params_vision_utils[0] != '/')
    	        {
-   	            std::string wolf_root = _WOLF_ROOT_DIR;
+   	            std::string wolf_root = _WOLF_VISION_ROOT_DIR;
    	            std::cout << "Wolf root: " << wolf_root << std::endl;
-   	            std::string abs_path = wolf_root + "/src/examples/" + p->yaml_file_params_vision_utils;
+   	            std::string abs_path = wolf_root + "/demos/" + p->yaml_file_params_vision_utils;
    	            p->yaml_file_params_vision_utils = abs_path;
    	        }
    	    }
