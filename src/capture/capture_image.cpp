@@ -10,7 +10,8 @@ CaptureImage::CaptureImage(const TimeStamp& _ts, SensorCameraPtr _camera_ptr, cv
     descriptors_(cv::Mat()),
     matches_from_precedent_(DMatchVector()),
     matches_normalized_scores_(std::vector<Scalar>()),
-    map_index_to_next_(std::map<int, int>())
+    map_index_to_next_(std::map<int, int>()),
+    global_descriptor_(cv::Mat())
 {
     //
 }
@@ -43,6 +44,16 @@ cv::Mat& CaptureImage::getDescriptors()
 std::vector<cv::KeyPoint>& CaptureImage::getKeypoints()
 {
     return frame_.getKeyPoints();
+}
+
+void CaptureImage::setGlobalDescriptor(const cv::Mat& _global_descriptor)
+{
+    global_descriptor_ = _global_descriptor;
+}
+
+cv::Mat& CaptureImage::getGlobalDescriptor()
+{
+    return global_descriptor_;
 }
 
 } // namespace wolf
