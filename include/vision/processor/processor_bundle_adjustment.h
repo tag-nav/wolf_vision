@@ -69,6 +69,11 @@ class ProcessorBundleAdjustment : public ProcessorTrackerFeature
         //TODO: correct to add this?
         std::map<size_t, LandmarkBasePtr> lmk_track_map_; //LandmarkTrackMap;
 
+	public:
+		vision_utils::DetectorBasePtr   get_det_ptr_() {return det_ptr_;};
+        vision_utils::DescriptorBasePtr get_des_ptr_() {return des_ptr_;};
+        vision_utils::MatcherBasePtr    get_mat_ptr_() {return mat_ptr_;};
+
     private:
         int frame_count_;
 
