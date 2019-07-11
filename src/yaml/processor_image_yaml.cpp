@@ -5,6 +5,7 @@
  *      \author: jsola
  */
 
+#include "vision/internal/config.h"
 #include "vision/processor/processor_params_image.h"
 
 // wolf yaml
@@ -16,12 +17,7 @@
 // yaml-cpp library
 #include <yaml-cpp/yaml.h>
 
-////<<<<<<< HEAD
-////=======
-//#include "vision/processor/processor_params_image.h"
-//#include "vision/internal/config.h"
-//
-////>>>>>>> devel
+
 namespace wolf
 {
 namespace
