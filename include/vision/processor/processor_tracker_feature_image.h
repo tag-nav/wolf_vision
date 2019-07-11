@@ -65,29 +65,29 @@ class ProcessorTrackerFeatureImage : public ProcessorTrackerFeature
         ProcessorTrackerFeatureImage(ProcessorParamsTrackerFeatureImagePtr _params_image);
         virtual ~ProcessorTrackerFeatureImage();
 
-        virtual void configure(SensorBasePtr _sensor) ;
+        virtual void configure(SensorBasePtr _sensor) override ;
 
     protected:
 
         /**
          * \brief Does cast of the images and renews the active grid.
          */
-        void preProcess();
+        void preProcess() override;
 
         /**
          * \brief Does the drawing of the features.
          *
          * Used for debugging
          */
-        void postProcess();
+        void postProcess() override;
 
-        void advanceDerived()
+        void advanceDerived() override
         {
             ProcessorTrackerFeature::advanceDerived();
             image_last_ = image_incoming_;
         }
 
-        void resetDerived()
+        void resetDerived() override
         {
             ProcessorTrackerFeature::resetDerived();
             image_last_ = image_incoming_;
@@ -104,15 +104,16 @@ class ProcessorTrackerFeatureImage : public ProcessorTrackerFeature
         virtual unsigned int trackFeatures(const FeatureBasePtrList& _features_in,
                                            const CaptureBasePtr& _capture,
                                            FeatureBasePtrList& _features_out,
-                                           FeatureMatchMap& _feature_correspondences);
+                                           FeatureMatchMap& _feature_correspondences) override;
 
         /** \brief Correct the drift in incoming feature by re-comparing against the corresponding feature in origin.
          * \param _last_feature input feature in last capture tracked
          * \param _incoming_feature input/output feature in incoming capture to be corrected
          * \return false if the the process discards the correspondence with origin's feature
          */
-        virtual bool correctFeatureDrift(const FeatureBasePtr _origin_feature, const FeatureBasePtr _last_feature,
-                                         FeatureBasePtr _incoming_feature);
+        virtual bool correctFeatureDrift(const FeatureBasePtr _origin_feature,
+                                         const FeatureBasePtr _last_feature,
+                                         FeatureBasePtr _incoming_feature) override;
 
         /** \brief Vote for KeyFrame generation
          *
@@ -121,7 +122,7 @@ class ProcessorTrackerFeatureImage : public ProcessorTrackerFeature
          *
          * WARNING! This function only votes! It does not create KeyFrames!
          */
-        virtual bool voteForKeyFrame();
+        virtual bool voteForKeyFrame() override;
 
         /** \brief Detect new Features
          * \param _max_features maximum number of features detected (-1: unlimited. 0: none)
@@ -151,7 +152,7 @@ class ProcessorTrackerFeatureImage : public ProcessorTrackerFeature
          *
          * This function emplaces a factor of the appropriate type for the derived processor.
          */
-        virtual FactorBasePtr emplaceFactor(FeatureBasePtr _feature_ptr, FeatureBasePtr _feature_other_ptr);
+        virtual FactorBasePtr emplaceFactor(FeatureBasePtr _feature_ptr, FeatureBasePtr _feature_other_ptr) override;
 
     private:
 
