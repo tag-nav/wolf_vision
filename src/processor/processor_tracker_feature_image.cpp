@@ -268,7 +268,7 @@ unsigned int ProcessorTrackerFeatureImage::detect(cv::Mat _image, cv::Rect& _roi
     return _new_keypoints.size();
 }
 
-void ProcessorTrackerFeatureImage::resetVisualizationFlag(FeatureBasePtrList& _feature_list_last)
+void ProcessorTrackerFeatureImage::resetVisualizationFlag(const FeatureBasePtrList& _feature_list_last)
 {
     for (auto feature_base_last_ptr : _feature_list_last)
     {
