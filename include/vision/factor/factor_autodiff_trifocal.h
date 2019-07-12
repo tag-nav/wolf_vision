@@ -6,8 +6,8 @@
 #include "core/factor/factor_autodiff.h"
 #include "vision/sensor/sensor_camera.h"
 
-#include <common_class/trifocaltensor.h>
-#include <vision_utils.h>
+#include <vision_utils/common_class/trifocaltensor.h>
+#include <vision_utils/vision_utils.h>
 
 namespace wolf
 {
@@ -270,7 +270,7 @@ inline void FactorAutodiffTrifocal::expectation(const MatrixBase<D1>&     _wtr1,
 {
 
         typedef Translation<T, 3> TranslationType;
-        typedef Eigen::Transform<T, 3, Eigen::Affine> TransformType;
+        typedef Eigen::Transform<T, 3, Eigen::Isometry> TransformType;
 
         // All input Transforms
         TransformType wHr1 = TranslationType(_wtr1) * _wqr1;

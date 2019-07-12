@@ -311,7 +311,7 @@ void ProcessorTrackerLandmarkImage::landmarkInCurrentCamera(const Eigen::VectorX
     assert((_current_state.size() == 7 || _current_state.size() == 16) && "Wrong state size! Should be 7 for 3D pose or 16 for IMU.");
 
     // ALL TRANSFORMS
-    Transform<Scalar,3,Eigen::Affine> T_W_R0, T_W_R1, T_R0_C0, T_R1_C1;
+    Transform<Scalar,3,Eigen::Isometry> T_W_R0, T_W_R1, T_R0_C0, T_R1_C1;
 
     // world to anchor robot frame
     Translation<Scalar,3>  t_w_r0(_landmark->getAnchorFrame()->getP()->getState()); // sadly we cannot put a Map over a translation
@@ -335,7 +335,7 @@ void ProcessorTrackerLandmarkImage::landmarkInCurrentCamera(const Eigen::VectorX
 
     // Transform lmk from c0 to c1 and exit
     Vector4s landmark_hmg_c0 = _landmark->getP()->getState(); // lmk in anchor frame
-    _point3D_hmg = T_R1_C1.inverse(Eigen::Affine) * T_W_R1.inverse(Eigen::Affine) * T_W_R0 * T_R0_C0 * landmark_hmg_c0;
+    _point3D_hmg = T_R1_C1.inverse(Eigen::Isometry) * T_W_R1.inverse(Eigen::Isometry) * T_W_R0 * T_R0_C0 * landmark_hmg_c0;
 }
 
 Scalar ProcessorTrackerLandmarkImage::match(const cv::Mat _target_descriptor, const cv::Mat _candidate_descriptors, DMatchVector& _cv_matches)

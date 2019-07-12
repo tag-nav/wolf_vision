@@ -1,4 +1,4 @@
-#include "vision/landmark/landmark_AHP.h"
+#include "vision/landmark/landmark_HP.h"
 
 #include "core/state_block/state_homogeneous_3D.h"
 #include "core/common/factory.h"
@@ -6,63 +6,61 @@
 
 namespace wolf {
 
-/* Landmark - Anchored Homogeneous Point*/
-LandmarkAHP::LandmarkAHP(Eigen::Vector4s _position_homogeneous,
-                         FrameBasePtr _anchor_frame,
-                         SensorBasePtr _anchor_sensor,
+/* Landmark - Homogeneous Point*/
+LandmarkHP::LandmarkHP(Eigen::Vector4s _position_homogeneous,
+						 SensorBasePtr _sensor,
                          cv::Mat _2D_descriptor) :
-    LandmarkBase("AHP", std::make_shared<StateHomogeneous3D>(_position_homogeneous)),
-    cv_descriptor_(_2D_descriptor.clone()),
-    anchor_frame_(_anchor_frame),
-    anchor_sensor_(_anchor_sensor)
+    LandmarkBase("HP", std::make_shared<StateHomogeneous3D>(_position_homogeneous)),
+	sensor_(_sensor),
+    cv_descriptor_(_2D_descriptor.clone())
 {
 }
 
-LandmarkAHP::~LandmarkAHP()
+LandmarkHP::~LandmarkHP()
 {
     //
 }
 
-YAML::Node LandmarkAHP::saveToYaml() const
+YAML::Node LandmarkHP::saveToYaml() const
 {
     // First base things
     YAML::Node node = LandmarkBase::saveToYaml();
 
     // Then add specific things
     std::vector<int> v;
-    LandmarkAHP::cv_descriptor_.copyTo(v);
+    LandmarkHP::cv_descriptor_.copyTo(v);
     node["descriptor"] = v;
     return node;
 }
 
-Eigen::Vector3s LandmarkAHP::getPointInAnchorSensor() const
-{
-    Eigen::Map<const Eigen::Vector4s> hmg_point(getP()->getState().data());
-    return hmg_point.head<3>()/hmg_point(3);
-}
-
-Eigen::Vector3s LandmarkAHP::point() const
+Eigen::Vector3s LandmarkHP::point() const
 {
     using namespace Eigen;
+
+    /* TODO: done when creating the landmark
     Transform<Scalar,3,Isometry> T_w_r
         = Translation<Scalar,3>(getAnchorFrame()->getP()->getState())
         * Quaternions(getAnchorFrame()->getO()->getState().data());
     Transform<Scalar,3,Isometry> T_r_c
         = Translation<Scalar,3>(getAnchorSensor()->getP()->getState())
         * Quaternions(getAnchorSensor()->getO()->getState().data());
-    Vector4s point_hmg_c = getP()->getState();
-    Vector4s point_hmg = T_w_r * T_r_c * point_hmg_c;
+    */
+    //Vector4s point_hmg_c = getP()->getState();
+    //Vector4s point_hmg = T_w_r * T_r_c * point_hmg_c;
+
+    Vector4s point_hmg = getP()->getState();
+
     return point_hmg.head<3>()/point_hmg(3);
 }
 
-LandmarkBasePtr LandmarkAHP::create(const YAML::Node& _node)
+LandmarkBasePtr LandmarkHP::create(const YAML::Node& _node)
 {
     unsigned int        id          = _node["id"]           .as< unsigned int     >();
     Eigen::VectorXs     pos_homog   = _node["position"]     .as< Eigen::VectorXs  >();
     std::vector<int>    v           = _node["descriptor"]   .as< std::vector<int> >();
     cv::Mat desc(v);
 
-    LandmarkBasePtr lmk = std::make_shared<LandmarkAHP>(pos_homog, nullptr, nullptr, desc);
+    LandmarkBasePtr lmk = std::make_shared<LandmarkHP>(pos_homog, nullptr, desc);
     lmk->setId(id);
     return lmk;
 }
@@ -70,7 +68,7 @@ LandmarkBasePtr LandmarkAHP::create(const YAML::Node& _node)
 // Register landmark creator
 namespace
 {
-const bool WOLF_UNUSED registered_lmk_ahp = LandmarkFactory::get().registerCreator("AHP", LandmarkAHP::create);
+const bool WOLF_UNUSED registered_lmk_ahp = LandmarkFactory::get().registerCreator("HP", LandmarkHP::create);
 }
 
 } // namespace wolf

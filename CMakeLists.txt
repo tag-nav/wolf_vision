@@ -146,12 +146,14 @@ include/vision/capture/capture_image.h
 SET(HDRS_FACTOR
 include/vision/factor/factor_autodiff_trifocal.h
 include/vision/factor/factor_AHP.h
+include/vision/factor/factor_pixelHP.h
   )
 SET(HDRS_FEATURE
 include/vision/feature/feature_point_image.h
   )
 SET(HDRS_LANDMARK
   include/vision/landmark/landmark_AHP.h
+  include/vision/landmark/landmark_HP.h
   include/vision/landmark/landmark_point_3D.h
   )
 SET(HDRS_PROCESSOR
@@ -159,6 +161,7 @@ include/vision/processor/processor_tracker_feature_trifocal.h
 include/vision/processor/processor_params_image.h
 include/vision/processor/processor_tracker_landmark_image.h
 include/vision/processor/processor_tracker_feature_image.h
+include/vision/processor/processor_bundle_adjustment.h
   )
 SET(HDRS_SENSOR
 include/vision/sensor/sensor_camera.h
@@ -185,12 +188,14 @@ src/feature/feature_point_image.cpp
   )
 SET(SRCS_LANDMARK
 src/landmark/landmark_AHP.cpp
+src/landmark/landmark_HP.cpp
 src/landmark/landmark_point_3D.cpp
   )
 SET(SRCS_PROCESSOR
 src/processor/processor_tracker_feature_trifocal.cpp
 src/processor/processor_tracker_feature_image.cpp
 src/processor/processor_tracker_landmark_image.cpp
+src/processor/processor_bundle_adjustment.cpp
   )
 SET(SRCS_SENSOR
 src/sensor/sensor_camera.cpp
@@ -203,6 +208,7 @@ SET(SRCS_YAML
 src/yaml/processor_tracker_feature_trifocal_yaml.cpp
 src/yaml/sensor_camera_yaml.cpp
 src/yaml/processor_image_yaml.cpp
+src/yaml/processor_bundle_adjustment_yaml.cpp
   )
 #OPTIONALS
 #optional HDRS and SRCS
@@ -253,7 +259,7 @@ TARGET_LINK_LIBRARIES(${PLUGIN_NAME} ${vision_utils_LIBRARY})
 #     TARGET_LINK_LIBRARIES(${PLUGIN_NAME} ${CERES_LIBRARIES})
 # ENDIF(Ceres_FOUND)
 
-
+add_subdirectory(demos)
 #Build tests
 #===============EXAMPLE=========================
 IF(BUILD_TESTS)

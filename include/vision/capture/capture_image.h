@@ -2,13 +2,13 @@
 #define CAPTURE_IMAGE_H
 
 //Wolf includes
-#include "core/capture/capture_base.h"
+#include <core/capture/capture_base.h>
 #include "vision/feature/feature_point_image.h"
 #include "vision/sensor/sensor_camera.h"
 
 // Vision Utils includes
-#include "vision_utils/vision_utils.h"
-#include "vision_utils/common_class/frame.h"
+#include <vision_utils/vision_utils.h>
+#include <vision_utils/common_class/frame.h>
 
 namespace wolf {
 
@@ -33,6 +33,7 @@ class CaptureImage : public CaptureBase
         DMatchVector                    matches_from_precedent_;
         std::vector<Scalar>             matches_normalized_scores_;
         std::map<int, int>              map_index_to_next_;
+        cv::Mat                         global_descriptor_;
 
     public:
         CaptureImage(const TimeStamp& _ts, SensorCameraPtr _camera_ptr, cv::Mat _data_cv);
@@ -43,6 +44,8 @@ class CaptureImage : public CaptureBase
         void setKeypoints(const std::vector<cv::KeyPoint>& _keypoints);
         cv::Mat& getDescriptors();
         std::vector<cv::KeyPoint>& getKeypoints();
+        void setGlobalDescriptor(const cv::Mat &_global_descriptor);
+        cv::Mat& getGlobalDescriptor();
 };
 
 } // namespace wolf

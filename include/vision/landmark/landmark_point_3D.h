@@ -23,16 +23,10 @@ class LandmarkPoint3D : public LandmarkBase
         virtual ~LandmarkPoint3D();
 
         const Eigen::Vector3s& getPosition() const;
-        void setPosition(const Eigen::Vector3s & _pos)
-        {
-            position_ = _pos;
-        }
+        void setPosition(const Eigen::Vector3s& _pos);
 
         const cv::Mat& getDescriptor() const;
-        void setDescriptor(const cv::Mat& _descriptor)
-        {
-            descriptor_ = _descriptor;
-        }
+        void setDescriptor(const cv::Mat& _descriptor);
 };
 
 inline const Eigen::Vector3s& LandmarkPoint3D::getPosition() const
@@ -40,9 +34,19 @@ inline const Eigen::Vector3s& LandmarkPoint3D::getPosition() const
     return position_;
 }
 
+inline void LandmarkPoint3D::setPosition(const Eigen::Vector3s& _pos)
+{
+    position_ = _pos;
+}
+
 inline const cv::Mat& LandmarkPoint3D::getDescriptor() const
 {
     return descriptor_;
+}
+
+inline void LandmarkPoint3D::setDescriptor(const cv::Mat& _descriptor)
+{
+    descriptor_ = _descriptor;
 }
 
 } // namespace wolf
