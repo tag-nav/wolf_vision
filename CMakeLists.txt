@@ -147,6 +147,7 @@ SET(HDRS_FACTOR
 include/vision/factor/factor_autodiff_trifocal.h
 include/vision/factor/factor_AHP.h
 include/vision/factor/factor_pixelHP.h
+include/vision/factor/factor_feature_epipolar.h
   )
 SET(HDRS_FEATURE
 include/vision/feature/feature_point_image.h
