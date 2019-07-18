@@ -22,7 +22,7 @@ struct IntrinsicsCamera : public IntrinsicsBase
     {
         //DEFINED FOR COMPATIBILITY PURPOSES. TO BE REMOVED IN THE FUTURE.
     }
-    IntrinsicsCamera(std::string _unique_name, const paramsServer& _server):
+    IntrinsicsCamera(std::string _unique_name, const ParamsServer& _server):
         IntrinsicsBase(_unique_name,  _server)
     {
         width = _server.getParam<unsigned int>(_unique_name + "/width");

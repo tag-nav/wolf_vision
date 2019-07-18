@@ -21,7 +21,7 @@ struct ProcessorParamsTrackerFeatureImage : public ProcessorParamsTrackerFeature
         Scalar pixel_noise_std; ///< std noise of the pixel
         Scalar pixel_noise_var; ///< var noise of the pixel
     ProcessorParamsTrackerFeatureImage() = default;
-    ProcessorParamsTrackerFeatureImage(std::string _unique_name, const paramsServer& _server):
+    ProcessorParamsTrackerFeatureImage(std::string _unique_name, const ParamsServer& _server):
         ProcessorParamsTrackerFeature(_unique_name, _server)
     {
         yaml_file_params_vision_utils = _server.getParam<std::string>(_unique_name + "/yaml_file_params_vision_utils");
@@ -52,7 +52,7 @@ struct ProcessorParamsTrackerLandmarkImage : public ProcessorParamsTrackerLandma
 
         Scalar pixel_noise_std; ///< std noise of the pixel
         Scalar pixel_noise_var; ///< var noise of the pixel
-    ProcessorParamsTrackerLandmarkImage(std::string _unique_name, const paramsServer& _server):
+    ProcessorParamsTrackerLandmarkImage(std::string _unique_name, const ParamsServer& _server):
         ProcessorParamsTrackerLandmark(_unique_name, _server)
     {
         yaml_file_params_vision_utils = _server.getParam<std::string>(_unique_name + "/yaml_file_params_vision_utils");
