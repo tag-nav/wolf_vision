@@ -81,22 +81,22 @@ class ProcessorTrackerLandmarkImage : public ProcessorTrackerLandmark
         ProcessorTrackerLandmarkImage(ProcessorParamsTrackerLandmarkImagePtr _params_tracker_landmark_image);
         virtual ~ProcessorTrackerLandmarkImage();
 
-        virtual void configure(SensorBasePtr _sensor) ;
+        virtual void configure(SensorBasePtr _sensor) override;
 
     protected:
 
         /**
          * \brief Does cast of the images and renews the active grid.
          */
-        void preProcess();
+        void preProcess() override;
 
-        void advanceDerived()
+        void advanceDerived() override
         {
             ProcessorTrackerLandmark::advanceDerived();
             image_last_ = image_incoming_;
         }
 
-        void resetDerived()
+        void resetDerived() override
         {
             ProcessorTrackerLandmark::resetDerived();
             image_last_ = image_incoming_;
@@ -107,7 +107,7 @@ class ProcessorTrackerLandmarkImage : public ProcessorTrackerLandmark
          *
          * Used for debugging
          */
-        void postProcess();
+        void postProcess() override;
 
         /** \brief Find provided landmarks as features in the provided capture
          * \param _landmarks_in input list of landmarks to be found
@@ -129,7 +129,7 @@ class ProcessorTrackerLandmarkImage : public ProcessorTrackerLandmark
          *
          * WARNING! This function only votes! It does not create KeyFrames!
          */
-        virtual bool voteForKeyFrame();
+        virtual bool voteForKeyFrame() override;
 
         /** \brief Detect new Features
          * \param _max_features maximum number of features detected (-1: unlimited. 0: none)
