@@ -321,7 +321,6 @@ void ProcessorBundleAdjustment::postProcess()
 //	}
 
     //delete landmarks
-    getProblem()->print(4,1,0,0);
     std::list<LandmarkBasePtr> lmks_to_remove;
     for (auto & lmk : getProblem()->getMap()->getLandmarkList())
     {
