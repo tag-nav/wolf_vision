@@ -1,5 +1,4 @@
-processor type: "TRACKER BUNDLE ADJUSTMENT"
-processor name: "tracker bundle adjustment example"
+type: "TRACKER BUNDLE ADJUSTMENT"
 
 vision_utils:
     YAML file params: processor_bundle_adjustment_vision_utils.yaml
