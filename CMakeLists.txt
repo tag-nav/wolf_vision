@@ -260,11 +260,15 @@ TARGET_LINK_LIBRARIES(${PLUGIN_NAME} ${vision_utils_LIBRARY})
 #     TARGET_LINK_LIBRARIES(${PLUGIN_NAME} ${CERES_LIBRARIES})
 # ENDIF(Ceres_FOUND)
 
-add_subdirectory(demos)
+IF(BUILD_DEMOS)
+  MESSAGE(STATUS "Building demos.")
+  add_subdirectory(demos)
+ENDIF(BUILD_DEMOS)
+
 #Build tests
 #===============EXAMPLE=========================
 IF(BUILD_TESTS)
-  MESSAGE("Building tests.")
+  MESSAGE(STATUS "Building tests.")
   add_subdirectory(test)
 ENDIF(BUILD_TESTS)
 
