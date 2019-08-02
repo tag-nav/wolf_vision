@@ -192,8 +192,7 @@ class ProcessorBundleAdjustment : public ProcessorTrackerFeature
     public:
         /// @brief Factory method
         static ProcessorBasePtr create(const std::string& _unique_name,
-                                       const ProcessorParamsBasePtr _params,
-                                       const SensorBasePtr _sensor_ptr);
+                                       const ProcessorParamsBasePtr _params);
 
     private:
 

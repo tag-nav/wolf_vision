@@ -326,7 +326,7 @@ void ProcessorTrackerFeatureImage::drawFeatures(cv::Mat _image)
     }
 }
 
-ProcessorBasePtr ProcessorTrackerFeatureImage::create(const std::string& _unique_name, const ProcessorParamsBasePtr _params, const SensorBasePtr _sensor_ptr)
+ProcessorBasePtr ProcessorTrackerFeatureImage::create(const std::string& _unique_name, const ProcessorParamsBasePtr _params)
 {
     ProcessorTrackerFeatureImagePtr prc_ptr = std::make_shared<ProcessorTrackerFeatureImage>(std::static_pointer_cast<ProcessorParamsTrackerFeatureImage>(_params));
     prc_ptr->setName(_unique_name);

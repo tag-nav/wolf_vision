@@ -185,8 +185,7 @@ class ProcessorTrackerFeatureImage : public ProcessorTrackerFeature
         virtual void resetVisualizationFlag(const FeatureBasePtrList& _feature_list_last);
 
     public:
-        static ProcessorBasePtr create(const std::string& _unique_name, const ProcessorParamsBasePtr _params,
-                                       const SensorBasePtr sensor_ptr = nullptr);
+        static ProcessorBasePtr create(const std::string& _unique_name, const ProcessorParamsBasePtr _params);
 
 };
 

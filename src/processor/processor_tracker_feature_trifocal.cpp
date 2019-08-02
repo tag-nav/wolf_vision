@@ -452,14 +452,12 @@ void ProcessorTrackerFeatureTrifocal::configure(SensorBasePtr _sensor)
 }
 
 ProcessorBasePtr ProcessorTrackerFeatureTrifocal::create(const std::string& _unique_name,
-                                                         const ProcessorParamsBasePtr _params,
-                                                         const SensorBasePtr _sensor_ptr)
+                                                         const ProcessorParamsBasePtr _params)
 {
   const auto params = std::static_pointer_cast<ProcessorParamsTrackerFeatureTrifocal>(_params);
 
   ProcessorBasePtr prc_ptr = std::make_shared<ProcessorTrackerFeatureTrifocal>(params);
   prc_ptr->setName(_unique_name);
-  prc_ptr->configure(_sensor_ptr);
   return prc_ptr;
 }
 

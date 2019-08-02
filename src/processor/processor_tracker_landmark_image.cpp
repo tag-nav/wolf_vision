@@ -440,7 +440,7 @@ void ProcessorTrackerLandmarkImage::drawLandmarks(cv::Mat _image)
 
 //namespace wolf{
 
-ProcessorBasePtr ProcessorTrackerLandmarkImage::create(const std::string& _unique_name, const ProcessorParamsBasePtr _params, const SensorBasePtr _sen_ptr)
+ProcessorBasePtr ProcessorTrackerLandmarkImage::create(const std::string& _unique_name, const ProcessorParamsBasePtr _params)
 {
     ProcessorTrackerLandmarkImagePtr prc_ptr = std::make_shared<ProcessorTrackerLandmarkImage>(std::static_pointer_cast<ProcessorParamsTrackerLandmarkImage>(_params));
     prc_ptr->setName(_unique_name);

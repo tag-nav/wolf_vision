@@ -156,7 +156,7 @@ class ProcessorTrackerLandmarkImage : public ProcessorTrackerLandmark
         virtual LandmarkBasePtr emplaceLandmark(FeatureBasePtr _feature_ptr) override;
 
     public:
-        static ProcessorBasePtr create(const std::string& _unique_name, const ProcessorParamsBasePtr _params, const SensorBasePtr sensor_ptr = nullptr);
+        static ProcessorBasePtr create(const std::string& _unique_name, const ProcessorParamsBasePtr _params);
 
         /** \brief Emplaces a new factor
          * \param _feature_ptr pointer to the Feature to constrain
