@@ -31,22 +31,22 @@ struct ProcessorParamsTrackerFeatureTrifocal : public ProcessorParamsTrackerFeat
     ProcessorParamsTrackerFeatureTrifocal(std::string _unique_name, const ParamsServer& _server):
         ProcessorParamsTrackerFeature(_unique_name, _server)
     {
-        yaml_file_params_vision_utils = _server.getParam<std::string>(_unique_name + "/yaml_file_params_vision_utils");
-        n_cells_h = _server.getParam<int>(_unique_name + "/n_cells_h");
-        n_cells_v = _server.getParam<int>(_unique_name + "/n_cells_v");
-        min_response_new_feature = _server.getParam<int>(_unique_name + "/min_response_new_feature");
-        pixel_noise_std = _server.getParam<Scalar>(_unique_name + "/pixel_noise_std");
-        min_track_length_for_factor = _server.getParam<int>(_unique_name + "/min_track_length_for_factor");
+        yaml_file_params_vision_utils   = _server.getParam<std::string>(_unique_name    + "/yaml_file_params_vision_utils");
+        n_cells_h                       = _server.getParam<int>(_unique_name            + "/n_cells_h");
+        n_cells_v                       = _server.getParam<int>(_unique_name            + "/n_cells_v");
+        min_response_new_feature        = _server.getParam<int>(_unique_name            + "/min_response_new_feature");
+        pixel_noise_std                 = _server.getParam<Scalar>(_unique_name         + "/pixel_noise_std");
+        min_track_length_for_factor     = _server.getParam<int>(_unique_name            + "/min_track_length_for_factor");
     }
     std::string print()
     {
-        return "\n" + ProcessorParamsTrackerFeature::print()
-            + "yaml_file_params_vision_utils: " + yaml_file_params_vision_utils + "\n"
-            + "n_cells_h: " + std::to_string(n_cells_h) + "\n"
-            + "n_cells_v: " + std::to_string(n_cells_v) + "\n"
-            + "min_response_new_feature: " + std::to_string(min_response_new_feature) + "\n"
-            + "pixel_noise_std: " + std::to_string(pixel_noise_std) + "\n"
-            + "min_track_length_for_factor: " + std::to_string(min_track_length_for_factor) + "\n";
+        return "\n" + ProcessorParamsTrackerFeature::print()                                    + "\n"
+            + "yaml_file_params_vision_utils: " + yaml_file_params_vision_utils                 + "\n"
+            + "n_cells_h: "                     + std::to_string(n_cells_h)                     + "\n"
+            + "n_cells_v: "                     + std::to_string(n_cells_v)                     + "\n"
+            + "min_response_new_feature: "      + std::to_string(min_response_new_feature)      + "\n"
+            + "pixel_noise_std: "               + std::to_string(pixel_noise_std)               + "\n"
+            + "min_track_length_for_factor: "   + std::to_string(min_track_length_for_factor)   + "\n";
     }
 };
 

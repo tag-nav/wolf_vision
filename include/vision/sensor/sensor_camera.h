@@ -25,20 +25,20 @@ struct IntrinsicsCamera : public IntrinsicsBase
     IntrinsicsCamera(std::string _unique_name, const ParamsServer& _server):
         IntrinsicsBase(_unique_name,  _server)
     {
-        width = _server.getParam<unsigned int>(_unique_name + "/width");
-        height = _server.getParam<unsigned int>(_unique_name + "/height");
-        pinhole_model_raw = _server.getParam<Eigen::Vector4s>(_unique_name + "/pinhole_model_raw");
-        pinhole_model_rectified = _server.getParam<Eigen::Vector4s>(_unique_name + "/pinhole_model_rectified");
-        distortion = _server.getParam<Eigen::VectorXs>(_unique_name + "/distortion");
+        width                   = _server.getParam<unsigned int>(_unique_name       + "/width");
+        height                  = _server.getParam<unsigned int>(_unique_name       + "/height");
+        pinhole_model_raw       = _server.getParam<Eigen::Vector4s>(_unique_name    + "/pinhole_model_raw");
+        pinhole_model_rectified = _server.getParam<Eigen::Vector4s>(_unique_name    + "/pinhole_model_rectified");
+        distortion              = _server.getParam<Eigen::VectorXs>(_unique_name    + "/distortion");
     }
     std::string print()
     {
-        return "\n" + IntrinsicsBase::print()
-            + "width: " + std::to_string(width) + "\n"
-            + "height: " + std::to_string(height) + "\n"
-            + "pinhole: " + converter<std::string>::convert(pinhole_model_raw) + "\n"
-            + "pinhole: " + converter<std::string>::convert(pinhole_model_rectified) + "\n"
-            + "distortion: " + converter<std::string>::convert(distortion) + "\n";
+        return "\n" + IntrinsicsBase::print()                                               + "\n"
+            + "width: "         + std::to_string(width)                                     + "\n"
+            + "height: "        + std::to_string(height)                                    + "\n"
+            + "pinhole: "       + converter<std::string>::convert(pinhole_model_raw)        + "\n"
+            + "pinhole: "       + converter<std::string>::convert(pinhole_model_rectified)  + "\n"
+            + "distortion: "    + converter<std::string>::convert(distortion)               + "\n";
     }
         virtual ~IntrinsicsCamera() = default;
 };
