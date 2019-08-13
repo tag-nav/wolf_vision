@@ -18,7 +18,6 @@ WOLF_PTR_TYPEDEFS(LandmarkHP);
 class LandmarkHP : public LandmarkBase
 {
     protected:
-    	SensorBasePtr sensor_;
         cv::Mat cv_descriptor_;
 
 
@@ -30,9 +29,6 @@ class LandmarkHP : public LandmarkBase
         const cv::Mat& getCvDescriptor() const;
         void setCvDescriptor(const cv::Mat& _descriptor);
 
-        void setSensor (SensorBasePtr _anchor_sensor);
-        const SensorBasePtr getSensor() const;
-
         Eigen::Vector3s point() const;
 
         YAML::Node saveToYaml() const;
@@ -43,17 +39,6 @@ class LandmarkHP : public LandmarkBase
          */
         static LandmarkBasePtr create(const YAML::Node& _node);
 };
-
-inline void LandmarkHP::setSensor(SensorBasePtr _sensor)
-{
-   sensor_ = _sensor;
-}
-
-
-inline const SensorBasePtr LandmarkHP::getSensor() const
-{
-    return sensor_;
-}
 
 
 inline const cv::Mat& LandmarkHP::getCvDescriptor() const

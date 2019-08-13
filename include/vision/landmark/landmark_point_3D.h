@@ -18,25 +18,19 @@ class LandmarkPoint3D : public LandmarkBase
         cv::Mat descriptor_;
         Eigen::Vector3s position_;
     public:
-        LandmarkPoint3D(StateBlockPtr _p_ptr, StateBlockPtr _o_ptr, Eigen::Vector3s _position, cv::Mat _2D_descriptor);
+        LandmarkPoint3D(Eigen::Vector3s _position, cv::Mat _2D_descriptor);
 
         virtual ~LandmarkPoint3D();
 
-        const Eigen::Vector3s& getPosition() const;
-        void setPosition(const Eigen::Vector3s& _pos);
+        const Eigen::Vector3s point() const;
 
         const cv::Mat& getDescriptor() const;
         void setDescriptor(const cv::Mat& _descriptor);
 };
 
-inline const Eigen::Vector3s& LandmarkPoint3D::getPosition() const
+inline const Eigen::Vector3s LandmarkPoint3D::point() const
 {
-    return position_;
-}
-
-inline void LandmarkPoint3D::setPosition(const Eigen::Vector3s& _pos)
-{
-    position_ = _pos;
+    return getP()->getState();
 }
 
 inline const cv::Mat& LandmarkPoint3D::getDescriptor() const
