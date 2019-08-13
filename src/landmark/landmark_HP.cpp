@@ -11,7 +11,6 @@ LandmarkHP::LandmarkHP(Eigen::Vector4s _position_homogeneous,
 						 SensorBasePtr _sensor,
                          cv::Mat _2D_descriptor) :
     LandmarkBase("HP", std::make_shared<StateHomogeneous3D>(_position_homogeneous)),
-	sensor_(_sensor),
     cv_descriptor_(_2D_descriptor.clone())
 {
 }
@@ -37,17 +36,6 @@ Eigen::Vector3s LandmarkHP::point() const
 {
     using namespace Eigen;
 
-    /* TODO: done when creating the landmark
-    Transform<Scalar,3,Isometry> T_w_r
-        = Translation<Scalar,3>(getAnchorFrame()->getP()->getState())
-        * Quaternions(getAnchorFrame()->getO()->getState().data());
-    Transform<Scalar,3,Isometry> T_r_c
-        = Translation<Scalar,3>(getAnchorSensor()->getP()->getState())
-        * Quaternions(getAnchorSensor()->getO()->getState().data());
-    */
-    //Vector4s point_hmg_c = getP()->getState();
-    //Vector4s point_hmg = T_w_r * T_r_c * point_hmg_c;
-
     Vector4s point_hmg = getP()->getState();
 
     return point_hmg.head<3>()/point_hmg(3);
@@ -68,7 +56,7 @@ LandmarkBasePtr LandmarkHP::create(const YAML::Node& _node)
 // Register landmark creator
 namespace
 {
-const bool WOLF_UNUSED registered_lmk_ahp = LandmarkFactory::get().registerCreator("HP", LandmarkHP::create);
+const bool WOLF_UNUSED registered_lmk_hp = LandmarkFactory::get().registerCreator("HP", LandmarkHP::create);
 }
 
 } // namespace wolf
