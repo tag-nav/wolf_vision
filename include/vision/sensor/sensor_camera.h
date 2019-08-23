@@ -31,7 +31,7 @@ struct IntrinsicsCamera : public IntrinsicsBase
         pinhole_model_rectified = _server.getParam<Eigen::Vector4s>(_unique_name    + "/pinhole_model_rectified");
         distortion              = _server.getParam<Eigen::VectorXs>(_unique_name    + "/distortion");
     }
-    std::string print()
+    std::string print() const
     {
         return "\n" + IntrinsicsBase::print()                                               + "\n"
             + "width: "         + std::to_string(width)                                     + "\n"

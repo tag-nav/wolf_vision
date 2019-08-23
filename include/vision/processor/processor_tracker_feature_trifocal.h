@@ -38,7 +38,7 @@ struct ProcessorParamsTrackerFeatureTrifocal : public ProcessorParamsTrackerFeat
         pixel_noise_std                 = _server.getParam<Scalar>(_unique_name         + "/pixel_noise_std");
         min_track_length_for_factor     = _server.getParam<int>(_unique_name            + "/min_track_length_for_factor");
     }
-    std::string print()
+    std::string print() const
     {
         return "\n" + ProcessorParamsTrackerFeature::print()                                    + "\n"
             + "yaml_file_params_vision_utils: " + yaml_file_params_vision_utils                 + "\n"

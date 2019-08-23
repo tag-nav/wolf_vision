@@ -30,7 +30,7 @@ struct ProcessorParamsTrackerFeatureImage : public ProcessorParamsTrackerFeature
         pixel_noise_std                 = _server.getParam<Scalar>(_unique_name         + "/pixel_noise_std");
         pixel_noise_var                 = _server.getParam<Scalar>(_unique_name         + "/pixel_noise_var");
     }
-    std::string print()
+    std::string print() const
     {
         return "\n" + ProcessorParamsTrackerFeature::print()                                    + "\n"
             + "yaml_file_params_vision_utils: " + yaml_file_params_vision_utils                 + "\n"
@@ -64,7 +64,7 @@ struct ProcessorParamsTrackerLandmarkImage : public ProcessorParamsTrackerLandma
             pixel_noise_std                 = _server.getParam<Scalar>(_unique_name         + "/pixel_noise_std");
             pixel_noise_var                 = _server.getParam<Scalar>(_unique_name         + "/pixel_noise_var");
         }
-        std::string print()
+        std::string print() const
         {
             return "\n" + ProcessorParamsTrackerLandmark::print()                                       + "\n"
                     + "yaml_file_params_vision_utils: " + yaml_file_params_vision_utils                 + "\n"
