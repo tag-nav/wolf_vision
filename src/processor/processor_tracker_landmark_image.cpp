@@ -163,7 +163,7 @@ unsigned int ProcessorTrackerLandmarkImage::findLandmarks(const LandmarkBasePtrL
     return _features_out.size();
 }
 
-bool ProcessorTrackerLandmarkImage::voteForKeyFrame()
+bool ProcessorTrackerLandmarkImage::voteForKeyFrame() const
 {
     return false;
 //    return landmarks_tracked_ < params_tracker_landmark_image_->min_features_for_keyframe;
