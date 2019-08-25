@@ -49,55 +49,60 @@ TEST(FactorEpipolar, exemple)
     auto f1 = FeatureBase   ::emplace<FeaturePointImage>(C1, pix1, 0, cv::Mat(), Matrix2s::Identity());
     auto c  = FactorBase    ::emplace<FactorEpipolar>(f0, f0, f1, nullptr, false);
 
-    Scalar residual;
+    Scalar residual_0, residual_1, residual_2, residual_n1;
 
+    // same line
     c->operator()(F0->getP()->getState().data(),
                   F0->getO()->getState().data(),
                   F1->getP()->getState().data(),
                   F1->getO()->getState().data(),
                   camera->getP()->getState().data(),
                   camera->getO()->getState().data(),
-                  &residual);
+                  &residual_0);
 
-    WOLF_TRACE("residual @  0 pix: ", residual);
+    WOLF_TRACE("residual @  0 pix: ", residual_0);
 
-    ASSERT_NEAR(residual, 0.0, 1e-6);
+    ASSERT_NEAR(residual_0, 0.0, 1e-6);
 
+    // lines 1 pix difference
     f1->setMeasurement(Vector2s(300, 241));
-
     c->operator()(F0->getP()->getState().data(),
                   F0->getO()->getState().data(),
                   F1->getP()->getState().data(),
                   F1->getO()->getState().data(),
                   camera->getP()->getState().data(),
                   camera->getO()->getState().data(),
-                  &residual);
+                  &residual_1);
 
-    WOLF_TRACE("residual @  1 pix : ", residual);
+    WOLF_TRACE("residual @  1 pix : ", residual_1);
 
+    // lines 2 pixels difference
     f1->setMeasurement(Vector2s(300, 242));
-
     c->operator()(F0->getP()->getState().data(),
                   F0->getO()->getState().data(),
                   F1->getP()->getState().data(),
                   F1->getO()->getState().data(),
                   camera->getP()->getState().data(),
                   camera->getO()->getState().data(),
-                  &residual);
+                  &residual_2);
 
-    WOLF_TRACE("residual @  2 pix : ", residual);
+    WOLF_TRACE("residual @  2 pix : ", residual_2);
 
+    ASSERT_NEAR(residual_2, 2.0 * residual_1, 1e-6);
+
+    // lines 1 pix difference in the other direction
     f1->setMeasurement(Vector2s(300, 239));
-
     c->operator()(F0->getP()->getState().data(),
                   F0->getO()->getState().data(),
                   F1->getP()->getState().data(),
                   F1->getO()->getState().data(),
                   camera->getP()->getState().data(),
                   camera->getO()->getState().data(),
-                  &residual);
+                  &residual_n1);
 
-    WOLF_TRACE("residual @ -1 pix : ", residual);
+    WOLF_TRACE("residual @ -1 pix : ", residual_n1);
+
+    ASSERT_NEAR(residual_1, -residual_n1, 1e-6);
 
 }
 
