@@ -24,6 +24,10 @@ target_link_libraries(gtest_sensor_camera ${PLUGIN_NAME} ${wolf_LIBRARY} ${OpenC
 wolf_add_gtest(gtest_factor_autodiff_trifocal gtest_factor_autodiff_trifocal.cpp)
 target_link_libraries(gtest_factor_autodiff_trifocal ${PLUGIN_NAME} ${wolf_LIBRARY} ${OpenCV_LIBS} ${vision_utils_LIBRARY})
 
+# FactorFeatureEpipolar test
+wolf_add_gtest(gtest_factor_epipolar gtest_factor_epipolar.cpp)
+target_link_libraries(gtest_factor_epipolar ${PLUGIN_NAME} ${wolf_LIBRARY} ${OpenCV_LIBS} ${vision_utils_LIBRARY})
+
 # ProcessorFeatureTrifocal test
 wolf_add_gtest(gtest_processor_tracker_feature_trifocal gtest_processor_tracker_feature_trifocal.cpp)
 target_link_libraries(gtest_processor_tracker_feature_trifocal ${PLUGIN_NAME} ${wolf_LIBRARY} ${OpenCV_LIBS} ${vision_utils_LIBRARY})
