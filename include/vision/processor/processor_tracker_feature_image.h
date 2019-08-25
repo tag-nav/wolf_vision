@@ -1,17 +1,17 @@
 #ifndef PROCESSOR_TRACKER_FEATURE_IMAGE_H
 #define PROCESSOR_TRACKER_FEATURE_IMAGE_H
 
-// Wolf includes
 #include "vision/sensor/sensor_camera.h"
 #include "vision/capture/capture_image.h"
 #include "vision/feature/feature_point_image.h"
 #include "vision/processor/processor_params_image.h"
-#include "vision/factor/factor_feature_epipolar.h"
+#include "vision/processor/processor_params_image.h"
+#include "vision/factor/factor_epipolar.h"
+
+// Wolf includes
 #include <core/state_block/state_block.h>
 #include <core/state_block/state_quaternion.h>
 #include <core/processor/processor_tracker_feature.h>
-#include "vision/processor/processor_params_image.h"
-
 
 // vision_utils
 #include <vision_utils/detectors/detector_base.h>

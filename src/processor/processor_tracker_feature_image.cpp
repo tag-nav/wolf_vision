@@ -257,7 +257,7 @@ Scalar ProcessorTrackerFeatureImage::match(cv::Mat _target_descriptor, cv::Mat _
 FactorBasePtr ProcessorTrackerFeatureImage::emplaceFactor(FeatureBasePtr _feature_ptr,
                                                           FeatureBasePtr _feature_other_ptr)
 {
-    return FactorBase::emplace<FactorFeatureEpipolar>(_feature_ptr, _feature_ptr, _feature_other_ptr, shared_from_this());
+    return FactorBase::emplace<FactorEpipolar>(_feature_ptr, _feature_ptr, _feature_other_ptr, shared_from_this());
 }
 
 unsigned int ProcessorTrackerFeatureImage::detect(cv::Mat _image, cv::Rect& _roi, std::vector<cv::KeyPoint>& _new_keypoints,

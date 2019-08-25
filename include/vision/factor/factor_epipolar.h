@@ -1,23 +1,25 @@
-#ifndef FACTOR_FEATURE_EPIPOLAR_H
-#define FACTOR_FEATURE_EPIPOLAR_H
+#ifndef FACTOR_EPIPOLAR_H
+#define FACTOR_EPIPOLAR_H
+
+#include "vision/sensor/sensor_camera.h"
 
 #include <core/factor/factor_autodiff.h>
 #include <core/math/rotations.h>
 
 namespace wolf {
 
-WOLF_PTR_TYPEDEFS(FactorFeatureEpipolar);
+WOLF_PTR_TYPEDEFS(FactorEpipolar);
 
-class FactorFeatureEpipolar : public FactorAutodiff<FactorFeatureEpipolar, 1, 3, 4, 3, 4, 3, 4>
+class FactorEpipolar : public FactorAutodiff<FactorEpipolar, 1, 3, 4, 3, 4, 3, 4>
 {
     public:
-        FactorFeatureEpipolar(const FeatureBasePtr& _feature_ptr,
+        FactorEpipolar(const FeatureBasePtr& _feature_ptr,
                            const FeatureBasePtr& _feature_other_ptr,
                            const ProcessorBasePtr& _processor_ptr = nullptr,
                            bool _apply_loss_function = false,
                            FactorStatus _status = FAC_ACTIVE);
 
-        virtual ~FactorFeatureEpipolar() = default;
+        virtual ~FactorEpipolar() = default;
 
         template<typename T>
         bool operator ()(const T* const _frame_own_p,
@@ -39,11 +41,11 @@ class FactorFeatureEpipolar : public FactorAutodiff<FactorFeatureEpipolar, 1, 3,
 
 };
 
-inline FactorFeatureEpipolar::FactorFeatureEpipolar(const FeatureBasePtr& _feature_ptr,
+inline FactorEpipolar::FactorEpipolar(const FeatureBasePtr& _feature_ptr,
                                                     const FeatureBasePtr& _feature_other_ptr,
                                                     const ProcessorBasePtr& _processor_ptr,
                                                     bool _apply_loss_function, FactorStatus _status) :
-        FactorAutodiff<FactorFeatureEpipolar, 1, 3, 4, 3, 4, 3, 4>("FEATURE EPIPOLAR",
+        FactorAutodiff<FactorEpipolar, 1, 3, 4, 3, 4, 3, 4>("FEATURE EPIPOLAR",
                                                                    nullptr,
                                                                    nullptr,
                                                                    _feature_other_ptr,
@@ -66,7 +68,7 @@ inline FactorFeatureEpipolar::FactorFeatureEpipolar(const FeatureBasePtr& _featu
 }
 
 template<typename T>
-inline bool FactorFeatureEpipolar::operator ()(const T* const _frame_own_p,
+inline bool FactorEpipolar::operator ()(const T* const _frame_own_p,
                                                const T* const _frame_own_o,
                                                const T* const _frame_other_p,
                                                const T* const _frame_other_o,
@@ -160,12 +162,12 @@ inline bool FactorFeatureEpipolar::operator ()(const T* const _frame_own_p,
     return true;
 }
 
-inline FactorBasePtr FactorFeatureEpipolar::create(const FeatureBasePtr& _feature_ptr, const NodeBasePtr& _correspondant_ptr,
+inline FactorBasePtr FactorEpipolar::create(const FeatureBasePtr& _feature_ptr, const NodeBasePtr& _correspondant_ptr,
                                                           const ProcessorBasePtr& _processor_ptr)
 {
-    return std::make_shared<FactorFeatureEpipolar>(_feature_ptr, std::static_pointer_cast<FeatureBase>(_correspondant_ptr), _processor_ptr);
+    return std::make_shared<FactorEpipolar>(_feature_ptr, std::static_pointer_cast<FeatureBase>(_correspondant_ptr), _processor_ptr);
 }
 
 } // namespace wolf
 
-#endif // FACTOR_FEATURE_EPIPOLAR_H
+#endif // FACTOR_EPIPOLAR_H

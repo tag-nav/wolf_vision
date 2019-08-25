@@ -5,21 +5,21 @@
  *      \author: jsola
  */
 
-#include <core/utils/utils_gtest.h>
-#include <core/problem/problem.h>
+
+#include "vision/factor/factor_epipolar.h"
+#include "vision/capture/capture_image.h"
+#include "vision/feature/feature_point_image.h"
 
 #include "vision/internal/config.h"
 
-#include "vision/capture/capture_image.h"
-#include "vision/feature/feature_point_image.h"
-#include "vision/factor/factor_feature_epipolar.h"
-
 #include <core/frame/frame_base.h>
+#include <core/utils/utils_gtest.h>
+#include <core/problem/problem.h>
 
 using namespace wolf;
 using namespace Eigen;
 
-TEST(FactorFeatureEpipolar, exemple)
+TEST(FactorEpipolar, exemple)
 {
     Vector7s pose0, pose1, posecam;
     pose0   << 0,0,0, 0,0,0,1;
@@ -47,7 +47,7 @@ TEST(FactorFeatureEpipolar, exemple)
     auto C1 = CaptureBase   ::emplace<CaptureImage>(F1, F1->getTimeStamp(), camera, cv::Mat());
     auto f0 = FeatureBase   ::emplace<FeaturePointImage>(C0, pix0, 0, cv::Mat(), Matrix2s::Identity());
     auto f1 = FeatureBase   ::emplace<FeaturePointImage>(C1, pix1, 0, cv::Mat(), Matrix2s::Identity());
-    auto c  = FactorBase    ::emplace<FactorFeatureEpipolar>(f0, f0, f1, nullptr, false);
+    auto c  = FactorBase    ::emplace<FactorEpipolar>(f0, f0, f1, nullptr, false);
 
     Scalar residual;
 
@@ -60,6 +60,8 @@ TEST(FactorFeatureEpipolar, exemple)
                   &residual);
 
     WOLF_TRACE("residual @  0 pix: ", residual);
+
+    ASSERT_NEAR(residual, 0.0, 1e-6);
 
     f1->setMeasurement(Vector2s(300, 241));
 
