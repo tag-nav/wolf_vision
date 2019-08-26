@@ -77,6 +77,7 @@ inline bool FactorEpipolar::operator ()(const T* const _frame_own_p,
                                                      T*       _residuals) const
 {
     using namespace Eigen;
+
     // Map input and output
     Map<const Matrix<T, 3, 1> > p_own(_frame_own_p);
     Map<const Quaternion<T> > q_own(_frame_own_o);
@@ -85,11 +86,13 @@ inline bool FactorEpipolar::operator ()(const T* const _frame_own_p,
     Map<const Matrix<T, 3, 1> > p_sen(_sensor_p);
     Map<const Quaternion<T> > q_sen(_sensor_o);
     Map<Matrix<T, 1, 1> > residual(_residuals);
+
     // Compose frames get to camera frames in absolute reference
     Matrix<T, 3, 1> cam_own_p = p_own + q_own * p_sen;
     Quaternion<T> cam_own_q = q_own * q_sen;
     Matrix<T, 3, 1> cam_other_p = p_other + q_own * p_sen;
     Quaternion<T> cam_other_q = q_other * q_sen;
+
     // Compute essential matrix
     /* Essential matrix convention disambiguation -- beware of literature existing conventions are a mess!
      *
@@ -137,25 +140,32 @@ inline bool FactorEpipolar::operator ()(const T* const _frame_own_p,
      *
      * where c1Fc2 = K.inv.tr * c1Ec2 * K.inv is the fundamental matrix.
      */
+
     Matrix<T, 3, 1> t = cam_own_q.conjugate() * (cam_other_p - cam_own_p); // other with respect to own
     Matrix<T, 3, 3> R = (cam_own_q.conjugate() * cam_other_q).matrix(); // other with respect to own
+
     // Fundamental matrix
     Matrix<T, 3, 3> own_F_other = K_inv_.transpose() * wolf::skew(t) * R * K_inv_;
+
     // own and other pixels
     Matrix<T, 3, 1> u_own;
     u_own << getFeature()->getMeasurement().cast<T>(), (T)(1.0);
     Matrix<T, 3, 1> u_other;
     u_other << getFeatureOther()->getMeasurement().cast<T>(), (T)(1.0);
+
     // Jacobians of error e = u_own.tr * own_F_other * u_other
     Matrix<T, 1, 3> J_e_uown = (own_F_other * u_other).transpose();
     Matrix<T, 1, 3> J_e_uother = u_own.transpose() * own_F_other;
+
     // Covariance of error
     Matrix<T, 1, 1> Q_e = J_e_uown.template block<1, 2>(0, 0) * getFeature()->getMeasurementCovariance()
             * J_e_uown.template block<1, 2>(0, 0).template transpose()
             + J_e_uother.template block<1, 2>(0, 0) * getFeatureOther()->getMeasurementCovariance()
                     * J_e_uother.template block<1, 2>(0, 0).template transpose();
+
     // Sqrt of inverse of the covariance is sigma^-1
     T sigma_inv = 1.0 / sqrt(Q_e(0, 0));
+
     // Final residual
     // residual = sigma_inv * u_own.transpose() * own_F_other * u_other; // use expression below which is the same but reuses computations
     residual = sigma_inv * J_e_uother * u_other;
