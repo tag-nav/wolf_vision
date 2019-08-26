@@ -212,7 +212,7 @@ bool ProcessorTrackerFeatureTrifocal::correctFeatureDrift(const FeatureBasePtr _
     return true;
 }
 
-bool ProcessorTrackerFeatureTrifocal::voteForKeyFrame()
+bool ProcessorTrackerFeatureTrifocal::voteForKeyFrame() const
 {
 //    // A. crossing voting threshold with ascending number of features
     bool vote_up = false;

@@ -122,7 +122,7 @@ class ProcessorTrackerFeatureImage : public ProcessorTrackerFeature
          *
          * WARNING! This function only votes! It does not create KeyFrames!
          */
-        virtual bool voteForKeyFrame() override;
+        virtual bool voteForKeyFrame() const override;
 
         /** \brief Detect new Features
          * \param _max_features maximum number of features detected (-1: unlimited. 0: none)
@@ -188,11 +188,6 @@ class ProcessorTrackerFeatureImage : public ProcessorTrackerFeature
         static ProcessorBasePtr create(const std::string& _unique_name, const ProcessorParamsBasePtr _params);
 
 };
-
-inline bool ProcessorTrackerFeatureImage::voteForKeyFrame()
-{
-    return (incoming_ptr_->getFeatureList().size() < params_tracker_feature_image_->min_features_for_keyframe);
-}
 
 } // namespace wolf
 

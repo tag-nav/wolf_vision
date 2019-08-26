@@ -145,11 +145,11 @@ class ProcessorBundleAdjustment : public ProcessorTrackerFeature
          *
          * WARNING! This function only votes! It does not create KeyFrames!
          */
-        virtual bool voteForKeyFrame() override;
+        virtual bool voteForKeyFrame() const override;
 
-        bool isInlier(const cv::KeyPoint& _kp_incoming, const cv::KeyPoint& _kp_last);
+        bool isInlier(const cv::KeyPoint& _kp_incoming, const cv::KeyPoint& _kp_last) const;
 
-        bool is_tracked(int& kp_idx_);
+        bool is_tracked(int& kp_idx_) const;
 
         /** \brief Detect new Features
          * \param _max_features maximum number of features detected (-1: unlimited. 0: none)
@@ -203,29 +203,29 @@ class ProcessorBundleAdjustment : public ProcessorTrackerFeature
         /**
          * \brief Return Image for debug purposes
          */
-        cv::Mat getImageDebug();
+        cv::Mat getImageDebug() const;
 
         /**
          * \brief Return list of Features tracked in a Capture
          */
-        std::list<FeatureBasePtr> trackedFeatures(const CaptureBasePtr& _capture_ptr);
+        std::list<FeatureBasePtr> trackedFeatures(const CaptureBasePtr& _capture_ptr) const;
         /**
         * \brief Return list of Landmarks
         */
-        std::list<LandmarkBasePtr> currentLandmarks();
+        std::list<LandmarkBasePtr> currentLandmarks() const;
 };
 
-inline cv::Mat ProcessorBundleAdjustment::getImageDebug()
+inline cv::Mat ProcessorBundleAdjustment::getImageDebug() const
 {
     return image_debug_;
 }
 
-inline std::list<FeatureBasePtr> ProcessorBundleAdjustment::trackedFeatures(const CaptureBasePtr& _capture_ptr)
+inline std::list<FeatureBasePtr> ProcessorBundleAdjustment::trackedFeatures(const CaptureBasePtr& _capture_ptr) const
 {
 	return track_matrix_.snapshotAsList(_capture_ptr);
 }
 
-inline std::list<LandmarkBasePtr> ProcessorBundleAdjustment::currentLandmarks()
+inline std::list<LandmarkBasePtr> ProcessorBundleAdjustment::currentLandmarks() const
 {
 	return getProblem()->getMap()->getLandmarkList();
 }

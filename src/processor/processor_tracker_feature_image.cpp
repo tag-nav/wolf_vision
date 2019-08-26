@@ -188,6 +188,11 @@ bool ProcessorTrackerFeatureImage::correctFeatureDrift(const FeatureBasePtr _ori
     }
 }
 
+bool ProcessorTrackerFeatureImage::voteForKeyFrame() const
+{
+    return (incoming_ptr_->getFeatureList().size() < params_tracker_feature_image_->min_features_for_keyframe);
+}
+
 unsigned int ProcessorTrackerFeatureImage::detectNewFeatures(const int& _max_new_features,
                                                              const CaptureBasePtr& _capture,
                                                              FeatureBasePtrList& _features_out)

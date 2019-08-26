@@ -427,6 +427,9 @@ void ProcessorBundleAdjustment::postProcess()
 		}
 	}
 
+    // frame counter for voting for KF --- if not used in voteForKf, this can be removed.
+    frame_count_ ++;
+
 //    cv::namedWindow("DEBUG VIEW", cv::WINDOW_NORMAL);
 //    cv::resizeWindow("DEBUG VIEW", 800,600);
 //    cv::imshow("DEBUG VIEW", image_debug_);
@@ -479,7 +482,7 @@ unsigned int ProcessorBundleAdjustment::trackFeatures(const FeatureBasePtrList& 
     return _features_out.size();
 }
 
-bool ProcessorBundleAdjustment::isInlier(const cv::KeyPoint& _kp_last, const cv::KeyPoint& _kp_incoming)
+bool ProcessorBundleAdjustment::isInlier(const cv::KeyPoint& _kp_last, const cv::KeyPoint& _kp_incoming) const
 {
     // List of conditions
     bool inlier = true;
@@ -493,7 +496,7 @@ bool ProcessorBundleAdjustment::isInlier(const cv::KeyPoint& _kp_last, const cv:
     return inlier;
 }
 
-bool ProcessorBundleAdjustment::is_tracked(int& _kp_idx)
+bool ProcessorBundleAdjustment::is_tracked(int& _kp_idx) const
 {
 
     for (auto ftr : known_features_incoming_)
@@ -597,10 +600,9 @@ bool ProcessorBundleAdjustment::correctFeatureDrift(const FeatureBasePtr _origin
     return true;
 }
 
-bool ProcessorBundleAdjustment::voteForKeyFrame()
+bool ProcessorBundleAdjustment::voteForKeyFrame() const
 {
 
-    frame_count_ ++;
 
 
     return ((frame_count_ % 5) == 0);
