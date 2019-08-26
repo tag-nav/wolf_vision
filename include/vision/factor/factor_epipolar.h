@@ -37,7 +37,7 @@ class FactorEpipolar : public FactorAutodiff<FactorEpipolar, 1, 3, 4, 3, 4, 3, 4
 
     private:
         SensorCameraPtr camera_;
-        Eigen::Matrix3s K_, K_inv_; ///< Intrinsic matrix and its inverse
+        Eigen::Matrix3s K_inv_; ///< Intrinsic matrix and its inverse
 
 };
 
@@ -46,25 +46,23 @@ inline FactorEpipolar::FactorEpipolar(const FeatureBasePtr& _feature_ptr,
                                                     const ProcessorBasePtr& _processor_ptr,
                                                     bool _apply_loss_function, FactorStatus _status) :
         FactorAutodiff<FactorEpipolar, 1, 3, 4, 3, 4, 3, 4>("FEATURE EPIPOLAR",
-                                                                   nullptr,
-                                                                   nullptr,
-                                                                   _feature_other_ptr,
-                                                                   nullptr,
-                                                                   _processor_ptr,
-                                                                   _apply_loss_function,
-                                                                   _status,
-                                                                   _feature_ptr->getCapture()->getFrame()->getP(),
-                                                                   _feature_ptr->getCapture()->getFrame()->getO(),
-                                                                   _feature_other_ptr->getCapture()->getFrame()->getP(),
-                                                                   _feature_other_ptr->getCapture()->getFrame()->getO(),
-                                                                   _feature_ptr->getCapture()->getSensorP(),
-                                                                   _feature_ptr->getCapture()->getSensorO() )
+                                                            nullptr,
+                                                            nullptr,
+                                                            _feature_other_ptr,
+                                                            nullptr,
+                                                            _processor_ptr,
+                                                            _apply_loss_function,
+                                                            _status,
+                                                            _feature_ptr->getCapture()->getFrame()->getP(),
+                                                            _feature_ptr->getCapture()->getFrame()->getO(),
+                                                            _feature_other_ptr->getCapture()->getFrame()->getP(),
+                                                            _feature_other_ptr->getCapture()->getFrame()->getO(),
+                                                            _feature_ptr->getCapture()->getSensorP(),
+                                                            _feature_ptr->getCapture()->getSensorO() )
 {
     camera_ = std::static_pointer_cast<SensorCamera>(_feature_ptr->getCapture()->getSensor());
 
-    K_      = camera_->getIntrinsicMatrix();
-    K_inv_  = K_.inverse();
-    //
+    K_inv_  = camera_->getIntrinsicMatrix().inverse();
 }
 
 template<typename T>
@@ -80,18 +78,18 @@ inline bool FactorEpipolar::operator ()(const T* const _frame_own_p,
 
     // Map input and output
     Map<const Matrix<T, 3, 1> > p_own(_frame_own_p);
-    Map<const Quaternion<T> > q_own(_frame_own_o);
+    Map<const Quaternion<T> >   q_own(_frame_own_o);
     Map<const Matrix<T, 3, 1> > p_other(_frame_other_p);
-    Map<const Quaternion<T> > q_other(_frame_other_o);
+    Map<const Quaternion<T> >   q_other(_frame_other_o);
     Map<const Matrix<T, 3, 1> > p_sen(_sensor_p);
-    Map<const Quaternion<T> > q_sen(_sensor_o);
-    Map<Matrix<T, 1, 1> > residual(_residuals);
+    Map<const Quaternion<T> >   q_sen(_sensor_o);
+    Map<Matrix<T, 1, 1> >       residual(_residuals);
 
     // Compose frames get to camera frames in absolute reference
-    Matrix<T, 3, 1> cam_own_p = p_own + q_own * p_sen;
-    Quaternion<T> cam_own_q = q_own * q_sen;
+    Matrix<T, 3, 1> cam_own_p   = p_own + q_own * p_sen;
+    Quaternion<T>   cam_own_q   = q_own * q_sen;
     Matrix<T, 3, 1> cam_other_p = p_other + q_own * p_sen;
-    Quaternion<T> cam_other_q = q_other * q_sen;
+    Quaternion<T>   cam_other_q = q_other * q_sen;
 
     // Compute essential matrix
     /* Essential matrix convention disambiguation -- beware of literature existing conventions are a mess!
@@ -148,20 +146,18 @@ inline bool FactorEpipolar::operator ()(const T* const _frame_own_p,
     Matrix<T, 3, 3> own_F_other = K_inv_.transpose() * wolf::skew(t) * R * K_inv_;
 
     // own and other pixels
-    Matrix<T, 3, 1> u_own;
-    u_own << getFeature()->getMeasurement().cast<T>(), (T)(1.0);
-    Matrix<T, 3, 1> u_other;
+    Matrix<T, 3, 1> u_own, u_other;
+    u_own   << getFeature()     ->getMeasurement().cast<T>(), (T)(1.0);
     u_other << getFeatureOther()->getMeasurement().cast<T>(), (T)(1.0);
 
     // Jacobians of error e = u_own.tr * own_F_other * u_other
-    Matrix<T, 1, 3> J_e_uown = (own_F_other * u_other).transpose();
-    Matrix<T, 1, 3> J_e_uother = u_own.transpose() * own_F_other;
+    Matrix<T, 1, 3> J_e_uown    = (own_F_other * u_other).transpose();
+    Matrix<T, 1, 3> J_e_uother  = u_own.transpose() * own_F_other;
 
     // Covariance of error
-    Matrix<T, 1, 1> Q_e = J_e_uown.template block<1, 2>(0, 0) * getFeature()->getMeasurementCovariance()
-            * J_e_uown.template block<1, 2>(0, 0).template transpose()
-            + J_e_uother.template block<1, 2>(0, 0) * getFeatureOther()->getMeasurementCovariance()
-                    * J_e_uother.template block<1, 2>(0, 0).template transpose();
+    Matrix<T, 1, 1> Q_e =
+            J_e_uown  .template block<1, 2>(0, 0) * getFeature()     ->getMeasurementCovariance() * J_e_uown  .template block<1, 2>(0, 0).template transpose()
+          + J_e_uother.template block<1, 2>(0, 0) * getFeatureOther()->getMeasurementCovariance() * J_e_uother.template block<1, 2>(0, 0).template transpose();
 
     // Sqrt of inverse of the covariance is sigma^-1
     T sigma_inv = 1.0 / sqrt(Q_e(0, 0));
@@ -172,8 +168,9 @@ inline bool FactorEpipolar::operator ()(const T* const _frame_own_p,
     return true;
 }
 
-inline FactorBasePtr FactorEpipolar::create(const FeatureBasePtr& _feature_ptr, const NodeBasePtr& _correspondant_ptr,
-                                                          const ProcessorBasePtr& _processor_ptr)
+inline FactorBasePtr FactorEpipolar::create(const FeatureBasePtr&   _feature_ptr,
+                                            const NodeBasePtr&      _correspondant_ptr,
+                                            const ProcessorBasePtr& _processor_ptr)
 {
     return std::make_shared<FactorEpipolar>(_feature_ptr, std::static_pointer_cast<FeatureBase>(_correspondant_ptr), _processor_ptr);
 }
