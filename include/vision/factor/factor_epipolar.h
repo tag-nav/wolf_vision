@@ -91,7 +91,7 @@ inline bool FactorEpipolar::operator ()(const T* const _frame_own_p,
     Matrix<T, 3, 1> cam_other_p = p_other + q_own * p_sen;
     Quaternion<T>   cam_other_q = q_other * q_sen;
 
-    // Compute essential matrix
+    // Compute essential matrix and fundamental matrix
     /* Essential matrix convention disambiguation -- beware of literature existing conventions are a mess!
      *
      * C1 is a camera at the origin frame or reference
@@ -113,8 +113,8 @@ inline bool FactorEpipolar::operator ()(const T* const _frame_own_p,
      *         \ |
      *          P1
      *
-     *   baseline: b  = t
-     *   ray 1   : r1 = P1
+     *   baseline: b  = t  - 0 = t
+     *   ray 1   : r1 = P1 - 0 = P1
      *   ray 2   : r2 = P1 - t = R*P2;
      *
      * so,
@@ -143,7 +143,8 @@ inline bool FactorEpipolar::operator ()(const T* const _frame_own_p,
     Matrix<T, 3, 3> R = (cam_own_q.conjugate() * cam_other_q).matrix(); // other with respect to own
 
     // Fundamental matrix
-    Matrix<T, 3, 3> own_F_other = K_inv_.transpose() * wolf::skew(t) * R * K_inv_;
+    auto K_inv = K_inv_.cast<T>();
+    Matrix<T, 3, 3> own_F_other = K_inv.transpose() * wolf::skew(t) * R * K_inv;
 
     // own and other pixels
     Matrix<T, 3, 1> u_own, u_other;
