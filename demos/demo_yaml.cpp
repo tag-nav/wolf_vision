@@ -34,11 +34,11 @@ int main()
 
     YAML::Node camera_config = YAML::LoadFile(wolf_root + "/src/examples/camera.yaml");
 
-    if (camera_config["sensor type"])
+    if (camera_config["type"])
     {
-        std::string sensor_type = camera_config["sensor type"].as<std::string>();
+        std::string sensor_type = camera_config["type"].as<std::string>();
 
-        std::string sensor_name = camera_config["sensor name"].as<std::string>();
+        std::string sensor_name = camera_config["name"].as<std::string>();
 
         YAML::Node params   = camera_config["intrinsic"];
 
@@ -74,7 +74,7 @@ int main()
 //
 //    Node params = YAML::LoadFile(wolf_root + "/src/examples/processor_image_feature.yaml");
 //
-//    if (params["processor type"])
+//    if (params["type"])
 //    {
 //        Node as = params["active search"];
 //        p.active_search.grid_width      = as["grid width"].as<unsigned int>();

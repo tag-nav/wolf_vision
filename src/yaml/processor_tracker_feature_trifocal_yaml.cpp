@@ -28,7 +28,7 @@ static ProcessorParamsBasePtr createProcessorParamsTrackerFeatureTrifocal(const 
         WOLF_ERROR("Invalid YAML file!");
         return nullptr;
     }
-    else if (config["processor type"].as<std::string>() == "TRACKER FEATURE TRIFOCAL")
+    else if (config["type"].as<std::string>() == "TRACKER FEATURE TRIFOCAL")
     {
         ProcessorParamsTrackerFeatureTrifocalPtr params = std::make_shared<ProcessorParamsTrackerFeatureTrifocal>();
 

@@ -22,7 +22,7 @@ static ProcessorParamsBasePtr createProcessorParamsBundleAdjustment(const std::s
         WOLF_ERROR("Invalid YAML file!");
         return nullptr;
     }
-    else if (config["processor type"].as<std::string>() == "TRACKER BUNDLE ADJUSTMENT")
+    else if (config["type"].as<std::string>() == "TRACKER BUNDLE ADJUSTMENT")
     {
         ProcessorParamsBundleAdjustmentPtr params = std::make_shared<ProcessorParamsBundleAdjustment>();
 
