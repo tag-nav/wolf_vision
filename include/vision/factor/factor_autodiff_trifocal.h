@@ -35,37 +35,37 @@ class FactorAutodiffTrifocal : public FactorAutodiff<FactorAutodiffTrifocal, 3, 
 
         FeatureBasePtr getFeaturePrev();
 
-        const Vector3s& getPixelCanonical3() const
+        const Vector3d& getPixelCanonical3() const
         {
             return pixel_canonical_3_;
         }
 
-        void setPixelCanonical3(const Vector3s& pixelCanonical3)
+        void setPixelCanonical3(const Vector3d& pixelCanonical3)
         {
             pixel_canonical_3_ = pixelCanonical3;
         }
 
-        const Vector3s& getPixelCanonical2() const
+        const Vector3d& getPixelCanonical2() const
         {
             return pixel_canonical_2_;
         }
 
-        void setPixelCanonical2(const Vector3s& pixelCanonical2)
+        void setPixelCanonical2(const Vector3d& pixelCanonical2)
         {
             pixel_canonical_2_ = pixelCanonical2;
         }
 
-        const Vector3s& getPixelCanonical1() const
+        const Vector3d& getPixelCanonical1() const
         {
             return pixel_canonical_1_;
         }
 
-        void setPixelCanonical1(const Vector3s& pixelCanonical1)
+        void setPixelCanonical1(const Vector3d& pixelCanonical1)
         {
             pixel_canonical_1_ = pixelCanonical1;
         }
 
-        const Matrix3s& getSqrtInformationUpper() const
+        const Matrix3d& getSqrtInformationUpper() const
         {
             return sqrt_information_upper;
         }
@@ -111,9 +111,9 @@ class FactorAutodiffTrifocal : public FactorAutodiff<FactorAutodiffTrifocal, 3, 
     private:
         FeatureBaseWPtr feature_prev_ptr_;  // To look for measurements
         SensorCameraPtr camera_ptr_;        // To look for intrinsics
-        Vector3s pixel_canonical_1_, pixel_canonical_2_, pixel_canonical_3_;
+        Vector3d pixel_canonical_1_, pixel_canonical_2_, pixel_canonical_3_;
 
-        Matrix3s sqrt_information_upper;
+        Matrix3d sqrt_information_upper;
 
         //Print function specialized for doubles (avoid jets)
         template <class T, int ROWS, int COLS>
@@ -125,7 +125,7 @@ class FactorAutodiffTrifocal : public FactorAutodiff<FactorAutodiffTrifocal, 3, 
         template<class T>
         void print_scalar(const T& _val) const;
 
-        void print_scalar(const Scalar& _val) const;
+        void print_scalar(const double& _val) const;
 };
 
 } // namespace wolf
@@ -163,27 +163,27 @@ FactorAutodiffTrifocal::FactorAutodiffTrifocal(const FeatureBasePtr& _feature_1_
                         _feature_own_ptr->getCapture()->getSensorO() ),
         feature_prev_ptr_(_feature_1_ptr),
         camera_ptr_(std::static_pointer_cast<SensorCamera>(_processor_ptr->getSensor())),
-        sqrt_information_upper(Matrix3s::Zero())
+        sqrt_information_upper(Matrix3d::Zero())
 {
-    Matrix3s K_inv           = camera_ptr_->getIntrinsicMatrix().inverse();
-    pixel_canonical_1_      = K_inv * Vector3s(_feature_1_ptr->getMeasurement(0), _feature_1_ptr->getMeasurement(1), 1.0);
-    pixel_canonical_2_      = K_inv * Vector3s(_feature_2_ptr->getMeasurement(0), _feature_2_ptr->getMeasurement(1), 1.0);
-    pixel_canonical_3_      = K_inv * Vector3s(_feature_own_ptr->getMeasurement(0), _feature_own_ptr->getMeasurement(1), 1.0);
-    Matrix<Scalar,3,2> J_m_u = K_inv.block(0,0,3,2);
+    Matrix3d K_inv           = camera_ptr_->getIntrinsicMatrix().inverse();
+    pixel_canonical_1_      = K_inv * Vector3d(_feature_1_ptr->getMeasurement(0), _feature_1_ptr->getMeasurement(1), 1.0);
+    pixel_canonical_2_      = K_inv * Vector3d(_feature_2_ptr->getMeasurement(0), _feature_2_ptr->getMeasurement(1), 1.0);
+    pixel_canonical_3_      = K_inv * Vector3d(_feature_own_ptr->getMeasurement(0), _feature_own_ptr->getMeasurement(1), 1.0);
+    Matrix<double,3,2> J_m_u = K_inv.block(0,0,3,2);
 
     // extract relevant states
-    Vector3s    wtr1 =             _feature_1_ptr  ->getFrame()  ->getP()      ->getState();
-    Quaternions wqr1 = Quaternions(_feature_1_ptr  ->getFrame()  ->getO()      ->getState().data() );
-    Vector3s    wtr2 =             _feature_2_ptr  ->getFrame()  ->getP()      ->getState();
-    Quaternions wqr2 = Quaternions(_feature_2_ptr  ->getFrame()  ->getO()      ->getState().data() );
-    Vector3s    wtr3 =             _feature_own_ptr->getFrame()  ->getP()      ->getState();
-    Quaternions wqr3 = Quaternions(_feature_own_ptr->getFrame()  ->getO()      ->getState().data() );
-    Vector3s    rtc  =             _feature_own_ptr->getCapture()->getSensorP()->getState();
-    Quaternions rqc  = Quaternions(_feature_own_ptr->getCapture()->getSensorO()->getState().data() );
+    Vector3d    wtr1 =             _feature_1_ptr  ->getFrame()  ->getP()      ->getState();
+    Quaterniond wqr1 = Quaterniond(_feature_1_ptr  ->getFrame()  ->getO()      ->getState().data() );
+    Vector3d    wtr2 =             _feature_2_ptr  ->getFrame()  ->getP()      ->getState();
+    Quaterniond wqr2 = Quaterniond(_feature_2_ptr  ->getFrame()  ->getO()      ->getState().data() );
+    Vector3d    wtr3 =             _feature_own_ptr->getFrame()  ->getP()      ->getState();
+    Quaterniond wqr3 = Quaterniond(_feature_own_ptr->getFrame()  ->getO()      ->getState().data() );
+    Vector3d    rtc  =             _feature_own_ptr->getCapture()->getSensorP()->getState();
+    Quaterniond rqc  = Quaterniond(_feature_own_ptr->getCapture()->getSensorO()->getState().data() );
 
     // expectation // canonical units
-    vision_utils::TrifocalTensorBase<Scalar> tensor;
-    Matrix3s    c2Ec1;
+    vision_utils::TrifocalTensorBase<double> tensor;
+    Matrix3d    c2Ec1;
     expectation(wtr1, wqr1,
                 wtr2, wqr2,
                 wtr3, wqr3,
@@ -191,29 +191,29 @@ FactorAutodiffTrifocal::FactorAutodiffTrifocal(const FeatureBasePtr& _feature_1_
                 tensor, c2Ec1);
 
     // error Jacobians // canonical units
-    Matrix<Scalar,3,3> J_e_m1, J_e_m2, J_e_m3;
+    Matrix<double,3,3> J_e_m1, J_e_m2, J_e_m3;
     error_jacobians(tensor, c2Ec1, J_e_m1, J_e_m2, J_e_m3);
 
     // chain rule to go from homogeneous pixel to Euclidean pixel
-    Matrix<Scalar,3,2> J_e_u1 = J_e_m1 * J_m_u;
-    Matrix<Scalar,3,2> J_e_u2 = J_e_m2 * J_m_u;
-    Matrix<Scalar,3,2> J_e_u3 = J_e_m3 * J_m_u;
+    Matrix<double,3,2> J_e_u1 = J_e_m1 * J_m_u;
+    Matrix<double,3,2> J_e_u2 = J_e_m2 * J_m_u;
+    Matrix<double,3,2> J_e_u3 = J_e_m3 * J_m_u;
 
     // Error covariances induced by each of the measurement covariance // canonical units
-    Matrix3s Q1 = J_e_u1 * _feature_1_ptr   ->getMeasurementCovariance() * J_e_u1.transpose(); // FIXME: changed getFeaturePrev() by _feature_1_ptr
-    Matrix3s Q2 = J_e_u2 * _feature_2_ptr   ->getMeasurementCovariance() * J_e_u2.transpose(); // FIXME: changed getFeatureOther() by _feature_2_ptr
-    Matrix3s Q3 = J_e_u3 * _feature_own_ptr ->getMeasurementCovariance() * J_e_u3.transpose(); // FIXME: changed getFeature() by _feature_own_ptr
+    Matrix3d Q1 = J_e_u1 * _feature_1_ptr   ->getMeasurementCovariance() * J_e_u1.transpose(); // FIXME: changed getFeaturePrev() by _feature_1_ptr
+    Matrix3d Q2 = J_e_u2 * _feature_2_ptr   ->getMeasurementCovariance() * J_e_u2.transpose(); // FIXME: changed getFeatureOther() by _feature_2_ptr
+    Matrix3d Q3 = J_e_u3 * _feature_own_ptr ->getMeasurementCovariance() * J_e_u3.transpose(); // FIXME: changed getFeature() by _feature_own_ptr
 
     // Total error covariance // canonical units
-    Matrix3s Q = Q1 + Q2 + Q3;
+    Matrix3d Q = Q1 + Q2 + Q3;
 
     // Sqrt of information matrix // canonical units
-    Eigen::LLT<Eigen::MatrixXs> llt_of_info(Q.inverse()); // Cholesky decomposition
+    Eigen::LLT<Eigen::MatrixXd> llt_of_info(Q.inverse()); // Cholesky decomposition
     sqrt_information_upper = llt_of_info.matrixU();
 
     // Re-write info matrix (for debug only)
-    //    Scalar pix_noise = 1.0;
-    //    sqrt_information_upper = pow(1.0/pix_noise, 2) * Matrix3s::Identity(); // one PLP (2D) and one epipolar (1D) factor
+    //    double pix_noise = 1.0;
+    //    sqrt_information_upper = pow(1.0/pix_noise, 2) * Matrix3d::Identity(); // one PLP (2D) and one epipolar (1D) factor
 }
 
 // Destructor
@@ -419,7 +419,7 @@ template<class T>
 void FactorAutodiffTrifocal::print_scalar(const T& _val) const
 {}
 
-void FactorAutodiffTrifocal::print_scalar(const Scalar& _val) const
+void FactorAutodiffTrifocal::print_scalar(const double& _val) const
 {
     std::cout << _val << std::endl;
 }

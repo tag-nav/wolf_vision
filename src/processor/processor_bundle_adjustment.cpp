@@ -25,7 +25,7 @@ ProcessorBundleAdjustment::ProcessorBundleAdjustment(ProcessorParamsBundleAdjust
                 frame_count_(0)
 {
 	//Initialize detector-descriptor-matcher
-	pixel_cov_ = Eigen::Matrix2s::Identity() * params_bundle_adjustment_->pixel_noise_std * params_bundle_adjustment_->pixel_noise_std;
+	pixel_cov_ = Eigen::Matrix2d::Identity() * params_bundle_adjustment_->pixel_noise_std * params_bundle_adjustment_->pixel_noise_std;
 
     // Detector yaml file
     std::string det_name = vision_utils::readYamlType(params_bundle_adjustment_->yaml_file_params_vision_utils, "detector");
@@ -45,12 +45,12 @@ ProcessorBundleAdjustment::ProcessorBundleAdjustment(ProcessorParamsBundleAdjust
     //Initialize rvec and tvec
     tvec_ = cv::Mat::zeros(cv::Size(3,1), CV_32F);
     rvec_ = cv::Mat::zeros(cv::Size(3,1), CV_32F);
-//    Eigen::Vector3s last_pos = capture_image_last_->getFrame()->getP()->getState();
-//    Eigen::Vector4s last_or = capture_image_last_->getFrame()->getO()->getState();
-//    Eigen::Quaternion<Scalar> last_q(last_or(0), last_or(1), last_or(2), last_or(3));
+//    Eigen::Vector3d last_pos = capture_image_last_->getFrame()->getP()->getState();
+//    Eigen::Vector4d last_or = capture_image_last_->getFrame()->getO()->getState();
+//    Eigen::Quaternion<double> last_q(last_or(0), last_or(1), last_or(2), last_or(3));
 //
-//    Eigen::VectorXs tvec_eigen = last_pos;
-//    Eigen::VectorXs rvec_eigen = q2v(last_q);
+//    Eigen::VectorXd tvec_eigen = last_pos;
+//    Eigen::VectorXd rvec_eigen = q2v(last_q);
 //
 //    cv::eigen2cv(tvec_eigen, tvec);
 //    cv::eigen2cv(rvec_eigen, rvec);
@@ -151,11 +151,11 @@ void ProcessorBundleAdjustment::preProcess()
 //        cv::recoverPose(E,pts1,pts2, camera_mat_cv, R_cv, t_cv, inliers);
 //
 //        //Convert R and t from OpenCV type to Eigen type and convert Rotation to a quaternion
-//        Eigen::Matrix3s R;
+//        Eigen::Matrix3d R;
 //        cv::cv2eigen(R_cv, R);
 ////        auto q = R2q(R); //Quaternion q
 //
-//        Eigen::Vector3s t; //Translation t
+//        Eigen::Vector3d t; //Translation t
 //        cv::cv2eigen(t_cv,t);
 
 
@@ -199,7 +199,7 @@ void ProcessorBundleAdjustment::postProcess()
 //
 //		auto dist_coeffs = camera->getDistortionVector();
 //
-//		Eigen::Vector5s dist;
+//		Eigen::Vector5d dist;
 //		switch(dist_coeffs.size())
 //		{
 //		case 0:
@@ -285,29 +285,29 @@ void ProcessorBundleAdjustment::postProcess()
 //
 //		    //Compute and set Robot state
 //		    //q_w_s Camera quaternion
-//		    Eigen::Vector3s rvec_eigen;
+//		    Eigen::Vector3d rvec_eigen;
 //		    cv::cv2eigen(rvec, rvec_eigen);
-//		    Eigen::Quaternion<Scalar> q_w_s = v2q(rvec_eigen);
+//		    Eigen::Quaternion<double> q_w_s = v2q(rvec_eigen);
 //
 //		    //p_w_s Camera position
-//		    Eigen::Vector3s p_w_s;
+//		    Eigen::Vector3d p_w_s;
 //		    cv::cv2eigen(tvec, p_w_s);
 //
 //		    //Robot pose
-//		    //	Eigen::Vector3s p_w_r = capture_image_last_->getFrame()->getP()->getState();
-//		    //	Eigen::Quaternion<Scalar> q_w_r = Quaternions(capture_image_last_->getFrame()->getO()->getState().data());
+//		    //	Eigen::Vector3d p_w_r = capture_image_last_->getFrame()->getP()->getState();
+//		    //	Eigen::Quaternion<double> q_w_r = Quaterniond(capture_image_last_->getFrame()->getO()->getState().data());
 //
 //		    //Extrinsics (camera in robot reference frame)
-//		    Eigen::Vector3s p_r_s = camera->getP()->getState();
-//		    Eigen::Quaternion<Scalar> q_r_s = Quaternions(camera->getO()->getState().data());
+//		    Eigen::Vector3d p_r_s = camera->getP()->getState();
+//		    Eigen::Quaternion<double> q_r_s = Quaterniond(camera->getO()->getState().data());
 //
 //		    //Robot pose compositions
-//		    Eigen::Quaternion<Scalar> q_w_r = q_w_s * q_r_s.conjugate();
-//		    Eigen::Vector3s p_w_r = p_w_s - q_w_r * p_r_s;
+//		    Eigen::Quaternion<double> q_w_r = q_w_s * q_r_s.conjugate();
+//		    Eigen::Vector3d p_w_r = p_w_s - q_w_r * p_r_s;
 //
 //
 //
-//		    Eigen::Vector7s prior_state;
+//		    Eigen::Vector7d prior_state;
 //		    prior_state << p_w_r(0), p_w_r(1), p_w_r(2), q_w_r.x(), q_w_r.y(), q_w_r.z(), q_w_r.w();
 //
 //		    last_ptr_->getFrame()->setState(prior_state);
@@ -403,22 +403,22 @@ void ProcessorBundleAdjustment::postProcess()
         unsigned int track_id = feat->trackId();
 		if (lmk_track_map_.count(track_id))
         {
-			Vector3s point3D = std::static_pointer_cast<LandmarkHP>(lmk_track_map_[track_id])->point();
+			Vector3d point3D = std::static_pointer_cast<LandmarkHP>(lmk_track_map_[track_id])->point();
 
-			Transform<Scalar,3,Isometry> T_w_r
-		        = Translation<Scalar,3>(feat_base->getFrame()->getP()->getState())
-		        * Quaternions(feat_base->getFrame()->getO()->getState().data());
-		    Transform<Scalar,3,Isometry> T_r_c
-				= Translation<Scalar,3>(feat_base->getCapture()->getSensorP()->getState())
-		        * Quaternions(feat_base->getCapture()->getSensorO()->getState().data());
+			Transform<double,3,Isometry> T_w_r
+		        = Translation<double,3>(feat_base->getFrame()->getP()->getState())
+		        * Quaterniond(feat_base->getFrame()->getO()->getState().data());
+		    Transform<double,3,Isometry> T_r_c
+				= Translation<double,3>(feat_base->getCapture()->getSensorP()->getState())
+		        * Quaterniond(feat_base->getCapture()->getSensorO()->getState().data());
 
-		    Eigen::Matrix<Scalar, 3, 1> point3D_c = T_r_c.inverse()
+		    Eigen::Matrix<double, 3, 1> point3D_c = T_r_c.inverse()
 												   * T_w_r.inverse()
 		                                           * point3D;
 
 //		    SensorCameraPtr camera = std::static_pointer_cast<SensorCamera>(getSensor());
 
-		    Vector2s point2D = pinhole::projectPoint(getSensor()->getIntrinsic()->getState(), camera->getDistortionVector(), point3D_c);
+		    Vector2d point2D = pinhole::projectPoint(getSensor()->getIntrinsic()->getState(), camera->getDistortionVector(), point3D_c);
     		cv::Point point = cv::Point(point2D(0), point2D(1));
 
     		cv::circle(image_debug_, point, 3, cv::Scalar(0,0,255) , 1 , 8);
@@ -654,9 +654,9 @@ FactorBasePtr ProcessorBundleAdjustment::emplaceFactor(FeatureBasePtr _feature_p
 LandmarkBasePtr ProcessorBundleAdjustment::emplaceLandmark(FeatureBasePtr _feature_ptr)
 {
     FeaturePointImagePtr feat_point_image_ptr = std::static_pointer_cast<FeaturePointImage>( _feature_ptr);
-    Eigen::Vector2s point2D = _feature_ptr->getMeasurement();
+    Eigen::Vector2d point2D = _feature_ptr->getMeasurement();
 
-    Eigen::Vector3s point3D;
+    Eigen::Vector3d point3D;
     point3D = pinhole::backprojectPoint(
     		getSensor()->getIntrinsic()->getState(),
     		(std::static_pointer_cast<SensorCamera>(getSensor()))->getCorrectionVector(),
@@ -664,20 +664,20 @@ LandmarkBasePtr ProcessorBundleAdjustment::emplaceLandmark(FeatureBasePtr _featu
 
 
 
-    //Scalar distance = params_bundle_adjustment_->distance; // arbitrary value
-    Scalar distance = 1;
-    Eigen::Vector4s vec_homogeneous_c;
+    //double distance = params_bundle_adjustment_->distance; // arbitrary value
+    double distance = 1;
+    Eigen::Vector4d vec_homogeneous_c;
     vec_homogeneous_c = {point3D(0),point3D(1),point3D(2),point3D.norm()/distance};
     vec_homogeneous_c.normalize();
 
     //TODO: lmk from camera to world coordinate frame.
-    Transform<Scalar,3,Isometry> T_w_r
-        = Translation<Scalar,3>(_feature_ptr->getFrame()->getP()->getState())
-        * Quaternions(_feature_ptr->getFrame()->getO()->getState().data());
-    Transform<Scalar,3,Isometry> T_r_c
-		= Translation<Scalar,3>(_feature_ptr->getCapture()->getSensorP()->getState())
-        * Quaternions(_feature_ptr->getCapture()->getSensorO()->getState().data());
-    Eigen::Matrix<Scalar, 4, 1> vec_homogeneous_w = T_w_r
+    Transform<double,3,Isometry> T_w_r
+        = Translation<double,3>(_feature_ptr->getFrame()->getP()->getState())
+        * Quaterniond(_feature_ptr->getFrame()->getO()->getState().data());
+    Transform<double,3,Isometry> T_r_c
+		= Translation<double,3>(_feature_ptr->getCapture()->getSensorP()->getState())
+        * Quaterniond(_feature_ptr->getCapture()->getSensorO()->getState().data());
+    Eigen::Matrix<double, 4, 1> vec_homogeneous_w = T_w_r
                                            * T_r_c
                                            * vec_homogeneous_c;
 

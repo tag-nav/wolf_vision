@@ -17,7 +17,7 @@ int main(int argc, char *argv[])
     std::cout << "========================================================" << std::endl;
     
     //scan ranges
-    Eigen::VectorXs ranges(720);
+    Eigen::VectorXd ranges(720);
     ranges << 	2.78886,2.78289,2.7832,2.78367,2.7843,2.78508,2.78603,2.78713,2.78839,2.78981,
 		2.79139,2.78669,2.78855,2.79057,2.79274,2.79507,2.79098,2.79359,2.79635,2.79927,
 		2.79566,2.79886,2.80221,2.79895,2.80258,2.80638,2.80345,2.80753,2.81176,2.80917,
@@ -90,11 +90,11 @@ int main(int argc, char *argv[])
 		27.2361,27.3466,27.4586,27.572,27.6869,27.8033,27.9213,28.0407,28.1617;
     
     //variable declarations and inits
-    Eigen::VectorXs device_pose(6);
+    Eigen::VectorXd device_pose(6);
     device_pose << 0,0,0,0,0,0; //origin, no rotation
     TimeStamp time_stamp;
     time_stamp.setToNow();
-    std::list<Eigen::Vector4s, Eigen::aligned_allocator<Eigen::Vector4s> > corner_list;
+    std::list<Eigen::Vector4d, Eigen::aligned_allocator<Eigen::Vector4d> > corner_list;
     
     //Create Device objects 
     //SensorLaser2D device(device_pose, ranges.size(), M_PI, 0.2, 30.0, 0.01);
@@ -103,7 +103,7 @@ int main(int argc, char *argv[])
     
     //init a noise generator
     std::default_random_engine generator(1);
-    std::normal_distribution<Scalar> distribution_range(0.,device.getRangeStdDev()); //odometry noise
+    std::normal_distribution<double> distribution_range(0.,device.getRangeStdDev()); //odometry noise
     
     //Create a Capture object
     CaptureLaser2D capture(time_stamp, &device, ranges);

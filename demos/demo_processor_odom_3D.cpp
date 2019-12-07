@@ -18,11 +18,11 @@
 using namespace wolf;
 using std::cout;
 using std::endl;
-using Eigen::Vector3s;
-using Eigen::Vector6s;
-using Eigen::Vector7s;
-using Eigen::Quaternions;
-using Eigen::VectorXs;
+using Eigen::Vector3d;
+using Eigen::Vector6d;
+using Eigen::Vector7d;
+using Eigen::Quaterniond;
+using Eigen::VectorXd;
 
 int main (int argc, char** argv)
 {
@@ -49,19 +49,19 @@ int main (int argc, char** argv)
     ceres_options.minimizer_progress_to_stdout = true;
     CeresManager ceres_manager(problem, ceres_options);
 
-    SensorBasePtr sen = problem->installSensor("ODOM 3D", "odom", (Vector7s()<<0,0,0,0,0,0,1).finished(), wolf_root + "/src/examples/sensor_odom_3D.yaml");
+    SensorBasePtr sen = problem->installSensor("ODOM 3D", "odom", (Vector7d()<<0,0,0,0,0,0,1).finished(), wolf_root + "/src/examples/sensor_odom_3D.yaml");
     ProcessorParamsOdom3DPtr proc_params = std::make_shared<ProcessorParamsOdom3D>();
     problem->installProcessor("ODOM 3D", "odometry integrator", sen, proc_params);
 
     // Time and prior
-    Scalar dt = 0.1;
+    double dt = 0.1;
 
-    problem->setPrior((Vector7s()<<0,0,0,0,0,0,1).finished(), Matrix6s::Identity() * 1e-8, TimeStamp(0), dt/2);
+    problem->setPrior((Vector7d()<<0,0,0,0,0,0,1).finished(), Matrix6d::Identity() * 1e-8, TimeStamp(0), dt/2);
 
     // Motion data
-    Scalar dx = .1;
-    Scalar dyaw = 2*M_PI/5;
-    Vector6s data((Vector6s() << dx*cos(dyaw/2),dx*sin(dyaw/2),0,0,0,dyaw).finished()); // will integrate this data repeatedly
+    double dx = .1;
+    double dyaw = 2*M_PI/5;
+    Vector6d data((Vector6d() << dx*cos(dyaw/2),dx*sin(dyaw/2),0,0,0,dyaw).finished()); // will integrate this data repeatedly
 
     CaptureMotionPtr cap_odo = std::make_shared<CaptureMotion>("ODOM 3D", TimeStamp(0), sen, data, 7, 6, nullptr);
 

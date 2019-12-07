@@ -23,8 +23,8 @@
 
 using namespace wolf;
 
-void remapJacDeltas_quat0(IMU_jac_deltas& _jac_delta, Eigen::Map<Eigen::Quaternions>& _Dq0, Eigen::Map<Eigen::Quaternions>& _dq0);
-void remapJacDeltas_quat(IMU_jac_deltas& _jac_delta, Eigen::Map<Eigen::Quaternions>& _Dq, Eigen::Map<Eigen::Quaternions>& _dq, const int& place );
+void remapJacDeltas_quat0(IMU_jac_deltas& _jac_delta, Eigen::Map<Eigen::Quaterniond>& _Dq0, Eigen::Map<Eigen::Quaterniond>& _dq0);
+void remapJacDeltas_quat(IMU_jac_deltas& _jac_delta, Eigen::Map<Eigen::Quaterniond>& _Dq, Eigen::Map<Eigen::Quaterniond>& _dq, const int& place );
 
 int main(int argc, char** argv)
 {
@@ -33,20 +33,20 @@ int main(int argc, char** argv)
     std::cout << std::endl << "==================== processor IMU : Checking Jacobians ======================" << std::endl;
 
     TimeStamp t;
-    Eigen::Vector6s data_;
-    wolf::Scalar deg_to_rad = 3.14159265359/180.0;
+    Eigen::Vector6d data_;
+    double deg_to_rad = 3.14159265359/180.0;
     data_ << 10,0.5,3, 100*deg_to_rad,110*deg_to_rad,30*deg_to_rad;
 
     // Wolf problem
     ProblemPtr wolf_problem_ptr_ = Problem::create("PQVBB 3D");
-    Eigen::VectorXs IMU_extrinsics(7);
+    Eigen::VectorXd IMU_extrinsics(7);
     IMU_extrinsics << 0,0,0, 0,0,0,1; // IMU pose in the robot
     //SensorBase* sensor_ptr = wolf_problem_ptr_->installSensor("IMU", "Main IMU", IMU_extrinsics, nullptr);
     //wolf_problem_ptr_->installProcessor("IMU", "IMU pre-integrator", "Main IMU", "");
 
     // Set the origin
     t.set(0.0001); // clock in 0,1 ms ticks
-    Eigen::VectorXs x0(16);
+    Eigen::VectorXd x0(16);
     x0 << 0,1,0,   0,0,0,1,  1,0,0,  0,0,.000,  0,0,.000; // P Q V B B
 
     //wolf_problem_ptr_->getProcessorMotion()->setOrigin(x0, t);
@@ -55,18 +55,18 @@ int main(int argc, char** argv)
 
     ProcessorIMU_UnitTester processor_imu;
     //processor_imu.setOrigin(x0, t);
-    wolf::Scalar ddelta_bias = 0.00000001;
-    wolf::Scalar dt = 0.001;
+    double ddelta_bias = 0.00000001;
+    double dt = 0.001;
 
     //defining a random Delta to begin with (not to use Origin point)
-    Eigen::Matrix<wolf::Scalar,10,1> Delta0;
-    Delta0 = Eigen::Matrix<wolf::Scalar,10,1>::Random();
+    Eigen::Matrix<double,10,1> Delta0;
+    Delta0 = Eigen::Matrix<double,10,1>::Random();
     Delta0.head<3>() = Delta0.head<3>()*100;
     Delta0.tail<3>() = Delta0.tail<3>()*10;
-    Eigen::Vector3s ang0, ang;
+    Eigen::Vector3d ang0, ang;
     ang0 << 120.08*deg_to_rad, 12.36*deg_to_rad, 54.32*deg_to_rad; 
     //Delta0 << 0,0,0, 0,0,0,1, 0,0,0;
-    Eigen::Map<Eigen::Quaternions> Delta0_quat(Delta0.data()+3);
+    Eigen::Map<Eigen::Quaterniond> Delta0_quat(Delta0.data()+3);
     Delta0_quat = v2q(ang0);
     Delta0_quat.normalize();
     ang = q2v(Delta0_quat);
@@ -76,11 +76,11 @@ int main(int argc, char** argv)
 
     struct IMU_jac_bias bias_jac = processor_imu.finite_diff_ab(dt, data_, ddelta_bias, Delta0);
 
-    Eigen::Map<Eigen::Quaternions> Dq0(NULL);
-    Eigen::Map<Eigen::Quaternions> dq0(NULL);
-    Eigen::Map<Eigen::Quaternions> Dq_noisy(NULL);
-    Eigen::Map<Eigen::Quaternions> dq_noisy(NULL);
-    Eigen::Map<Eigen::Quaternions> q_in_1(NULL), q_in_2(NULL);
+    Eigen::Map<Eigen::Quaterniond> Dq0(NULL);
+    Eigen::Map<Eigen::Quaterniond> dq0(NULL);
+    Eigen::Map<Eigen::Quaterniond> Dq_noisy(NULL);
+    Eigen::Map<Eigen::Quaterniond> dq_noisy(NULL);
+    Eigen::Map<Eigen::Quaterniond> q_in_1(NULL), q_in_2(NULL);
 
     /* IMU_jac_deltas struct form :
     contains vectors of size 7 :
@@ -89,7 +89,7 @@ int main(int argc, char** argv)
                 place 4 : added dw_bx in data         place 5 : added dw_by in data       place 6 : added dw_bz in data
     */
 
-    Eigen::Matrix3s dDp_dab, dDv_dab, dDp_dwb, dDv_dwb, dDq_dab, dDq_dwb;
+    Eigen::Matrix3d dDp_dab, dDv_dab, dDp_dwb, dDv_dwb, dDq_dab, dDq_dwb;
 
     /*
         dDp_dab = [dDp_dab_x, dDp_dab_y, dDp_dab_z]
@@ -115,7 +115,7 @@ int main(int argc, char** argv)
 
      std::cout << "\n input data : \n" << data_ << std::endl;
 
-     new (&q_in_1) Eigen::Map<Eigen::Quaternions>(bias_jac.Delta0_.data() + 3);
+     new (&q_in_1) Eigen::Map<Eigen::Quaterniond>(bias_jac.Delta0_.data() + 3);
      for(int i=0;i<3;i++){
          dDp_dab.block<3,1>(0,i) = (bias_jac.Deltas_noisy_vect_(i).head(3) - bias_jac.Delta0_.head(3))/ddelta_bias;
          dDv_dab.block<3,1>(0,i) = (bias_jac.Deltas_noisy_vect_(i).tail(3) - bias_jac.Delta0_.tail(3))/ddelta_bias;
@@ -123,10 +123,10 @@ int main(int argc, char** argv)
          dDp_dwb.block<3,1>(0,i) = (bias_jac.Deltas_noisy_vect_(i+3).head(3) - bias_jac.Delta0_.head(3))/ddelta_bias;
          dDv_dwb.block<3,1>(0,i) = (bias_jac.Deltas_noisy_vect_(i+3).tail(3) - bias_jac.Delta0_.tail(3))/ddelta_bias;
 
-         new (&q_in_2) Eigen::Map<Eigen::Quaternions>(bias_jac.Deltas_noisy_vect_(i).data() + 3);
+         new (&q_in_2) Eigen::Map<Eigen::Quaterniond>(bias_jac.Deltas_noisy_vect_(i).data() + 3);
          dDq_dab.block<3,1>(0,i) = R2v( q_in_1.matrix().transpose() * q_in_2.matrix())/ddelta_bias;
 
-         new (&q_in_2) Eigen::Map<Eigen::Quaternions>(bias_jac.Deltas_noisy_vect_(i+3).data() + 3);
+         new (&q_in_2) Eigen::Map<Eigen::Quaterniond>(bias_jac.Deltas_noisy_vect_(i+3).data() + 3);
          dDq_dwb.block<3,1>(0,i) = R2v( q_in_1.matrix().transpose() * q_in_2.matrix())/ddelta_bias;
          //std::cout << "matrix operation result :" << i << "\n" << q_in_1.matrix().transpose() * q_in_2.matrix() << std::endl;
          //std::cout << "matrix operation result to vector :" << i << "\n" << R2v( q_in_1.matrix().transpose() * q_in_2.matrix()) << std::endl;
@@ -261,8 +261,8 @@ int main(int argc, char** argv)
      */
 
      //taking care of noise now 
-    Eigen::Matrix<wolf::Scalar,9,1> Delta_noise;
-    Eigen::Matrix<wolf::Scalar,9,1> delta_noise;
+    Eigen::Matrix<double,9,1> Delta_noise;
+    Eigen::Matrix<double,9,1> delta_noise;
 
     Delta_noise << 0.00000001, 0.00000001, 0.00000001,  0.0001, 0.0001, 0.0001,  0.00000001, 0.00000001, 0.00000001;
     delta_noise << 0.00000001, 0.00000001, 0.00000001,  0.0001, 0.0001, 0.0001,  0.00000001, 0.00000001, 0.00000001;
@@ -277,8 +277,8 @@ int main(int argc, char** argv)
                             7: +dVx, 8: +dVy, 9: +dVz                                                               7: + dvx, 8: +dvy, 9: +dvz
     */
 
-    Eigen::Matrix3s dDp_dP, dDp_dV, dDp_dO, dDv_dP, dDv_dV, dDv_dO, dDo_dP, dDo_dV, dDo_dO;
-    Eigen::Matrix3s dDp_dp, dDp_dv, dDp_do, dDv_dp, dDv_dv, dDv_do, dDo_dp, dDo_dv, dDo_do; 
+    Eigen::Matrix3d dDp_dP, dDp_dV, dDp_dO, dDv_dP, dDv_dV, dDv_dO, dDo_dP, dDo_dV, dDo_dO;
+    Eigen::Matrix3d dDp_dp, dDp_dv, dDp_do, dDv_dp, dDv_dv, dDv_do, dDo_dp, dDo_dv, dDo_do; 
 
     remapJacDeltas_quat0(deltas_jac, Dq0, dq0);
     
@@ -370,7 +370,7 @@ int main(int argc, char** argv)
         std::cout << "dDo_dO_a - dDo_dO : \n" << deltas_jac.jacobian_delta_preint_.block(3,3,3,3) - dDo_dO <<  "\n" << std::endl;
     }
 
-     Eigen::Matrix3s dDp_dp_a, dDv_dv_a, dDo_do_a;
+     Eigen::Matrix3d dDp_dp_a, dDv_dv_a, dDo_do_a;
      dDp_dp_a = deltas_jac.jacobian_delta_.block(0,0,3,3);
      dDv_dv_a = deltas_jac.jacobian_delta_.block(6,6,3,3);
      dDo_do_a = deltas_jac.jacobian_delta_.block(3,3,3,3);
@@ -404,15 +404,15 @@ int main(int argc, char** argv)
 
 using namespace wolf;
 
-void remapJacDeltas_quat0(IMU_jac_deltas& _jac_delta, Eigen::Map<Eigen::Quaternions>& _Dq0, Eigen::Map<Eigen::Quaternions>& _dq0){
+void remapJacDeltas_quat0(IMU_jac_deltas& _jac_delta, Eigen::Map<Eigen::Quaterniond>& _Dq0, Eigen::Map<Eigen::Quaterniond>& _dq0){
 
-        new (&_Dq0) Eigen::Map<const Eigen::Quaternions>(_jac_delta.Delta0_.data() + 3);
-        new (&_dq0) Eigen::Map<const Eigen::Quaternions>(_jac_delta.delta0_.data() + 3);
+        new (&_Dq0) Eigen::Map<const Eigen::Quaterniond>(_jac_delta.Delta0_.data() + 3);
+        new (&_dq0) Eigen::Map<const Eigen::Quaterniond>(_jac_delta.delta0_.data() + 3);
 }
 
-void remapJacDeltas_quat(IMU_jac_deltas& _jac_delta, Eigen::Map<Eigen::Quaternions>& _Dq, Eigen::Map<Eigen::Quaternions>& _dq, const int& place ){
+void remapJacDeltas_quat(IMU_jac_deltas& _jac_delta, Eigen::Map<Eigen::Quaterniond>& _Dq, Eigen::Map<Eigen::Quaterniond>& _dq, const int& place ){
     
     assert(place < _jac_delta.Delta_noisy_vect_.size());
-    new (&_Dq) Eigen::Map<const Eigen::Quaternions>(_jac_delta.Delta_noisy_vect_(place).data() + 3);
-    new (&_dq) Eigen::Map<const Eigen::Quaternions>(_jac_delta.delta_noisy_vect_(place).data() + 3);
+    new (&_Dq) Eigen::Map<const Eigen::Quaterniond>(_jac_delta.Delta_noisy_vect_(place).data() + 3);
+    new (&_dq) Eigen::Map<const Eigen::Quaterniond>(_jac_delta.delta_noisy_vect_(place).data() + 3);
 }

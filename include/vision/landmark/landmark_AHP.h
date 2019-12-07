@@ -23,7 +23,7 @@ class LandmarkAHP : public LandmarkBase
         SensorBasePtr anchor_sensor_;
 
     public:
-        LandmarkAHP(Eigen::Vector4s _position_homogeneous, FrameBasePtr _anchor_frame, SensorBasePtr _anchor_sensor, cv::Mat _2D_descriptor);
+        LandmarkAHP(Eigen::Vector4d _position_homogeneous, FrameBasePtr _anchor_frame, SensorBasePtr _anchor_sensor, cv::Mat _2D_descriptor);
 
         virtual ~LandmarkAHP();
 
@@ -36,8 +36,8 @@ class LandmarkAHP : public LandmarkBase
         void setAnchorFrame  (FrameBasePtr  _anchor_frame );
         void setAnchorSensor (SensorBasePtr _anchor_sensor);
         void setAnchor       (FrameBasePtr  _anchor_frame , SensorBasePtr _anchor_sensor);
-        Eigen::Vector3s getPointInAnchorSensor() const;
-        Eigen::Vector3s point() const;
+        Eigen::Vector3d getPointInAnchorSensor() const;
+        Eigen::Vector3d point() const;
 
         YAML::Node saveToYaml() const;
 

@@ -53,7 +53,7 @@ int main(void)
     ProblemPtr problem = Problem::create(FRM_PO_3D);
 
     // define some useful parameters
-    Eigen::VectorXs pq_3d(7), po_2d(3), p_3d(3);
+    Eigen::VectorXd pq_3d(7), po_2d(3), p_3d(3);
     shared_ptr<IntrinsicsOdom2D> intr_odom2d_ptr = nullptr;
 
     cout << "\n================== Intrinsics Factory ===================" << endl;

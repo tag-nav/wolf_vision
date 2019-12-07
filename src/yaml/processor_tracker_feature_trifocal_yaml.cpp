@@ -43,7 +43,7 @@ static ProcessorParamsBasePtr createProcessorParamsTrackerFeatureTrifocal(const 
         params->yaml_file_params_vision_utils = _filename_dot_yaml.substr (first,last-first) + "/" + params->yaml_file_params_vision_utils;
 
         YAML::Node algorithm                    = config   ["algorithm"];
-        params->time_tolerance                  = algorithm["time tolerance"]                 .as<Scalar>();
+        params->time_tolerance                  = algorithm["time tolerance"]                 .as<double>();
         params->voting_active                   = algorithm["voting active"]                  .as<bool>();
         params->min_features_for_keyframe       = algorithm["minimum features for keyframe"]  .as<unsigned int>();
         params->max_new_features                = algorithm["maximum new features"]           .as<int>();
@@ -53,7 +53,7 @@ static ProcessorParamsBasePtr createProcessorParamsTrackerFeatureTrifocal(const 
         params->min_track_length_for_factor     = algorithm["min track length for factor"].as<int>();
 
         YAML::Node noise                      = config["noise"];
-        params->pixel_noise_std               = noise ["pixel noise std"].as<Scalar>();
+        params->pixel_noise_std               = noise ["pixel noise std"].as<double>();
 
         return params;
     }

@@ -19,8 +19,8 @@ class FactorPixelHP : public FactorAutodiff<FactorPixelHP, 2, 3, 4, 3, 4, 4>
 {
     protected:
 
-        Eigen::Vector4s intrinsic_;
-        Eigen::VectorXs distortion_;
+        Eigen::Vector4d intrinsic_;
+        Eigen::VectorXd distortion_;
 
     public:
 
@@ -40,7 +40,7 @@ class FactorPixelHP : public FactorAutodiff<FactorPixelHP, 2, 3, 4, 3, 4, 4>
                          const T* const _lmk_hmg,
                          T* _expectation) const;
 
-        Eigen::VectorXs expectation() const;
+        Eigen::VectorXd expectation() const;
 
         template<typename T>
         bool operator ()(const T* const _frame_p,
@@ -84,19 +84,19 @@ inline FactorPixelHP::FactorPixelHP(const FeatureBasePtr&   _ftr_ptr,
     distortion_ = (std::static_pointer_cast<SensorCamera>(_ftr_ptr->getCapture()->getSensor()))->getDistortionVector();
 }
 
-inline Eigen::VectorXs FactorPixelHP::expectation() const
+inline Eigen::VectorXd FactorPixelHP::expectation() const
 {
     FrameBasePtr frm = getFeature()->getCapture()->getFrame();
     SensorBasePtr sen  = getFeature()->getCapture()->getSensor();
     LandmarkBasePtr lmk      = getLandmarkOther();
 
-    const Eigen::MatrixXs frame_pos = frm->getP()->getState();
-    const Eigen::MatrixXs frame_ori = frm->getO()->getState();
-    const Eigen::MatrixXs sensor_pos  = sen ->getP()->getState();
-    const Eigen::MatrixXs sensor_ori  = sen ->getO()->getState();
-    const Eigen::MatrixXs lmk_pos_hmg       = lmk        ->getP()->getState();
+    const Eigen::MatrixXd frame_pos = frm->getP()->getState();
+    const Eigen::MatrixXd frame_ori = frm->getO()->getState();
+    const Eigen::MatrixXd sensor_pos  = sen ->getP()->getState();
+    const Eigen::MatrixXd sensor_ori  = sen ->getO()->getState();
+    const Eigen::MatrixXd lmk_pos_hmg       = lmk        ->getP()->getState();
 
-    Eigen::Vector2s exp;
+    Eigen::Vector2d exp;
     expectation(frame_pos.data(), frame_ori.data(), sensor_pos.data(), sensor_ori.data(),
     			lmk_pos_hmg.data(), exp.data());
 

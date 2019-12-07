@@ -9,7 +9,7 @@ CaptureImage::CaptureImage(const TimeStamp& _ts, SensorCameraPtr _camera_ptr, cv
     keypoints_(KeyPointVector()),
     descriptors_(cv::Mat()),
     matches_from_precedent_(DMatchVector()),
-    matches_normalized_scores_(std::vector<Scalar>()),
+    matches_normalized_scores_(std::vector<double>()),
     map_index_to_next_(std::map<int, int>()),
     global_descriptor_(cv::Mat())
 {

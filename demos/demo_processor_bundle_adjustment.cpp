@@ -71,10 +71,10 @@
 //  return std::string( result, (count > 0) ? count : 0 );
 //}
 
-using Eigen::Vector3s;
-using Eigen::Vector4s;
-using Eigen::Vector6s;
-using Eigen::Vector7s;
+using Eigen::Vector3d;
+using Eigen::Vector4d;
+using Eigen::Vector6d;
+using Eigen::Vector7d;
 
 using namespace wolf;
 
@@ -108,11 +108,11 @@ int main(int argc, char** argv)
 
     // Install camera
 //    IntrinsicsCameraPtr intr = std::make_shared<IntrinsicsCamera>(); // TODO init params or read from YAML
-//    intr->pinhole_model_raw = Eigen::Vector4s(320,240,320,320);
+//    intr->pinhole_model_raw = Eigen::Vector4d(320,240,320,320);
 //    intr->width  = img_width;
 //    intr->height = img_height;
-//    auto sens_cam = problem->installSensor("CAMERA", "camera", (Eigen::Vector7s() << 0,0,0,  0,0,0,1).finished(), intr);
-    auto sens_cam = problem->installSensor("CAMERA", "camera", (Eigen::Vector7s() << 0,0,0,  0,0,0,1).finished(), wolf_vision_root + "/demos/calib_logitech_webcam_params.yaml");
+//    auto sens_cam = problem->installSensor("CAMERA", "camera", (Eigen::Vector7d() << 0,0,0,  0,0,0,1).finished(), intr);
+    auto sens_cam = problem->installSensor("CAMERA", "camera", (Eigen::Vector7d() << 0,0,0,  0,0,0,1).finished(), wolf_vision_root + "/demos/calib_logitech_webcam_params.yaml");
     SensorCameraPtr camera = std::static_pointer_cast<SensorCamera>(sens_cam);
     camera->setImgWidth(img_width);
     camera->setImgHeight(img_height);
@@ -141,7 +141,7 @@ int main(int argc, char** argv)
     TimeStamp t = 0;
     unsigned int number_of_KFs = 0;
     // main loop
-    Scalar dt = 0.04;
+    double dt = 0.04;
     for(int frame_count = 0; frame_count<10000; ++frame_count)
     {
         t += dt;

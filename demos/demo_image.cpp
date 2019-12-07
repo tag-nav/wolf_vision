@@ -59,9 +59,9 @@ int main(int argc, char** argv)
     //=====================================================
 
 //        // SENSOR
-//        Eigen::Vector4s k = {320,240,320,320};
-//        SensorCameraPtr camera_ptr = std::make_shared<SensorCamera>(std::make_shared<StateBlock>(Eigen::Vector3s::Zero()),
-//                                                  std::make_shared<StateBlock>(Eigen::Vector3s::Zero()),
+//        Eigen::Vector4d k = {320,240,320,320};
+//        SensorCameraPtr camera_ptr = std::make_shared<SensorCamera>(std::make_shared<StateBlock>(Eigen::Vector3d::Zero()),
+//                                                  std::make_shared<StateBlock>(Eigen::Vector3d::Zero()),
 //                                                  std::make_shared<StateBlock>(k,false),img_width,img_height);
 //
 //        wolf_problem_->getHardware()->addSensor(camera_ptr);
@@ -100,7 +100,7 @@ int main(int argc, char** argv)
     //=====================================================
 
     /* Do this while there aren't extrinsic parameters on the yaml */
-    Eigen::Vector7s extrinsic_cam;
+    Eigen::Vector7d extrinsic_cam;
     extrinsic_cam[0] = 0; //px
     extrinsic_cam[1] = 0; //py
     extrinsic_cam[2] = 0; //pz
@@ -109,12 +109,12 @@ int main(int argc, char** argv)
     extrinsic_cam[5] = 0; //qz
     extrinsic_cam[6] = 1; //qw
     std::cout << "========extrinsic_cam: " << extrinsic_cam.transpose() << std::endl;
-    const Eigen::VectorXs extr = extrinsic_cam;
+    const Eigen::VectorXd extr = extrinsic_cam;
     /* Do this while there aren't extrinsic parameters on the yaml */
 
     // SENSOR
     // one-liner API
-    SensorBasePtr sensor_ptr = wolf_problem_->installSensor("CAMERA", "PinHole", Eigen::VectorXs::Zero(7), wolf_root + "/src/examples/camera_params_ueye_sim.yaml");
+    SensorBasePtr sensor_ptr = wolf_problem_->installSensor("CAMERA", "PinHole", Eigen::VectorXd::Zero(7), wolf_root + "/src/examples/camera_params_ueye_sim.yaml");
     SensorCameraPtr camera_ptr = static_pointer_cast<SensorCamera>(sensor_ptr);
     camera_ptr->setImgWidth(img_width);
     camera_ptr->setImgHeight(img_height);

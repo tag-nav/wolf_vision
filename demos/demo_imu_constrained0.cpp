@@ -85,8 +85,8 @@ int main(int argc, char** argv)
         
     // WOLF PROBLEM
     ProblemPtr wolf_problem_ptr_ = Problem::create("PQVBB 3D");
-    Eigen::VectorXs x_origin(16);
-    Eigen::Vector6s origin_bias;
+    Eigen::VectorXd x_origin(16);
+    Eigen::Vector6d origin_bias;
     x_origin << 0,0,0,  0,0,0,1,  0,0,0,  0,0,0,  0,0,0; //INITIAL CONDITIONS    0.05,0.03,.00,  0.2,-0.05,.00;
     TimeStamp t(0);
 
@@ -103,7 +103,7 @@ int main(int argc, char** argv)
     CeresManager* ceres_manager_wolf_diff = new CeresManager(wolf_problem_ptr_, ceres_options);
 
     // SENSOR + PROCESSOR IMU
-    SensorBasePtr sen0_ptr = wolf_problem_ptr_->installSensor("IMU", "Main IMU", (Vector7s()<<0,0,0,0,0,0,1).finished(), wolf_root + "/src/examples/sensor_imu.yaml");
+    SensorBasePtr sen0_ptr = wolf_problem_ptr_->installSensor("IMU", "Main IMU", (Vector7d()<<0,0,0,0,0,0,1).finished(), wolf_root + "/src/examples/sensor_imu.yaml");
     ProcessorIMUParamsPtr prc_imu_params = std::make_shared<ProcessorParamsIMU>();
     prc_imu_params->max_time_span = 10;
     prc_imu_params->max_buff_length = 1000000000; //make it very high so that this condition will not pass
@@ -115,7 +115,7 @@ int main(int argc, char** argv)
     ProcessorIMUPtr processor_ptr_imu = std::static_pointer_cast<ProcessorIMU>(processor_ptr_);
 
     // SENSOR + PROCESSOR ODOM 3D
-    SensorBasePtr sen1_ptr = wolf_problem_ptr_->installSensor("ODOM 3D", "odom", (Vector7s()<<0,0,0,0,0,0,1).finished(), wolf_root + "/src/examples/sensor_odom_3D_HQ.yaml");
+    SensorBasePtr sen1_ptr = wolf_problem_ptr_->installSensor("ODOM 3D", "odom", (Vector7d()<<0,0,0,0,0,0,1).finished(), wolf_root + "/src/examples/sensor_odom_3D_HQ.yaml");
     ProcessorParamsOdom3DPtr prc_odom3D_params = std::make_shared<ProcessorParamsOdom3D>();
     prc_odom3D_params->max_time_span = 20.9999;
     prc_odom3D_params->max_buff_length = 1000000000; //make it very high so that this condition will not pass
@@ -128,7 +128,7 @@ int main(int argc, char** argv)
 
     // reset origin of problem
     t.set(0);
-    Eigen::Matrix<wolf::Scalar, 10, 1> expected_final_state;
+    Eigen::Matrix<double, 10, 1> expected_final_state;
     
     FrameIMUPtr origin_KF = std::static_pointer_cast<FrameIMU>(processor_ptr_imu->setOrigin(x_origin, t));
     processor_ptr_odom3D->setOrigin(origin_KF);
@@ -142,14 +142,14 @@ int main(int argc, char** argv)
     //===================================================== PROCESS DATA
     // PROCESS DATA
 
-    Eigen::Vector6s data_imu, data_odom3D;
+    Eigen::Vector6d data_imu, data_odom3D;
     data_imu << 0,0,-wolf::gravity()(2), 0,0,0;
     data_odom3D << 0,0,0, 0,0,0;
 
-    Scalar input_clock;
+    double input_clock;
     TimeStamp ts(0);
     TimeStamp t_odom(0);
-    wolf::CaptureIMUPtr imu_ptr = std::make_shared<CaptureIMU>(ts, sen_imu, data_imu, Matrix6s::Identity(), Vector6s::Zero());
+    wolf::CaptureIMUPtr imu_ptr = std::make_shared<CaptureIMU>(ts, sen_imu, data_imu, Matrix6d::Identity(), Vector6d::Zero());
     wolf::CaptureMotionPtr mot_ptr = std::make_shared<CaptureMotion>(t, sen_odom3D, data_odom3D, 6, 6, nullptr);
     
     //read first odom data from file
@@ -193,7 +193,7 @@ int main(int argc, char** argv)
             t = ts;
             //std::string report = ceres_manager_wolf_diff->solve(1); //0: nothing, 1: BriefReport, 2: FullReport
         
-            Eigen::VectorXs frm_state(16);
+            Eigen::VectorXd frm_state(16);
             frm_state = origin_KF->getState();
 
             KF0_evolution << std::setprecision(16) << ts.get() << "\t" << frm_state(0) << "\t" << frm_state(1) << "\t" << frm_state(2)
@@ -270,10 +270,10 @@ int main(int argc, char** argv)
     wolf_problem_ptr_->print(4,1,1,1);
 
     #ifdef DEBUG_RESULTS
-    Eigen::VectorXs frm_state(16);
-    Eigen::Matrix<wolf::Scalar, 16, 1> cov_stdev;
-    Eigen::MatrixXs covX(16,16);
-    Eigen::MatrixXs cov3(Eigen::Matrix3s::Zero());
+    Eigen::VectorXd frm_state(16);
+    Eigen::Matrix<double, 16, 1> cov_stdev;
+    Eigen::MatrixXd covX(16,16);
+    Eigen::MatrixXd cov3(Eigen::Matrix3d::Zero());
 
     wolf::FrameBasePtrList frame_list = wolf_problem_ptr_->getTrajectory()->getFrameList();
     for(FrameBasePtr frm_ptr : frame_list)
@@ -308,19 +308,19 @@ int main(int argc, char** argv)
     }
 
     //trials to print all factorIMUs' residuals
-    Eigen::Matrix<wolf::Scalar,15,1> IMU_residuals;
-    Eigen::Vector3s p1(Eigen::Vector3s::Zero());
-    Eigen::Vector4s q1_vec(Eigen::Vector4s::Zero());
-    Eigen::Map<Quaternions> q1(q1_vec.data());
-    Eigen::Vector3s v1(Eigen::Vector3s::Zero());
-    Eigen::Vector3s ab1(Eigen::Vector3s::Zero());
-    Eigen::Vector3s wb1(Eigen::Vector3s::Zero());
-    Eigen::Vector3s p2(Eigen::Vector3s::Zero());
-    Eigen::Vector4s q2_vec(Eigen::Vector4s::Zero());
-    Eigen::Map<Quaternions> q2(q2_vec.data());
-    Eigen::Vector3s v2(Eigen::Vector3s::Zero());
-    Eigen::Vector3s ab2(Eigen::Vector3s::Zero());
-    Eigen::Vector3s wb2(Eigen::Vector3s::Zero());
+    Eigen::Matrix<double,15,1> IMU_residuals;
+    Eigen::Vector3d p1(Eigen::Vector3d::Zero());
+    Eigen::Vector4d q1_vec(Eigen::Vector4d::Zero());
+    Eigen::Map<Quaterniond> q1(q1_vec.data());
+    Eigen::Vector3d v1(Eigen::Vector3d::Zero());
+    Eigen::Vector3d ab1(Eigen::Vector3d::Zero());
+    Eigen::Vector3d wb1(Eigen::Vector3d::Zero());
+    Eigen::Vector3d p2(Eigen::Vector3d::Zero());
+    Eigen::Vector4d q2_vec(Eigen::Vector4d::Zero());
+    Eigen::Map<Quaterniond> q2(q2_vec.data());
+    Eigen::Vector3d v2(Eigen::Vector3d::Zero());
+    Eigen::Vector3d ab2(Eigen::Vector3d::Zero());
+    Eigen::Vector3d wb2(Eigen::Vector3d::Zero());
 
     for(FrameBasePtr frm_ptr : frame_list)
     {
@@ -331,8 +331,8 @@ int main(int argc, char** argv)
             {
                 if(fac_ptr->getTypeId() == FAC_IMU)
                 {
-                    //Eigen::VectorXs prev_KF_state(fac_ptr->getFrameOther()->getState());
-                    //Eigen::VectorXs curr_KF_state(fac_ptr->getFeature()->getFrame()->getState());
+                    //Eigen::VectorXd prev_KF_state(fac_ptr->getFrameOther()->getState());
+                    //Eigen::VectorXd curr_KF_state(fac_ptr->getFeature()->getFrame()->getState());
                     p1      = fac_ptr->getFrameOther()->getP()->getState();
                     q1_vec  = fac_ptr->getFrameOther()->getO()->getState();
                     v1      = fac_ptr->getFrameOther()->getV()->getState();

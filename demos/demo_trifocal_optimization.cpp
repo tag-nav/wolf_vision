@@ -19,12 +19,12 @@
 #include "../capture_void.h"
 #include "../constraints/constraint_autodiff_distance_3D.h"
 
-Eigen::VectorXs get_random_state(const double& _LO, const double& _HI)
+Eigen::VectorXd get_random_state(const double& _LO, const double& _HI)
 {
     double range= _HI-_LO;
-    Eigen::VectorXs x = Eigen::VectorXs::Random(7); // Vector filled with random numbers between (-1,1)
-    x = (x + Eigen::VectorXs::Constant(7,1.0))*range/2.; // add 1 to the vector to have values between 0 and 2; multiply with range/2
-    x = (x + Eigen::VectorXs::Constant(7,_LO)); //set LO as the lower bound (offset)
+    Eigen::VectorXd x = Eigen::VectorXd::Random(7); // Vector filled with random numbers between (-1,1)
+    x = (x + Eigen::VectorXd::Constant(7,1.0))*range/2.; // add 1 to the vector to have values between 0 and 2; multiply with range/2
+    x = (x + Eigen::VectorXd::Constant(7,_LO)); //set LO as the lower bound (offset)
     x.segment(3,4).normalize(); // Normalize quaternion part
     return x;
 }
@@ -35,7 +35,7 @@ int main(int argc, char** argv)
     using std::shared_ptr;
     using std::make_shared;
     using std::static_pointer_cast;
-    using Eigen::Vector2s;
+    using Eigen::Vector2d;
 
     std::string wolf_root = _WOLF_ROOT_DIR;
 
@@ -44,7 +44,7 @@ int main(int argc, char** argv)
     // ===============================================
 
     // x,y displacement, negatives values are directly added in the path string (row-wise).
-    Eigen::MatrixXs img_pos = Eigen::MatrixXs::Zero(10,2);
+    Eigen::MatrixXd img_pos = Eigen::MatrixXd::Zero(10,2);
     img_pos.row(0) <<  0, 0;
     img_pos.row(1) << -1, 0;
     img_pos.row(2) << -2, 0;
@@ -94,7 +94,7 @@ int main(int argc, char** argv)
     ceres_manager = make_shared<CeresManager>(problem, ceres_options);
 
     // Install tracker (sensor and processor)
-    Eigen::Vector7s cam_ext; cam_ext << 0.0,0.0,0.0, 0.0,0.0,0.0,1.0;
+    Eigen::Vector7d cam_ext; cam_ext << 0.0,0.0,0.0, 0.0,0.0,0.0,1.0;
     std::string cam_intr_yaml = wolf_root + "/src/examples/camera_params_1280x960_ideal.yaml";
     SensorBasePtr sensor = problem->installSensor("CAMERA","camera",cam_ext,cam_intr_yaml);
     SensorCameraPtr camera = std::static_pointer_cast<SensorCamera>(sensor);
@@ -108,11 +108,11 @@ int main(int argc, char** argv)
     // ===============================================
 
     // Set problem PRIOR
-    Scalar dt = 0.01;
+    double dt = 0.01;
     TimeStamp   t(0.0);
-    Vector7s    x; x <<  img_pos.row(0).transpose(), 0.0,   0.0, 0.0, 0.0, 1.0;
+    Vector7d    x; x <<  img_pos.row(0).transpose(), 0.0,   0.0, 0.0, 0.0, 1.0;
     x.segment(3,4).normalize();
-    Matrix6s    P = Matrix6s::Identity() * 0.000001; // 1mm
+    Matrix6d    P = Matrix6d::Identity() * 0.000001; // 1mm
 
     // ====== KF1 ======
     FrameBasePtr kf1 = problem->setPrior(x, P, t, dt/2);
@@ -165,8 +165,8 @@ int main(int argc, char** argv)
     std::cout << "================== ADD Scale constraint ========================" << std::endl;
 
     // Distance constraint
-    Vector1s distance(0.2);      // 2x10cm distance -- this fixes the scale
-    Matrix1s dist_cov(0.000001); // 1mm error
+    Vector1d distance(0.2);      // 2x10cm distance -- this fixes the scale
+    Matrix1d dist_cov(0.000001); // 1mm error
 
     CaptureBasePtr
     cap_dist  = problem->closestKeyFrameToTimeStamp(TimeStamp(2*dt))->addCapture(make_shared<CaptureVoid>(t,
@@ -208,7 +208,7 @@ int main(int argc, char** argv)
     for (auto kf : problem->getTrajectoryPtr()->getFrameList())
         if (kf->isKey())
         {
-            Eigen::MatrixXs cov = kf->getCovariance();
+            Eigen::MatrixXd cov = kf->getCovariance();
             WOLF_TRACE("KF", kf->id(), "_std (sigmas) = ", cov.diagonal().transpose().array().sqrt());
         }
     std::cout << std::endl;
@@ -224,8 +224,8 @@ int main(int argc, char** argv)
     {
         if (kf != kf1)
         {
-            Eigen::Vector7s perturbation; perturbation << Vector7s::Random() * 0.05;
-            Eigen::Vector7s state_perturbed = kf->getState() + perturbation;
+            Eigen::Vector7d perturbation; perturbation << Vector7d::Random() * 0.05;
+            Eigen::Vector7d state_perturbed = kf->getState() + perturbation;
             state_perturbed.segment(3,4).normalize();
             kf->setState(state_perturbed);
             std::cout << "KF" << kf->id() << " Euler deg " << wolf::q2e(kf->getOPtr()->getState()).transpose()*180.0/3.14159 << std::endl;

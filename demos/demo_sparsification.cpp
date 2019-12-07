@@ -26,16 +26,16 @@
 namespace wolf{
 // inserts the sparse matrix 'ins' into the sparse matrix 'original' in the place given by 'row' and 'col' integers
 
-void insertSparseBlock(const Eigen::SparseMatrix<Scalar>& ins, Eigen::SparseMatrix<Scalar>& original, const unsigned int& row, const unsigned int& col)
+void insertSparseBlock(const Eigen::SparseMatrix<double>& ins, Eigen::SparseMatrix<double>& original, const unsigned int& row, const unsigned int& col)
 {
   for (int k=0; k<ins.outerSize(); ++k)
-    for (Eigen::SparseMatrix<Scalar>::InnerIterator iti(ins,k); iti; ++iti)
+    for (Eigen::SparseMatrix<double>::InnerIterator iti(ins,k); iti; ++iti)
       original.coeffRef(iti.row() + row, iti.col() + col) = iti.value();
 
   original.makeCompressed();
 }
 
-void decodeEdge(const std::string& buffer, unsigned int& edge_from, unsigned int& edge_to, Eigen::Vector3s& measurement, Eigen::Matrix3s& covariance)
+void decodeEdge(const std::string& buffer, unsigned int& edge_from, unsigned int& edge_to, Eigen::Vector3d& measurement, Eigen::Matrix3d& covariance)
 {
 	std::string str_num;
 
@@ -91,7 +91,7 @@ void decodeEdge(const std::string& buffer, unsigned int& edge_from, unsigned int
 		while (buffer.at(i) == ' ') i++;
 
 		// INFORMATION
-		Eigen::Matrix3s information;
+		Eigen::Matrix3d information;
 		// XX
 		while (buffer.at(i) != ' ')
 			str_num.push_back(buffer.at(i++));
@@ -187,7 +187,7 @@ int main(int argc, char** argv)
     // Wolf problem
     FrameBasePtr last_frame_ptr, frame_from_ptr, frame_to_ptr;
     ProblemPtr bl_problem_ptr = Problem::create("PO_2D");
-    SensorBasePtr sensor_ptr = bl_problem_ptr->installSensor("ODOM 2D", "Odometry", Eigen::VectorXs::Zero(3), IntrinsicsBasePtr());
+    SensorBasePtr sensor_ptr = bl_problem_ptr->installSensor("ODOM 2D", "Odometry", Eigen::VectorXd::Zero(3), IntrinsicsBasePtr());
 
     // Ceres wrapper
     std::string bl_summary, sp_summary;
@@ -209,14 +209,14 @@ int main(int argc, char** argv)
     // auxiliar variables
 	std::string line_string;
 	unsigned int edge_from, edge_to;
-	Eigen::Vector3s meas;
-	Eigen::Matrix3s meas_cov;
-	Eigen::Matrix3s R = Eigen::Matrix3s::Identity();
+	Eigen::Vector3d meas;
+	Eigen::Matrix3d meas_cov;
+	Eigen::Matrix3d R = Eigen::Matrix3d::Identity();
 	//clock_t t1;
 
 	// ------------------------ START EXPERIMENT ------------------------
 	// First frame FIXED
-	last_frame_ptr = bl_problem_ptr->emplaceFrame(KEY, Eigen::Vector3s::Zero(),TimeStamp(0));
+	last_frame_ptr = bl_problem_ptr->emplaceFrame(KEY, Eigen::Vector3d::Zero(),TimeStamp(0));
 	last_frame_ptr->fix();
 	bl_problem_ptr->print(4, true, false, true);
 
@@ -235,9 +235,9 @@ int main(int argc, char** argv)
 				frame_from_ptr = last_frame_ptr;
 
 				// NEW KEYFRAME
-				Eigen::Vector3s from_pose = frame_from_ptr->getState();
-				R.topLeftCorner(2,2) = Eigen::Rotation2Ds(from_pose(2)).matrix();
-				Eigen::Vector3s new_frame_pose = from_pose + R*meas;
+				Eigen::Vector3d from_pose = frame_from_ptr->getState();
+				R.topLeftCorner(2,2) = Eigen::Rotation2Dd(from_pose(2)).matrix();
+				Eigen::Vector3d new_frame_pose = from_pose + R*meas;
 				last_frame_ptr = bl_problem_ptr->emplaceFrame(KEY, new_frame_pose, TimeStamp(double(edge_to)));
 
 				frame_to_ptr = last_frame_ptr;

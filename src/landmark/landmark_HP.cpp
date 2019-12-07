@@ -7,7 +7,7 @@
 namespace wolf {
 
 /* Landmark - Homogeneous Point*/
-LandmarkHP::LandmarkHP(Eigen::Vector4s _position_homogeneous,
+LandmarkHP::LandmarkHP(Eigen::Vector4d _position_homogeneous,
 						 SensorBasePtr _sensor,
                          cv::Mat _2D_descriptor) :
     LandmarkBase("HP", std::make_shared<StateHomogeneous3D>(_position_homogeneous)),
@@ -32,11 +32,11 @@ YAML::Node LandmarkHP::saveToYaml() const
     return node;
 }
 
-Eigen::Vector3s LandmarkHP::point() const
+Eigen::Vector3d LandmarkHP::point() const
 {
     using namespace Eigen;
 
-    Vector4s point_hmg = getP()->getState();
+    Vector4d point_hmg = getP()->getState();
 
     return point_hmg.head<3>()/point_hmg(3);
 }
@@ -44,7 +44,7 @@ Eigen::Vector3s LandmarkHP::point() const
 LandmarkBasePtr LandmarkHP::create(const YAML::Node& _node)
 {
     unsigned int        id          = _node["id"]           .as< unsigned int     >();
-    Eigen::VectorXs     pos_homog   = _node["position"]     .as< Eigen::VectorXs  >();
+    Eigen::VectorXd     pos_homog   = _node["position"]     .as< Eigen::VectorXd  >();
     std::vector<int>    v           = _node["descriptor"]   .as< std::vector<int> >();
     cv::Mat desc(v);
 

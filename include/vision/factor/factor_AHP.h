@@ -18,10 +18,10 @@ WOLF_PTR_TYPEDEFS(FactorAHP);
 class FactorAHP : public FactorAutodiff<FactorAHP, 2, 3, 4, 3, 4, 4>
 {
     protected:
-        Eigen::Vector3s anchor_sensor_extrinsics_p_;
-        Eigen::Vector4s anchor_sensor_extrinsics_o_;
-        Eigen::Vector4s intrinsic_;
-        Eigen::VectorXs distortion_;
+        Eigen::Vector3d anchor_sensor_extrinsics_p_;
+        Eigen::Vector4d anchor_sensor_extrinsics_o_;
+        Eigen::Vector4d intrinsic_;
+        Eigen::VectorXd distortion_;
 
     public:
 
@@ -41,7 +41,7 @@ class FactorAHP : public FactorAutodiff<FactorAHP, 2, 3, 4, 3, 4, 4>
                          const T* const _lmk_hmg,
                          T* _expectation) const;
 
-        Eigen::VectorXs expectation() const;
+        Eigen::VectorXd expectation() const;
 
         template<typename T>
         bool operator ()(const T* const _current_frame_p,
@@ -86,19 +86,19 @@ inline FactorAHP::FactorAHP(const FeatureBasePtr&   _ftr_ptr,
     distortion_ = (std::static_pointer_cast<SensorCamera>(_ftr_ptr->getCapture()->getSensor()))->getDistortionVector();
 }
 
-inline Eigen::VectorXs FactorAHP::expectation() const
+inline Eigen::VectorXd FactorAHP::expectation() const
 {
     FrameBasePtr frm_current = getFeature()->getCapture()->getFrame();
     FrameBasePtr frm_anchor  = getFrameOther();
     LandmarkBasePtr lmk      = getLandmarkOther();
 
-    const Eigen::MatrixXs frame_current_pos = frm_current->getP()->getState();
-    const Eigen::MatrixXs frame_current_ori = frm_current->getO()->getState();
-    const Eigen::MatrixXs frame_anchor_pos  = frm_anchor ->getP()->getState();
-    const Eigen::MatrixXs frame_anchor_ori  = frm_anchor ->getO()->getState();
-    const Eigen::MatrixXs lmk_pos_hmg       = lmk        ->getP()->getState();
+    const Eigen::MatrixXd frame_current_pos = frm_current->getP()->getState();
+    const Eigen::MatrixXd frame_current_ori = frm_current->getO()->getState();
+    const Eigen::MatrixXd frame_anchor_pos  = frm_anchor ->getP()->getState();
+    const Eigen::MatrixXd frame_anchor_ori  = frm_anchor ->getO()->getState();
+    const Eigen::MatrixXd lmk_pos_hmg       = lmk        ->getP()->getState();
 
-    Eigen::Vector2s exp;
+    Eigen::Vector2d exp;
     expectation(frame_current_pos.data(), frame_current_ori.data(), frame_anchor_pos.data(),
                 frame_anchor_ori.data(), lmk_pos_hmg.data(), exp.data());
 
@@ -138,7 +138,7 @@ inline void FactorAHP::expectation(const T* const _current_frame_p,
     // current robot to current camera transform
     CaptureBasePtr      current_capture = this->getFeature()->getCapture();
     Translation<T, 3>   t_r1_c1  (current_capture->getSensorP()->getState().cast<T>());
-    Quaternions         q_r1_c1_s(Eigen::Vector4s(current_capture->getSensorO()->getState()));
+    Quaterniond         q_r1_c1_s(Eigen::Vector4d(current_capture->getSensorO()->getState()));
     Quaternion<T>       q_r1_c1 = q_r1_c1_s.cast<T>();
     TransformType       T_R1_C1 = t_r1_c1 * q_r1_c1;
 

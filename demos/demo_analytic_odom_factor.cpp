@@ -20,10 +20,10 @@
 
 namespace wolf {
 // inserts the sparse matrix 'ins' into the sparse matrix 'original' in the place given by 'row' and 'col' integers
-void insertSparseBlock(const Eigen::SparseMatrix<Scalar>& ins, Eigen::SparseMatrix<Scalar>& original, const unsigned int& row, const unsigned int& col)
+void insertSparseBlock(const Eigen::SparseMatrix<double>& ins, Eigen::SparseMatrix<double>& original, const unsigned int& row, const unsigned int& col)
 {
   for (int k=0; k<ins.outerSize(); ++k)
-    for (Eigen::SparseMatrix<Scalar>::InnerIterator iti(ins,k); iti; ++iti)
+    for (Eigen::SparseMatrix<double>::InnerIterator iti(ins,k); iti; ++iti)
       original.coeffRef(iti.row() + row, iti.col() + col) = iti.value();
 
   original.makeCompressed();
@@ -59,7 +59,7 @@ int main(int argc, char** argv)
     // Wolf problem
     ProblemPtr wolf_problem_autodiff = new Problem(FRM_PO_2D);
     ProblemPtr wolf_problem_analytic = new Problem(FRM_PO_2D);
-    SensorBasePtr sensor = new SensorBase("ODOM 2D", std::make_shared<StateBlock>(Eigen::VectorXs::Zero(2)), std::make_shared<StateBlock>(Eigen::VectorXs::Zero(1)), std::make_shared<StateBlock>(Eigen::VectorXs::Zero(2)), 2);
+    SensorBasePtr sensor = new SensorBase("ODOM 2D", std::make_shared<StateBlock>(Eigen::VectorXd::Zero(2)), std::make_shared<StateBlock>(Eigen::VectorXd::Zero(1)), std::make_shared<StateBlock>(Eigen::VectorXd::Zero(2)), 2);
 
     // Ceres wrapper
     ceres::Solver::Options ceres_options;
@@ -102,7 +102,7 @@ int main(int argc, char** argv)
                     while (buffer.at(i) == ' ') i++;
 
                     // vertex pose
-                    Eigen::Vector3s vertex_pose;
+                    Eigen::Vector3d vertex_pose;
                     // x
                     while (buffer.at(i) != ' ')
                         bNum.push_back(buffer.at(i++));
@@ -164,7 +164,7 @@ int main(int argc, char** argv)
                     while (buffer.at(i) == ' ') i++;
 
                     // edge vector
-                    Eigen::Vector3s edge_vector;
+                    Eigen::Vector3d edge_vector;
                     // x
                     while (buffer.at(i) != ' ')
                         bNum.push_back(buffer.at(i++));
@@ -188,7 +188,7 @@ int main(int argc, char** argv)
                     while (buffer.at(i) == ' ') i++;
 
                     // edge covariance
-                    Eigen::Matrix3s edge_information;
+                    Eigen::Matrix3d edge_information;
                     // xx
                     while (buffer.at(i) != ' ')
                         bNum.push_back(buffer.at(i++));
@@ -274,8 +274,8 @@ int main(int argc, char** argv)
     // PRIOR
     FrameBasePtr first_frame_autodiff = wolf_problem_autodiff->getTrajectory()->getFrameList().front();
     FrameBasePtr first_frame_analytic = wolf_problem_analytic->getTrajectory()->getFrameList().front();
-    CaptureFix* initial_covariance_autodiff = new CaptureFix(TimeStamp(0), new SensorBase("ABSOLUTE POSE", nullptr, nullptr, nullptr, 0), first_frame_autodiff->getState(), Eigen::Matrix3s::Identity() * 0.01);
-    CaptureFix* initial_covariance_analytic = new CaptureFix(TimeStamp(0), new SensorBase("ABSOLUTE POSE", nullptr, nullptr, nullptr, 0), first_frame_analytic->getState(), Eigen::Matrix3s::Identity() * 0.01);
+    CaptureFix* initial_covariance_autodiff = new CaptureFix(TimeStamp(0), new SensorBase("ABSOLUTE POSE", nullptr, nullptr, nullptr, 0), first_frame_autodiff->getState(), Eigen::Matrix3d::Identity() * 0.01);
+    CaptureFix* initial_covariance_analytic = new CaptureFix(TimeStamp(0), new SensorBase("ABSOLUTE POSE", nullptr, nullptr, nullptr, 0), first_frame_analytic->getState(), Eigen::Matrix3d::Identity() * 0.01);
     first_frame_autodiff->addCapture(initial_covariance_autodiff);
     first_frame_analytic->addCapture(initial_covariance_analytic);
     initial_covariance_autodiff->emplaceFeatureAndFactor();

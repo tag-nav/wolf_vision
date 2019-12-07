@@ -101,14 +101,14 @@ unsigned int ProcessorTrackerFeatureImage::trackFeatures(const FeatureBasePtrLis
 
         if (detect(image_incoming_, roi, candidate_keypoints, candidate_descriptors))
         {
-            Scalar normalized_score = match(target_descriptor,candidate_descriptors,cv_matches);
+            double normalized_score = match(target_descriptor,candidate_descriptors,cv_matches);
             if ( normalized_score > mat_ptr_->getParams()->min_norm_score )
             {
                 auto incoming_point_ptr = FeatureBase::emplace<FeaturePointImage>(_capture,
                                                                                   candidate_keypoints[cv_matches[0].trainIdx],
                                                                                   cv_matches[0].trainIdx,
                                                                                   (candidate_descriptors.row(cv_matches[0].trainIdx)),
-                                                                                  Eigen::Matrix2s::Identity()*params_tracker_feature_image_->pixel_noise_var);
+                                                                                  Eigen::Matrix2d::Identity()*params_tracker_feature_image_->pixel_noise_var);
 
                 std::static_pointer_cast<FeaturePointImage>(incoming_point_ptr)->setIsKnown(feature_ptr->isKnown());
                 _features_out.push_back(incoming_point_ptr);
@@ -145,7 +145,7 @@ bool ProcessorTrackerFeatureImage::correctFeatureDrift(const FeatureBasePtr _ori
     KeyPointVector origin_keypoint;
     origin_keypoint.push_back(feat_origin_ptr->getKeypoint());
 
-    Scalar normalized_score = match(origin_descriptor,incoming_descriptor,matches_mat);
+    double normalized_score = match(origin_descriptor,incoming_descriptor,matches_mat);
 
     if(normalized_score > mat_ptr_->getParams()->min_norm_score)
         return true;
@@ -172,7 +172,7 @@ bool ProcessorTrackerFeatureImage::correctFeatureDrift(const FeatureBasePtr _ori
 
         if (detect(image_incoming_, roi, correction_keypoints, correction_descriptors))
         {
-            Scalar normalized_score_correction = match(origin_descriptor,correction_descriptors,correction_matches);
+            double normalized_score_correction = match(origin_descriptor,correction_descriptors,correction_matches);
             if(normalized_score_correction > mat_ptr_->getParams()->min_norm_score )
             {
                 feat_incoming_ptr->setKeypoint(correction_keypoints[correction_matches[0].trainIdx]);
@@ -226,7 +226,7 @@ unsigned int ProcessorTrackerFeatureImage::detectNewFeatures(const int& _max_new
                                                                              new_keypoints[0],
                                                                              0,
                                                                              new_descriptors.row(index),
-                                                                             Eigen::Matrix2s::Identity()*params_tracker_feature_image_->pixel_noise_var);
+                                                                             Eigen::Matrix2d::Identity()*params_tracker_feature_image_->pixel_noise_var);
 
                     std::static_pointer_cast<FeaturePointImage>(point_ptr)->setIsKnown(false);
 
@@ -252,10 +252,10 @@ unsigned int ProcessorTrackerFeatureImage::detectNewFeatures(const int& _max_new
 
 //============================================================
 
-Scalar ProcessorTrackerFeatureImage::match(cv::Mat _target_descriptor, cv::Mat _candidate_descriptors, DMatchVector& _cv_matches)
+double ProcessorTrackerFeatureImage::match(cv::Mat _target_descriptor, cv::Mat _candidate_descriptors, DMatchVector& _cv_matches)
 {
     mat_ptr_->match(_target_descriptor, _candidate_descriptors, des_ptr_->getSize(), _cv_matches);
-    Scalar normalized_score = 1 - (Scalar)(_cv_matches[0].distance)/(des_ptr_->getSize()*8);
+    double normalized_score = 1 - (double)(_cv_matches[0].distance)/(des_ptr_->getSize()*8);
     return normalized_score;
 }
 

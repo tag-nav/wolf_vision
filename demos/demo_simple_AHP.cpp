@@ -97,11 +97,11 @@ int main(int argc, char** argv)
     /* 1 */
     ProblemPtr problem = Problem::create("PO", 3);
     // One anchor frame to define the lmk, and a copy to make a factor
-    FrameBasePtr kf_1 = problem->emplaceFrame(KEY,(Vector7s()<<0,0,0,0,0,0,1).finished(), TimeStamp(0));
-    FrameBasePtr kf_2 = problem->emplaceFrame(KEY,(Vector7s()<<0,0,0,0,0,0,1).finished(), TimeStamp(0));
+    FrameBasePtr kf_1 = problem->emplaceFrame(KEY,(Vector7d()<<0,0,0,0,0,0,1).finished(), TimeStamp(0));
+    FrameBasePtr kf_2 = problem->emplaceFrame(KEY,(Vector7d()<<0,0,0,0,0,0,1).finished(), TimeStamp(0));
     // and two other frames to observe the lmk
-    FrameBasePtr kf_3 = problem->emplaceFrame(KEY,(Vector7s()<<0,-1,0,0,0,0,1).finished(), TimeStamp(0));
-    FrameBasePtr kf_4 = problem->emplaceFrame(KEY,(Vector7s()<<0,+1,0,0,0,0,1).finished(), TimeStamp(0));
+    FrameBasePtr kf_3 = problem->emplaceFrame(KEY,(Vector7d()<<0,-1,0,0,0,0,1).finished(), TimeStamp(0));
+    FrameBasePtr kf_4 = problem->emplaceFrame(KEY,(Vector7d()<<0,+1,0,0,0,0,1).finished(), TimeStamp(0));
 
     kf_1->fix();
     kf_2->fix();
@@ -112,17 +112,17 @@ int main(int argc, char** argv)
     // ============================================================================================================
     /* 2 */
     std::string wolf_root = _WOLF_ROOT_DIR;
-    SensorBasePtr sensor_ptr = problem->installSensor("CAMERA", "PinHole", (Vector7s()<<0,0,0,-0.5,0.5,-0.5,0.5).finished(), wolf_root + "/src/examples/camera_params_ueye_sim.yaml");
+    SensorBasePtr sensor_ptr = problem->installSensor("CAMERA", "PinHole", (Vector7d()<<0,0,0,-0.5,0.5,-0.5,0.5).finished(), wolf_root + "/src/examples/camera_params_ueye_sim.yaml");
     SensorCameraPtr camera = std::static_pointer_cast<SensorCamera>(sensor_ptr);
     // ============================================================================================================
 
     // ============================================================================================================
     /* 3 */
-    Eigen::Vector3s lmk_dir = {0,0,1}; // in the optical axis of the anchor camera at kf1
+    Eigen::Vector3d lmk_dir = {0,0,1}; // in the optical axis of the anchor camera at kf1
     std::cout << std::endl << "lmk: " << lmk_dir.transpose() << std::endl;
     lmk_dir.normalize();
-    Eigen::Vector4s lmk_hmg_c;
-    Scalar distance = 1.0; // from anchor at kf1
+    Eigen::Vector4d lmk_hmg_c;
+    double distance = 1.0; // from anchor at kf1
     lmk_hmg_c = {lmk_dir(0),lmk_dir(1),lmk_dir(2),(1/distance)};
 //    std::cout << "lmk hmg in C frame: " << lmk_hmg_c.transpose() << std::endl;
     // ============================================================================================================
@@ -141,15 +141,15 @@ int main(int argc, char** argv)
     cv::Mat desc;
 
     cv::KeyPoint kp_0;
-    FeaturePointImagePtr feat_0 = std::make_shared<FeaturePointImage>(kp_0, 0, desc, Eigen::Matrix2s::Identity());
+    FeaturePointImagePtr feat_0 = std::make_shared<FeaturePointImage>(kp_0, 0, desc, Eigen::Matrix2d::Identity());
     image_0->addFeature(feat_0);
 
     cv::KeyPoint kp_1;
-    FeaturePointImagePtr feat_1 = std::make_shared<FeaturePointImage>(kp_1, 0, desc, Eigen::Matrix2s::Identity());
+    FeaturePointImagePtr feat_1 = std::make_shared<FeaturePointImage>(kp_1, 0, desc, Eigen::Matrix2d::Identity());
     image_1->addFeature(feat_1);
 
     cv::KeyPoint kp_2;
-    FeaturePointImagePtr feat_2 = std::make_shared<FeaturePointImage>(kp_2, 0, desc, Eigen::Matrix2s::Identity());
+    FeaturePointImagePtr feat_2 = std::make_shared<FeaturePointImage>(kp_2, 0, desc, Eigen::Matrix2d::Identity());
     image_2->addFeature(feat_2);
 
     // Landmark--------------------
@@ -167,15 +167,15 @@ int main(int argc, char** argv)
     feat_2->addFactor(fac_2);
 
     // Projections----------------------------
-    Eigen::VectorXs pix_0 = fac_0->expectation();
+    Eigen::VectorXd pix_0 = fac_0->expectation();
     kp_0 = cv::KeyPoint(pix_0(0), pix_0(1), 0);
     feat_0->setKeypoint(kp_0);
 
-    Eigen::VectorXs pix_1 = fac_1->expectation();
+    Eigen::VectorXd pix_1 = fac_1->expectation();
     kp_1 = cv::KeyPoint(pix_1(0), pix_1(1), 0);
     feat_1->setKeypoint(kp_1);
 
-    Eigen::VectorXs pix_2 = fac_2->expectation();
+    Eigen::VectorXd pix_2 = fac_2->expectation();
     kp_2 = cv::KeyPoint(pix_2(0), pix_2(1), 0);
     feat_2->setKeypoint(kp_2);
 
@@ -190,19 +190,19 @@ int main(int argc, char** argv)
     //======== now we want to estimate a new lmk ===============
     //
     // Features -----------------
-    FeaturePointImagePtr feat_3 = std::make_shared<FeaturePointImage>(kp_1, 0, desc, Eigen::Matrix2s::Identity());
+    FeaturePointImagePtr feat_3 = std::make_shared<FeaturePointImage>(kp_1, 0, desc, Eigen::Matrix2d::Identity());
     image_1->addFeature(feat_3);
 
-    FeaturePointImagePtr feat_4 = std::make_shared<FeaturePointImage>(kp_2, 0, desc, Eigen::Matrix2s::Identity());
+    FeaturePointImagePtr feat_4 = std::make_shared<FeaturePointImage>(kp_2, 0, desc, Eigen::Matrix2d::Identity());
     image_2->addFeature(feat_4);
 
     // New landmark with measured pixels from kf2 (anchor) kf3 and kf4 (measurements)
-    Scalar unknown_distance = 2; // the real distance is 1
-    Matrix3s K = camera->getIntrinsicMatrix();
-    Vector3s pix_0_hmg;
+    double unknown_distance = 2; // the real distance is 1
+    Matrix3d K = camera->getIntrinsicMatrix();
+    Vector3d pix_0_hmg;
     pix_0_hmg << pix_0, 1;
-    Eigen::Vector3s dir_0 = K.inverse() * pix_0_hmg;
-    Eigen::Vector4s pnt_hmg_0;
+    Eigen::Vector3d dir_0 = K.inverse() * pix_0_hmg;
+    Eigen::Vector4d pnt_hmg_0;
     pnt_hmg_0 << dir_0, 1/unknown_distance;
     LandmarkAHPPtr lmk_2( std::make_shared<LandmarkAHP>(pnt_hmg_0, kf_2, camera, desc) );
     problem->addLandmark(lmk_2);
@@ -214,8 +214,8 @@ int main(int argc, char** argv)
     FactorAHPPtr fac_4 = FactorAHP::create(feat_4, lmk_2, nullptr);
     feat_4->addFactor(fac_4);
 
-    Eigen::Vector2s pix_3 = fac_3->expectation();
-    Eigen::Vector2s pix_4 = fac_4->expectation();
+    Eigen::Vector2d pix_3 = fac_3->expectation();
+    Eigen::Vector2d pix_4 = fac_4->expectation();
 
     std::cout << "pix 3: " << pix_3.transpose() << std::endl;
     std::cout << "pix 4: " << pix_4.transpose() << std::endl;

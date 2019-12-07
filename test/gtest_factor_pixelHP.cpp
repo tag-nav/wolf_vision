@@ -25,12 +25,12 @@ std::string wolf_vision_root = _WOLF_VISION_ROOT_DIR;
 
 class FactorPixelHPTest : public testing::Test{
     public:
-        Vector3s    pos1,   pos2,   pos3,   pos_cam, point;
-        Vector3s    euler1, euler2, euler3, euler_cam;
-        Quaternions quat1,  quat2,  quat3,  quat_cam;
-        Vector4s    vquat1, vquat2, vquat3, vquat_cam; // quaternions as vectors
-        Vector7s    pose1,  pose2,  pose3,  pose_cam;
-        Vector4s    lmkHP1, lmkHP2, lmkHP3, lmkHP4;
+        Vector3d    pos1,   pos2,   pos3,   pos_cam, point;
+        Vector3d    euler1, euler2, euler3, euler_cam;
+        Quaterniond quat1,  quat2,  quat3,  quat_cam;
+        Vector4d    vquat1, vquat2, vquat3, vquat_cam; // quaternions as vectors
+        Vector7d    pose1,  pose2,  pose3,  pose_cam;
+        Vector4d    lmkHP1, lmkHP2, lmkHP3, lmkHP4;
 
         ProblemPtr      problem;
         CeresManagerPtr ceres_manager;
@@ -55,7 +55,7 @@ class FactorPixelHPTest : public testing::Test{
         FactorPixelHPPtr c21, c22, c23, c24;
         FactorPixelHPPtr c31, c32, c33, c34;
 
-        Scalar pixel_noise_std;
+        double pixel_noise_std;
 
         virtual ~FactorPixelHPTest()
         {
@@ -155,8 +155,8 @@ class FactorPixelHPTest : public testing::Test{
 
             // Install sensor and processor
         	IntrinsicsCameraPtr intr      = std::make_shared<IntrinsicsCamera>();
-            intr->pinhole_model_raw       = Eigen::Vector4s(320,240,320,320);
-            intr->pinhole_model_rectified = Eigen::Vector4s(320,240,320,320);
+            intr->pinhole_model_raw       = Eigen::Vector4d(320,240,320,320);
+            intr->pinhole_model_rectified = Eigen::Vector4d(320,240,320,320);
         	intr->width  = 640;
         	intr->height = 480;
             S      = problem->installSensor("CAMERA", "camera", pose_cam, intr);
@@ -164,8 +164,8 @@ class FactorPixelHPTest : public testing::Test{
 
             // Add three viewpoints with frame, capture and feature
             pixel_noise_std = 1.0; //params->pixel_noise_std;
-            Vector2s pix(0,0);
-            Matrix2s pix_cov(Matrix2s::Identity() * pow(pixel_noise_std, 2));
+            Vector2d pix(0,0);
+            Matrix2d pix_cov(Matrix2d::Identity() * pow(pixel_noise_std, 2));
 
         	// Point
         	cv::Point2f p = cv::Point2f(intr->width /2, intr->height/2);
@@ -202,11 +202,11 @@ TEST(ProcessorFactorPixelHP, testZeroResidual)
 
     // Install sensor
     IntrinsicsCameraPtr intr      = std::make_shared<IntrinsicsCamera>();
-    intr->pinhole_model_raw       = Eigen::Vector4s(0,0,1,1);
-    intr->pinhole_model_rectified = Eigen::Vector4s(320,240,320,320);
+    intr->pinhole_model_raw       = Eigen::Vector4d(0,0,1,1);
+    intr->pinhole_model_rectified = Eigen::Vector4d(320,240,320,320);
     intr->width  = 640;
     intr->height = 480;
-    auto sens_cam = problem_ptr->installSensor("CAMERA", "camera", (Eigen::Vector7s() << 0,0,0,  0,0,0,1).finished(), intr);
+    auto sens_cam = problem_ptr->installSensor("CAMERA", "camera", (Eigen::Vector7d() << 0,0,0,  0,0,0,1).finished(), intr);
     SensorCameraPtr camera = std::static_pointer_cast<SensorCamera>(sens_cam);
 
     // Install processor
@@ -231,7 +231,7 @@ TEST(ProcessorFactorPixelHP, testZeroResidual)
     cv::KeyPoint kp = cv::KeyPoint(p, 32.0f);
     cv::Mat des = cv::Mat::zeros(1,8, CV_8U);
 
-    FeatureBasePtr fea0 = FeatureBase::emplace<FeaturePointImage>(cap0, kp, 0, des, Eigen::Matrix2s::Identity()* pow(1, 2));
+    FeatureBasePtr fea0 = FeatureBase::emplace<FeaturePointImage>(cap0, kp, 0, des, Eigen::Matrix2d::Identity()* pow(1, 2));
 
     // Landmark
     LandmarkBasePtr lmk = proc_bundle_adj->emplaceLandmark(fea0);
@@ -244,7 +244,7 @@ TEST(ProcessorFactorPixelHP, testZeroResidual)
     ASSERT_TRUE(problem_ptr->check(0));
 
     //ASSERT the expectation of the landmark should be equal to the measurement
-    Eigen::VectorXs expect = fac_ptr->expectation();
+    Eigen::VectorXd expect = fac_ptr->expectation();
     //	std::cout << expect << std::endl;
     ASSERT_FLOAT_EQ(expect(0,0),fea0->getMeasurement()(0,0));
     ASSERT_FLOAT_EQ(expect(1,0),fea0->getMeasurement()(1,0));
@@ -283,7 +283,7 @@ TEST_F(FactorPixelHPTest, testSolveLandmarkAltered)
     L1->unfix();
 
     auto orig = L1->point();
-    L1->getP()->setState(L1->getState() + Vector4s::Random());
+    L1->getP()->setState(L1->getState() + Vector4d::Random());
     std::string report = ceres_manager->solve(wolf::SolverManager::ReportVerbosity::FULL);
 
     std::cout << report << std::endl;
@@ -307,10 +307,10 @@ TEST_F(FactorPixelHPTest, testSolveFramePosition2ObservableDoF)
     auto orig = F1->getP()->getState();
 
     //change state
-    Vector3s position;
+    Vector3d position;
     position << 2.0, 2.0, 2.0;
     auto ori = F1->getO()->getState();
-    Vector7s state;
+    Vector7d state;
     state << position, ori;
     F1->setState(state);
 
@@ -330,7 +330,7 @@ TEST_F(FactorPixelHPTest, testSolveFramePosition2ObservableDoF)
     // Frame must be in the X axis, so Y=0 and Z=0
     ASSERT_MATRIX_APPROX(F1->getP()->getState().tail(2), orig.tail(2), 1e-6);
 
-    Eigen::VectorXs expect = c11->expectation();
+    Eigen::VectorXd expect = c11->expectation();
     ASSERT_FLOAT_EQ(expect(0,0),f11->getMeasurement()(0,0));
     ASSERT_FLOAT_EQ(expect(1,0),f11->getMeasurement()(1,0));
 
@@ -344,32 +344,32 @@ TEST_F(FactorPixelHPTest, testSolveFramePosition)
     lmkHP4 << 0.5, 0, -0.5, 1;
 
     //landmarks to camera coordinates
-    Transform<Scalar,3,Isometry> T_w_r
-    = Translation<Scalar,3>(F1->getP()->getState())
-    * Quaternions(F1->getO()->getState().data());
-    Transform<Scalar,3,Isometry> T_r_c
-    = Translation<Scalar,3>(I1->getSensorP()->getState())
-    * Quaternions(I1->getSensorO()->getState().data());
-    Eigen::Matrix<Scalar, 4, 1> lmkHP2_c =  T_r_c.inverse() * T_w_r.inverse() * lmkHP2;
-    Eigen::Matrix<Scalar, 4, 1> lmkHP3_c =  T_r_c.inverse() * T_w_r.inverse() * lmkHP3;
-    Eigen::Matrix<Scalar, 4, 1> lmkHP4_c =  T_r_c.inverse() * T_w_r.inverse() * lmkHP4;
+    Transform<double,3,Isometry> T_w_r
+    = Translation<double,3>(F1->getP()->getState())
+    * Quaterniond(F1->getO()->getState().data());
+    Transform<double,3,Isometry> T_r_c
+    = Translation<double,3>(I1->getSensorP()->getState())
+    * Quaterniond(I1->getSensorO()->getState().data());
+    Eigen::Matrix<double, 4, 1> lmkHP2_c =  T_r_c.inverse() * T_w_r.inverse() * lmkHP2;
+    Eigen::Matrix<double, 4, 1> lmkHP3_c =  T_r_c.inverse() * T_w_r.inverse() * lmkHP3;
+    Eigen::Matrix<double, 4, 1> lmkHP4_c =  T_r_c.inverse() * T_w_r.inverse() * lmkHP4;
 
     //landmark point in camera coord
-    Vector3s lmk_point_2_c = lmkHP2_c.head<3>()/lmkHP2_c(3);
-    Vector3s lmk_point_3_c = lmkHP3_c.head<3>()/lmkHP3_c(3);
-    Vector3s lmk_point_4_c = lmkHP4_c.head<3>()/lmkHP4_c(3);
+    Vector3d lmk_point_2_c = lmkHP2_c.head<3>()/lmkHP2_c(3);
+    Vector3d lmk_point_3_c = lmkHP3_c.head<3>()/lmkHP3_c(3);
+    Vector3d lmk_point_4_c = lmkHP4_c.head<3>()/lmkHP4_c(3);
 
     //points projected to image plane
-    Vector2s point2 = pinhole::projectPoint(camera->getIntrinsic()->getState(), camera->getDistortionVector(), lmk_point_2_c);
-    Vector2s point3 = pinhole::projectPoint(camera->getIntrinsic()->getState(), camera->getDistortionVector(), lmk_point_3_c);
-    Vector2s point4 = pinhole::projectPoint(camera->getIntrinsic()->getState(), camera->getDistortionVector(), lmk_point_4_c);
+    Vector2d point2 = pinhole::projectPoint(camera->getIntrinsic()->getState(), camera->getDistortionVector(), lmk_point_2_c);
+    Vector2d point3 = pinhole::projectPoint(camera->getIntrinsic()->getState(), camera->getDistortionVector(), lmk_point_3_c);
+    Vector2d point4 = pinhole::projectPoint(camera->getIntrinsic()->getState(), camera->getDistortionVector(), lmk_point_4_c);
     cv::KeyPoint kp2 = cv::KeyPoint(cv::Point2f(point2(0),point2(1)), 32.0f);
     cv::KeyPoint kp3 = cv::KeyPoint(cv::Point2f(point3(0),point3(1)), 32.0f);
     cv::KeyPoint kp4 = cv::KeyPoint(cv::Point2f(point4(0),point4(1)), 32.0f);
     cv::Mat des = cv::Mat::zeros(1,8, CV_8UC1);
     pixel_noise_std = 1.0; //params->pixel_noise_std;
-    Vector2s pix(0,0);
-    Matrix2s pix_cov(Matrix2s::Identity() * pow(pixel_noise_std, 2));
+    Vector2d pix(0,0);
+    Matrix2d pix_cov(Matrix2d::Identity() * pow(pixel_noise_std, 2));
 
     //create features
     f12 = std::static_pointer_cast<FeaturePointImage>(FeatureBase::emplace<FeaturePointImage>(I1, kp2, 0, des, pix_cov));
@@ -399,10 +399,10 @@ TEST_F(FactorPixelHPTest, testSolveFramePosition)
     auto orig = F1->getP()->getState();
 
     //change state
-    Vector3s position;
-    position << Vector3s::Random()*100;//2.0, 2.0, 2.0;
+    Vector3d position;
+    position << Vector3d::Random()*100;//2.0, 2.0, 2.0;
     auto ori = F1->getO()->getState();
-    Vector7s state;
+    Vector7d state;
     state << position, ori;
     F1->setState(state);
 
@@ -419,7 +419,7 @@ TEST_F(FactorPixelHPTest, testSolveFramePosition)
     // This test checks 3 DoF (3DoF are observable).
     ASSERT_MATRIX_APPROX(F1->getP()->getState(), orig, 1e-6);
 
-    Eigen::VectorXs expect = c11->expectation();
+    Eigen::VectorXd expect = c11->expectation();
     ASSERT_FLOAT_EQ(expect(0,0),f11->getMeasurement()(0,0));
     ASSERT_FLOAT_EQ(expect(1,0),f11->getMeasurement()(1,0));
 }
@@ -430,7 +430,7 @@ TEST_F(FactorPixelHPTest, testSolveBundleAdjustment)
 
 
     // Go around a weird bug: if we do not perturbate this LMK then the test fails.
-    L1->getP()->setState(L1->getState() + Vector4s::Random()*1e-12);
+    L1->getP()->setState(L1->getState() + Vector4d::Random()*1e-12);
 
 
 
@@ -441,73 +441,73 @@ TEST_F(FactorPixelHPTest, testSolveBundleAdjustment)
     lmkHP4 << 0.5, 0, -0.5, 1;
 
     //landmarks to camera coordinates
-    Transform<Scalar,3,Isometry> T_w_r1
-        = Translation<Scalar,3>(F1->getP()->getState())
-        * Quaternions(F1->getO()->getState().data());
-    Transform<Scalar,3,Isometry> T_r_c
-		= Translation<Scalar,3>(I1->getSensorP()->getState())
-        * Quaternions(I1->getSensorO()->getState().data());
-    Eigen::Matrix<Scalar, 4, 1> lmkHP2_c1 =  T_r_c.inverse() * T_w_r1.inverse() * lmkHP2;
-    Eigen::Matrix<Scalar, 4, 1> lmkHP3_c1 =  T_r_c.inverse() * T_w_r1.inverse() * lmkHP3;
-    Eigen::Matrix<Scalar, 4, 1> lmkHP4_c1 =  T_r_c.inverse() * T_w_r1.inverse() * lmkHP4;
+    Transform<double,3,Isometry> T_w_r1
+        = Translation<double,3>(F1->getP()->getState())
+        * Quaterniond(F1->getO()->getState().data());
+    Transform<double,3,Isometry> T_r_c
+		= Translation<double,3>(I1->getSensorP()->getState())
+        * Quaterniond(I1->getSensorO()->getState().data());
+    Eigen::Matrix<double, 4, 1> lmkHP2_c1 =  T_r_c.inverse() * T_w_r1.inverse() * lmkHP2;
+    Eigen::Matrix<double, 4, 1> lmkHP3_c1 =  T_r_c.inverse() * T_w_r1.inverse() * lmkHP3;
+    Eigen::Matrix<double, 4, 1> lmkHP4_c1 =  T_r_c.inverse() * T_w_r1.inverse() * lmkHP4;
 
     //landmark point in camera coord
-	Vector3s lmk_point_2_c1 = lmkHP2_c1.head<3>()/lmkHP2_c1(3);
-	Vector3s lmk_point_3_c1 = lmkHP3_c1.head<3>()/lmkHP3_c1(3);
-	Vector3s lmk_point_4_c1 = lmkHP4_c1.head<3>()/lmkHP4_c1(3);
+	Vector3d lmk_point_2_c1 = lmkHP2_c1.head<3>()/lmkHP2_c1(3);
+	Vector3d lmk_point_3_c1 = lmkHP3_c1.head<3>()/lmkHP3_c1(3);
+	Vector3d lmk_point_4_c1 = lmkHP4_c1.head<3>()/lmkHP4_c1(3);
 
     //landmarks to camera coordinates
-    Transform<Scalar,3,Isometry> T_w_r2
-        = Translation<Scalar,3>(F2->getP()->getState())
-        * Quaternions(F2->getO()->getState().data());
-    Eigen::Matrix<Scalar, 4, 1> lmkHP2_c2 =  T_r_c.inverse() * T_w_r2.inverse() * lmkHP2;
-    Eigen::Matrix<Scalar, 4, 1> lmkHP3_c2 =  T_r_c.inverse() * T_w_r2.inverse() * lmkHP3;
-    Eigen::Matrix<Scalar, 4, 1> lmkHP4_c2 =  T_r_c.inverse() * T_w_r2.inverse() * lmkHP4;
+    Transform<double,3,Isometry> T_w_r2
+        = Translation<double,3>(F2->getP()->getState())
+        * Quaterniond(F2->getO()->getState().data());
+    Eigen::Matrix<double, 4, 1> lmkHP2_c2 =  T_r_c.inverse() * T_w_r2.inverse() * lmkHP2;
+    Eigen::Matrix<double, 4, 1> lmkHP3_c2 =  T_r_c.inverse() * T_w_r2.inverse() * lmkHP3;
+    Eigen::Matrix<double, 4, 1> lmkHP4_c2 =  T_r_c.inverse() * T_w_r2.inverse() * lmkHP4;
 
     //landmark point in camera coord
-	Vector3s lmk_point_2_c2 = lmkHP2_c2.head<3>()/lmkHP2_c2(3);
-	Vector3s lmk_point_3_c2 = lmkHP3_c2.head<3>()/lmkHP3_c2(3);
-	Vector3s lmk_point_4_c2 = lmkHP4_c2.head<3>()/lmkHP4_c2(3);
+	Vector3d lmk_point_2_c2 = lmkHP2_c2.head<3>()/lmkHP2_c2(3);
+	Vector3d lmk_point_3_c2 = lmkHP3_c2.head<3>()/lmkHP3_c2(3);
+	Vector3d lmk_point_4_c2 = lmkHP4_c2.head<3>()/lmkHP4_c2(3);
 
     //landmarks to camera coordinates
-    Transform<Scalar,3,Isometry> T_w_r3
-        = Translation<Scalar,3>(F3->getP()->getState())
-        * Quaternions(F3->getO()->getState().data());
-    Eigen::Matrix<Scalar, 4, 1> lmkHP2_c3 =  T_r_c.inverse() * T_w_r3.inverse() * lmkHP2;
-    Eigen::Matrix<Scalar, 4, 1> lmkHP3_c3 =  T_r_c.inverse() * T_w_r3.inverse() * lmkHP3;
-    Eigen::Matrix<Scalar, 4, 1> lmkHP4_c3 =  T_r_c.inverse() * T_w_r3.inverse() * lmkHP4;
+    Transform<double,3,Isometry> T_w_r3
+        = Translation<double,3>(F3->getP()->getState())
+        * Quaterniond(F3->getO()->getState().data());
+    Eigen::Matrix<double, 4, 1> lmkHP2_c3 =  T_r_c.inverse() * T_w_r3.inverse() * lmkHP2;
+    Eigen::Matrix<double, 4, 1> lmkHP3_c3 =  T_r_c.inverse() * T_w_r3.inverse() * lmkHP3;
+    Eigen::Matrix<double, 4, 1> lmkHP4_c3 =  T_r_c.inverse() * T_w_r3.inverse() * lmkHP4;
 
     //landmark point in camera coord
-	Vector3s lmk_point_2_c3 = lmkHP2_c3.head<3>()/lmkHP2_c3(3);
-	Vector3s lmk_point_3_c3 = lmkHP3_c3.head<3>()/lmkHP3_c3(3);
-	Vector3s lmk_point_4_c3 = lmkHP4_c3.head<3>()/lmkHP4_c3(3);
+	Vector3d lmk_point_2_c3 = lmkHP2_c3.head<3>()/lmkHP2_c3(3);
+	Vector3d lmk_point_3_c3 = lmkHP3_c3.head<3>()/lmkHP3_c3(3);
+	Vector3d lmk_point_4_c3 = lmkHP4_c3.head<3>()/lmkHP4_c3(3);
 
 	//points projected to image plane
-	Vector2s point12 = pinhole::projectPoint(camera->getIntrinsic()->getState(), camera->getDistortionVector(), lmk_point_2_c1);
-	Vector2s point13 = pinhole::projectPoint(camera->getIntrinsic()->getState(), camera->getDistortionVector(), lmk_point_3_c1);
-	Vector2s point14 = pinhole::projectPoint(camera->getIntrinsic()->getState(), camera->getDistortionVector(), lmk_point_4_c1);
+	Vector2d point12 = pinhole::projectPoint(camera->getIntrinsic()->getState(), camera->getDistortionVector(), lmk_point_2_c1);
+	Vector2d point13 = pinhole::projectPoint(camera->getIntrinsic()->getState(), camera->getDistortionVector(), lmk_point_3_c1);
+	Vector2d point14 = pinhole::projectPoint(camera->getIntrinsic()->getState(), camera->getDistortionVector(), lmk_point_4_c1);
 	cv::KeyPoint kp12 = cv::KeyPoint(cv::Point2f(point12(0),point12(1)), 32.0f);
 	cv::KeyPoint kp13 = cv::KeyPoint(cv::Point2f(point13(0),point13(1)), 32.0f);
 	cv::KeyPoint kp14 = cv::KeyPoint(cv::Point2f(point14(0),point14(1)), 32.0f);
 
-	Vector2s point22 = pinhole::projectPoint(camera->getIntrinsic()->getState(), camera->getDistortionVector(), lmk_point_2_c2);
-	Vector2s point23 = pinhole::projectPoint(camera->getIntrinsic()->getState(), camera->getDistortionVector(), lmk_point_3_c2);
-	Vector2s point24 = pinhole::projectPoint(camera->getIntrinsic()->getState(), camera->getDistortionVector(), lmk_point_4_c2);
+	Vector2d point22 = pinhole::projectPoint(camera->getIntrinsic()->getState(), camera->getDistortionVector(), lmk_point_2_c2);
+	Vector2d point23 = pinhole::projectPoint(camera->getIntrinsic()->getState(), camera->getDistortionVector(), lmk_point_3_c2);
+	Vector2d point24 = pinhole::projectPoint(camera->getIntrinsic()->getState(), camera->getDistortionVector(), lmk_point_4_c2);
 	cv::KeyPoint kp22 = cv::KeyPoint(cv::Point2f(point22(0),point22(1)), 32.0f);
 	cv::KeyPoint kp23 = cv::KeyPoint(cv::Point2f(point23(0),point23(1)), 32.0f);
 	cv::KeyPoint kp24 = cv::KeyPoint(cv::Point2f(point24(0),point24(1)), 32.0f);
 
-	Vector2s point32 = pinhole::projectPoint(camera->getIntrinsic()->getState(), camera->getDistortionVector(), lmk_point_2_c3);
-	Vector2s point33 = pinhole::projectPoint(camera->getIntrinsic()->getState(), camera->getDistortionVector(), lmk_point_3_c3);
-	Vector2s point34 = pinhole::projectPoint(camera->getIntrinsic()->getState(), camera->getDistortionVector(), lmk_point_4_c3);
+	Vector2d point32 = pinhole::projectPoint(camera->getIntrinsic()->getState(), camera->getDistortionVector(), lmk_point_2_c3);
+	Vector2d point33 = pinhole::projectPoint(camera->getIntrinsic()->getState(), camera->getDistortionVector(), lmk_point_3_c3);
+	Vector2d point34 = pinhole::projectPoint(camera->getIntrinsic()->getState(), camera->getDistortionVector(), lmk_point_4_c3);
 	cv::KeyPoint kp32 = cv::KeyPoint(cv::Point2f(point32(0),point32(1)), 32.0f);
 	cv::KeyPoint kp33 = cv::KeyPoint(cv::Point2f(point33(0),point33(1)), 32.0f);
 	cv::KeyPoint kp34 = cv::KeyPoint(cv::Point2f(point34(0),point34(1)), 32.0f);
 
 	cv::Mat des = cv::Mat::zeros(1,8, CV_8UC1);
     pixel_noise_std = 1.0;
-    Vector2s pix(0,0);
-    Matrix2s pix_cov(Matrix2s::Identity() * pow(pixel_noise_std, 2));
+    Vector2d pix(0,0);
+    Matrix2d pix_cov(Matrix2d::Identity() * pow(pixel_noise_std, 2));
 
     //create features
     f12 = std::static_pointer_cast<FeaturePointImage>(FeatureBase::emplace<FeaturePointImage>(I1, kp12, 0, des, pix_cov));
@@ -592,9 +592,9 @@ TEST_F(FactorPixelHPTest, testSolveBundleAdjustment)
 		if (kf == F1) continue;
 
 		if (!kf->getP()->isFixed())
-		    kf->getP()->setState(kf->getP()->getState() + 0.2*Vector3s::Random());
+		    kf->getP()->setState(kf->getP()->getState() + 0.2*Vector3d::Random());
         if (!kf->getO()->isFixed())
-            kf->getO()->setState((Quaternions(kf->getO()->getState().data()) * exp_q(0.2*Vector3s::Random())).coeffs());
+            kf->getO()->setState((Quaterniond(kf->getO()->getState().data()) * exp_q(0.2*Vector3d::Random())).coeffs());
 	}
 
 	// lmks
@@ -603,7 +603,7 @@ TEST_F(FactorPixelHPTest, testSolveBundleAdjustment)
 		if (lmk == L1) continue;
 
         if (!lmk->isFixed())
-            lmk->getP()->setState(lmk->getP()->getState() + 0.2*Vector4s::Random());
+            lmk->getP()->setState(lmk->getP()->getState() + 0.2*Vector4d::Random());
 	}
 
 	// solve again
@@ -623,9 +623,9 @@ TEST_F(FactorPixelHPTest, testSolveBundleAdjustment)
     ASSERT_MATRIX_APPROX(F1->getP()->getState(), p1, 1e-6);
     ASSERT_MATRIX_APPROX(F2->getP()->getState(), p2, 1e-6);
     ASSERT_MATRIX_APPROX(F3->getP()->getState(), p3, 1e-6);
-    ASSERT_QUATERNION_APPROX(Quaternions(F1->getO()->getState().data()), Quaternions(q1.data()), 1e-6);
-    ASSERT_QUATERNION_APPROX(Quaternions(F2->getO()->getState().data()), Quaternions(q2.data()), 1e-6);
-    ASSERT_QUATERNION_APPROX(Quaternions(F3->getO()->getState().data()), Quaternions(q3.data()), 1e-6);
+    ASSERT_QUATERNION_APPROX(Quaterniond(F1->getO()->getState().data()), Quaterniond(q1.data()), 1e-6);
+    ASSERT_QUATERNION_APPROX(Quaterniond(F2->getO()->getState().data()), Quaterniond(q2.data()), 1e-6);
+    ASSERT_QUATERNION_APPROX(Quaterniond(F3->getO()->getState().data()), Quaterniond(q3.data()), 1e-6);
 
     ASSERT_MATRIX_APPROX(L1->point(), lmkHP1.head<3>()/lmkHP1(3), 1e-6);
     ASSERT_MATRIX_APPROX(L2->point(), lmkHP2.head<3>()/lmkHP2(3), 1e-6);

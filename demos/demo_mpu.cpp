@@ -62,13 +62,13 @@ int main(int argc, char** argv)
         return 1;
     }
     unsigned char buf[64] = {0};
-	wolf::Scalar gravity = 9.81;
-	wolf::Scalar sec_to_rad = 3.14159265359/180.0;
-	wolf::Scalar accel_LSB = 1.0/8192.0; // = 4.0/32768.0
-	wolf::Scalar gyro_LSB = 1.0/131.0; // = 250.0/32768.0
-    wolf::Scalar accel_LSB_g = accel_LSB * gravity;
-	wolf::Scalar gyro_LSB_rad = gyro_LSB * sec_to_rad;
-    //wolf::Scalar Ax, Ay, Az, Gx, Gy, Gz;
+	double gravity = 9.81;
+	double sec_to_rad = 3.14159265359/180.0;
+	double accel_LSB = 1.0/8192.0; // = 4.0/32768.0
+	double gyro_LSB = 1.0/131.0; // = 250.0/32768.0
+    double accel_LSB_g = accel_LSB * gravity;
+	double gyro_LSB_rad = gyro_LSB * sec_to_rad;
+    //double Ax, Ay, Az, Gx, Gy, Gz;
 
     struct termios toptions;
     //open serial port
@@ -103,20 +103,20 @@ int main(int argc, char** argv)
 
     // Wolf problem
     ProblemPtr wolf_problem_ptr_ = Problem::create("PQVBB 3D");
-    Eigen::VectorXs IMU_extrinsics(7);
+    Eigen::VectorXd IMU_extrinsics(7);
     IMU_extrinsics << 0,0,0, 0,0,0,1; // IMU pose in the robot
     SensorBasePtr sensor_ptr = wolf_problem_ptr_->installSensor("IMU", "Main IMU", IMU_extrinsics, IntrinsicsBase());
     wolf_problem_ptr_->installProcessor("IMU", "IMU pre-integrator", "Main IMU", "");
 
     // Time and data variables
     TimeStamp t;
-    Eigen::Vector6s data_;
-    Scalar mpu_clock = 0;
+    Eigen::Vector6d data_;
+    double mpu_clock = 0;
 
     t.set(mpu_clock * 0.0001); // clock in 0,1 ms ticks
 
     // Set the origin
-    Eigen::VectorXs x0(16);
+    Eigen::VectorXd x0(16);
     x0 << 0,0,0,  0,0,0,  1,0,0,0,  0,0,.001,  0,0,.002; // Try some non-zero biases
     wolf_problem_ptr_->getProcessorMotion()->setOrigin(x0, t);
 
@@ -140,12 +140,12 @@ int main(int argc, char** argv)
         while (buf[0]!=0x47); //control character has been found
         n = read(fd, buf, 12);//read the data
         if (n>3){ //construct data_ from IMU input
-			data_(0)   = (wolf::Scalar)((int16_t)((buf[1]<<8)|buf[0]))*accel_LSB_g;
-			data_(1)   = (wolf::Scalar)((int16_t)((buf[3]<<8)|buf[2]))*accel_LSB_g;
-			data_(2)   = (wolf::Scalar)((int16_t)((buf[5]<<8)|buf[4]))*accel_LSB_g;
-			data_(3)   = (wolf::Scalar)((int16_t)((buf[7]<<8)|buf[6]))*gyro_LSB_rad;
-			data_(4)   = (wolf::Scalar)((int16_t)((buf[9]<<8)|buf[8]))*gyro_LSB_rad;
-			data_(5)   = (wolf::Scalar)((int16_t)((buf[11]<<8)|buf[10]))*gyro_LSB_rad;
+			data_(0)   = (double)((int16_t)((buf[1]<<8)|buf[0]))*accel_LSB_g;
+			data_(1)   = (double)((int16_t)((buf[3]<<8)|buf[2]))*accel_LSB_g;
+			data_(2)   = (double)((int16_t)((buf[5]<<8)|buf[4]))*accel_LSB_g;
+			data_(3)   = (double)((int16_t)((buf[7]<<8)|buf[6]))*gyro_LSB_rad;
+			data_(4)   = (double)((int16_t)((buf[9]<<8)|buf[8]))*gyro_LSB_rad;
+			data_(5)   = (double)((int16_t)((buf[11]<<8)|buf[10]))*gyro_LSB_rad;
             mpu_clock += 0.001;
             t.set(mpu_clock);
         }
@@ -160,9 +160,9 @@ int main(int argc, char** argv)
 
         #ifdef DEBUG_RESULTS
 
-        Eigen::VectorXs delta_debug;
-        Eigen::VectorXs delta_integr_debug;
-        Eigen::VectorXs x_debug;
+        Eigen::VectorXd delta_debug;
+        Eigen::VectorXd delta_integr_debug;
+        Eigen::VectorXd x_debug;
         TimeStamp ts;
 
         delta_debug = wolf_problem_ptr_->getProcessorMotion()->getMotion().delta_;

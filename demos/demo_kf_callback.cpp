@@ -18,14 +18,14 @@ int main()
 
     ProblemPtr problem = Problem::create("PO", 2);
 
-    SensorBasePtr sen_odo    = problem->installSensor   ("ODOM 2D", "main odometer", (Vector3s()<<0,0,0).finished(),"");
+    SensorBasePtr sen_odo    = problem->installSensor   ("ODOM 2D", "main odometer", (Vector3d()<<0,0,0).finished(),"");
     ProcessorParamsOdom2DPtr params_odo = std::make_shared<ProcessorParamsOdom2D>();
     params_odo->max_time_span = 2;
     params_odo->angle_turned = M_PI; // 180 degrees turn
     ProcessorBasePtr prc_odo = problem->installProcessor("ODOM 2D", "odometry integrator", sen_odo, params_odo);
     prc_odo->setTimeTolerance(0.1);
 
-    SensorBasePtr sen_ftr    = problem->installSensor   ("ODOM 2D", "other odometer", (Vector3s()<<0,0,0).finished(),"");
+    SensorBasePtr sen_ftr    = problem->installSensor   ("ODOM 2D", "other odometer", (Vector3d()<<0,0,0).finished(),"");
     ProcessorParamsTrackerFeaturePtr params_trk = std::make_shared<ProcessorParamsTrackerFeature>();
     params_trk->max_new_features = 4;
     params_trk->min_features_for_keyframe = 7;
@@ -40,17 +40,17 @@ int main()
 
     TimeStamp t(0);
     cout << "=======================\n>> TIME: " << t.get() << endl;
-    Vector3s x({0,0,0});
-    Matrix3s P; P.setZero();
+    Vector3d x({0,0,0});
+    Matrix3d P; P.setZero();
     problem->setPrior(x, P, t, 0.01);
 
     cout << "x(" << t.get() << ") = " << problem->getCurrentState().transpose() << endl;
 
-    Vector2s odo_data;  odo_data << .1, (M_PI / 10);
+    Vector2d odo_data;  odo_data << .1, (M_PI / 10);
 
     problem->print(2, false, true, true); // print(level, constr_by, metric, state_blocks)
 
-    Scalar dt = 1;
+    double dt = 1;
     for (auto i = 0; i < 4; i++)
     {
 

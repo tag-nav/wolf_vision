@@ -37,10 +37,10 @@ class FaramoticsRobot
         string modelFileName;
         CrangeScan2D* myScanner;
         CdynamicSceneRender* myRender;
-        Eigen::Vector3s ground_truth_pose_;
-        Eigen::Vector4s laser_1_pose_, laser_2_pose_;
+        Eigen::Vector3d ground_truth_pose_;
+        Eigen::Vector4d laser_1_pose_, laser_2_pose_;
 
-        FaramoticsRobot(int argc, char** argv, const Eigen::Vector4s& _laser_1_pose, const Eigen::Vector4s& _laser_2_pose) :
+        FaramoticsRobot(int argc, char** argv, const Eigen::Vector4d& _laser_1_pose, const Eigen::Vector4d& _laser_2_pose) :
             modelFileName("/home/jvallve/iri-lab/faramotics/models/campusNordUPC.obj"),
             laser_1_pose_(_laser_1_pose),
             laser_2_pose_(_laser_2_pose)
@@ -61,7 +61,7 @@ class FaramoticsRobot
         }
 
         //function travel around
-        Eigen::Vector3s motionCampus(unsigned int ii, double& displacement_, double& rotation_)
+        Eigen::Vector3d motionCampus(unsigned int ii, double& displacement_, double& rotation_)
         {
             if (ii <= 120){         displacement_ = 0.1;    rotation_ = 0; }
             else if (ii <= 170) {   displacement_ = 0.2;    rotation_ = 1.8 * M_PI / 180; }
@@ -115,7 +115,7 @@ class FaramoticsRobot
             }
         }
 
-        void render(const FeatureBasePtrList& feature_list, int laser, const LandmarkBasePtrList& landmark_list, const Eigen::Vector3s& estimated_pose)
+        void render(const FeatureBasePtrList& feature_list, int laser, const LandmarkBasePtrList& landmark_list, const Eigen::Vector3d& estimated_pose)
         {
             // detected corners
             //std::cout << "   drawCorners: " << feature_list.size() << std::endl;
@@ -135,7 +135,7 @@ class FaramoticsRobot
             landmark_vector.reserve(3*landmark_list.size());
             for (auto landmark : landmark_list)
             {
-                Scalar* position_ptr = landmark->getP()->get();
+                double* position_ptr = landmark->getP()->get();
                 landmark_vector.push_back(*position_ptr); //x
                 landmark_vector.push_back(*(position_ptr + 1)); //y
                 landmark_vector.push_back(0.2); //z
@@ -174,15 +174,15 @@ int main(int argc, char** argv)
     unsigned int n_execution = 900; //number of iterations of the whole execution
 
     // VARIABLES ============================================================================================
-    Eigen::Vector2s odom_data;
-    Eigen::Vector3s ground_truth;
-    Scalar dt = 0.05;
+    Eigen::Vector2d odom_data;
+    Eigen::Vector3d ground_truth;
+    double dt = 0.05;
 
     // Laser params
-    Eigen::Vector4s laser_1_pose, laser_2_pose; //xyz + theta
+    Eigen::Vector4d laser_1_pose, laser_2_pose; //xyz + theta
     laser_1_pose << 1.2, 0, 0, 0; //laser 1
     laser_2_pose << -1.2, 0, 0, M_PI; //laser 2
-    Eigen::VectorXs laser_params(8);
+    Eigen::VectorXd laser_params(8);
     laser_params << M_PI/2, -M_PI/2, -M_PI/720, 0.01, 0.2, 100, 0.01, 0.01;
     std::vector<float> scan1, scan2;
 

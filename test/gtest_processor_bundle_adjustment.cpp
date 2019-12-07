@@ -70,7 +70,7 @@ class ProcessorBundleAdjustmentDummy : public ProcessorBundleAdjustment
 
 		CaptureImagePtr createCaptureImage(std::string _path, SensorCameraPtr _sensor, bool detectAndDescript = false)
 		{
-			const Scalar time = 0.0;
+			const double time = 0.0;
 			TimeStamp ts(time);
 		    CaptureImagePtr im = std::make_shared<CaptureImage>(ts, _sensor, cv::imread(_path));
 		    if (detectAndDescript){
@@ -103,7 +103,7 @@ TEST(ProcessorBundleAdjustment, installProcessor)
     IntrinsicsCameraPtr intr = std::make_shared<IntrinsicsCamera>(); // TODO init params or read from YAML
     intr->width  = 640;
     intr->height = 480;
-    auto sens_cam = problem->installSensor("CAMERA", "camera", (Eigen::Vector7s() << 0,0,0,  0,0,0,1).finished(), intr);
+    auto sens_cam = problem->installSensor("CAMERA", "camera", (Eigen::Vector7d() << 0,0,0,  0,0,0,1).finished(), intr);
 
     // Install processor
     ProcessorParamsBundleAdjustmentPtr params = std::make_shared<ProcessorParamsBundleAdjustment>();
@@ -241,7 +241,7 @@ TEST(ProcessorBundleAdjustment, emplaceLandmark)
     IntrinsicsCameraPtr intr = std::make_shared<IntrinsicsCamera>();
     intr->width  = 640;
     intr->height = 480;
-    auto sens_cam = problem_ptr->installSensor("CAMERA", "camera", (Eigen::Vector7s() << 0,0,0,  0,0,0,1).finished(), intr);
+    auto sens_cam = problem_ptr->installSensor("CAMERA", "camera", (Eigen::Vector7d() << 0,0,0,  0,0,0,1).finished(), intr);
     SensorCameraPtr camera = std::static_pointer_cast<SensorCamera>(sens_cam);
     // Install processor
     ProcessorParamsBundleAdjustmentPtr params = std::make_shared<ProcessorParamsBundleAdjustment>();
@@ -264,7 +264,7 @@ TEST(ProcessorBundleAdjustment, emplaceLandmark)
 	cv::KeyPoint kp = cv::KeyPoint(p, 32.0f);
 	cv::Mat des = cv::Mat::zeros(1,8, CV_8U);
 
-	FeaturePointImagePtr fea0 = std::make_shared<FeaturePointImage>(kp, 0, des, Eigen::Matrix2s::Identity()* pow(1, 2));
+	FeaturePointImagePtr fea0 = std::make_shared<FeaturePointImage>(kp, 0, des, Eigen::Matrix2d::Identity()* pow(1, 2));
 	fea0->link(cap0);
 
 	ASSERT_TRUE(problem_ptr->check(0));
@@ -283,10 +283,10 @@ TEST(ProcessorBundleAdjustment, process)
 
     // Install camera
     IntrinsicsCameraPtr intr = std::make_shared<IntrinsicsCamera>(); // TODO init params or read from YAML
-    intr->pinhole_model_raw = Eigen::Vector4s(0,0,1,1);  //TODO: initialize
+    intr->pinhole_model_raw = Eigen::Vector4d(0,0,1,1);  //TODO: initialize
     intr->width  = 640;
     intr->height = 480;
-    SensorCameraPtr sens_cam = std::static_pointer_cast<SensorCamera>(problem->installSensor("CAMERA", "camera", (Eigen::Vector7s() << 0,0,0,  0,0,0,1).finished(), intr));
+    SensorCameraPtr sens_cam = std::static_pointer_cast<SensorCamera>(problem->installSensor("CAMERA", "camera", (Eigen::Vector7d() << 0,0,0,  0,0,0,1).finished(), intr));
 
     // Install processor
     ProcessorParamsBundleAdjustmentPtr params = std::make_shared<ProcessorParamsBundleAdjustment>();

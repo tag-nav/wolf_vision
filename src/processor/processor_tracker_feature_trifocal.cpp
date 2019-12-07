@@ -40,7 +40,7 @@ ProcessorTrackerFeatureTrifocal::ProcessorTrackerFeatureTrifocal(ProcessorParams
     assert(!(params_tracker_feature_trifocal_->yaml_file_params_vision_utils.empty()) && "Missing YAML file with vision_utils parameters!");
     assert(file_exists(params_tracker_feature_trifocal_->yaml_file_params_vision_utils) && "Cannot setup processor: vision_utils' YAML file does not exist.");
 
-    pixel_cov_ = Eigen::Matrix2s::Identity() * params_tracker_feature_trifocal_->pixel_noise_std * params_tracker_feature_trifocal_->pixel_noise_std;
+    pixel_cov_ = Eigen::Matrix2d::Identity() * params_tracker_feature_trifocal_->pixel_noise_std * params_tracker_feature_trifocal_->pixel_noise_std;
 
     // Detector
     std::string det_name = vision_utils::readYamlType(params_tracker_feature_trifocal_->yaml_file_params_vision_utils, "detector");
@@ -400,10 +400,10 @@ void ProcessorTrackerFeatureTrifocal::establishFactors()
 
                 TimeStamp ts_first      = ftr_first->getCapture()->getTimeStamp();
                 TimeStamp ts_last       = ftr_last->getCapture()->getTimeStamp();
-                Scalar    Dt2           = (ts_last - ts_first) / 2.0;
+                double    Dt2           = (ts_last - ts_first) / 2.0;
                 TimeStamp ts_ave        = ts_first + Dt2;
 
-                Scalar dt_dev_min = Dt2;
+                double dt_dev_min = Dt2;
                 auto track = track_matrix_.track(trk_id);
                 for (auto ftr_it = track.begin() ; ftr_it != track.end() ; ftr_it ++)
                 {
@@ -448,7 +448,7 @@ void ProcessorTrackerFeatureTrifocal::setParams(const ProcessorParamsTrackerFeat
 
 void ProcessorTrackerFeatureTrifocal::configure(SensorBasePtr _sensor)
 {
-    _sensor->setNoiseStd(Vector2s::Ones() * params_tracker_feature_trifocal_->pixel_noise_std);
+    _sensor->setNoiseStd(Vector2d::Ones() * params_tracker_feature_trifocal_->pixel_noise_std);
 }
 
 ProcessorBasePtr ProcessorTrackerFeatureTrifocal::create(const std::string& _unique_name,

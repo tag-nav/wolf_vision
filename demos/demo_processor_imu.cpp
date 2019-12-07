@@ -71,16 +71,16 @@ int main(int argc, char** argv)
 
     // Wolf problem
     ProblemPtr problem_ptr_ = Problem::create("PQVBB 3D");
-    Eigen::VectorXs extrinsics(7);
+    Eigen::VectorXd extrinsics(7);
     extrinsics << 0,0,0, 0,0,0,1; // IMU pose in the robot
     SensorBasePtr sensor_ptr = problem_ptr_->installSensor("IMU", "Main IMU", extrinsics, IntrinsicsBasePtr());
     problem_ptr_->installProcessor("IMU", "IMU pre-integrator", "Main IMU", "");
 
     // Time and data variables
     TimeStamp t;
-    Scalar mti_clock, tmp;
-    Eigen::Vector6s data;
-    Eigen::Matrix6s data_cov;
+    double mti_clock, tmp;
+    Eigen::Vector6d data;
+    Eigen::Matrix6d data_cov;
     data_cov.setIdentity();
     data_cov.topLeftCorner(3,3)     *= 0.01;
     data_cov.bottomRightCorner(3,3) *= 0.01;
@@ -91,12 +91,12 @@ int main(int argc, char** argv)
     t.set(mti_clock * 0.0001); // clock in 0,1 ms ticks
 
     // Set the origin
-    Eigen::VectorXs x0(16);
+    Eigen::VectorXd x0(16);
     x0 << 0,0,0,  0,0,0,1,  0,0,0,  0,0,0,  0,0,0; // Try some non-zero biases
     problem_ptr_->getProcessorMotion()->setOrigin(x0, t);
 
     // Create one capture to store the IMU data arriving from (sensor / callback / file / etc.)
-    CaptureIMUPtr imu_ptr = make_shared<CaptureIMU>(t, sensor_ptr, data, data_cov, Vector6s::Zero());
+    CaptureIMUPtr imu_ptr = make_shared<CaptureIMU>(t, sensor_ptr, data, data_cov, Vector6d::Zero());
 
 //    problem_ptr_->print();
 
@@ -137,7 +137,7 @@ int main(int argc, char** argv)
         std::cout << "Integrated delta: " << std::fixed << std::setprecision(3) << std::setw(8)
                 << problem_ptr_->getProcessorMotion()->getMotion().delta_integr_.transpose() << std::endl;
 
-        Eigen::VectorXs x = problem_ptr_->getProcessorMotion()->getCurrentState();
+        Eigen::VectorXd x = problem_ptr_->getProcessorMotion()->getCurrentState();
 
         std::cout << "Integrated state: " << std::fixed << std::setprecision(3) << std::setw(8)
                 << x.head(10).transpose() << std::endl;
@@ -150,9 +150,9 @@ int main(int argc, char** argv)
 //#ifdef DEBUG_RESULTS
         // ----- dump to file -----
 
-        Eigen::VectorXs delta_debug;
-        Eigen::VectorXs delta_integr_debug;
-        Eigen::VectorXs x_debug;
+        Eigen::VectorXd delta_debug;
+        Eigen::VectorXd delta_integr_debug;
+        Eigen::VectorXd x_debug;
         TimeStamp ts;
 
         delta_debug = problem_ptr_->getProcessorMotion()->getMotion().delta_;
