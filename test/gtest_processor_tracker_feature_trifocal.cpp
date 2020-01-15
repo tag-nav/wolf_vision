@@ -107,12 +107,12 @@ TEST(ProcessorTrackerFeatureTrifocal, KeyFrameCallback)
     IntrinsicsOdom3DPtr params = std::make_shared<IntrinsicsOdom3D>();
     params->min_disp_var = 0.000001;
     params->min_rot_var  = 0.000001;
-    SensorBasePtr sens_odo = problem->installSensor("ODOM 3D", "odometer", (Vector7s() << 0,0,0,  0,0,0,1).finished(), params);
+    SensorBasePtr sens_odo = problem->installSensor("SensorOdom3D", "odometer", (Vector7s() << 0,0,0,  0,0,0,1).finished(), params);
     ProcessorParamsOdom3DPtr proc_odo_params = make_shared<ProcessorParamsOdom3D>();
     proc_odo_params->voting_active   = true;
     proc_odo_params->time_tolerance  = dt/2;
     proc_odo_params->max_buff_length = 3;
-    ProcessorBasePtr proc_odo = problem->installProcessor("ODOM 3D", "odometer", sens_odo, proc_odo_params);
+    ProcessorBasePtr proc_odo = problem->installProcessor("ProcessorOdom3D", "odometer", sens_odo, proc_odo_params);
 
     std::cout << "sensor & processor created and added to wolf problem" << std::endl;
 
