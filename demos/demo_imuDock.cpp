@@ -85,17 +85,17 @@ int main(int argc, char** argv)
     #endif
 
     // ___initialize variabes that will be used through the code___
-    Eigen::VectorXs problem_origin(16);
-    Eigen::Vector7s imu_pose((Eigen::Vector7s()<<0,0,0,0,0,0,1).finished()), odom_pose((Eigen::Vector7s()<<0,0,0,0,0,0,1).finished());
+    Eigen::VectorXd problem_origin(16);
+    Eigen::Vector7d imu_pose((Eigen::Vector7d()<<0,0,0,0,0,0,1).finished()), odom_pose((Eigen::Vector7d()<<0,0,0,0,0,0,1).finished());
     problem_origin << 0,0,0, 0,0,0,1, 0,0,0, 0,0,0, 0,0,0;
     
     //Create vectors to store data and time
-    Eigen::Vector6s data_imu, data_odom;
-    Scalar clock;
+    Eigen::Vector6d data_imu, data_odom;
+    double clock;
     TimeStamp ts(0), ts_output(0); //will be used to store the data timestamps and set timestamps in captures
 
     // ___Define expected values___
-    Eigen::Vector7s expected_KF1_pose((Eigen::Vector7s()<<0,0,0,0,0,0,1).finished()), expected_KF2_pose((Eigen::Vector7s()<<0,-0.06,0,0,0,0,11).finished());
+    Eigen::Vector7d expected_KF1_pose((Eigen::Vector7d()<<0,0,0,0,0,0,1).finished()), expected_KF2_pose((Eigen::Vector7d()<<0,-0.06,0,0,0,0,11).finished());
 
     //#################################################### SETTING PROBLEM
     std::string wolf_root = _WOLF_ROOT_DIR;
@@ -121,7 +121,7 @@ int main(int argc, char** argv)
     // ___process IMU and odometry___
 
     //Create captures
-    CaptureIMUPtr imu_ptr = std::make_shared<CaptureIMU>(ts, sensorIMU, data_imu, Matrix6s::Identity(), Vector6s::Zero()); //ts is set at 0
+    CaptureIMUPtr imu_ptr = std::make_shared<CaptureIMU>(ts, sensorIMU, data_imu, Matrix6d::Identity(), Vector6d::Zero()); //ts is set at 0
     CaptureMotionPtr mot_ptr = std::make_shared<CaptureMotion>(ts, sensorOdom, data_odom, 7, 6, nullptr);
 
     //while we do not reach the end of file, read IMU input (ts, Ax, Ay, Az, Wx, Wy, Wz) and process data through capture
@@ -175,8 +175,8 @@ int main(int argc, char** argv)
     // ___Create needed factors___
 
     //Add Fix3D factor on first KeyFrame (with large covariance except for yaw)
-    Eigen::MatrixXs featureFix_cov(6,6);
-    featureFix_cov = Eigen::MatrixXs::Identity(6,6);
+    Eigen::MatrixXd featureFix_cov(6,6);
+    featureFix_cov = Eigen::MatrixXd::Identity(6,6);
     featureFix_cov.topLeftCorner(3,3) *= 1e-8; // position variances (it's fixed anyway)
     featureFix_cov(3,3) = pow( .02  , 2); // roll variance
     featureFix_cov(4,4) = pow( .02  , 2); // pitch variance
@@ -185,8 +185,8 @@ int main(int argc, char** argv)
     FeatureBasePtr featureFix = cap_fix->addFeature(std::make_shared<FeatureBase>("ODOM 3D", problem_origin.head(7), featureFix_cov));
     FactorFix3DPtr fac_fix = std::static_pointer_cast<FactorPose3D>(featureFix->addFactor(std::make_shared<FactorPose3D>(featureFix)));
 
-    Eigen::MatrixXs featureFixBias_cov(6,6);
-    featureFixBias_cov = Eigen::MatrixXs::Identity(6,6); 
+    Eigen::MatrixXd featureFixBias_cov(6,6);
+    featureFixBias_cov = Eigen::MatrixXd::Identity(6,6); 
     featureFixBias_cov.topLeftCorner(3,3) *= sensorIMU->getAbInitialStdev() * sensorIMU->getAbInitialStdev();
     featureFixBias_cov.bottomRightCorner(3,3) *= sensorIMU->getWbInitialStdev() * sensorIMU->getWbInitialStdev();
     CaptureBasePtr cap_fixbias = KF1->addCapture(std::make_shared<CaptureMotion>(0, nullptr, problem_origin.tail(6), featureFixBias_cov, 6, 6, nullptr));
@@ -228,7 +228,7 @@ int main(int argc, char** argv)
          */
 
         unsigned int time_iter(0);
-        Scalar ms(0.001);
+        double ms(0.001);
         ts_output.set(0);
         while(ts_output.get() < ts.get() + ms)
         {
@@ -248,13 +248,13 @@ int main(int argc, char** argv)
 
     // ___Get standard deviation from covariances___
     #ifdef ADD_KF3
-        Eigen::MatrixXs cov_KF1(16,16), cov_KF2(16,16), cov_KF3(16,16);
+        Eigen::MatrixXd cov_KF1(16,16), cov_KF2(16,16), cov_KF3(16,16);
 
         problem->getFrameCovariance(KF1, cov_KF1);
         problem->getFrameCovariance(KF2, cov_KF2);
         problem->getFrameCovariance(KF3, cov_KF3);
 
-        Eigen::Matrix<wolf::Scalar, 16, 1> stdev_KF1, stdev_KF2, stdev_KF3;
+        Eigen::Matrix<double, 16, 1> stdev_KF1, stdev_KF2, stdev_KF3;
 
         stdev_KF1 = cov_KF1.diagonal().array().sqrt();
         stdev_KF2 = cov_KF2.diagonal().array().sqrt();
@@ -264,12 +264,12 @@ int main(int argc, char** argv)
         WOLF_DEBUG("stdev KF2 : ", stdev_KF2.transpose());
         WOLF_DEBUG("stdev KF3 : ", stdev_KF3.transpose());
     #else
-        Eigen::MatrixXs cov_KF1(16,16), cov_KF2(16,16);
+        Eigen::MatrixXd cov_KF1(16,16), cov_KF2(16,16);
 
         problem->getFrameCovariance(KF1, cov_KF1);
         problem->getFrameCovariance(KF2, cov_KF2);
 
-        Eigen::Matrix<wolf::Scalar, 16, 1> stdev_KF1, stdev_KF2;
+        Eigen::Matrix<double, 16, 1> stdev_KF1, stdev_KF2;
 
         stdev_KF1 = cov_KF1.diagonal().array().sqrt();
         stdev_KF2 = cov_KF2.diagonal().array().sqrt();

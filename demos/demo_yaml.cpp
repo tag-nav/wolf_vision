@@ -43,14 +43,14 @@ int main()
         YAML::Node params   = camera_config["intrinsic"];
 
         // convert yaml to Eigen
-        Vector3s pos        = camera_config["extrinsic"]["position"].as<Vector3s>();
-        Vector3s ori        = camera_config["extrinsic"]["orientation"].as<Vector3s>() * M_PI / 180;
-        Vector2s size       = params["image size"].as<Vector2s>();
-        Vector4s intrinsic  = params["pinhole model"].as<Vector4s>();
-        VectorXs distortion = params["distortion"].as<VectorXs>();
+        Vector3d pos        = camera_config["extrinsic"]["position"].as<Vector3d>();
+        Vector3d ori        = camera_config["extrinsic"]["orientation"].as<Vector3d>() * M_PI / 180;
+        Vector2d size       = params["image size"].as<Vector2d>();
+        Vector4d intrinsic  = params["pinhole model"].as<Vector4d>();
+        VectorXd distortion = params["distortion"].as<VectorXd>();
 
         // compute correction model
-        VectorXs correction(distortion.size());
+        VectorXd correction(distortion.size());
         pinhole::computeCorrectionModel(intrinsic, distortion, correction);
 
         // output

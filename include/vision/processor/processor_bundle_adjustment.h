@@ -37,7 +37,7 @@ struct ProcessorParamsBundleAdjustment : public ProcessorParamsTrackerFeature
 	int n_cells_v;
 	int min_response_new_feature;
 
-	Scalar pixel_noise_std; ///< std noise of the pixel
+	double pixel_noise_std; ///< std noise of the pixel
 	int min_track_length_for_factor; ///< Minimum track length of a matched feature to create a factor
 
 	ProcessorParamsBundleAdjustment() = default;
@@ -60,7 +60,7 @@ class ProcessorBundleAdjustment : public ProcessorTrackerFeature
 
         SensorCameraPtr camera;
 
-        Matrix2s        pixel_cov_;
+        Matrix2d        pixel_cov_;
 
         cv::Mat tvec_;
         cv::Mat rvec_;

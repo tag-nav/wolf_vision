@@ -717,14 +717,14 @@ void computeCorrectionModel(const Vk & k, const Vd & d, Vc & c)
     if (size != 0)
     {
 
-        Scalar r_max = sqrt(k(0) * k(0) / (k(2) * k(2)) + k(1) * k(1) / (k(3) * k(3)));
-        Scalar rd_max = 1.2 * r_max;
+        double r_max = sqrt(k(0) * k(0) / (k(2) * k(2)) + k(1) * k(1) / (k(3) * k(3)));
+        double rd_max = 1.2 * r_max;
 
         SizeEigen N_samples = 200; // number of samples
-        Scalar iN_samples = 1 / (Scalar)N_samples;
-        Scalar rd_n, rc_2, rd_2;
-        Eigen::VectorXs rd(N_samples + 1), rc(N_samples + 1);
-        Eigen::MatrixXs Rd(N_samples + 1, size);
+        double iN_samples = 1 / (double)N_samples;
+        double rd_n, rc_2, rd_2;
+        Eigen::VectorXd rd(N_samples + 1), rc(N_samples + 1);
+        Eigen::MatrixXd Rd(N_samples + 1, size);
 
         for (SizeEigen sample = 0; sample <= N_samples; sample++)
         {
@@ -751,13 +751,13 @@ void computeCorrectionModel(const Vk & k, const Vd & d, Vc & c)
         // jmath::LinearSolvers::solve_Cholesky(Rd, (rc - rd), c);
 
         // therefore we solve manually the pseudo-inverse:
-        Eigen::MatrixXs RdtRd(size, size);
+        Eigen::MatrixXd RdtRd(size, size);
         RdtRd = Rd.transpose() * Rd;
-        Eigen::MatrixXs iRdtRd(size, size);
+        Eigen::MatrixXd iRdtRd(size, size);
         //jmath::ublasExtra::inv(RdtRd, iRdtRd);
         // I understood that iRdtRd is the inverse of RdtRd)
         iRdtRd = RdtRd.inverse();
-        Eigen::MatrixXs iRd = iRdtRd * Rd.transpose();
+        Eigen::MatrixXd iRd = iRdtRd * Rd.transpose();
 
         c = iRd * (rc - rd);
     }

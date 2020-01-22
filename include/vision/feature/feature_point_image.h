@@ -19,16 +19,16 @@ class FeaturePointImage : public FeatureBase
         unsigned int index_keypoint_;
         cv::Mat descriptor_;
         bool is_known_;
-        Scalar score_;
+        double score_;
         cv::Rect tracker_roi_;
 
     public:
 
         /// Constructor from Eigen measured pixel
-        FeaturePointImage(const Eigen::Vector2s & _measured_pixel,
+        FeaturePointImage(const Eigen::Vector2d & _measured_pixel,
                           const unsigned int& _index_keypoint,
                           const cv::Mat& _descriptor,
-                          const Eigen::Matrix2s& _meas_covariance) :
+                          const Eigen::Matrix2d& _meas_covariance) :
                 FeatureBase("POINT IMAGE", _measured_pixel, _meas_covariance),
                 keypoint_(_measured_pixel(0), _measured_pixel(1), 1), // Size 1 is a dummy value
                 index_keypoint_(_index_keypoint),
@@ -44,16 +44,16 @@ class FeaturePointImage : public FeatureBase
         FeaturePointImage(const cv::KeyPoint& _keypoint,
                           const unsigned int& _index_keypoint,
                           const cv::Mat& _descriptor,
-                          const Eigen::Matrix2s& _meas_covariance) :
-                FeatureBase("POINT IMAGE", Eigen::Vector2s::Zero(), _meas_covariance),
+                          const Eigen::Matrix2d& _meas_covariance) :
+                FeatureBase("POINT IMAGE", Eigen::Vector2d::Zero(), _meas_covariance),
                 keypoint_(_keypoint),
                 index_keypoint_(_index_keypoint),
                 descriptor_(_descriptor),
                 is_known_(false),
                 score_(0)
         {
-            measurement_(0) = Scalar(_keypoint.pt.x);
-            measurement_(1) = Scalar(_keypoint.pt.y);
+            measurement_(0) = double(_keypoint.pt.x);
+            measurement_(1) = double(_keypoint.pt.y);
         }
 
        virtual ~FeaturePointImage();
@@ -70,21 +70,21 @@ class FeaturePointImage : public FeatureBase
         bool isKnown();
         void setIsKnown(bool _is_known);
 
-        /*Eigen::VectorXs & getMeasurement(){
-            measurement_(0) = Scalar(keypoint_.pt.x);
-            measurement_(1) = Scalar(keypoint_.pt.y);
+        /*Eigen::VectorXd & getMeasurement(){
+            measurement_(0) = double(keypoint_.pt.x);
+            measurement_(1) = double(keypoint_.pt.y);
             return measurement_;
         }*/
 
         const cv::Rect& getTrackerRoi() const;
         void setTrackerRoi(const cv::Rect& tracker_roi);
 
-        Scalar getScore() const
+        double getScore() const
         {
             return score_;
         }
 
-        void setScore(Scalar score)
+        void setScore(double score)
         {
             score_ = score;
         }

@@ -21,7 +21,7 @@
 
 //#define DEBUG_RESULTS
 
-void getOdom2DData(std::ifstream& _stream, wolf::Scalar& _stamp, Eigen::Vector2s& _data)
+void getOdom2DData(std::ifstream& _stream, double& _stamp, Eigen::Vector2d& _data)
 {
   /*
    * Data are logged as follows :
@@ -64,7 +64,7 @@ void getOdom2DData(std::ifstream& _stream, wolf::Scalar& _stamp, Eigen::Vector2s
   i = dummy.find(sub);
   dummy.erase(i, sub.length());
 
-  _stamp += std::stod(dummy) * wolf::Scalar(1e-9);
+  _stamp += std::stod(dummy) * double(1e-9);
 
   getline(_stream, dummy); // frame_id: ''
   getline(_stream, dummy); // twist:
@@ -93,7 +93,7 @@ void getOdom2DData(std::ifstream& _stream, wolf::Scalar& _stamp, Eigen::Vector2s
   getline(_stream, dummy); // ---
 }
 
-void readWheelData(std::ifstream &_stream, Eigen::Vector2s &_data)
+void readWheelData(std::ifstream &_stream, Eigen::Vector2d &_data)
 {
   /*
    * left_wheel_joint_actual_position: [x]
@@ -166,7 +166,7 @@ int main(int argc, char** argv)
   ProblemPtr wolf_problem_ptr_ = Problem::create("PO", 2);
 
   const std::string sensor_name("Main Odometer");
-  Eigen::VectorXs extrinsics(3);
+  Eigen::VectorXd extrinsics(3);
   extrinsics << 0, 0, 0;
 
   IntrinsicsBasePtr intrinsics = std::make_shared<IntrinsicsDiffDrive>();
@@ -179,7 +179,7 @@ int main(int argc, char** argv)
   intrinsics_diff_drive->separation_   = 0.3517;
 
   intrinsics_diff_drive->model_        = wolf::DiffDriveModel::Three_Factor_Model;
-  intrinsics_diff_drive->factors_      = Eigen::Vector3s(1,1,1);
+  intrinsics_diff_drive->factors_      = Eigen::Vector3d(1,1,1);
 
   intrinsics_diff_drive->left_resolution_  = 0.0001653; // [rad]
   intrinsics_diff_drive->right_resolution_ = 0.0001653; // [rad]
@@ -189,12 +189,12 @@ int main(int argc, char** argv)
 
   // Time and data variables
   TimeStamp t;
-  Scalar stamp_secs(0);
-//  Scalar period_secs(0.010); //100Hz
-  Scalar period_secs(0.020); //50Hz
-  Eigen::Vector2s data_; data_ << 0,0;
+  double stamp_secs(0);
+//  double period_secs(0.010); //100Hz
+  double period_secs(0.020); //50Hz
+  Eigen::Vector2d data_; data_ << 0,0;
 
-  const auto scalar_max = std::numeric_limits<Scalar>::max();
+  const auto scalar_max = std::numeric_limits<double>::max();
 
   ProcessorParamsDiffDrivePtr processor_params = std::make_shared<ProcessorParamsDiffDrive>();
   processor_params->time_tolerance  = period_secs/2;

@@ -14,8 +14,8 @@ int main(int argc, char** argv)
 
     std::cout << std::endl << " ========= ProjectPoints test ===========" << std::endl << std::endl;
 
-    Eigen::MatrixXs points3D(2,3);
-    Eigen::Vector3s point3D;
+    Eigen::MatrixXd points3D(2,3);
+    Eigen::Vector3d point3D;
     point3D[0] = 2.0;
     point3D[1] = 5.0;
     point3D[2] = 6.0;
@@ -25,18 +25,18 @@ int main(int argc, char** argv)
     point3D[2] = 1.0;
     points3D.row(1)= point3D;
 
-    Eigen::Vector3s cam_ext_rot_mat = Eigen::Vector3s::Zero();
-    Eigen::Vector3s cam_ext_trans_mat = Eigen::Vector3s::Ones();
+    Eigen::Vector3d cam_ext_rot_mat = Eigen::Vector3d::Zero();
+    Eigen::Vector3d cam_ext_trans_mat = Eigen::Vector3d::Ones();
 
-    Eigen::Matrix3s cam_intr_mat;
-    cam_intr_mat = Eigen::Matrix3s::Identity();
+    Eigen::Matrix3d cam_intr_mat;
+    cam_intr_mat = Eigen::Matrix3d::Identity();
     cam_intr_mat(0,2)=2;
     cam_intr_mat(1,2)=2;
 
-    Eigen::VectorXs dist_coef(5);
+    Eigen::VectorXd dist_coef(5);
     dist_coef << 0,0,0,0,0;
 
-    Eigen::MatrixXs points2D = vision_utils::projectPoints(points3D, cam_ext_rot_mat, cam_ext_trans_mat, cam_intr_mat, dist_coef);
+    Eigen::MatrixXd points2D = vision_utils::projectPoints(points3D, cam_ext_rot_mat, cam_ext_trans_mat, cam_intr_mat, dist_coef);
 
     for (int ii = 0; ii < points3D.rows(); ++ii)
         std::cout << "points2D- X: " << points2D(ii,0) << "; Y: " << points2D(ii,1) << std::endl;
@@ -45,16 +45,16 @@ int main(int argc, char** argv)
 
     //================================= projectPoint and backprojectPoint to/from NormalizedPlane
 
-    Eigen::Vector3s project_point_normalized_test;
+    Eigen::Vector3d project_point_normalized_test;
     project_point_normalized_test[0] = 1.06065;
     project_point_normalized_test[1] = 1.06065;
     project_point_normalized_test[2] = 3;
-    Eigen::Vector2s project_point_normalized_output;
-    Eigen::Vector2s project_point_normalized_output2;
-    Scalar project_point_normalized_dist;
+    Eigen::Vector2d project_point_normalized_output;
+    Eigen::Vector2d project_point_normalized_output2;
+    double project_point_normalized_dist;
 
-    Scalar backproject_point_normalized_depth = 3;
-    Eigen::Vector3s backproject_point_normalized_output;
+    double backproject_point_normalized_depth = 3;
+    Eigen::Vector3d backproject_point_normalized_output;
 
     project_point_normalized_output = pinhole::projectPointToNormalizedPlane(project_point_normalized_test);
 
@@ -74,20 +74,20 @@ int main(int argc, char** argv)
 
     //================================= projectPoint and backprojectPoint to/from NormalizedPlane WITH JACOBIANS
 
-    Eigen::Vector3s pp_normalized_test;
+    Eigen::Vector3d pp_normalized_test;
     pp_normalized_test[0] = 3;
     pp_normalized_test[1] = 3;
     pp_normalized_test[2] = 3;
-    Eigen::Vector2s pp_normalized_output;
-    Eigen::Vector2s pp_normalized_output2;
-    Eigen::Matrix<Scalar, 2, 3> pp_normalized_jacobian;
-    Eigen::Matrix<Scalar, 2, 3> pp_normalized_jacobian2;
-    Scalar pp_normalized_distance;
+    Eigen::Vector2d pp_normalized_output;
+    Eigen::Vector2d pp_normalized_output2;
+    Eigen::Matrix<double, 2, 3> pp_normalized_jacobian;
+    Eigen::Matrix<double, 2, 3> pp_normalized_jacobian2;
+    double pp_normalized_distance;
 
-    Scalar bpp_normalized_depth = 3;
-    Eigen::Vector3s bpp_normalized_output;
-    Eigen::Matrix<Scalar, 3, 2> bpp_normalized_jacobian;
-    Eigen::Vector3s bpp_normalized_jacobian_depth;
+    double bpp_normalized_depth = 3;
+    Eigen::Vector3d bpp_normalized_output;
+    Eigen::Matrix<double, 3, 2> bpp_normalized_jacobian;
+    Eigen::Vector3d bpp_normalized_jacobian_depth;
 
     pinhole::projectPointToNormalizedPlane(pp_normalized_test,
                                            pp_normalized_output,
@@ -119,14 +119,14 @@ int main(int argc, char** argv)
     std::cout << "\n--> Jacobian" << std::endl << bpp_normalized_jacobian << std::endl;
     std::cout << "\n--> Jacobian - depth" << bpp_normalized_jacobian_depth.transpose() << std::endl;
 
-    Eigen::Matrix2s test_jacobian; // (2x3) * (3x2) = (2x2)
+    Eigen::Matrix2d test_jacobian; // (2x3) * (3x2) = (2x2)
     test_jacobian =  pp_normalized_jacobian * bpp_normalized_jacobian;
 
     std::cout << "\n\n\n==> Jacobian Testing" << std::endl << test_jacobian << std::endl;
 
     //================================= IsInRoi / IsInImage
 
-    Eigen::Vector2s pix;
+    Eigen::Vector2d pix;
     pix[0] = 40; // x
     pix[1] = 40; // y
 
@@ -162,17 +162,17 @@ int main(int argc, char** argv)
 
     //================================= computeCorrectionModel
 
-    Eigen::Vector2s distortion2;
+    Eigen::Vector2d distortion2;
     distortion2[0] = -0.301701;
     distortion2[1] = 0.0963189;
-    Eigen::Vector4s k_test2;
+    Eigen::Vector4d k_test2;
     //k = [u0, v0, au, av]
     k_test2[0] = 516.686; //u0
     k_test2[1] = 355.129; //v0
     k_test2[2] = 991.852; //au
     k_test2[3] = 995.269; //av
 
-    Eigen::Vector2s correction_test2;
+    Eigen::Vector2d correction_test2;
     pinhole::computeCorrectionModel(k_test2,
                                     distortion2,
                                     correction_test2);
@@ -188,11 +188,11 @@ int main(int argc, char** argv)
 
     //================================= distortPoint
 
-    Eigen::Vector2s distorting_point;
+    Eigen::Vector2d distorting_point;
     distorting_point[0] = 0.35355;
     distorting_point[1] = 0.35355;
 
-    Eigen::Vector2s distored_point3;
+    Eigen::Vector2d distored_point3;
     distored_point3 = pinhole::distortPoint(distortion2,
                                             distorting_point);
 
@@ -203,7 +203,7 @@ int main(int argc, char** argv)
     std::cout << std::endl << "Distorted point" << std::endl;
     std::cout << "x: " << distored_point3[0] << "; y: " << distored_point3[1] << std::endl;
 
-    Eigen::Vector2s corrected_point4;
+    Eigen::Vector2d corrected_point4;
     corrected_point4 = pinhole::undistortPoint(correction_test2,
                                                distored_point3);
     std::cout << std::endl << "Corrected point" << std::endl;
@@ -211,8 +211,8 @@ int main(int argc, char** argv)
 
     ////
 
-    Eigen::Vector2s distored_point4;
-    Eigen::Matrix2s distortion_jacobian2;
+    Eigen::Vector2d distored_point4;
+    Eigen::Matrix2d distortion_jacobian2;
     pinhole::distortPoint(distortion2,
                           distorting_point,
                           distored_point4,
@@ -226,8 +226,8 @@ int main(int argc, char** argv)
     std::cout << "\n--> Jacobian" << std::endl <<
                  distortion_jacobian2 << std::endl;
 
-    Eigen::Vector2s corrected_point5;
-    Eigen::Matrix2s corrected_jacobian2;
+    Eigen::Vector2d corrected_point5;
+    Eigen::Matrix2d corrected_jacobian2;
     pinhole::undistortPoint(correction_test2,
                             distored_point4,
                             corrected_point5,
@@ -238,7 +238,7 @@ int main(int argc, char** argv)
     std::cout << "\n--> Jacobian" << std::endl <<
                  corrected_jacobian2 << std::endl;
 
-    Eigen::Matrix2s test_jacobian_distortion;
+    Eigen::Matrix2d test_jacobian_distortion;
     test_jacobian_distortion =  distortion_jacobian2 * corrected_jacobian2;
 
     std::cout << "\n\n\n==> Jacobian Testing" << std::endl <<
@@ -246,22 +246,22 @@ int main(int argc, char** argv)
 
     //================================= PixelizePoint
 
-    Eigen::Vector2s pixelize_ud;
+    Eigen::Vector2d pixelize_ud;
     pixelize_ud[0] = 45;
     pixelize_ud[1] = 28;
 
-    Eigen::Vector2s pixelize_output3;
+    Eigen::Vector2d pixelize_output3;
     pixelize_output3 = pinhole::pixellizePoint(k_test2,
                                                pixelize_ud);
 
     std::cout << "\n--------------------------------------------------------" << std::endl;
-    std::cout << "\nTEST pixelizePoint; Eigen::Vector2s" << std::endl;
+    std::cout << "\nTEST pixelizePoint; Eigen::Vector2d" << std::endl;
     std::cout << std::endl << "Original" << std::endl;
     std::cout << "x: " << pixelize_ud[0] << "; y: " << pixelize_ud[1] << std::endl;
     std::cout << std::endl << "Pixelized" << std::endl;
     std::cout << "x: " << pixelize_output3[0] << "; y: " << pixelize_output3[1] << std::endl;
 
-    Eigen::Vector2s depixelize_output3;
+    Eigen::Vector2d depixelize_output3;
     depixelize_output3 = pinhole::depixellizePoint(k_test2,
                                                    pixelize_output3);
     std::cout << std::endl << "Depixelized" << std::endl;
@@ -269,8 +269,8 @@ int main(int argc, char** argv)
 
     ////
 
-    Eigen::Vector2s pixelize_output4;
-    Eigen::Matrix2s pixelize_jacobian2;
+    Eigen::Vector2d pixelize_output4;
+    Eigen::Matrix2d pixelize_jacobian2;
     pinhole::pixellizePoint(k_test2,
                             pixelize_ud,
                             pixelize_output4,
@@ -284,8 +284,8 @@ int main(int argc, char** argv)
     std::cout << "\n--> Jacobian" << std::endl <<
                  pixelize_jacobian2 << std::endl;
 
-    Eigen::Vector2s depixelize_output4;
-    Eigen::Matrix2s depixelize_jacobian2;
+    Eigen::Vector2d depixelize_output4;
+    Eigen::Matrix2d depixelize_jacobian2;
     pinhole::depixellizePoint(k_test2,
                               pixelize_output4,
                               depixelize_output4,
@@ -296,7 +296,7 @@ int main(int argc, char** argv)
     std::cout << "\n--> Jacobian" << std::endl <<
                  depixelize_jacobian2 << std::endl;
 
-    Eigen::Matrix2s test_jacobian_pix;
+    Eigen::Matrix2d test_jacobian_pix;
     test_jacobian_pix =  pixelize_jacobian2 * depixelize_jacobian2;
 
     std::cout << "\n\n\n==> Jacobian Testing" << std::endl <<
@@ -313,7 +313,7 @@ int main(int argc, char** argv)
 //    //3Dpoint
 //    project_point_normalized_test;
 
-    Eigen::Vector2s point2D_test5;
+    Eigen::Vector2d point2D_test5;
     point2D_test5 = pinhole::projectPoint(k_test2,
                                           distortion2,
                                           project_point_normalized_test);
@@ -332,8 +332,8 @@ int main(int argc, char** argv)
     std::cout << "x: " << point2D_test5[0] << "; y: " << point2D_test5[1] << std::endl;
 
         //distance
-    Eigen::Vector2s point2D_test6;
-    Scalar distance_test4;
+    Eigen::Vector2d point2D_test6;
+    double distance_test4;
     pinhole::projectPoint(k_test2,
                           distortion2,
                           project_point_normalized_test,
@@ -344,8 +344,8 @@ int main(int argc, char** argv)
     std::cout << "x: " << point2D_test6[0] << "; y: " << point2D_test6[1] << "; dist: " << distance_test4 << std::endl;
 
         //jacobian
-    Eigen::Vector2s point2D_test7;
-    Eigen::MatrixXs jacobian_test3(2,3);
+    Eigen::Vector2d point2D_test7;
+    Eigen::MatrixXd jacobian_test3(2,3);
     pinhole::projectPoint(k_test2,
                           distortion2,
                           project_point_normalized_test,
@@ -358,9 +358,9 @@ int main(int argc, char** argv)
                  jacobian_test3 << std::endl;
 
         //jacobian and distance
-    Eigen::Vector2s point2D_test8;
-    Eigen::MatrixXs jacobian_test4(2,3);
-    Scalar distance_test3;
+    Eigen::Vector2d point2D_test8;
+    Eigen::MatrixXd jacobian_test4(2,3);
+    double distance_test3;
     pinhole::projectPoint(k_test2,
                           distortion2,
                           project_point_normalized_test,
@@ -381,9 +381,9 @@ int main(int argc, char** argv)
 //    //2Dpoint
 //    point2D_test5
 
-    Scalar depth3 = project_point_normalized_test[2];
+    double depth3 = project_point_normalized_test[2];
 
-    Eigen::Vector3s point3D_backproj5;
+    Eigen::Vector3d point3D_backproj5;
     point3D_backproj5 = pinhole::backprojectPoint(k_test2,
                                                   correction_test2,
                                                   point2D_test5,
@@ -394,9 +394,9 @@ int main(int argc, char** argv)
     std::cout << "x: " << point3D_backproj5[0] << "; y: " << point3D_backproj5[1] << "; z: " << point3D_backproj5[2] << std::endl;
 
         //jacobian
-    Eigen::Vector3s point3D_backproj4;
-    Eigen::MatrixXs jacobian_backproj2(3,2);
-    Eigen::Vector3s depth_jacobian2;
+    Eigen::Vector3d point3D_backproj4;
+    Eigen::MatrixXd jacobian_backproj2(3,2);
+    Eigen::Vector3d depth_jacobian2;
     pinhole::backprojectPoint(k_test2,
                               correction_test2,
                               point2D_test7,
@@ -412,7 +412,7 @@ int main(int argc, char** argv)
     std::cout << "\n--> Jacobian - depth" << std::endl <<
                  depth_jacobian2[0] << " " << depth_jacobian2[1] << " " << depth_jacobian2[2] << " " << std::endl;
 
-    Eigen::Matrix2s test_jacobian_complete;
+    Eigen::Matrix2d test_jacobian_complete;
     test_jacobian_complete =  jacobian_test4 * jacobian_backproj2;
 
     std::cout << "\n\n\n==> Jacobian Testing" << std::endl <<
@@ -421,28 +421,28 @@ int main(int argc, char** argv)
     /* Test */
     std::cout << "\n\n\n\nTEST\n" << std::endl;
 
-    Eigen::Matrix3s K;
+    Eigen::Matrix3d K;
     K(0,0) = 830.748734;    K(0,1) = 0;             K(0,2) = 327.219132;
     K(1,0) = 0;             K(1,1) = 831.18208;     K(1,2) = 234.720244;
     K(2,0) = 0;             K(2,1) = 0;             K(2,2) = 1;
 
-    Eigen::Vector4s K_params = {327.219132,234.720244, 830.748734,831.18208};
+    Eigen::Vector4d K_params = {327.219132,234.720244, 830.748734,831.18208};
 
     std::cout << "K:\n" << K << std::endl;
 
-    Eigen::Vector4s distortion_vector = {0.0006579999999999999, 0.023847, -0.001878, 0.007706999999999999};
+    Eigen::Vector4d distortion_vector = {0.0006579999999999999, 0.023847, -0.001878, 0.007706999999999999};
 
     std::cout << "\nDistortion vector:\n" << distortion_vector << std::endl;
 
-    Eigen::Vector4s correction_vector;
+    Eigen::Vector4d correction_vector;
     pinhole::computeCorrectionModel(K_params,
                                     distortion_vector,
                                     correction_vector);
 
     std::cout << "\nCorrection vector:\n" << correction_vector << std::endl;
 
-    Eigen::Vector3s test_point3D;
-    Eigen::Vector2s test_point2D = {123,321};
+    Eigen::Vector3d test_point3D;
+    Eigen::Vector2d test_point2D = {123,321};
     std::cout << "\ntest_point2D ORIGINAL:\n" << test_point2D << std::endl;
 
     test_point2D = pinhole::depixellizePoint(K_params,

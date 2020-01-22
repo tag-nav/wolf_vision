@@ -13,11 +13,11 @@ using namespace wolf;
 
 class FactorAutodiffTrifocalTest : public testing::Test{
     public:
-        Vector3s    pos1,   pos2,   pos3,   pos_cam, point;
-        Vector3s    euler1, euler2, euler3, euler_cam;
-        Quaternions quat1,  quat2,  quat3,  quat_cam;
-        Vector4s    vquat1, vquat2, vquat3, vquat_cam; // quaternions as vectors
-        Vector7s    pose1,  pose2,  pose3,  pose_cam;
+        Vector3d    pos1,   pos2,   pos3,   pos_cam, point;
+        Vector3d    euler1, euler2, euler3, euler_cam;
+        Quaterniond quat1,  quat2,  quat3,  quat_cam;
+        Vector4d    vquat1, vquat2, vquat3, vquat_cam; // quaternions as vectors
+        Vector7d    pose1,  pose2,  pose3,  pose_cam;
 
         ProblemPtr      problem;
         CeresManagerPtr ceres_manager;
@@ -31,7 +31,7 @@ class FactorAutodiffTrifocalTest : public testing::Test{
         FeatureBasePtr  f1, f2, f3;
         FactorAutodiffTrifocalPtr c123;
 
-        Scalar pixel_noise_std;
+        double pixel_noise_std;
 
         virtual ~FactorAutodiffTrifocalTest()
         {
@@ -139,8 +139,8 @@ class FactorAutodiffTrifocalTest : public testing::Test{
 
             // Add three viewpoints with frame, capture and feature
             pixel_noise_std = 2.0;
-            Vector2s pix(0,0);
-            Matrix2s pix_cov(Matrix2s::Identity() * pow(pixel_noise_std, 2));
+            Vector2d pix(0,0);
+            Matrix2d pix_cov(Matrix2d::Identity() * pow(pixel_noise_std, 2));
 
             F1 = problem->emplaceFrame(KEY, pose1, 1.0);
             I1 = std::static_pointer_cast<CaptureImage>(CaptureBase::emplace<CaptureImage>(F1, 1.0, camera, cv::Mat(2,2,CV_8UC1)));
@@ -181,7 +181,7 @@ TEST_F(FactorAutodiffTrifocalTest, InfoMatrix)
      *   The info matrix is 0.5 s^-2 pix^-2
      *   The sqrt info matrix is 1/s/sqrt(2) pix^-1
      */
-    Matrix3s sqrt_info_gt = Matrix3s::Identity() / pixel_noise_std / sqrt(2.0);
+    Matrix3d sqrt_info_gt = Matrix3d::Identity() / pixel_noise_std / sqrt(2.0);
 
     ASSERT_MATRIX_APPROX(c123->getSqrtInformationUpper(), sqrt_info_gt, 1e-8);
 
@@ -190,42 +190,42 @@ TEST_F(FactorAutodiffTrifocalTest, InfoMatrix)
 TEST_F(FactorAutodiffTrifocalTest, expectation)
 {
     //    Homogeneous transform C2 wrt C1
-    Matrix4s _c1Hc2; _c1Hc2 <<
+    Matrix4d _c1Hc2; _c1Hc2 <<
                0,  0, -1,  1,
                0,  1,  0,  0,
                1,  0,  0,  1,
                0,  0,  0,  1;
 
     // rotation and translation
-    Matrix3s _c1Rc2 = _c1Hc2.block(0,0,3,3);
-    Vector3s _c1Tc2 = _c1Hc2.block(0,3,3,1);
+    Matrix3d _c1Rc2 = _c1Hc2.block(0,0,3,3);
+    Vector3d _c1Tc2 = _c1Hc2.block(0,3,3,1);
 
     // Essential matrix, ground truth (fwd and bkwd)
-    Matrix3s _c1Ec2 = wolf::skew(_c1Tc2) * _c1Rc2;
-    Matrix3s _c2Ec1 = _c1Ec2.transpose();
+    Matrix3d _c1Ec2 = wolf::skew(_c1Tc2) * _c1Rc2;
+    Matrix3d _c2Ec1 = _c1Ec2.transpose();
 
     // Expected values
     vision_utils::TrifocalTensor tensor;
-    Matrix3s c2Ec1;
+    Matrix3d c2Ec1;
     c123->expectation(pos1, quat1, pos2, quat2, pos3, quat3, pos_cam, quat_cam, tensor, c2Ec1);
 
     // check trilinearities
 
     // Elements computed using the tensor
-    Matrix3s T0, T1, T2;
+    Matrix3d T0, T1, T2;
     tensor.getLayers(T0,T1,T2);
-    Vector3s _m1 (0,0,1),
+    Vector3d _m1 (0,0,1),
              _m2 (0,0,1),
              _m3 (0,0,1); // ground truth
-    Matrix3s m1Tt = _m1(0)*T0.transpose()
+    Matrix3d m1Tt = _m1(0)*T0.transpose()
                   + _m1(1)*T1.transpose()
                   + _m1(2)*T2.transpose();
 
     // Projective line: l = (nx ny dn), with (nx ny): normal vector; dn: distance to origin times norm(nx,ny)
-    Vector3s _l2(0,1,0),
+    Vector3d _l2(0,1,0),
              _p2(1,0,0),
              _p3(0,1,0); // ground truth
-    Vector3s l2;
+    Vector3d l2;
     l2 = c2Ec1 * _m1;
 
     // check epipolar lines (check only director vectors for equal direction)
@@ -237,20 +237,20 @@ TEST_F(FactorAutodiffTrifocalTest, expectation)
     // Verify trilinearities
 
     // Point-line-line
-    Matrix1s pll = _p3.transpose() * m1Tt * _p2;
+    Matrix1d pll = _p3.transpose() * m1Tt * _p2;
     ASSERT_TRUE(pll(0)<1e-5);
 
     // Point-line-point
-    Vector3s plp = wolf::skew(_m3) * m1Tt * _p2;
-    ASSERT_MATRIX_APPROX(plp, Vector3s::Zero(), 1e-8);
+    Vector3d plp = wolf::skew(_m3) * m1Tt * _p2;
+    ASSERT_MATRIX_APPROX(plp, Vector3d::Zero(), 1e-8);
 
     // Point-point-line
-    Vector3s ppl = _p3.transpose() * m1Tt * wolf::skew(_m2);
-    ASSERT_MATRIX_APPROX(ppl, Vector3s::Zero(), 1e-8);
+    Vector3d ppl = _p3.transpose() * m1Tt * wolf::skew(_m2);
+    ASSERT_MATRIX_APPROX(ppl, Vector3d::Zero(), 1e-8);
 
     // Point-point-point
-    Matrix3s ppp = wolf::skew(_m3) * m1Tt * wolf::skew(_m2);
-    ASSERT_MATRIX_APPROX(ppp, Matrix3s::Zero(), 1e-8);
+    Matrix3d ppp = wolf::skew(_m3) * m1Tt * wolf::skew(_m2);
+    ASSERT_MATRIX_APPROX(ppp, Matrix3d::Zero(), 1e-8);
 
     // check epipolars
     ASSERT_MATRIX_APPROX(c2Ec1/c2Ec1(0,1), _c2Ec1/_c2Ec1(0,1), 1e-8);
@@ -259,36 +259,36 @@ TEST_F(FactorAutodiffTrifocalTest, expectation)
 TEST_F(FactorAutodiffTrifocalTest, residual)
 {
     vision_utils::TrifocalTensor tensor;
-    Matrix3s c2Ec1;
-    Vector3s residual;
+    Matrix3d c2Ec1;
+    Vector3d residual;
 
     // Nominal values
     c123->expectation(pos1, quat1, pos2, quat2, pos3, quat3, pos_cam, quat_cam, tensor, c2Ec1);
     residual = c123->residual(tensor, c2Ec1);
 
-    ASSERT_MATRIX_APPROX(residual, Vector3s::Zero(), 1e-8);
+    ASSERT_MATRIX_APPROX(residual, Vector3d::Zero(), 1e-8);
 }
 
 TEST_F(FactorAutodiffTrifocalTest, error_jacobians)
 {
     vision_utils::TrifocalTensor tensor;
-    Matrix3s c2Ec1;
-    Vector3s residual, residual_pert;
-    Vector3s pix0, pert, pix_pert;
-    Scalar epsilon = 1e-8;
+    Matrix3d c2Ec1;
+    Vector3d residual, residual_pert;
+    Vector3d pix0, pert, pix_pert;
+    double epsilon = 1e-8;
 
     // Nominal values
     c123->expectation(pos1, quat1, pos2, quat2, pos3, quat3, pos_cam, quat_cam, tensor, c2Ec1);
     residual = c123->residual(tensor, c2Ec1);
 
-    Matrix<Scalar, 3, 3> J_e_m1, J_e_m2, J_e_m3, J_r_m1, J_r_m2, J_r_m3;
+    Matrix<double, 3, 3> J_e_m1, J_e_m2, J_e_m3, J_r_m1, J_r_m2, J_r_m3;
     c123->error_jacobians(tensor, c2Ec1, J_e_m1, J_e_m2, J_e_m3);
     J_r_m1 = c123->getSqrtInformationUpper() * J_e_m1;
     J_r_m2 = c123->getSqrtInformationUpper() * J_e_m2;
     J_r_m3 = c123->getSqrtInformationUpper() * J_e_m3;
 
     // numerical jacs
-    Matrix<Scalar,3,3> Jn_r_m1, Jn_r_m2, Jn_r_m3;
+    Matrix<double,3,3> Jn_r_m1, Jn_r_m2, Jn_r_m3;
 
     // jacs wrt m1
     pix0 = c123->getPixelCanonical1();
@@ -342,7 +342,7 @@ TEST_F(FactorAutodiffTrifocalTest, error_jacobians)
 
 TEST_F(FactorAutodiffTrifocalTest, operator_parenthesis)
 {
-    Vector3s res;
+    Vector3d res;
 
     // Factor with exact states should give zero residual
     c123->operator ()(pos1.data(), vquat1.data(),
@@ -351,7 +351,7 @@ TEST_F(FactorAutodiffTrifocalTest, operator_parenthesis)
                       pos_cam.data(), vquat_cam.data(),
                       res.data());
 
-    ASSERT_MATRIX_APPROX(res, Vector3s::Zero(), 1e-8);
+    ASSERT_MATRIX_APPROX(res, Vector3d::Zero(), 1e-8);
 }
 
 TEST_F(FactorAutodiffTrifocalTest, solve_F1)
@@ -363,16 +363,16 @@ TEST_F(FactorAutodiffTrifocalTest, solve_F1)
     S ->getO()->setState(vquat_cam);
     // Residual with prior
 
-    Vector3s res;
+    Vector3d res;
 
-    Eigen::VectorXs F1_p = F1->getP()->getState();
-    Eigen::VectorXs F1_o = F1->getO()->getState();
-    Eigen::VectorXs F2_p = F2->getP()->getState();
-    Eigen::VectorXs F2_o = F2->getO()->getState();
-    Eigen::VectorXs F3_p = F3->getP()->getState();
-    Eigen::VectorXs F3_o = F3->getO()->getState();
-    Eigen::VectorXs S_p  = S ->getP()->getState();
-    Eigen::VectorXs S_o  = S ->getO()->getState();
+    Eigen::VectorXd F1_p = F1->getP()->getState();
+    Eigen::VectorXd F1_o = F1->getO()->getState();
+    Eigen::VectorXd F2_p = F2->getP()->getState();
+    Eigen::VectorXd F2_o = F2->getO()->getState();
+    Eigen::VectorXd F3_p = F3->getP()->getState();
+    Eigen::VectorXd F3_o = F3->getO()->getState();
+    Eigen::VectorXd S_p  = S ->getP()->getState();
+    Eigen::VectorXd S_o  = S ->getO()->getState();
 
     c123->operator ()(F1_p.data(), F1_o.data(),
                       F2_p.data(), F2_o.data(),
@@ -382,11 +382,11 @@ TEST_F(FactorAutodiffTrifocalTest, solve_F1)
 
     WOLF_DEBUG("Initial state:              ", F1->getState().transpose());
     WOLF_DEBUG("residual before perturbing: ", res.transpose());
-    ASSERT_MATRIX_APPROX(res, Vector3s::Zero(), 1e-8);
+    ASSERT_MATRIX_APPROX(res, Vector3d::Zero(), 1e-8);
 
     // Residual with perturbated state
 
-    Vector7s pose_perturbated = F1->getState() + 0.1 * Vector7s::Random();
+    Vector7d pose_perturbated = F1->getState() + 0.1 * Vector7d::Random();
     pose_perturbated.segment(3,4).normalize();
     F1->setState(pose_perturbated);
 
@@ -431,7 +431,7 @@ TEST_F(FactorAutodiffTrifocalTest, solve_F1)
 
     WOLF_DEBUG(report, " AND UNION");
 
-    ASSERT_MATRIX_APPROX(res, Vector3s::Zero(), 1e-8);
+    ASSERT_MATRIX_APPROX(res, Vector3d::Zero(), 1e-8);
 
 }
 
@@ -445,16 +445,16 @@ TEST_F(FactorAutodiffTrifocalTest, solve_F2)
 
     // Residual with prior
 
-    Vector3s res;
+    Vector3d res;
 
-    Eigen::VectorXs F1_p = F1->getP()->getState();
-    Eigen::VectorXs F1_o = F1->getO()->getState();
-    Eigen::VectorXs F2_p = F2->getP()->getState();
-    Eigen::VectorXs F2_o = F2->getO()->getState();
-    Eigen::VectorXs F3_p = F3->getP()->getState();
-    Eigen::VectorXs F3_o = F3->getO()->getState();
-    Eigen::VectorXs S_p  = S ->getP()->getState();
-    Eigen::VectorXs S_o  = S ->getO()->getState();
+    Eigen::VectorXd F1_p = F1->getP()->getState();
+    Eigen::VectorXd F1_o = F1->getO()->getState();
+    Eigen::VectorXd F2_p = F2->getP()->getState();
+    Eigen::VectorXd F2_o = F2->getO()->getState();
+    Eigen::VectorXd F3_p = F3->getP()->getState();
+    Eigen::VectorXd F3_o = F3->getO()->getState();
+    Eigen::VectorXd S_p  = S ->getP()->getState();
+    Eigen::VectorXd S_o  = S ->getO()->getState();
 
     c123->operator ()(F1_p.data(), F1_o.data(),
                       F2_p.data(), F2_o.data(),
@@ -464,11 +464,11 @@ TEST_F(FactorAutodiffTrifocalTest, solve_F2)
 
     WOLF_DEBUG("Initial state:              ", F2->getState().transpose());
     WOLF_DEBUG("residual before perturbing: ", res.transpose());
-    ASSERT_MATRIX_APPROX(res, Vector3s::Zero(), 1e-8);
+    ASSERT_MATRIX_APPROX(res, Vector3d::Zero(), 1e-8);
 
     // Residual with perturbated state
 
-    Vector7s pose_perturbated = F2->getState() + 0.1 * Vector7s::Random();
+    Vector7d pose_perturbated = F2->getState() + 0.1 * Vector7d::Random();
     pose_perturbated.segment(3,4).normalize();
     F2->setState(pose_perturbated);
 
@@ -513,7 +513,7 @@ TEST_F(FactorAutodiffTrifocalTest, solve_F2)
 
     WOLF_DEBUG(report, " AND UNION");
 
-    ASSERT_MATRIX_APPROX(res, Vector3s::Zero(), 1e-8);
+    ASSERT_MATRIX_APPROX(res, Vector3d::Zero(), 1e-8);
 
 }
 
@@ -527,16 +527,16 @@ TEST_F(FactorAutodiffTrifocalTest, solve_F3)
 
     // Residual with prior
 
-    Vector3s res;
+    Vector3d res;
 
-    Eigen::VectorXs F1_p = F1->getP()->getState();
-    Eigen::VectorXs F1_o = F1->getO()->getState();
-    Eigen::VectorXs F2_p = F2->getP()->getState();
-    Eigen::VectorXs F2_o = F2->getO()->getState();
-    Eigen::VectorXs F3_p = F3->getP()->getState();
-    Eigen::VectorXs F3_o = F3->getO()->getState();
-    Eigen::VectorXs S_p  = S ->getP()->getState();
-    Eigen::VectorXs S_o  = S ->getO()->getState();
+    Eigen::VectorXd F1_p = F1->getP()->getState();
+    Eigen::VectorXd F1_o = F1->getO()->getState();
+    Eigen::VectorXd F2_p = F2->getP()->getState();
+    Eigen::VectorXd F2_o = F2->getO()->getState();
+    Eigen::VectorXd F3_p = F3->getP()->getState();
+    Eigen::VectorXd F3_o = F3->getO()->getState();
+    Eigen::VectorXd S_p  = S ->getP()->getState();
+    Eigen::VectorXd S_o  = S ->getO()->getState();
 
     c123->operator ()(F1_p.data(), F1_o.data(),
                       F2_p.data(), F2_o.data(),
@@ -546,11 +546,11 @@ TEST_F(FactorAutodiffTrifocalTest, solve_F3)
 
     WOLF_DEBUG("Initial state:              ", F3->getState().transpose());
     WOLF_DEBUG("residual before perturbing: ", res.transpose());
-    ASSERT_MATRIX_APPROX(res, Vector3s::Zero(), 1e-8);
+    ASSERT_MATRIX_APPROX(res, Vector3d::Zero(), 1e-8);
 
     // Residual with perturbated state
 
-    Vector7s pose_perturbated = F3->getState() + 0.1 * Vector7s::Random();
+    Vector7d pose_perturbated = F3->getState() + 0.1 * Vector7d::Random();
     pose_perturbated.segment(3,4).normalize();
     F3->setState(pose_perturbated);
 
@@ -596,7 +596,7 @@ TEST_F(FactorAutodiffTrifocalTest, solve_F3)
 
     WOLF_DEBUG(report, " AND UNION");
 
-    ASSERT_MATRIX_APPROX(res, Vector3s::Zero(), 1e-8);
+    ASSERT_MATRIX_APPROX(res, Vector3d::Zero(), 1e-8);
 
 }
 
@@ -610,16 +610,16 @@ TEST_F(FactorAutodiffTrifocalTest, solve_S)
 
     // Residual with prior
 
-    Vector3s res;
+    Vector3d res;
 
-    Eigen::VectorXs F1_p = F1->getP()->getState();
-    Eigen::VectorXs F1_o = F1->getO()->getState();
-    Eigen::VectorXs F2_p = F2->getP()->getState();
-    Eigen::VectorXs F2_o = F2->getO()->getState();
-    Eigen::VectorXs F3_p = F3->getP()->getState();
-    Eigen::VectorXs F3_o = F3->getO()->getState();
-    Eigen::VectorXs S_p  = S ->getP()->getState();
-    Eigen::VectorXs S_o  = S ->getO()->getState();
+    Eigen::VectorXd F1_p = F1->getP()->getState();
+    Eigen::VectorXd F1_o = F1->getO()->getState();
+    Eigen::VectorXd F2_p = F2->getP()->getState();
+    Eigen::VectorXd F2_o = F2->getO()->getState();
+    Eigen::VectorXd F3_p = F3->getP()->getState();
+    Eigen::VectorXd F3_o = F3->getO()->getState();
+    Eigen::VectorXd S_p  = S ->getP()->getState();
+    Eigen::VectorXd S_o  = S ->getO()->getState();
 
     c123->operator ()(F1_p.data(), F1_o.data(),
                       F2_p.data(), F2_o.data(),
@@ -629,14 +629,14 @@ TEST_F(FactorAutodiffTrifocalTest, solve_S)
 
     WOLF_DEBUG("Initial state:              ", S->getP()->getState().transpose(), " ", S->getO()->getState().transpose());
     WOLF_DEBUG("residual before perturbing: ", res.transpose());
-    ASSERT_MATRIX_APPROX(res, Vector3s::Zero(), 1e-8);
+    ASSERT_MATRIX_APPROX(res, Vector3d::Zero(), 1e-8);
 
     // Residual with perturbated state
 
-    Vector3s pos_perturbated = pos_cam   + 0.1 * Vector3s::Random();
-    Vector4s ori_perturbated = vquat_cam + 0.1 * Vector4s::Random();
+    Vector3d pos_perturbated = pos_cam   + 0.1 * Vector3d::Random();
+    Vector4d ori_perturbated = vquat_cam + 0.1 * Vector4d::Random();
     ori_perturbated.normalize();
-    Vector7s pose_perturbated; pose_perturbated << pos_perturbated, ori_perturbated;
+    Vector7d pose_perturbated; pose_perturbated << pos_perturbated, ori_perturbated;
     S->getP()->setState(pos_perturbated);
     S->getO()->setState(ori_perturbated);
 
@@ -681,7 +681,7 @@ TEST_F(FactorAutodiffTrifocalTest, solve_S)
 
     WOLF_DEBUG(report, " AND UNION");
 
-    ASSERT_MATRIX_APPROX(res, Vector3s::Zero(), 1e-8);
+    ASSERT_MATRIX_APPROX(res, Vector3d::Zero(), 1e-8);
 
 }
 
@@ -705,22 +705,22 @@ class FactorAutodiffTrifocalMultiPointTest : public FactorAutodiffTrifocalTest
         {
             FactorAutodiffTrifocalTest::SetUp();
 
-            Matrix<Scalar, 2, 9> c1p_can;
+            Matrix<double, 2, 9> c1p_can;
             c1p_can <<
                     0,   -1/3.00,   -1/3.00,    1/3.00,    1/3.00,   -1.0000,   -1.0000, 1.0000,    1.0000,
                     0,    1/3.00,   -1/3.00,    1/3.00,   -1/3.00,    1.0000,   -1.0000, 1.0000,   -1.0000;
 
-            Matrix<Scalar, 2, 9> c2p_can;
+            Matrix<double, 2, 9> c2p_can;
             c2p_can <<
                     0,    1/3.00,    1/3.00,    1.0000,    1.0000,   -1/3.00,   -1/3.00,   -1.0000,   -1.0000,
                     0,    1/3.00,   -1/3.00,    1.0000,   -1.0000,    1/3.00,   -1/3.00,    1.0000,   -1.0000;
 
-            Matrix<Scalar, 2, 9> c3p_can;
+            Matrix<double, 2, 9> c3p_can;
             c3p_can <<
                     0,   -1/3.00,   -1.0000,    1/3.00,    1.0000,   -1/3.00,   -1.0000,   1/3.00,    1.0000,
                     0,   -1/3.00,   -1.0000,   -1/3.00,   -1.0000,    1/3.00,    1.0000,   1/3.00,    1.0000;
 
-            Matrix2s pix_cov; pix_cov.setIdentity(); //pix_cov *= 1e-4;
+            Matrix2d pix_cov; pix_cov.setIdentity(); //pix_cov *= 1e-4;
 
             // for i==0 we already have them
             fv1.push_back(f1);
@@ -780,9 +780,9 @@ TEST_F(FactorAutodiffTrifocalMultiPointTest, solve_multi_point)
     F1->getP()->setState( pos1   );
     F1->getO()->setState( vquat1 );
     F2->getP()->setState( pos2   ); // this fixes the scale
-    F2->getO()->setState((vquat2 + 0.2*Vector4s::Random()).normalized());
-    F3->getP()->setState( pos3   + 0.2*Vector3s::Random());
-    F3->getO()->setState((vquat3 + 0.2*Vector4s::Random()).normalized());
+    F2->getO()->setState((vquat2 + 0.2*Vector4d::Random()).normalized());
+    F3->getP()->setState( pos3   + 0.2*Vector3d::Random());
+    F3->getO()->setState((vquat3 + 0.2*Vector4d::Random()).normalized());
 
     std::string report = ceres_manager->solve(SolverManager::ReportVerbosity::BRIEF);
 
@@ -796,17 +796,17 @@ TEST_F(FactorAutodiffTrifocalMultiPointTest, solve_multi_point)
     ASSERT_MATRIX_APPROX(F3->getP()->getState(), pos3  , 1e-10);
     ASSERT_MATRIX_APPROX(F3->getO()->getState(), vquat3, 1e-10);
 
-    Eigen::VectorXs F1_p = F1->getP()->getState();
-    Eigen::VectorXs F1_o = F1->getO()->getState();
-    Eigen::VectorXs F2_p = F2->getP()->getState();
-    Eigen::VectorXs F2_o = F2->getO()->getState();
-    Eigen::VectorXs F3_p = F3->getP()->getState();
-    Eigen::VectorXs F3_o = F3->getO()->getState();
-    Eigen::VectorXs S_p  = S ->getP()->getState();
-    Eigen::VectorXs S_o  = S ->getO()->getState();
+    Eigen::VectorXd F1_p = F1->getP()->getState();
+    Eigen::VectorXd F1_o = F1->getO()->getState();
+    Eigen::VectorXd F2_p = F2->getP()->getState();
+    Eigen::VectorXd F2_o = F2->getO()->getState();
+    Eigen::VectorXd F3_p = F3->getP()->getState();
+    Eigen::VectorXd F3_o = F3->getO()->getState();
+    Eigen::VectorXd S_p  = S ->getP()->getState();
+    Eigen::VectorXd S_o  = S ->getO()->getState();
 
     // evaluate residuals
-    Vector3s res;
+    Vector3d res;
     for (size_t i=0; i<cv123.size(); i++)
     {
         cv123.at(i)->operator ()(F1_p.data(), F1_o.data(),
@@ -815,7 +815,7 @@ TEST_F(FactorAutodiffTrifocalMultiPointTest, solve_multi_point)
                                  S_p. data(), S_o. data(),
                                  res.data());
 
-        ASSERT_MATRIX_APPROX(res, Vector3s::Zero(), 1e-10);
+        ASSERT_MATRIX_APPROX(res, Vector3d::Zero(), 1e-10);
     }
 
 }
@@ -845,9 +845,9 @@ TEST_F(FactorAutodiffTrifocalMultiPointTest, solve_multi_point_scale)
     F1->getP()->setState( 2 * pos1 );
     F1->getO()->setState(   vquat1 );
     F2->getP()->setState( 2 * pos2 );
-    F2->getO()->setState((  vquat2 + 0.2*Vector4s::Random()).normalized());
-    F3->getP()->setState( 2 * pos3 + 0.2*Vector3s::Random());
-    F3->getO()->setState((  vquat3 + 0.2*Vector4s::Random()).normalized());
+    F2->getO()->setState((  vquat2 + 0.2*Vector4d::Random()).normalized());
+    F3->getP()->setState( 2 * pos3 + 0.2*Vector3d::Random());
+    F3->getO()->setState((  vquat3 + 0.2*Vector4d::Random()).normalized());
 
     std::string report = ceres_manager->solve(SolverManager::ReportVerbosity::BRIEF);
 
@@ -861,17 +861,17 @@ TEST_F(FactorAutodiffTrifocalMultiPointTest, solve_multi_point_scale)
     ASSERT_MATRIX_APPROX(F3->getP()->getState(), 2 * pos3, 1e-8);
     ASSERT_MATRIX_APPROX(F3->getO()->getState(),   vquat3, 1e-8);
 
-    Eigen::VectorXs F1_p = F1->getP()->getState();
-    Eigen::VectorXs F1_o = F1->getO()->getState();
-    Eigen::VectorXs F2_p = F2->getP()->getState();
-    Eigen::VectorXs F2_o = F2->getO()->getState();
-    Eigen::VectorXs F3_p = F3->getP()->getState();
-    Eigen::VectorXs F3_o = F3->getO()->getState();
-    Eigen::VectorXs S_p  = S ->getP()->getState();
-    Eigen::VectorXs S_o  = S ->getO()->getState();
+    Eigen::VectorXd F1_p = F1->getP()->getState();
+    Eigen::VectorXd F1_o = F1->getO()->getState();
+    Eigen::VectorXd F2_p = F2->getP()->getState();
+    Eigen::VectorXd F2_o = F2->getO()->getState();
+    Eigen::VectorXd F3_p = F3->getP()->getState();
+    Eigen::VectorXd F3_o = F3->getO()->getState();
+    Eigen::VectorXd S_p  = S ->getP()->getState();
+    Eigen::VectorXd S_o  = S ->getO()->getState();
 
     // evaluate residuals
-    Vector3s res;
+    Vector3d res;
     for (size_t i=0; i<cv123.size(); i++)
     {
         cv123.at(i)->operator ()(F1_p.data(), F1_o.data(),
@@ -880,7 +880,7 @@ TEST_F(FactorAutodiffTrifocalMultiPointTest, solve_multi_point_scale)
                                  S_p. data(), S_o. data(),
                                  res.data());
 
-        ASSERT_MATRIX_APPROX(res, Vector3s::Zero(), 1e-8);
+        ASSERT_MATRIX_APPROX(res, Vector3d::Zero(), 1e-8);
     }
 }
 
@@ -910,20 +910,20 @@ TEST_F(FactorAutodiffTrifocalMultiPointTest, solve_multi_point_distance)
     // Perturbate states, change scale
     F1->getP()->setState( pos1   );
     F1->getO()->setState( vquat1 );
-    F2->getP()->setState( pos2   + 0.2*Vector3s::Random() );
-    F2->getO()->setState((vquat2 + 0.2*Vector4s::Random()).normalized());
-    F3->getP()->setState( pos3   + 0.2*Vector3s::Random());
-    F3->getO()->setState((vquat3 + 0.2*Vector4s::Random()).normalized());
+    F2->getP()->setState( pos2   + 0.2*Vector3d::Random() );
+    F2->getO()->setState((vquat2 + 0.2*Vector4d::Random()).normalized());
+    F3->getP()->setState( pos3   + 0.2*Vector3d::Random());
+    F3->getO()->setState((vquat3 + 0.2*Vector4d::Random()).normalized());
 
     // Add a distance factor to fix the scale
-    Scalar distance     = sqrt(2.0);
-    Scalar distance_std = 0.1;
+    double distance     = sqrt(2.0);
+    double distance_std = 0.1;
 
     auto Cd = CaptureBase::emplace<CaptureBase>(F3, "DISTANCE", F3->getTimeStamp());
     // CaptureBasePtr Cd = std::make_shared<CaptureBase>("DISTANCE", F3->getTimeStamp());
     // F3->addCapture(Cd);
-    auto fd = FeatureBase::emplace<FeatureBase>(Cd, "DISTANCE", Vector1s(distance), Matrix1s(distance_std * distance_std));
-    // FeatureBasePtr fd = std::make_shared<FeatureBase>("DISTANCE", Vector1s(distance), Matrix1s(distance_std * distance_std));
+    auto fd = FeatureBase::emplace<FeatureBase>(Cd, "DISTANCE", Vector1d(distance), Matrix1d(distance_std * distance_std));
+    // FeatureBasePtr fd = std::make_shared<FeatureBase>("DISTANCE", Vector1d(distance), Matrix1d(distance_std * distance_std));
     // Cd->addFeature(fd);
     auto cd = FactorBase::emplace<FactorAutodiffDistance3D>(fd, fd, F1, nullptr, false, FAC_ACTIVE);
     // FACTORAUTODIFFDISTANCE3DPTR cd = std::make_shared<FactorAutodiffDistance3D>(fd, F1, nullptr, false, FAC_ACTIVE);
@@ -949,17 +949,17 @@ TEST_F(FactorAutodiffTrifocalMultiPointTest, solve_multi_point_distance)
     ASSERT_MATRIX_APPROX(F3->getP()->getState(), pos3  , 1e-8);
     ASSERT_MATRIX_APPROX(F3->getO()->getState(), vquat3, 1e-8);
 
-    Eigen::VectorXs F1_p = F1->getP()->getState();
-    Eigen::VectorXs F1_o = F1->getO()->getState();
-    Eigen::VectorXs F2_p = F2->getP()->getState();
-    Eigen::VectorXs F2_o = F2->getO()->getState();
-    Eigen::VectorXs F3_p = F3->getP()->getState();
-    Eigen::VectorXs F3_o = F3->getO()->getState();
-    Eigen::VectorXs S_p  = S ->getP()->getState();
-    Eigen::VectorXs S_o  = S ->getO()->getState();
+    Eigen::VectorXd F1_p = F1->getP()->getState();
+    Eigen::VectorXd F1_o = F1->getO()->getState();
+    Eigen::VectorXd F2_p = F2->getP()->getState();
+    Eigen::VectorXd F2_o = F2->getO()->getState();
+    Eigen::VectorXd F3_p = F3->getP()->getState();
+    Eigen::VectorXd F3_o = F3->getO()->getState();
+    Eigen::VectorXd S_p  = S ->getP()->getState();
+    Eigen::VectorXd S_o  = S ->getO()->getState();
 
     // evaluate residuals
-    Vector3s res;
+    Vector3d res;
     for (size_t i=0; i<cv123.size(); i++)
     {
         cv123.at(i)->operator ()(F1_p.data(), F1_o.data(),
@@ -968,7 +968,7 @@ TEST_F(FactorAutodiffTrifocalMultiPointTest, solve_multi_point_distance)
                                  S_p. data(), S_o. data(),
                                  res.data());
 
-        ASSERT_MATRIX_APPROX(res, Vector3s::Zero(), 1e-8);
+        ASSERT_MATRIX_APPROX(res, Vector3d::Zero(), 1e-8);
     }
 }
 

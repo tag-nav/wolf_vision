@@ -174,7 +174,7 @@ class ProcessorTrackerFeatureImage : public ProcessorTrackerFeature
          * \param _cv_matches output variable in which the best result will be stored (in the position [0])
          * \return normalized score of similarity (1 - exact match; 0 - complete mismatch)
          */
-        virtual Scalar match(cv::Mat _target_descriptor, cv::Mat _candidate_descriptors,
+        virtual double match(cv::Mat _target_descriptor, cv::Mat _candidate_descriptors,
                              std::vector<cv::DMatch>& _cv_matches);
 
         // These only to debug, will disappear one day

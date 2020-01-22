@@ -17,14 +17,14 @@ int main(int argc, char** argv)
     //Welcome message
     std::cout << std::endl << " ========= WOLF TREE test ===========" << std::endl << std::endl;
 
-    SensorOdom2D* odom_sensor_ptr_ = new SensorOdom2D(std::make_shared<StateBlock>(Eigen::Vector3s::Zero()),
-                                                      std::make_shared<StateBlock>(Eigen::Vector1s::Zero()), 0.1, 0.1);
+    SensorOdom2D* odom_sensor_ptr_ = new SensorOdom2D(std::make_shared<StateBlock>(Eigen::Vector3d::Zero()),
+                                                      std::make_shared<StateBlock>(Eigen::Vector1d::Zero()), 0.1, 0.1);
     //std::cout << " odom sensor created!" << std::endl;
 
     WolfManager* wolf_manager_ = new WolfManager(FRM_PO_2D,                             //frame structure
                                                  odom_sensor_ptr_,                  //odom sensor
-                                                 Eigen::Vector3s::Zero(),           //prior
-                                                 Eigen::Matrix3s::Identity()*0.01,  //prior cov
+                                                 Eigen::Vector3d::Zero(),           //prior
+                                                 Eigen::Matrix3d::Identity()*0.01,  //prior cov
                                                  5,                                 //window size
                                                  1);                                //time for new keyframe
     //std::cout << " wolf_manager_ created!" << std::endl;
@@ -39,7 +39,7 @@ int main(int argc, char** argv)
         wolf_manager_->addCapture(new CaptureOdom2D(TimeStamp(ii*0.1),
                                                     TimeStamp(ii*0.1+0.01),
                                                     odom_sensor_ptr_,
-                                                    Eigen::Vector3s(0.1, 0. ,0.05)));
+                                                    Eigen::Vector3d(0.1, 0. ,0.05)));
         //std::cout << " capture added!" << std::endl;
 
         // update wolf tree

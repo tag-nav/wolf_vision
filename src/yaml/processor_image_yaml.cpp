@@ -51,11 +51,11 @@ static ProcessorParamsBasePtr createProcessorParamsImage(const std::string & _fi
         p->max_new_features = alg["maximum new features"].as<unsigned int>();
         p->min_features_for_keyframe = alg["minimum features for new keyframe"].as<unsigned int>();
         p->min_response_for_new_features = alg["minimum response for new features"].as<float>();
-        p->time_tolerance= alg["time tolerance"].as<Scalar>();
-        p->distance= alg["distance"].as<Scalar>();
+        p->time_tolerance= alg["time tolerance"].as<double>();
+        p->distance= alg["distance"].as<double>();
 
         Node noi = params["noise"];
-        p->pixel_noise_std = noi["pixel noise std"].as<Scalar>();
+        p->pixel_noise_std = noi["pixel noise std"].as<double>();
         p->pixel_noise_var = p->pixel_noise_std * p->pixel_noise_std;
     }
 

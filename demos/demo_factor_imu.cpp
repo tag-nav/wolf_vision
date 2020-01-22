@@ -24,7 +24,7 @@ int main(int argc, char** argv)
     bool c0(false), c1(false);// c2(true), c3(true), c4(true);
     // Wolf problem
     ProblemPtr wolf_problem_ptr_ = Problem::create("PQVBB 3D");
-    Eigen::VectorXs IMU_extrinsics(7);
+    Eigen::VectorXd IMU_extrinsics(7);
     IMU_extrinsics << 0,0,0, 0,0,0,1; // IMU pose in the robot
     SensorBasePtr sensor_ptr = wolf_problem_ptr_->installSensor("IMU", "Main IMU", IMU_extrinsics, shared_ptr<IntrinsicsBase>());
     wolf_problem_ptr_->installProcessor("IMU", "IMU pre-integrator", "Main IMU", "");
@@ -38,30 +38,30 @@ int main(int argc, char** argv)
 
     // Time and data variables
     TimeStamp t;
-    Eigen::Vector6s data_;
-    Scalar mpu_clock = 0;
+    Eigen::Vector6d data_;
+    double mpu_clock = 0;
 
     t.set(mpu_clock);
 
     // Set the origin
-    Eigen::VectorXs x0(16);
+    Eigen::VectorXd x0(16);
     x0 << 0,0,0,  0,0,0,1,  0,0,0,  0,0,.001,  0,0,.002; // Try some non-zero biases
     wolf_problem_ptr_->getProcessorMotion()->setOrigin(x0, t); //this also creates a keyframe at origin
     wolf_problem_ptr_->getTrajectory()->getFrameList().front()->fix(); //fix the keyframe at origin
 
     TimeStamp ts(0);
-    Eigen::VectorXs origin_state = x0;
+    Eigen::VectorXd origin_state = x0;
     
     // Create one capture to store the IMU data arriving from (sensor / callback / file / etc.)
-    CaptureIMUPtr imu_ptr( std::make_shared<CaptureIMU>(t, sensor_ptr, data_, Eigen::Matrix6s::Identity()) );
+    CaptureIMUPtr imu_ptr( std::make_shared<CaptureIMU>(t, sensor_ptr, data_, Eigen::Matrix6d::Identity()) );
     imu_ptr->setFrame(wolf_problem_ptr_->getTrajectory()->getFrameList().back());
 
     // set variables
     using namespace std;
-    Eigen::VectorXs state_vec;
-    Eigen::VectorXs delta_preint;
+    Eigen::VectorXd state_vec;
+    Eigen::VectorXd delta_preint;
     //FrameIMUPtr last_frame;
-    Eigen::Matrix<wolf::Scalar,9,9> delta_preint_cov;
+    Eigen::Matrix<double,9,9> delta_preint_cov;
 
     //process data
     mpu_clock = 0.001003;
@@ -96,15 +96,15 @@ int main(int argc, char** argv)
 
     FrameIMUPtr ref_frame_ptr(std::static_pointer_cast<FrameIMU>(imu_ptr->getFrame()));
 
-    Eigen::Matrix<wolf::Scalar, 10, 1> expect;
-    Eigen::Vector3s ref_frame_p = ref_frame_ptr->getP()->getVector();
-    Eigen::Quaternions ref_frame_o(ref_frame_ptr->getO()->getVector().data());
-    Eigen::Vector3s ref_frame_v = ref_frame_ptr->getV()->getVector();
-    Eigen::Vector3s current_frame_p = last_frame->getP()->getVector();
-    Eigen::Quaternions current_frame_o(last_frame->getO()->getVector().data());
-    Eigen::Vector3s current_frame_v = last_frame->getV()->getVector();
-    Eigen::Vector3s acc_bias(ref_frame_ptr->getAccBias()->getVector()), gyro_bias(ref_frame_ptr->getGyroBias()->getVector());
-    Eigen::Matrix<wolf::Scalar, 9, 1> residu;
+    Eigen::Matrix<double, 10, 1> expect;
+    Eigen::Vector3d ref_frame_p = ref_frame_ptr->getP()->getVector();
+    Eigen::Quaterniond ref_frame_o(ref_frame_ptr->getO()->getVector().data());
+    Eigen::Vector3d ref_frame_v = ref_frame_ptr->getV()->getVector();
+    Eigen::Vector3d current_frame_p = last_frame->getP()->getVector();
+    Eigen::Quaterniond current_frame_o(last_frame->getO()->getVector().data());
+    Eigen::Vector3d current_frame_v = last_frame->getV()->getVector();
+    Eigen::Vector3d acc_bias(ref_frame_ptr->getAccBias()->getVector()), gyro_bias(ref_frame_ptr->getGyroBias()->getVector());
+    Eigen::Matrix<double, 9, 1> residu;
     residu << 0,0,0,  0,0,0,  0,0,0;
     
     factor_imu->expectation(ref_frame_p, ref_frame_o, ref_frame_v, current_frame_p, current_frame_o, current_frame_v, expect);
@@ -157,15 +157,15 @@ int main(int argc, char** argv)
 
     FrameIMUPtr ref_frame_ptr(std::static_pointer_cast<FrameIMU>(imu_ptr->getFrame()));
 
-    Eigen::Matrix<wolf::Scalar, 10, 1> expect;
-    Eigen::Vector3s ref_frame_p = ref_frame_ptr->getP()->getVector();
-    Eigen::Quaternions ref_frame_o(ref_frame_ptr->getO()->getVector().data());
-    Eigen::Vector3s ref_frame_v = ref_frame_ptr->getV()->getVector();
-    Eigen::Vector3s current_frame_p = last_frame->getP()->getVector();
-    Eigen::Quaternions current_frame_o(last_frame->getO()->getVector().data());
-    Eigen::Vector3s current_frame_v = last_frame->getV()->getVector();
-    Eigen::Vector3s acc_bias(ref_frame_ptr->getAccBias()->getVector()), gyro_bias(ref_frame_ptr->getGyroBias()->getVector());
-    Eigen::Matrix<wolf::Scalar, 9, 1> residu;
+    Eigen::Matrix<double, 10, 1> expect;
+    Eigen::Vector3d ref_frame_p = ref_frame_ptr->getP()->getVector();
+    Eigen::Quaterniond ref_frame_o(ref_frame_ptr->getO()->getVector().data());
+    Eigen::Vector3d ref_frame_v = ref_frame_ptr->getV()->getVector();
+    Eigen::Vector3d current_frame_p = last_frame->getP()->getVector();
+    Eigen::Quaterniond current_frame_o(last_frame->getO()->getVector().data());
+    Eigen::Vector3d current_frame_v = last_frame->getV()->getVector();
+    Eigen::Vector3d acc_bias(ref_frame_ptr->getAccBias()->getVector()), gyro_bias(ref_frame_ptr->getGyroBias()->getVector());
+    Eigen::Matrix<double, 9, 1> residu;
     residu << 0,0,0,  0,0,0,  0,0,0;
     
     factor_imu->expectation(ref_frame_p, ref_frame_o, ref_frame_v, acc_bias, gyro_bias, current_frame_p, current_frame_o, current_frame_v, expect);
@@ -215,15 +215,15 @@ int main(int argc, char** argv)
 
     FrameIMUPtr ref_frame_ptr(std::static_pointer_cast<FrameIMU>(imu_ptr->getFrame()));
 
-    Eigen::Matrix<wolf::Scalar, 10, 1> expect;
-    Eigen::Vector3s ref_frame_p = ref_frame_ptr->getP()->getVector();
-    Eigen::Quaternions ref_frame_o(ref_frame_ptr->getO()->getVector().data());
-    Eigen::Vector3s ref_frame_v = ref_frame_ptr->getV()->getVector();
-    Eigen::Vector3s current_frame_p = last_frame->getP()->getVector();
-    Eigen::Quaternions current_frame_o(last_frame->getO()->getVector().data());
-    Eigen::Vector3s current_frame_v = last_frame->getV()->getVector();
-    Eigen::Vector3s acc_bias(ref_frame_ptr->getAccBias()->getVector()), gyro_bias(ref_frame_ptr->getGyroBias()->getVector());
-    Eigen::Matrix<wolf::Scalar, 9, 1> residu;
+    Eigen::Matrix<double, 10, 1> expect;
+    Eigen::Vector3d ref_frame_p = ref_frame_ptr->getP()->getVector();
+    Eigen::Quaterniond ref_frame_o(ref_frame_ptr->getO()->getVector().data());
+    Eigen::Vector3d ref_frame_v = ref_frame_ptr->getV()->getVector();
+    Eigen::Vector3d current_frame_p = last_frame->getP()->getVector();
+    Eigen::Quaterniond current_frame_o(last_frame->getO()->getVector().data());
+    Eigen::Vector3d current_frame_v = last_frame->getV()->getVector();
+    Eigen::Vector3d acc_bias(ref_frame_ptr->getAccBias()->getVector()), gyro_bias(ref_frame_ptr->getGyroBias()->getVector());
+    Eigen::Matrix<double, 9, 1> residu;
     residu << 0,0,0,  0,0,0,  0,0,0;
     
     factor_imu->expectation(ref_frame_p, ref_frame_o, ref_frame_v, acc_bias, gyro_bias, current_frame_p, current_frame_o, current_frame_v, expect);
@@ -237,7 +237,7 @@ int main(int argc, char** argv)
     }
 
     ///having a look at covariances
-    Eigen::MatrixXs predelta_cov;
+    Eigen::MatrixXd predelta_cov;
     predelta_cov.resize(9,9);
     predelta_cov = wolf_problem_ptr_->getProcessorMotion()->getCurrentDeltaPreintCov();
     //std::cout << "predelta_cov : \n" << predelta_cov << std::endl; 
@@ -247,7 +247,7 @@ int main(int argc, char** argv)
     //FrameBasePtr first_frame = wolf_problem_ptr_->getTrajectory()->getFrameList().front();
     wolf_problem_ptr_->getProcessorMotion()->setOrigin(wolf_problem_ptr_->getTrajectory()->getFrameList().front());
     //SensorBasePtr sensorbase = std::make_shared<SensorBase>("ABSOLUTE POSE", nullptr, nullptr, nullptr, 0);
-    //CapturePosePtr initial_covariance = std::make_shared<CaptureFix>(TimeStamp(0), sensorbase, first_frame->getState().head(7), Eigen::Matrix6s::Identity() * 0.01);
+    //CapturePosePtr initial_covariance = std::make_shared<CaptureFix>(TimeStamp(0), sensorbase, first_frame->getState().head(7), Eigen::Matrix6d::Identity() * 0.01);
     //first_frame->addCapture(initial_covariance);
     //initial_covariance->process();
     //std::cout << "initial covariance: factor " << initial_covariance->getFeatureList().front()->getConstrainedByList().front()->id() << std::endl << initial_covariance->getFeatureList().front()->getMeasurementCovariance() << std::endl;
@@ -261,9 +261,9 @@ int main(int argc, char** argv)
     // SOLVING PROBLEMS
     ceres::Solver::Summary summary_diff;
     std::cout << "solving..." << std::endl;
-    Eigen::VectorXs prev_wolf_state = wolf_problem_ptr_->getTrajectory()->getFrameList().back()->getState();
+    Eigen::VectorXd prev_wolf_state = wolf_problem_ptr_->getTrajectory()->getFrameList().back()->getState();
     summary_diff = ceres_manager_wolf_diff->solve();
-    Eigen::VectorXs post_wolf_state = wolf_problem_ptr_->getTrajectory()->getFrameList().back()->getState();
+    Eigen::VectorXd post_wolf_state = wolf_problem_ptr_->getTrajectory()->getFrameList().back()->getState();
     std::cout << " prev_wolf_state : " << prev_wolf_state.transpose() << "\n post_wolf_state : " << post_wolf_state.transpose() << std::endl;
     //std::cout << summary_wolf_diff.BriefReport() << std::endl;
     std::cout << "solved!" << std::endl;

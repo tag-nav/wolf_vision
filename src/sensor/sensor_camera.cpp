@@ -8,7 +8,7 @@
 namespace wolf
 {
 
-SensorCamera::SensorCamera(const Eigen::VectorXs& _extrinsics, const IntrinsicsCamera& _intrinsics) :
+SensorCamera::SensorCamera(const Eigen::VectorXd& _extrinsics, const IntrinsicsCamera& _intrinsics) :
                 SensorBase("CAMERA", std::make_shared<StateBlock>(_extrinsics.head(3), true), std::make_shared<StateQuaternion>(_extrinsics.tail(4), true), std::make_shared<StateBlock>(_intrinsics.pinhole_model_raw, true), 1),
                 img_width_(_intrinsics.width), //
                 img_height_(_intrinsics.height), //
@@ -23,7 +23,7 @@ SensorCamera::SensorCamera(const Eigen::VectorXs& _extrinsics, const IntrinsicsC
     pinhole::computeCorrectionModel(getIntrinsic()->getState(), distortion_, correction_);
 }
 
-SensorCamera::SensorCamera(const Eigen::VectorXs& _extrinsics, IntrinsicsCameraPtr _intrinsics_ptr) :
+SensorCamera::SensorCamera(const Eigen::VectorXd& _extrinsics, IntrinsicsCameraPtr _intrinsics_ptr) :
         SensorCamera(_extrinsics, *_intrinsics_ptr)
 {
     //
@@ -34,9 +34,9 @@ SensorCamera::~SensorCamera()
     //
 }
 
-Eigen::Matrix3s SensorCamera::setIntrinsicMatrix(Eigen::Vector4s _pinhole_model)
+Eigen::Matrix3d SensorCamera::setIntrinsicMatrix(Eigen::Vector4d _pinhole_model)
 {
-    Eigen::Matrix3s K;
+    Eigen::Matrix3d K;
     K(0, 0) = _pinhole_model(2);
     K(0, 1) = 0;
     K(0, 2) = _pinhole_model(0);
@@ -49,7 +49,7 @@ Eigen::Matrix3s SensorCamera::setIntrinsicMatrix(Eigen::Vector4s _pinhole_model)
 
 // Define the factory method
 SensorBasePtr SensorCamera::create(const std::string& _unique_name, //
-                                 const Eigen::VectorXs& _extrinsics_pq, //
+                                 const Eigen::VectorXd& _extrinsics_pq, //
                                  const IntrinsicsBasePtr _intrinsics)
 {
     assert(_extrinsics_pq.size() == 7 && "Bad extrinsics vector length. Should be 7 for 3D.");

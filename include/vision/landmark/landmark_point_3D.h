@@ -16,19 +16,19 @@ class LandmarkPoint3D : public LandmarkBase
 {
     protected:
         cv::Mat descriptor_;
-        Eigen::Vector3s position_;
+        Eigen::Vector3d position_;
     public:
-        LandmarkPoint3D(Eigen::Vector3s _position, cv::Mat _2D_descriptor);
+        LandmarkPoint3D(Eigen::Vector3d _position, cv::Mat _2D_descriptor);
 
         virtual ~LandmarkPoint3D();
 
-        const Eigen::Vector3s point() const;
+        const Eigen::Vector3d point() const;
 
         const cv::Mat& getDescriptor() const;
         void setDescriptor(const cv::Mat& _descriptor);
 };
 
-inline const Eigen::Vector3s LandmarkPoint3D::point() const
+inline const Eigen::Vector3d LandmarkPoint3D::point() const
 {
     return getP()->getState();
 }

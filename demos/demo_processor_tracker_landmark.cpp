@@ -62,12 +62,12 @@ int main()
 
     // Wolf problem
     ProblemPtr wolf_problem_ptr_ = Problem::create("PO", 2);
-    // SensorBasePtr sensor_ptr_ = std::make_shared< SensorBase>("ODOM 2D", std::make_shared<StateBlock>(Eigen::VectorXs::Zero(2)),
-    //                                          std::make_shared<StateBlock>(Eigen::VectorXs::Zero(1)),
-    //                                          std::make_shared<StateBlock>(Eigen::VectorXs::Zero(2)), 2);
-    auto sensor_ptr_ = SensorBase::emplace<SensorBase>(wolf_problem_ptr_->getHardware(), "ODOM 2D", std::make_shared<StateBlock>(Eigen::VectorXs::Zero(2)),
-                                                       std::make_shared<StateBlock>(Eigen::VectorXs::Zero(1)),
-                                                       std::make_shared<StateBlock>(Eigen::VectorXs::Zero(2)), 2);
+    // SensorBasePtr sensor_ptr_ = std::make_shared< SensorBase>("ODOM 2D", std::make_shared<StateBlock>(Eigen::VectorXd::Zero(2)),
+    //                                          std::make_shared<StateBlock>(Eigen::VectorXd::Zero(1)),
+    //                                          std::make_shared<StateBlock>(Eigen::VectorXd::Zero(2)), 2);
+    auto sensor_ptr_ = SensorBase::emplace<SensorBase>(wolf_problem_ptr_->getHardware(), "ODOM 2D", std::make_shared<StateBlock>(Eigen::VectorXd::Zero(2)),
+                                                       std::make_shared<StateBlock>(Eigen::VectorXd::Zero(1)),
+                                                       std::make_shared<StateBlock>(Eigen::VectorXd::Zero(2)), 2);
     ProcessorParamsTrackerLandmarkPtr params_trk = std::make_shared<ProcessorParamsTrackerLandmark>();
     params_trk->max_new_features = 5;
     params_trk->min_features_for_keyframe = 7;
@@ -81,7 +81,7 @@ int main()
     std::cout << "sensor & processor created and added to wolf problem" << std::endl;
 
     TimeStamp t(0);
-    Scalar dt = 0.5;
+    double dt = 0.5;
     for (auto i = 0; i < 10; i++)
     {
         processor_ptr_->process(std::make_shared<CaptureVoid>(t, sensor_ptr_));

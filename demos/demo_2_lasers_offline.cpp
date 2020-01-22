@@ -37,7 +37,7 @@
 #include "faramotics/rangeScan2D.h"
 #include "btr-headers/pose3d.h"
 
-void extractVector(std::ifstream& text_file, Eigen::VectorXs& vector, wolf::Scalar& ts)
+void extractVector(std::ifstream& text_file, Eigen::VectorXd& vector, double& ts)
 {
     std::string line;
     std::getline(text_file, line);
@@ -47,7 +47,7 @@ void extractVector(std::ifstream& text_file, Eigen::VectorXs& vector, wolf::Scal
         line_stream >> vector(i);
 }
 
-void extractScan(std::ifstream& text_file, std::vector<float>& scan, wolf::Scalar& ts)
+void extractScan(std::ifstream& text_file, std::vector<float>& scan, double& ts)
 {
     std::string line;
     std::getline(text_file, line);
@@ -92,27 +92,27 @@ int main(int argc, char** argv)
 
     // INITIALIZATION ============================================================================================
     //init random generators
-    Scalar odom_std_factor = 0.5;
+    double odom_std_factor = 0.5;
     std::default_random_engine generator(1);
-    std::normal_distribution<Scalar> distribution_odom(0.0, odom_std_factor); //odometry noise
+    std::normal_distribution<double> distribution_odom(0.0, odom_std_factor); //odometry noise
 
     //variables
     std::string line;
-    Eigen::VectorXs odom_data = Eigen::VectorXs::Zero(2);
-    Eigen::VectorXs ground_truth(n_execution * 3); //all true poses
-    Eigen::VectorXs ground_truth_pose(3); //last true pose
-    Eigen::VectorXs odom_trajectory(n_execution * 3); //open loop trajectory
-    Eigen::VectorXs mean_times = Eigen::VectorXs::Zero(6);
+    Eigen::VectorXd odom_data = Eigen::VectorXd::Zero(2);
+    Eigen::VectorXd ground_truth(n_execution * 3); //all true poses
+    Eigen::VectorXd ground_truth_pose(3); //last true pose
+    Eigen::VectorXd odom_trajectory(n_execution * 3); //open loop trajectory
+    Eigen::VectorXd mean_times = Eigen::VectorXd::Zero(6);
     clock_t t1, t2;
-    Scalar timestamp;
+    double timestamp;
     TimeStamp ts(0);
 
     // Wolf initialization
-    Eigen::VectorXs odom_pose = Eigen::VectorXs::Zero(3);
-    //Eigen::VectorXs gps_position = Eigen::VectorXs::Zero(2);
-    Eigen::VectorXs laser_1_params(9), laser_2_params(9);
-    Eigen::VectorXs laser_1_pose(4), laser_2_pose(4); //xyz + theta
-    Eigen::VectorXs laser_1_pose2D(3), laser_2_pose2D(3); //xy + theta
+    Eigen::VectorXd odom_pose = Eigen::VectorXd::Zero(3);
+    //Eigen::VectorXd gps_position = Eigen::VectorXd::Zero(2);
+    Eigen::VectorXd laser_1_params(9), laser_2_params(9);
+    Eigen::VectorXd laser_1_pose(4), laser_2_pose(4); //xyz + theta
+    Eigen::VectorXd laser_1_pose2D(3), laser_2_pose2D(3); //xy + theta
 
     // odometry intrinsics
     IntrinsicsOdom2D odom_intrinsics;
@@ -160,7 +160,7 @@ int main(int argc, char** argv)
 
     std::cout << "Wolf tree setted correctly!" << std::endl;
 
-    CaptureMotion* odom_capture = new CaptureMotion(ts, odom_sensor, odom_data, Eigen::Matrix2s::Identity() * odom_std_factor * odom_std_factor, nullptr);
+    CaptureMotion* odom_capture = new CaptureMotion(ts, odom_sensor, odom_data, Eigen::Matrix2d::Identity() * odom_std_factor * odom_std_factor, nullptr);
 
     // Initial pose
     ground_truth_pose << 2, 8, 0;
@@ -168,7 +168,7 @@ int main(int argc, char** argv)
     odom_trajectory.head(3) = ground_truth_pose;
 
     // Origin Key Frame with covariance
-    problem.setPrior(ground_truth_pose, Eigen::Matrix3s::Identity() * 0.1, ts, 0.1);
+    problem.setPrior(ground_truth_pose, Eigen::Matrix3d::Identity() * 0.1, ts, 0.1);
 
     // Ceres wrapper
     ceres::Solver::Options ceres_options;
@@ -262,7 +262,7 @@ int main(int argc, char** argv)
     // Print Final result in a file -------------------------
     // Vehicle poses
     int i = 0;
-    Eigen::VectorXs state_poses = Eigen::VectorXs::Zero(n_execution * 3);
+    Eigen::VectorXd state_poses = Eigen::VectorXd::Zero(n_execution * 3);
     for (auto frame : *(problem.getTrajectory()->getFrameList()))
     {
         state_poses.segment(i, 3) << frame->getP()->getVector(), frame->getO()->getVector();
@@ -271,7 +271,7 @@ int main(int argc, char** argv)
 
     // Landmarks
     i = 0;
-    Eigen::VectorXs landmarks = Eigen::VectorXs::Zero(problem.getMap()->getLandmarkList()->size() * 2);
+    Eigen::VectorXd landmarks = Eigen::VectorXd::Zero(problem.getMap()->getLandmarkList()->size() * 2);
     for (auto landmark : *(problem.getMap()->getLandmarkList()))
     {
         landmarks.segment(i, 2) = landmark->getP()->getVector();

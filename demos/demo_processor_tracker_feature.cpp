@@ -52,9 +52,9 @@ int main()
 
     // Wolf problem
     ProblemPtr wolf_problem_ptr_ = Problem::create("PO", 2);
-    SensorBasePtr sensor_ptr_ = make_shared<SensorBase>("ODOM 2D", std::make_shared<StateBlock>(Eigen::VectorXs::Zero(2)),
-                                             std::make_shared<StateBlock>(Eigen::VectorXs::Zero(1)),
-                                             std::make_shared<StateBlock>(Eigen::VectorXs::Zero(2)), 2);
+    SensorBasePtr sensor_ptr_ = make_shared<SensorBase>("ODOM 2D", std::make_shared<StateBlock>(Eigen::VectorXd::Zero(2)),
+                                             std::make_shared<StateBlock>(Eigen::VectorXd::Zero(1)),
+                                             std::make_shared<StateBlock>(Eigen::VectorXd::Zero(2)), 2);
 
     ProcessorParamsTrackerFeaturePtr params_trk = std::make_shared<ProcessorParamsTrackerFeature>();
     params_trk->voting_active = true;
@@ -69,7 +69,7 @@ int main()
     std::cout << "sensor & processor created and added to wolf problem" << std::endl;
 
     TimeStamp t(0);
-    Scalar dt = 0.5;
+    double dt = 0.5;
     for (auto i = 0; i < 10; i++)
     {
         std::cout << "\n===== Capture TS = " << t << " =====" << std::endl;

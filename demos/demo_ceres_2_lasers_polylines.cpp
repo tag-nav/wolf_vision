@@ -48,10 +48,10 @@ class FaramoticsRobot
         string modelFileName;
         CrangeScan2D* myScanner;
         CdynamicSceneRender* myRender;
-        Eigen::Vector3s ground_truth_pose_;
-        Eigen::Vector4s laser_1_pose_, laser_2_pose_;
+        Eigen::Vector3d ground_truth_pose_;
+        Eigen::Vector4d laser_1_pose_, laser_2_pose_;
 
-        FaramoticsRobot(int argc, char** argv, const Eigen::Vector4s& _laser_1_pose, const Eigen::Vector4s& _laser_2_pose) :
+        FaramoticsRobot(int argc, char** argv, const Eigen::Vector4d& _laser_1_pose, const Eigen::Vector4d& _laser_2_pose) :
             modelFileName("/home/jvallve/iri-lab/faramotics/models/campusNordUPC.obj"),
             laser_1_pose_(_laser_1_pose),
             laser_2_pose_(_laser_2_pose)
@@ -72,7 +72,7 @@ class FaramoticsRobot
         }
 
         //function travel around
-        Eigen::Vector3s motionCampus(unsigned int ii, double& displacement_, double& rotation_)
+        Eigen::Vector3d motionCampus(unsigned int ii, double& displacement_, double& rotation_)
         {
             if (ii <= 120){         displacement_ = 0.1;    rotation_ = 0; }
             else if (ii <= 170) {   displacement_ = 0.2;    rotation_ = 1.8 * M_PI / 180; }
@@ -126,7 +126,7 @@ class FaramoticsRobot
             }
         }
 
-        void render(const FeatureBasePtrList& feature_list, int laser, const LandmarkBasePtrList& landmark_list, const Eigen::Vector3s& estimated_pose)
+        void render(const FeatureBasePtrList& feature_list, int laser, const LandmarkBasePtrList& landmark_list, const Eigen::Vector3d& estimated_pose)
         {
             // detected corners
             std::cout << "   drawCorners: " << feature_list.size() << std::endl;
@@ -146,7 +146,7 @@ class FaramoticsRobot
             landmark_vector.reserve(3*landmark_list.size());
             for (auto landmark : landmark_list)
             {
-                Scalar* position_ptr = landmark->getP()->get();
+                double* position_ptr = landmark->getP()->get();
                 landmark_vector.push_back(*position_ptr); //x
                 landmark_vector.push_back(*(position_ptr + 1)); //y
                 landmark_vector.push_back(0.2); //z
@@ -195,27 +195,27 @@ int main(int argc, char** argv)
 
     // INITIALIZATION ============================================================================================
     //init random generators
-    Scalar odom_std_factor = 0.5;
-    Scalar gps_std = 1;
+    double odom_std_factor = 0.5;
+    double gps_std = 1;
     std::default_random_engine generator(1);
-    std::normal_distribution<Scalar> distribution_odom(0.0, odom_std_factor); //odometry noise
-    std::normal_distribution<Scalar> distribution_gps(0.0, gps_std); //GPS noise
+    std::normal_distribution<double> distribution_odom(0.0, odom_std_factor); //odometry noise
+    std::normal_distribution<double> distribution_gps(0.0, gps_std); //GPS noise
 
     //variables
-    Eigen::Vector2s odom_data;
-    Eigen::Vector2s gps_fix_reading;
-    Eigen::VectorXs ground_truth(n_execution * 3); //all true poses
-    Eigen::Vector3s ground_truth_pose; //last true pose
-    Eigen::VectorXs odom_trajectory(n_execution * 3); //open loop trajectory
-    Eigen::VectorXs mean_times = Eigen::VectorXs::Zero(7);
+    Eigen::Vector2d odom_data;
+    Eigen::Vector2d gps_fix_reading;
+    Eigen::VectorXd ground_truth(n_execution * 3); //all true poses
+    Eigen::Vector3d ground_truth_pose; //last true pose
+    Eigen::VectorXd odom_trajectory(n_execution * 3); //open loop trajectory
+    Eigen::VectorXd mean_times = Eigen::VectorXd::Zero(7);
     clock_t t1, t2;
-    Scalar dt = 0.05;
+    double dt = 0.05;
     TimeStamp ts(0);
 
     // Wolf Tree initialization
-    Eigen::Vector3s odom_pose = Eigen::Vector3s::Zero();
-    Eigen::Vector3s gps_pose = Eigen::Vector3s::Zero();
-    Eigen::Vector4s laser_1_pose, laser_2_pose; //xyz + theta
+    Eigen::Vector3d odom_pose = Eigen::Vector3d::Zero();
+    Eigen::Vector3d gps_pose = Eigen::Vector3d::Zero();
+    Eigen::Vector4d laser_1_pose, laser_2_pose; //xyz + theta
     laser_1_pose << 1.2, 0, 0, 0; //laser 1
     laser_2_pose << -1.2, 0, 0, M_PI; //laser 2
 
@@ -243,7 +243,7 @@ int main(int argc, char** argv)
     problem.addSensor(laser_2_sensor);
     problem.setProcessorMotion(odom_processor);
 
-    CaptureMotion* odom_capture = new CaptureMotion(ts,odom_sensor, odom_data, Eigen::Matrix2s::Identity() * odom_std_factor * odom_std_factor, nullptr);
+    CaptureMotion* odom_capture = new CaptureMotion(ts,odom_sensor, odom_data, Eigen::Matrix2d::Identity() * odom_std_factor * odom_std_factor, nullptr);
 
     // Simulated robot
     FaramoticsRobot robot(argc, argv, laser_1_pose, laser_2_pose);
@@ -257,7 +257,7 @@ int main(int argc, char** argv)
     FrameBasePtr origin_frame = problem.createFrame(KEY, ground_truth_pose, ts);
 
     // Prior covariance
-    CapturePose* initial_covariance = new CapturePose(ts, gps_sensor, ground_truth_pose, Eigen::Matrix3s::Identity() * 0.1);
+    CapturePose* initial_covariance = new CapturePose(ts, gps_sensor, ground_truth_pose, Eigen::Matrix3d::Identity() * 0.1);
     origin_frame->addCapture(initial_covariance);
     initial_covariance->process();
 
@@ -320,7 +320,7 @@ int main(int argc, char** argv)
             gps_fix_reading(0) += distribution_gps(generator);
             gps_fix_reading(1) += distribution_gps(generator);
             // process data
-            //(new CaptureGPSFix(ts, &gps_sensor, gps_fix_reading, gps_std * Eigen::MatrixXs::Identity(3,3)));
+            //(new CaptureGPSFix(ts, &gps_sensor, gps_fix_reading, gps_std * Eigen::MatrixXd::Identity(3,3)));
         }
         mean_times(0) += ((double) clock() - t1) / CLOCKS_PER_SEC;
 

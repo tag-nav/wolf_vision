@@ -55,15 +55,15 @@ class ProcessorTrackerLandmarkImage : public ProcessorTrackerLandmark
         unsigned int landmarks_tracked_ = 0;
 
         /* pinhole params */
-        Eigen::Vector2s distortion_;
-        Eigen::Vector2s correction_;
+        Eigen::Vector2d distortion_;
+        Eigen::Vector2d correction_;
 
         /* transformations */
-        Eigen::Vector3s world2cam_translation_;
-        Eigen::Vector4s world2cam_orientation_;
+        Eigen::Vector3d world2cam_translation_;
+        Eigen::Vector4d world2cam_orientation_;
 
-        Eigen::Vector3s cam2world_translation_;
-        Eigen::Vector4s cam2world_orientation_;
+        Eigen::Vector3d cam2world_translation_;
+        Eigen::Vector4d cam2world_orientation_;
 
         unsigned int n_feature_;
         unsigned int landmark_idx_non_visible_;
@@ -184,11 +184,11 @@ class ProcessorTrackerLandmarkImage : public ProcessorTrackerLandmark
          * \param _cv_matches output variable in which the best result will be stored (in the position [0])
          * \return normalized score of similarity (1 - exact match; 0 - complete mismatch)
          */
-        Scalar match(const cv::Mat _target_descriptor, const cv::Mat _candidate_descriptors, std::vector<cv::DMatch>& _cv_matches);
+        double match(const cv::Mat _target_descriptor, const cv::Mat _candidate_descriptors, std::vector<cv::DMatch>& _cv_matches);
 
-        void landmarkInCurrentCamera(const Eigen::VectorXs& _frame_state,
+        void landmarkInCurrentCamera(const Eigen::VectorXd& _frame_state,
                                      const LandmarkAHPPtr   _landmark,
-                                     Eigen::Vector4s&       _point3D_hmg);
+                                     Eigen::Vector4d&       _point3D_hmg);
 
         // These only to debug, will disappear one day soon
     public:

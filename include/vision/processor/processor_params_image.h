@@ -15,20 +15,20 @@ struct ProcessorParamsTrackerFeatureImage : public ProcessorParamsTrackerFeature
 {
         std::string yaml_file_params_vision_utils;
 
-        Scalar min_response_for_new_features; ///< minimum value of the response to create a new feature
-        Scalar distance;
+        double min_response_for_new_features; ///< minimum value of the response to create a new feature
+        double distance;
 
-        Scalar pixel_noise_std; ///< std noise of the pixel
-        Scalar pixel_noise_var; ///< var noise of the pixel
+        double pixel_noise_std; ///< std noise of the pixel
+        double pixel_noise_var; ///< var noise of the pixel
     ProcessorParamsTrackerFeatureImage() = default;
     ProcessorParamsTrackerFeatureImage(std::string _unique_name, const ParamsServer& _server):
         ProcessorParamsTrackerFeature(_unique_name, _server)
     {
         yaml_file_params_vision_utils   = _server.getParam<std::string>(_unique_name    + "/yaml_file_params_vision_utils");
-        min_response_for_new_features   = _server.getParam<Scalar>(_unique_name         + "/min_response_for_new_features");
-        distance                        = _server.getParam<Scalar>(_unique_name         + "/distance");
-        pixel_noise_std                 = _server.getParam<Scalar>(_unique_name         + "/pixel_noise_std");
-        pixel_noise_var                 = _server.getParam<Scalar>(_unique_name         + "/pixel_noise_var");
+        min_response_for_new_features   = _server.getParam<double>(_unique_name         + "/min_response_for_new_features");
+        distance                        = _server.getParam<double>(_unique_name         + "/distance");
+        pixel_noise_std                 = _server.getParam<double>(_unique_name         + "/pixel_noise_std");
+        pixel_noise_var                 = _server.getParam<double>(_unique_name         + "/pixel_noise_var");
     }
     std::string print() const
     {
@@ -47,22 +47,22 @@ struct ProcessorParamsTrackerLandmarkImage : public ProcessorParamsTrackerLandma
 {
         std::string yaml_file_params_vision_utils;
 
-        Scalar min_response_for_new_features; ///< minimum value of the response to create a new feature
-        Scalar distance;
+        double min_response_for_new_features; ///< minimum value of the response to create a new feature
+        double distance;
 
-        Scalar pixel_noise_std; ///< std noise of the pixel
-        Scalar pixel_noise_var; ///< var noise of the pixel
+        double pixel_noise_std; ///< std noise of the pixel
+        double pixel_noise_var; ///< var noise of the pixel
 
         ProcessorParamsTrackerLandmarkImage(std::string _unique_name, const ParamsServer& _server):
             ProcessorParamsTrackerLandmark(_unique_name, _server)
         {
             yaml_file_params_vision_utils   = _server.getParam<std::string>(_unique_name    + "/yaml_file_params_vision_utils");
 
-            min_response_for_new_features   = _server.getParam<Scalar>(_unique_name         + "/min_response_for_new_features");
-            distance                        = _server.getParam<Scalar>(_unique_name         + "/distance");
+            min_response_for_new_features   = _server.getParam<double>(_unique_name         + "/min_response_for_new_features");
+            distance                        = _server.getParam<double>(_unique_name         + "/distance");
 
-            pixel_noise_std                 = _server.getParam<Scalar>(_unique_name         + "/pixel_noise_std");
-            pixel_noise_var                 = _server.getParam<Scalar>(_unique_name         + "/pixel_noise_var");
+            pixel_noise_std                 = _server.getParam<double>(_unique_name         + "/pixel_noise_std");
+            pixel_noise_var                 = _server.getParam<double>(_unique_name         + "/pixel_noise_var");
         }
         std::string print() const
         {

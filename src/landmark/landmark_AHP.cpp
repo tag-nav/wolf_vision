@@ -7,7 +7,7 @@
 namespace wolf {
 
 /* Landmark - Anchored Homogeneous Point*/
-LandmarkAHP::LandmarkAHP(Eigen::Vector4s _position_homogeneous,
+LandmarkAHP::LandmarkAHP(Eigen::Vector4d _position_homogeneous,
                          FrameBasePtr _anchor_frame,
                          SensorBasePtr _anchor_sensor,
                          cv::Mat _2D_descriptor) :
@@ -35,30 +35,30 @@ YAML::Node LandmarkAHP::saveToYaml() const
     return node;
 }
 
-Eigen::Vector3s LandmarkAHP::getPointInAnchorSensor() const
+Eigen::Vector3d LandmarkAHP::getPointInAnchorSensor() const
 {
-    Eigen::Map<const Eigen::Vector4s> hmg_point(getP()->getState().data());
+    Eigen::Map<const Eigen::Vector4d> hmg_point(getP()->getState().data());
     return hmg_point.head<3>()/hmg_point(3);
 }
 
-Eigen::Vector3s LandmarkAHP::point() const
+Eigen::Vector3d LandmarkAHP::point() const
 {
     using namespace Eigen;
-    Transform<Scalar,3,Isometry> T_w_r
-        = Translation<Scalar,3>(getAnchorFrame()->getP()->getState())
-        * Quaternions(getAnchorFrame()->getO()->getState().data());
-    Transform<Scalar,3,Isometry> T_r_c
-        = Translation<Scalar,3>(getAnchorSensor()->getP()->getState())
-        * Quaternions(getAnchorSensor()->getO()->getState().data());
-    Vector4s point_hmg_c = getP()->getState();
-    Vector4s point_hmg = T_w_r * T_r_c * point_hmg_c;
+    Transform<double,3,Isometry> T_w_r
+        = Translation<double,3>(getAnchorFrame()->getP()->getState())
+        * Quaterniond(getAnchorFrame()->getO()->getState().data());
+    Transform<double,3,Isometry> T_r_c
+        = Translation<double,3>(getAnchorSensor()->getP()->getState())
+        * Quaterniond(getAnchorSensor()->getO()->getState().data());
+    Vector4d point_hmg_c = getP()->getState();
+    Vector4d point_hmg = T_w_r * T_r_c * point_hmg_c;
     return point_hmg.head<3>()/point_hmg(3);
 }
 
 LandmarkBasePtr LandmarkAHP::create(const YAML::Node& _node)
 {
     unsigned int        id          = _node["id"]           .as< unsigned int     >();
-    Eigen::VectorXs     pos_homog   = _node["position"]     .as< Eigen::VectorXs  >();
+    Eigen::VectorXd     pos_homog   = _node["position"]     .as< Eigen::VectorXd  >();
     std::vector<int>    v           = _node["descriptor"]   .as< std::vector<int> >();
     cv::Mat desc(v);
 

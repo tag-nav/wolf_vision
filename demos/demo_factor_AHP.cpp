@@ -24,7 +24,7 @@ int main()
     ProblemPtr wolf_problem_ptr_ = Problem::create("PO", 3);
 
     /* Do this while there aren't extrinsic parameters on the yaml */
-    Eigen::Vector7s extrinsic_cam;
+    Eigen::Vector7d extrinsic_cam;
     extrinsic_cam.setRandom();
 //    extrinsic_cam[0] = 0; //px
 //    extrinsic_cam[1] = 0; //py
@@ -35,7 +35,7 @@ int main()
 //    extrinsic_cam[6] = 1; //qw
     extrinsic_cam.tail<4>().normalize();
     std::cout << "========extrinsic_cam: " << extrinsic_cam.transpose() << std::endl;
-    const Eigen::VectorXs extr = extrinsic_cam;
+    const Eigen::VectorXd extr = extrinsic_cam;
     /* Do this while there aren't extrinsic parameters on the yaml */
 
     SensorBasePtr sensor_ptr = wolf_problem_ptr_->installSensor("CAMERA", "PinHole", extr, wolf_root + "/src/examples/camera_params_ueye_radial_dist.yaml");
@@ -46,7 +46,7 @@ int main()
     ProcessorBasePtr processor_ptr = wolf_problem_ptr_->installProcessor("IMAGE LANDMARK", "ORB", "PinHole", wolf_root + "/src/examples/processor_image_feature.yaml");
 
     // create the current frame
-    Eigen::Vector7s frame_pos_ori;
+    Eigen::Vector7d frame_pos_ori;
     frame_pos_ori.setRandom();
 //    frame_pos_ori[0] = 0; //px
 //    frame_pos_ori[1] = 0; //py
@@ -56,7 +56,7 @@ int main()
 //    frame_pos_ori[5] = 0; //qz
 //    frame_pos_ori[6] = 1; //qw
     frame_pos_ori.tail<4>().normalize();
-    const Eigen::VectorXs frame_val = frame_pos_ori;
+    const Eigen::VectorXd frame_val = frame_pos_ori;
 
     FrameBasePtr last_frame = std::make_shared<FrameBase>(t,std::make_shared<StateBlock>(frame_val.head(3)), std::make_shared<StateQuaternion>(frame_val.tail(4)));
     std::cout << "Last frame" << std::endl;
@@ -74,22 +74,22 @@ int main()
     cv::KeyPoint kp; kp.pt = {10,20};
     cv::Mat desc;
 
-    FeaturePointImagePtr feat_point_image_ptr = std::make_shared<FeaturePointImage>(kp, 0, desc, Eigen::Matrix2s::Identity());
+    FeaturePointImagePtr feat_point_image_ptr = std::make_shared<FeaturePointImage>(kp, 0, desc, Eigen::Matrix2d::Identity());
     image_ptr->addFeature(feat_point_image_ptr);
 
     FrameBasePtr anchor_frame = std::make_shared< FrameBase>(t,std::make_shared<StateBlock>(frame_val.head(3)), std::make_shared<StateQuaternion>(frame_val.tail(4)));
     //FrameBasePtr anchor_frame = wolf_problem_ptr_->getTrajectory()->getLastFrame();
 
     // create the landmark
-    Eigen::Vector2s point2D;
+    Eigen::Vector2d point2D;
     point2D[0] = feat_point_image_ptr->getKeypoint().pt.x;
     point2D[1] = feat_point_image_ptr->getKeypoint().pt.y;
     std::cout << "point2D: " << point2D.transpose() << std::endl;
 
-    Scalar distance = 2; // arbitrary value
-    Eigen::Vector4s vec_homogeneous;
+    double distance = 2; // arbitrary value
+    Eigen::Vector4d vec_homogeneous;
 
-    Eigen::VectorXs correction_vec = (std::static_pointer_cast<SensorCamera>(image_ptr->getSensor()))->getCorrectionVector();
+    Eigen::VectorXd correction_vec = (std::static_pointer_cast<SensorCamera>(image_ptr->getSensor()))->getCorrectionVector();
     std::cout << "correction vector: " << correction_vec << std::endl;
     std::cout << "distortion vector: " << (std::static_pointer_cast<SensorCamera>(image_ptr->getSensor()))->getDistortionVector() << std::endl;
     point2D = pinhole::depixellizePoint(image_ptr->getSensor()->getIntrinsic()->getState(),point2D);
@@ -97,7 +97,7 @@ int main()
     point2D = pinhole::undistortPoint((std::static_pointer_cast<SensorCamera>(image_ptr->getSensor()))->getCorrectionVector(),point2D);
     std::cout << "point2D undistorted: " << point2D.transpose() << std::endl;
 
-    Eigen::Vector3s point3D;
+    Eigen::Vector3d point3D;
     point3D.head(2) = point2D;
     point3D(2) = 1;
 
@@ -117,23 +117,23 @@ int main()
     feat_point_image_ptr->addFactor(factor_ptr);
     std::cout << "Factor AHP created" << std::endl;
 
-    Eigen::Vector2s point2D_proj = point3D.head<2>()/point3D(2);
+    Eigen::Vector2d point2D_proj = point3D.head<2>()/point3D(2);
     std::cout << "point2D projected: " << point2D_proj.transpose() << std::endl;
 
-    Eigen::Vector2s point2D_dist;
+    Eigen::Vector2d point2D_dist;
     point2D_dist =  pinhole::distortPoint((std::static_pointer_cast<SensorCamera>(image_ptr->getSensor()))->getDistortionVector(),point2D_proj);
     std::cout << "point2D distorted: " << point2D_dist.transpose() << std::endl;
 
-    Eigen::Vector2s point2D_pix;
+    Eigen::Vector2d point2D_pix;
     point2D_pix = pinhole::pixellizePoint(image_ptr->getSensor()->getIntrinsic()->getState(),point2D_dist);
     std::cout << "point2D pixellized: " << point2D_pix.transpose() << std::endl;
 
-    Eigen::Vector2s expectation;
-    Eigen::Vector3s current_frame_p = last_frame->getP()->getState();
-    Eigen::Vector4s current_frame_o = last_frame->getO()->getState();
-    Eigen::Vector3s anchor_frame_p = landmark->getAnchorFrame()->getP()->getState();
-    Eigen::Vector4s anchor_frame_o = landmark->getAnchorFrame()->getO()->getState();
-    Eigen::Vector4s landmark_ = landmark->getP()->getState();
+    Eigen::Vector2d expectation;
+    Eigen::Vector3d current_frame_p = last_frame->getP()->getState();
+    Eigen::Vector4d current_frame_o = last_frame->getO()->getState();
+    Eigen::Vector3d anchor_frame_p = landmark->getAnchorFrame()->getP()->getState();
+    Eigen::Vector4d anchor_frame_o = landmark->getAnchorFrame()->getO()->getState();
+    Eigen::Vector4d landmark_ = landmark->getP()->getState();
 
     factor_ptr ->expectation(current_frame_p.data(), current_frame_o.data(),
             anchor_frame_p.data(), anchor_frame_o.data(),

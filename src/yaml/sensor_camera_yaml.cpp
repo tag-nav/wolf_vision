@@ -87,7 +87,7 @@ static IntrinsicsBasePtr createIntrinsicsCamera(const std::string & _filename_do
 //        // extrinsics discarded in this creator
 //        Vector3d pos            = camera_config["extrinsic"]["position"].as<Vector3d>();
 //        Vector3d ori            = camera_config["extrinsic"]["orientation"].as<Vector3d>() * M_PI / 180; // roll, pitch, yaw [rad]
-//        Quaternions quat; v2q(ori, quat);
+//        Quaterniond quat; v2q(ori, quat);
 //        std::cout << "sensor extrinsics: " << std::endl;
 //        std::cout << "\tposition    : " << pos.transpose() << std::endl;
 //        std::cout << "\torientation : " << ori.transpose() << std::endl;

@@ -15,9 +15,9 @@ struct IntrinsicsCamera : public IntrinsicsBase
 {
         unsigned int width;                     ///< Image width in pixels
         unsigned int height;                    ///< Image height in pixels
-        Eigen::Vector4s pinhole_model_raw;      ///< k = [u_0, v_0, alpha_u, alpha_v]  vector of pinhole intrinsic parameters
-        Eigen::Vector4s pinhole_model_rectified;///< k = [u_0, v_0, alpha_u, alpha_v]  vector of pinhole intrinsic parameters
-        Eigen::VectorXs distortion;             ///< d = [d_1, d_2, d_3, ...] radial distortion coefficients
+        Eigen::Vector4d pinhole_model_raw;      ///< k = [u_0, v_0, alpha_u, alpha_v]  vector of pinhole intrinsic parameters
+        Eigen::Vector4d pinhole_model_rectified;///< k = [u_0, v_0, alpha_u, alpha_v]  vector of pinhole intrinsic parameters
+        Eigen::VectorXd distortion;             ///< d = [d_1, d_2, d_3, ...] radial distortion coefficients
     IntrinsicsCamera()
     {
         //DEFINED FOR COMPATIBILITY PURPOSES. TO BE REMOVED IN THE FUTURE.
@@ -27,9 +27,9 @@ struct IntrinsicsCamera : public IntrinsicsBase
     {
         width                   = _server.getParam<unsigned int>(_unique_name       + "/width");
         height                  = _server.getParam<unsigned int>(_unique_name       + "/height");
-        pinhole_model_raw       = _server.getParam<Eigen::Vector4s>(_unique_name    + "/pinhole_model_raw");
-        pinhole_model_rectified = _server.getParam<Eigen::Vector4s>(_unique_name    + "/pinhole_model_rectified");
-        distortion              = _server.getParam<Eigen::VectorXs>(_unique_name    + "/distortion");
+        pinhole_model_raw       = _server.getParam<Eigen::Vector4d>(_unique_name    + "/pinhole_model_raw");
+        pinhole_model_rectified = _server.getParam<Eigen::Vector4d>(_unique_name    + "/pinhole_model_rectified");
+        distortion              = _server.getParam<Eigen::VectorXd>(_unique_name    + "/distortion");
     }
     std::string print() const
     {
@@ -50,14 +50,14 @@ class SensorCamera : public SensorBase
 {
     public:
 
-        SensorCamera(const Eigen::VectorXs & _extrinsics, const IntrinsicsCamera& _intrinsics);
-        SensorCamera(const Eigen::VectorXs & _extrinsics, IntrinsicsCameraPtr _intrinsics_ptr);
+        SensorCamera(const Eigen::VectorXd & _extrinsics, const IntrinsicsCamera& _intrinsics);
+        SensorCamera(const Eigen::VectorXd & _extrinsics, IntrinsicsCameraPtr _intrinsics_ptr);
 
         virtual ~SensorCamera();
 
-        Eigen::VectorXs getDistortionVector()   { return distortion_; }
-        Eigen::VectorXs getCorrectionVector()   { return correction_; }
-        Eigen::Matrix3s getIntrinsicMatrix()    { return K_; }
+        Eigen::VectorXd getDistortionVector()   { return distortion_; }
+        Eigen::VectorXd getCorrectionVector()   { return correction_; }
+        Eigen::Matrix3d getIntrinsicMatrix()    { return K_; }
 
         bool isUsingRawImages() { return using_raw_; }
         bool useRawImages();
@@ -72,19 +72,19 @@ class SensorCamera : public SensorBase
     private:
         int img_width_;
         int img_height_;
-        Eigen::VectorXs distortion_;
-        Eigen::VectorXs correction_;
-        Eigen::Vector4s pinhole_model_raw_, pinhole_model_rectified_;
-        Eigen::Matrix3s K_;
+        Eigen::VectorXd distortion_;
+        Eigen::VectorXd correction_;
+        Eigen::Vector4d pinhole_model_raw_, pinhole_model_rectified_;
+        Eigen::Matrix3d K_;
         bool using_raw_;
 
-        virtual Eigen::Matrix3s setIntrinsicMatrix(Eigen::Vector4s _pinhole_model);
+        virtual Eigen::Matrix3d setIntrinsicMatrix(Eigen::Vector4d _pinhole_model);
 
     public:
         EIGEN_MAKE_ALIGNED_OPERATOR_NEW; // to guarantee alignment (see http://eigen.tuxfamily.org/dox-devel/group__TopicStructHavingEigenMembers.html)
 
         static SensorBasePtr create(const std::string & _unique_name, //
-                                    const Eigen::VectorXs& _extrinsics, //
+                                    const Eigen::VectorXd& _extrinsics, //
                                     const IntrinsicsBasePtr _intrinsics);
 
 };

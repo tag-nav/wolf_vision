@@ -15,7 +15,7 @@ using namespace wolf;
 
 TEST(SensorCamera, Img_size)
 {
-    Eigen::VectorXs extrinsics(7); extrinsics << 0,0,0, 0,0,0,1;
+    Eigen::VectorXd extrinsics(7); extrinsics << 0,0,0, 0,0,0,1;
     IntrinsicsCamera params;
     params.width  = 640;
     params.height = 480;
@@ -33,17 +33,17 @@ TEST(SensorCamera, Img_size)
 
 TEST(SensorCamera, Intrinsics_Raw_Rectified)
 {
-    Eigen::VectorXs extrinsics(7); extrinsics << 0,0,0, 0,0,0,1;
+    Eigen::VectorXd extrinsics(7); extrinsics << 0,0,0, 0,0,0,1;
     IntrinsicsCamera params;
     params.pinhole_model_raw       << 321, 241, 321, 321;
     params.pinhole_model_rectified << 320, 240, 320, 320;
     SensorCameraPtr cam = std::make_shared<SensorCamera>(extrinsics, params);
 
-    Eigen::Matrix3s K_raw, K_rectified;
+    Eigen::Matrix3d K_raw, K_rectified;
     K_raw       << 321, 0, 321,    0, 321, 241,    0, 0, 1;
     K_rectified << 320, 0, 320,    0, 320, 240,    0, 0, 1;
-    Eigen::Vector4s k_raw(321,241,321,321);
-    Eigen::Vector4s k_rectified(320,240,320,320);
+    Eigen::Vector4d k_raw(321,241,321,321);
+    Eigen::Vector4d k_rectified(320,240,320,320);
 
     // default is raw
     ASSERT_TRUE(cam->isUsingRawImages());
@@ -63,32 +63,32 @@ TEST(SensorCamera, Intrinsics_Raw_Rectified)
 
 TEST(SensorCamera, Distortion)
 {
-    Eigen::VectorXs extrinsics(7); extrinsics << 0,0,0, 0,0,0,1;
+    Eigen::VectorXd extrinsics(7); extrinsics << 0,0,0, 0,0,0,1;
     IntrinsicsCamera params;
     params.width  = 640;
     params.height = 480;
     params.pinhole_model_raw       << 321, 241, 321, 321;
     params.pinhole_model_rectified << 320, 240, 320, 320;
-    params.distortion = Eigen::Vector3s( -0.3, 0.096, 0 );
+    params.distortion = Eigen::Vector3d( -0.3, 0.096, 0 );
     SensorCameraPtr cam = std::make_shared<SensorCamera>(extrinsics, params);
 
-    Eigen::Vector3s d(-0.3, 0.096, 0);
+    Eigen::Vector3d d(-0.3, 0.096, 0);
 
     ASSERT_MATRIX_APPROX(d, cam->getDistortionVector(), 1e-8);
 }
 
 TEST(SensorCamera, Correction_zero)
 {
-    Eigen::VectorXs extrinsics(7); extrinsics << 0,0,0, 0,0,0,1;
+    Eigen::VectorXd extrinsics(7); extrinsics << 0,0,0, 0,0,0,1;
     IntrinsicsCamera params;
     params.width  = 640;
     params.height = 480;
     params.pinhole_model_raw       << 321, 241, 321, 321;
     params.pinhole_model_rectified << 320, 240, 320, 320;
-    params.distortion = Eigen::Vector3s( 0, 0, 0 );
+    params.distortion = Eigen::Vector3d( 0, 0, 0 );
     SensorCameraPtr cam = std::make_shared<SensorCamera>(extrinsics, params);
 
-    Eigen::MatrixXs c(cam->getCorrectionVector().size(), 1);
+    Eigen::MatrixXd c(cam->getCorrectionVector().size(), 1);
     c.setZero();
 
     ASSERT_GE(cam->getCorrectionVector().size(), cam->getDistortionVector().size());
@@ -97,13 +97,13 @@ TEST(SensorCamera, Correction_zero)
 
 TEST(SensorCamera, create)
 {
-    Eigen::VectorXs extrinsics(7); extrinsics << 0,0,0, 0,0,0,1;
+    Eigen::VectorXd extrinsics(7); extrinsics << 0,0,0, 0,0,0,1;
     IntrinsicsCameraPtr params = std::make_shared<IntrinsicsCamera>();
     params->width  = 640;
     params->height = 480;
     params->pinhole_model_raw       << 321, 241, 321, 321;
     params->pinhole_model_rectified << 320, 240, 320, 320;
-    params->distortion = Eigen::Vector3s( 0, 0, 0 );
+    params->distortion = Eigen::Vector3d( 0, 0, 0 );
 
     SensorBasePtr   sen = SensorCamera::create("camera", extrinsics, params);
 
@@ -117,13 +117,13 @@ TEST(SensorCamera, create)
 
 TEST(SensorCamera, install)
 {
-    Eigen::VectorXs extrinsics(7); extrinsics << 0,0,0, 0,0,0,1;
+    Eigen::VectorXd extrinsics(7); extrinsics << 0,0,0, 0,0,0,1;
     IntrinsicsCameraPtr params = std::make_shared<IntrinsicsCamera>();
     params->width  = 640;
     params->height = 480;
     params->pinhole_model_raw       << 321, 241, 321, 321;
     params->pinhole_model_rectified << 320, 240, 320, 320;
-    params->distortion = Eigen::Vector3s( 0, 0, 0 );
+    params->distortion = Eigen::Vector3d( 0, 0, 0 );
 
     // Wolf problem
 	ProblemPtr problem = Problem::create("PO 3D",3);

@@ -37,7 +37,7 @@ class FactorEpipolar : public FactorAutodiff<FactorEpipolar, 1, 3, 4, 3, 4, 3, 4
 
     private:
         SensorCameraPtr camera_;
-        Eigen::Matrix3s K_inv_; ///< Intrinsic matrix and its inverse
+        Eigen::Matrix3d K_inv_; ///< Intrinsic matrix and its inverse
 
 };
 

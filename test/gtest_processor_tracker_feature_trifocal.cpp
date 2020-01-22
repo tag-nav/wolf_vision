@@ -65,11 +65,11 @@ TEST(ProcessorTrackerFeatureTrifocal, KeyFrameCallback)
     using std::shared_ptr;
     using std::make_shared;
     using std::static_pointer_cast;
-    using Eigen::Vector2s;
+    using Eigen::Vector2d;
 
     std::string wolf_root = _WOLF_VISION_ROOT_DIR;
 
-    Scalar dt = 0.01;
+    double dt = 0.01;
 
     // Wolf problem
     ProblemPtr problem = Problem::create("PO", 3);
@@ -78,10 +78,10 @@ TEST(ProcessorTrackerFeatureTrifocal, KeyFrameCallback)
     IntrinsicsCameraPtr intr = make_shared<IntrinsicsCamera>(); // TODO init params or read from YAML
     intr->width  = 640;
     intr->height = 480;
-    // SensorCameraPtr sens_trk = make_shared<SensorCamera>((Eigen::Vector7s()<<0,0,0, 0,0,0,1).finished(),
+    // SensorCameraPtr sens_trk = make_shared<SensorCamera>((Eigen::Vector7d()<<0,0,0, 0,0,0,1).finished(),
     //                                                      intr);
 
-    auto sens_trk = SensorBase::emplace<SensorCamera>(problem->getHardware(), (Eigen::Vector7s()<<0,0,0, 0,0,0,1).finished(),
+    auto sens_trk = SensorBase::emplace<SensorCamera>(problem->getHardware(), (Eigen::Vector7d()<<0,0,0, 0,0,0,1).finished(),
                                                       intr);
     ProcessorParamsTrackerFeatureTrifocalPtr params_tracker_feature_trifocal = std::make_shared<ProcessorParamsTrackerFeatureTrifocal>();
     params_tracker_feature_trifocal->pixel_noise_std                = 1.0;
@@ -107,7 +107,7 @@ TEST(ProcessorTrackerFeatureTrifocal, KeyFrameCallback)
     IntrinsicsOdom3DPtr params = std::make_shared<IntrinsicsOdom3D>();
     params->min_disp_var = 0.000001;
     params->min_rot_var  = 0.000001;
-    SensorBasePtr sens_odo = problem->installSensor("SensorOdom3D", "odometer", (Vector7s() << 0,0,0,  0,0,0,1).finished(), params);
+    SensorBasePtr sens_odo = problem->installSensor("SensorOdom3D", "odometer", (Vector7d() << 0,0,0,  0,0,0,1).finished(), params);
     ProcessorParamsOdom3DPtr proc_odo_params = make_shared<ProcessorParamsOdom3D>();
     proc_odo_params->voting_active   = true;
     proc_odo_params->time_tolerance  = dt/2;
@@ -120,11 +120,11 @@ TEST(ProcessorTrackerFeatureTrifocal, KeyFrameCallback)
 
     // initialize
     TimeStamp   t(0.0);
-    Vector7s    x; x << 0,0,0, 0,0,0,1;
-    Matrix6s    P = Matrix6s::Identity() * 0.000001;
+    Vector7d    x; x << 0,0,0, 0,0,0,1;
+    Matrix6d    P = Matrix6d::Identity() * 0.000001;
     problem->setPrior(x, P, t, dt/2);             // KF1
 
-    CaptureOdom3DPtr capt_odo = make_shared<CaptureOdom3D>(t, sens_odo, Vector6s::Zero(), P);
+    CaptureOdom3DPtr capt_odo = make_shared<CaptureOdom3D>(t, sens_odo, Vector6d::Zero(), P);
 
     // Track
     cv::Mat image(intr->height, intr->width, CV_8UC3); // OpenCV cv::Mat(rows, cols)

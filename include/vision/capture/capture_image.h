@@ -31,7 +31,7 @@ class CaptureImage : public CaptureBase
         KeyPointVector                  keypoints_;
         cv::Mat                         descriptors_;
         DMatchVector                    matches_from_precedent_;
-        std::vector<Scalar>             matches_normalized_scores_;
+        std::vector<double>             matches_normalized_scores_;
         std::map<int, int>              map_index_to_next_;
         cv::Mat                         global_descriptor_;
 

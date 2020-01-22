@@ -20,14 +20,14 @@
 #include <common_class/buffer.h>
 #include <common_class/frame.h>
 
-using Eigen::Vector3s;
-using Eigen::Vector4s;
-using Eigen::Vector6s;
-using Eigen::Vector7s;
+using Eigen::Vector3d;
+using Eigen::Vector4d;
+using Eigen::Vector6d;
+using Eigen::Vector7d;
 
 using namespace wolf;
 
-void cleanupMap(const ProblemPtr& _problem, const TimeStamp& _t, Scalar _dt_max,
+void cleanupMap(const ProblemPtr& _problem, const TimeStamp& _t, double _dt_max,
                                       SizeEigen _min_factors)
 {
     std::list<LandmarkBasePtr> lmks_to_remove;
@@ -46,13 +46,13 @@ void cleanupMap(const ProblemPtr& _problem, const TimeStamp& _t, Scalar _dt_max,
     }
 }
 
-Eigen::MatrixXs computeDataCovariance(const VectorXs& _data)
+Eigen::MatrixXd computeDataCovariance(const VectorXd& _data)
 {
-    Scalar k = 0.5;
-    Scalar dist = _data.head<3>().norm();
+    double k = 0.5;
+    double dist = _data.head<3>().norm();
     if ( dist == 0 ) dist = 1.0;
     WOLF_DEBUG("dist: ", dist, "; sigma: ", sqrt(k* (dist + 0.1)) );
-    return k * (dist + 0.1) * Matrix6s::Identity();
+    return k * (dist + 0.1) * Matrix6d::Identity();
 }
 
 int main(int argc, char** argv)
@@ -83,12 +83,12 @@ int main(int argc, char** argv)
     ProblemPtr problem = Problem::create("PO", 3);
 
     // ODOM SENSOR AND PROCESSOR
-    SensorBasePtr sensor_base        = problem->installSensor("ODOM 3D", "odom", (Vector7s()<<0,0,0,0,0,0,1).finished(), wolf_root + "/src/examples/sensor_odom_3D.yaml");
+    SensorBasePtr sensor_base        = problem->installSensor("ODOM 3D", "odom", (Vector7d()<<0,0,0,0,0,0,1).finished(), wolf_root + "/src/examples/sensor_odom_3D.yaml");
     SensorOdom3DPtr sensor_odom      = std::static_pointer_cast<SensorOdom3D>(sensor_base);
     ProcessorBasePtr prcocessor_base = problem->installProcessor("ODOM 3D", "odometry integrator", "odom",               wolf_root + "/src/examples/processor_odom_3D.yaml");
 
     // CAMERA SENSOR AND PROCESSOR
-    sensor_base            = problem->installSensor("CAMERA", "PinHole", (Vector7s()<<0,0,0,0,0,0,1).finished(), wolf_root + "/src/examples/camera_params_ueye_sim.yaml");
+    sensor_base            = problem->installSensor("CAMERA", "PinHole", (Vector7d()<<0,0,0,0,0,0,1).finished(), wolf_root + "/src/examples/camera_params_ueye_sim.yaml");
     SensorCameraPtr camera = std::static_pointer_cast<SensorCamera>(sensor_base);
     camera->setImgWidth(img_width);
     camera->setImgHeight(img_height);
@@ -98,7 +98,7 @@ int main(int argc, char** argv)
     //=====================================================
     // Origin Key Frame is fixed
     TimeStamp t = 0;
-    FrameBasePtr origin_frame = problem->emplaceFrame(KEY, (Vector7s()<<1,0,0,0,0,0,1).finished(), t);
+    FrameBasePtr origin_frame = problem->emplaceFrame(KEY, (Vector7d()<<1,0,0,0,0,0,1).finished(), t);
     problem->getProcessorMotion()->setOrigin(origin_frame);
     origin_frame->fix();
 
@@ -109,7 +109,7 @@ int main(int argc, char** argv)
     //=====================================================
     // running CAPTURES preallocated
     CaptureImagePtr image;
-    Vector6s data(Vector6s::Zero()); // will integrate this data repeatedly
+    Vector6d data(Vector6d::Zero()); // will integrate this data repeatedly
     CaptureMotionPtr cap_odo = std::make_shared<CaptureMotion>("IMAGE", t, sensor_odom, data, 7, 6, nullptr);
     //=====================================================
 
@@ -136,7 +136,7 @@ int main(int argc, char** argv)
     //=====================================================
     // main loop
     unsigned int number_of_KFs = 0;
-    Scalar dt = 0.04;
+    double dt = 0.04;
 
     for(int frame_count = 0; frame_count<10000; ++frame_count)
     {
@@ -162,13 +162,13 @@ int main(int argc, char** argv)
 
         // previous state
         FrameBasePtr prev_key_fr_ptr = problem->getLastKeyFrame();
-//        Eigen::Vector7s x_prev = problem->getCurrentState();
-        Eigen::Vector7s x_prev = prev_key_fr_ptr->getState();
+//        Eigen::Vector7d x_prev = problem->getCurrentState();
+        Eigen::Vector7d x_prev = prev_key_fr_ptr->getState();
 
         // before the previous state
         FrameBasePtr prev_prev_key_fr_ptr = nullptr;
-        Vector7s x_prev_prev;
-        Vector7s dx;
+        Vector7d x_prev_prev;
+        Vector7d dx;
         for (auto f_it = problem->getTrajectory()->getFrameList().rbegin(); f_it != problem->getTrajectory()->getFrameList().rend(); f_it++)
             if ((*f_it) == prev_key_fr_ptr)
             {
@@ -191,12 +191,12 @@ int main(int argc, char** argv)
             x_prev_prev = prev_prev_key_fr_ptr->getState();
 
             // define local variables on top of existing vectors to avoid memory allocation
-            Eigen::Vector3s     p_prev_prev(x_prev_prev.data());
-            Eigen::Quaternions  q_prev_prev(x_prev_prev.data() + 3);
-            Eigen::Vector3s     p_prev(x_prev.data());
-            Eigen::Quaternions  q_prev(x_prev.data() + 3);
-            Eigen::Vector3s     dp(dx.data());
-            Eigen::Quaternions  dq(dx.data() + 3);
+            Eigen::Vector3d     p_prev_prev(x_prev_prev.data());
+            Eigen::Quaterniond  q_prev_prev(x_prev_prev.data() + 3);
+            Eigen::Vector3d     p_prev(x_prev.data());
+            Eigen::Quaterniond  q_prev(x_prev.data() + 3);
+            Eigen::Vector3d     dp(dx.data());
+            Eigen::Quaterniond  dq(dx.data() + 3);
 
             // delta state PQ
             dp = q_prev_prev.conjugate() * (p_prev - p_prev_prev);
@@ -207,7 +207,7 @@ int main(int argc, char** argv)
             data.tail<3>() = q2v(dq);
         }
 
-        Matrix6s data_cov = computeDataCovariance(data);
+        Matrix6d data_cov = computeDataCovariance(data);
 
         cap_odo->setData(data);
         cap_odo->setDataCovariance(data_cov);

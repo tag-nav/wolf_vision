@@ -71,11 +71,11 @@ int main(int argc, char** argv)
 
     // INITIALIZATION ============================================================================================
     //init random generators
-    Scalar odom_std_factor = 0.5;
-    Scalar gps_std = 1;
+    double odom_std_factor = 0.5;
+    double gps_std = 1;
     std::default_random_engine generator(1);
-    std::normal_distribution<Scalar> distribution_odom(0.0, odom_std_factor); //odometry noise
-    std::normal_distribution<Scalar> distribution_gps(0.0, gps_std); //GPS noise
+    std::normal_distribution<double> distribution_odom(0.0, odom_std_factor); //odometry noise
+    std::normal_distribution<double> distribution_gps(0.0, gps_std); //GPS noise
 
     //init google log
     //google::InitGoogleLogging(argv[0]);
@@ -106,18 +106,18 @@ int main(int argc, char** argv)
     myScanner->loadAssimpModel(modelFileName);
 
     //variables
-    Eigen::Vector3s odom_reading;
-    Eigen::Vector2s gps_fix_reading;
-    Eigen::VectorXs pose_odom(3); //current odometry integred pose
-    Eigen::VectorXs ground_truth(n_execution * 3); //all true poses
-    Eigen::VectorXs odom_trajectory(n_execution * 3); //open loop trajectory
-    Eigen::VectorXs mean_times = Eigen::VectorXs::Zero(7);
+    Eigen::Vector3d odom_reading;
+    Eigen::Vector2d gps_fix_reading;
+    Eigen::VectorXd pose_odom(3); //current odometry integred pose
+    Eigen::VectorXd ground_truth(n_execution * 3); //all true poses
+    Eigen::VectorXd odom_trajectory(n_execution * 3); //open loop trajectory
+    Eigen::VectorXd mean_times = Eigen::VectorXd::Zero(7);
     clock_t t1, t2;
 
     // Wolf manager initialization
-    Eigen::Vector3s odom_pose = Eigen::Vector3s::Zero();
-    Eigen::Vector3s gps_pose = Eigen::Vector3s::Zero();
-    Eigen::Vector4s laser_1_pose, laser_2_pose; //xyz + theta
+    Eigen::Vector3d odom_pose = Eigen::Vector3d::Zero();
+    Eigen::Vector3d gps_pose = Eigen::Vector3d::Zero();
+    Eigen::Vector4d laser_1_pose, laser_2_pose; //xyz + theta
     laser_1_pose << 1.2, 0, 0, 0; //laser 1
     laser_2_pose << -1.2, 0, 0, M_PI; //laser 2
     SensorOdom2D odom_sensor(std::make_shared<StateBlock>(odom_pose.head(2)), std::make_shared<StateBlock>(odom_pose.tail(1)), odom_std_factor, odom_std_factor);
@@ -132,8 +132,8 @@ int main(int argc, char** argv)
     ground_truth.head(3) = pose_odom;
     odom_trajectory.head(3) = pose_odom;
 
-    WolfManager* wolf_manager_ceres = new WolfManager(FRM_PO_2D, &odom_sensor, pose_odom, Eigen::Matrix3s::Identity() * 0.01, window_size, 0.3);
-    WolfManager* wolf_manager_wolf = new WolfManager(FRM_PO_2D, &odom_sensor, pose_odom, Eigen::Matrix3s::Identity() * 0.01, window_size, 0.3);
+    WolfManager* wolf_manager_ceres = new WolfManager(FRM_PO_2D, &odom_sensor, pose_odom, Eigen::Matrix3d::Identity() * 0.01, window_size, 0.3);
+    WolfManager* wolf_manager_wolf = new WolfManager(FRM_PO_2D, &odom_sensor, pose_odom, Eigen::Matrix3d::Identity() * 0.01, window_size, 0.3);
     
     // Ceres wrapper
     ceres::Solver::Options ceres_options;
@@ -201,12 +201,12 @@ int main(int argc, char** argv)
         std::cout << "ADD CAPTURES..." << std::endl;
         t1 = clock();
         // adding new sensor captures
-        wolf_manager_ceres->addCapture(new CaptureOdom2D(TimeStamp(),TimeStamp(), &odom_sensor, odom_reading));		//, odom_std_factor * Eigen::MatrixXs::Identity(2,2)));
-        wolf_manager_ceres->addCapture(new CaptureGPSFix(TimeStamp(), &gps_sensor, gps_fix_reading, gps_std * Eigen::MatrixXs::Identity(3,3)));
+        wolf_manager_ceres->addCapture(new CaptureOdom2D(TimeStamp(),TimeStamp(), &odom_sensor, odom_reading));		//, odom_std_factor * Eigen::MatrixXd::Identity(2,2)));
+        wolf_manager_ceres->addCapture(new CaptureGPSFix(TimeStamp(), &gps_sensor, gps_fix_reading, gps_std * Eigen::MatrixXd::Identity(3,3)));
         wolf_manager_ceres->addCapture(new CaptureLaser2D(TimeStamp(), &laser_1_sensor, scan1));
         wolf_manager_ceres->addCapture(new CaptureLaser2D(TimeStamp(), &laser_2_sensor, scan2));
-        wolf_manager_wolf->addCapture(new CaptureOdom2D(TimeStamp(),TimeStamp(), &odom_sensor, odom_reading));       //, odom_std_factor * Eigen::MatrixXs::Identity(2,2)));
-        wolf_manager_wolf->addCapture(new CaptureGPSFix(TimeStamp(), &gps_sensor, gps_fix_reading, gps_std * Eigen::MatrixXs::Identity(3,3)));
+        wolf_manager_wolf->addCapture(new CaptureOdom2D(TimeStamp(),TimeStamp(), &odom_sensor, odom_reading));       //, odom_std_factor * Eigen::MatrixXd::Identity(2,2)));
+        wolf_manager_wolf->addCapture(new CaptureGPSFix(TimeStamp(), &gps_sensor, gps_fix_reading, gps_std * Eigen::MatrixXd::Identity(3,3)));
         wolf_manager_wolf->addCapture(new CaptureLaser2D(TimeStamp(), &laser_1_sensor, scan1));
         wolf_manager_wolf->addCapture(new CaptureLaser2D(TimeStamp(), &laser_2_sensor, scan2));
 
@@ -246,7 +246,7 @@ int main(int argc, char** argv)
         t1 = clock();
         ceres_manager_ceres->computeCovariances(ALL_MARGINALS);
         ceres_manager_wolf->computeCovariances(ALL_MARGINALS);
-        Eigen::MatrixXs marginal_ceres(3,3), marginal_wolf(3,3);
+        Eigen::MatrixXd marginal_ceres(3,3), marginal_wolf(3,3);
         wolf_manager_ceres->getProblem()->getCovarianceBlock(wolf_manager_ceres->getProblem()->getTrajectory()->getLastFrame()->getP(),
                                                                 wolf_manager_ceres->getProblem()->getTrajectory()->getLastFrame()->getP(),
                                                                 marginal_ceres, 0, 0);
@@ -289,7 +289,7 @@ int main(int argc, char** argv)
 //        std::vector<double> landmark_vector;
 //        for (auto landmark_it = wolf_manager->getProblem()->getMap()->getLandmarkList().begin(); landmark_it != wolf_manager->getProblem()->getMap()->getLandmarkList().end(); landmark_it++)
 //        {
-//            Scalar* position_ptr = (*landmark_it)->getP()->get();
+//            double* position_ptr = (*landmark_it)->getP()->get();
 //            landmark_vector.push_back(*position_ptr); //x
 //            landmark_vector.push_back(*(position_ptr + 1)); //y
 //            landmark_vector.push_back(0.2); //z
@@ -342,7 +342,7 @@ int main(int argc, char** argv)
 //    std::vector<double> landmark_vector;
 //    for (auto landmark_it = wolf_manager->getProblem()->getMap()->getLandmarkList().begin(); landmark_it != wolf_manager->getProblem()->getMap()->getLandmarkList().end(); landmark_it++)
 //    {
-//        Scalar* position_ptr = (*landmark_it)->getP()->get();
+//        double* position_ptr = (*landmark_it)->getP()->get();
 //        landmark_vector.push_back(*position_ptr); //x
 //        landmark_vector.push_back(*(position_ptr + 1)); //y
 //        landmark_vector.push_back(0.2); //z
@@ -358,7 +358,7 @@ int main(int argc, char** argv)
     // Print Final result in a file -------------------------
     // Vehicle poses
 //    int i = 0;
-//    Eigen::VectorXs state_poses(n_execution * 3);
+//    Eigen::VectorXd state_poses(n_execution * 3);
 //    for (auto frame_it = wolf_manager->getProblem()->getTrajectory()->getFrameList().begin(); frame_it != wolf_manager->getProblem()->getTrajectory()->getFrameList().end(); frame_it++)
 //    {
 //        state_poses.segment(i, 3) << *(*frame_it)->getP()->get(), *((*frame_it)->getP()->get() + 1), *(*frame_it)->getO()->get();
@@ -367,10 +367,10 @@ int main(int argc, char** argv)
 //
 //    // Landmarks
 //    i = 0;
-//    Eigen::VectorXs landmarks(wolf_manager->getProblem()->getMap()->getLandmarkList().size() * 2);
+//    Eigen::VectorXd landmarks(wolf_manager->getProblem()->getMap()->getLandmarkList().size() * 2);
 //    for (auto landmark_it = wolf_manager->getProblem()->getMap()->getLandmarkList().begin(); landmark_it != wolf_manager->getProblem()->getMap()->getLandmarkList().end(); landmark_it++)
 //    {
-//        Eigen::Map<Eigen::Vector2s> landmark((*landmark_it)->getP()->get());
+//        Eigen::Map<Eigen::Vector2d> landmark((*landmark_it)->getP()->get());
 //        landmarks.segment(i, 2) = landmark;
 //        i += 2;
 //    }

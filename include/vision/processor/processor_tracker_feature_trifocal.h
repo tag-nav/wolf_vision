@@ -25,7 +25,7 @@ struct ProcessorParamsTrackerFeatureTrifocal : public ProcessorParamsTrackerFeat
         int n_cells_h;
         int n_cells_v;
         int min_response_new_feature;
-        Scalar pixel_noise_std; ///< std noise of the pixel
+        double pixel_noise_std; ///< std noise of the pixel
         int min_track_length_for_factor; ///< Minimum track length of a matched feature to create a factor
     ProcessorParamsTrackerFeatureTrifocal() = default;
     ProcessorParamsTrackerFeatureTrifocal(std::string _unique_name, const ParamsServer& _server):
@@ -35,7 +35,7 @@ struct ProcessorParamsTrackerFeatureTrifocal : public ProcessorParamsTrackerFeat
         n_cells_h                       = _server.getParam<int>(_unique_name            + "/n_cells_h");
         n_cells_v                       = _server.getParam<int>(_unique_name            + "/n_cells_v");
         min_response_new_feature        = _server.getParam<int>(_unique_name            + "/min_response_new_feature");
-        pixel_noise_std                 = _server.getParam<Scalar>(_unique_name         + "/pixel_noise_std");
+        pixel_noise_std                 = _server.getParam<double>(_unique_name         + "/pixel_noise_std");
         min_track_length_for_factor     = _server.getParam<int>(_unique_name            + "/min_track_length_for_factor");
     }
     std::string print() const
@@ -66,7 +66,7 @@ class ProcessorTrackerFeatureTrifocal : public ProcessorTrackerFeature
 
         CaptureImagePtr capture_image_last_;
         CaptureImagePtr capture_image_incoming_;
-        Matrix2s        pixel_cov_;
+        Matrix2d        pixel_cov_;
 
     private:
         CaptureBasePtr prev_origin_ptr_;                    ///< Capture previous to origin_ptr_ for the third focus of the trifocal.
@@ -184,7 +184,7 @@ class ProcessorTrackerFeatureTrifocal : public ProcessorTrackerFeature
         cv::Mat getImageDebug();
 
         /// \brief Get pixel covariance
-        const Matrix2s& pixelCov() const;
+        const Matrix2d& pixelCov() const;
 };
 
 inline CaptureBasePtr ProcessorTrackerFeatureTrifocal::getPrevOrigin()
@@ -197,7 +197,7 @@ inline cv::Mat ProcessorTrackerFeatureTrifocal::getImageDebug()
     return image_debug_;
 }
 
-inline const Eigen::Matrix2s& ProcessorTrackerFeatureTrifocal::pixelCov() const
+inline const Eigen::Matrix2d& ProcessorTrackerFeatureTrifocal::pixelCov() const
 {
     return pixel_cov_;
 }

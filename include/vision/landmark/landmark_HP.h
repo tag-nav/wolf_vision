@@ -22,14 +22,14 @@ class LandmarkHP : public LandmarkBase
 
 
     public:
-        LandmarkHP(Eigen::Vector4s _position_homogeneous, SensorBasePtr _sensor_, cv::Mat _2D_descriptor);
+        LandmarkHP(Eigen::Vector4d _position_homogeneous, SensorBasePtr _sensor_, cv::Mat _2D_descriptor);
 
         virtual ~LandmarkHP();
 
         const cv::Mat& getCvDescriptor() const;
         void setCvDescriptor(const cv::Mat& _descriptor);
 
-        Eigen::Vector3s point() const;
+        Eigen::Vector3d point() const;
 
         YAML::Node saveToYaml() const;
 

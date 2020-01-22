@@ -20,10 +20,10 @@
 
 namespace wolf{
 // inserts the sparse matrix 'ins' into the sparse matrix 'original' in the place given by 'row' and 'col' integers
-void insertSparseBlock(const Eigen::SparseMatrix<Scalar>& ins, Eigen::SparseMatrix<Scalar>& original, const unsigned int& row, const unsigned int& col)
+void insertSparseBlock(const Eigen::SparseMatrix<double>& ins, Eigen::SparseMatrix<double>& original, const unsigned int& row, const unsigned int& col)
 {
   for (int k=0; k<ins.outerSize(); ++k)
-    for (Eigen::SparseMatrix<Scalar>::InnerIterator iti(ins,k); iti; ++iti)
+    for (Eigen::SparseMatrix<double>::InnerIterator iti(ins,k); iti; ++iti)
       original.coeffRef(iti.row() + row, iti.col() + col) = iti.value();
 
   original.makeCompressed();
@@ -52,8 +52,8 @@ int main(int argc, char** argv)
     std::ifstream offLineFile_;
     clock_t t1;
     ceres::Solver::Summary summary_full, summary_prun;
-    Eigen::MatrixXs Sigma_ii(3,3), Sigma_ij(3,3), Sigma_jj(3,3), Sigma_z(3,3), Ji(3,3), Jj(3,3);
-    Scalar xi, yi, thi, si, ci, xj, yj;
+    Eigen::MatrixXd Sigma_ii(3,3), Sigma_ij(3,3), Sigma_jj(3,3), Sigma_z(3,3), Ji(3,3), Jj(3,3);
+    double xi, yi, thi, si, ci, xj, yj;
 
     // loading variables
     std::map<unsigned int, FrameBasePtr> index_2_frame_ptr_full;
@@ -63,9 +63,9 @@ int main(int argc, char** argv)
     // Wolf problem
     ProblemPtr wolf_problem_full = new Problem(FRM_PO_2D);
     ProblemPtr wolf_problem_prun = new Problem(FRM_PO_2D);
-    SensorBasePtr sensor = new SensorBase("ODOM 2D", std::make_shared<StateBlock>(Eigen::VectorXs::Zero(2)), std::make_shared<StateBlock>(Eigen::VectorXs::Zero(1)), std::make_shared<StateBlock>(Eigen::VectorXs::Zero(2)), 2);
+    SensorBasePtr sensor = new SensorBase("ODOM 2D", std::make_shared<StateBlock>(Eigen::VectorXd::Zero(2)), std::make_shared<StateBlock>(Eigen::VectorXd::Zero(1)), std::make_shared<StateBlock>(Eigen::VectorXd::Zero(2)), 2);
 
-    Eigen::SparseMatrix<Scalar> Lambda(0,0);
+    Eigen::SparseMatrix<double> Lambda(0,0);
 
     // Ceres wrapper
     ceres::Solver::Options ceres_options;
@@ -108,7 +108,7 @@ int main(int argc, char** argv)
                     while (buffer.at(i) == ' ') i++;
 
                     // vertex pose
-                    Eigen::Vector3s vertex_pose;
+                    Eigen::Vector3d vertex_pose;
                     // x
                     while (buffer.at(i) != ' ')
                         bNum.push_back(buffer.at(i++));
@@ -173,7 +173,7 @@ int main(int argc, char** argv)
                     while (buffer.at(i) == ' ') i++;
 
                     // edge vector
-                    Eigen::Vector3s edge_vector;
+                    Eigen::Vector3d edge_vector;
                     // x
                     while (buffer.at(i) != ' ')
                         bNum.push_back(buffer.at(i++));
@@ -197,7 +197,7 @@ int main(int argc, char** argv)
                     while (buffer.at(i) == ' ') i++;
 
                     // edge covariance
-                    Eigen::Matrix3s edge_information;
+                    Eigen::Matrix3d edge_information;
                     // xx
                     while (buffer.at(i) != ' ')
                         bNum.push_back(buffer.at(i++));
@@ -268,14 +268,14 @@ int main(int argc, char** argv)
                     //std::cout << "information " << std::endl << edge_information << std::endl;
                     //std::cout << "covariance " << std::endl << factor_ptr_prun->getMeasurementCovariance() << std::endl;
 
-                    Scalar xi = *(frame_old_ptr_prun->getP()->get());
-                    Scalar yi = *(frame_old_ptr_prun->getP()->get()+1);
-                    Scalar thi = *(frame_old_ptr_prun->getO()->get());
-                    Scalar si = sin(thi);
-                    Scalar ci = cos(thi);
-                    Scalar xj = *(frame_new_ptr_prun->getP()->get());
-                    Scalar yj = *(frame_new_ptr_prun->getP()->get()+1);
-                    Eigen::MatrixXs Ji(3,3), Jj(3,3);
+                    double xi = *(frame_old_ptr_prun->getP()->get());
+                    double yi = *(frame_old_ptr_prun->getP()->get()+1);
+                    double thi = *(frame_old_ptr_prun->getO()->get());
+                    double si = sin(thi);
+                    double ci = cos(thi);
+                    double xj = *(frame_new_ptr_prun->getP()->get());
+                    double yj = *(frame_new_ptr_prun->getP()->get()+1);
+                    Eigen::MatrixXd Ji(3,3), Jj(3,3);
                     Ji << -ci,-si,-(xj-xi)*si+(yj-yi)*ci,
                            si,-ci,-(xj-xi)*ci-(yj-yi)*si,
                             0,  0,                    -1;
@@ -284,7 +284,7 @@ int main(int argc, char** argv)
                             0,  0, 1;
                     //std::cout << "Ji" << std::endl << Ji << std::endl;
                     //std::cout << "Jj" << std::endl << Jj << std::endl;
-                    Eigen::SparseMatrix<Scalar> DeltaLambda(Lambda.rows(), Lambda.cols());
+                    Eigen::SparseMatrix<double> DeltaLambda(Lambda.rows(), Lambda.cols());
                     insertSparseBlock((Ji.transpose() * edge_information * Ji).sparseView(), DeltaLambda, edge_old*3, edge_old*3);
                     insertSparseBlock((Jj.transpose() * edge_information * Jj).sparseView(), DeltaLambda, edge_new*3, edge_new*3);
                     insertSparseBlock((Ji.transpose() * edge_information * Jj).sparseView(), DeltaLambda, edge_old*3, edge_new*3);
@@ -303,15 +303,15 @@ int main(int argc, char** argv)
     // PRIOR
     FrameBasePtr first_frame_full = wolf_problem_full->getTrajectory()->getFrameList().front();
     FrameBasePtr first_frame_prun = wolf_problem_prun->getTrajectory()->getFrameList().front();
-    CaptureFix* initial_covariance_full = new CaptureFix(TimeStamp(0), new SensorBase("ABSLOUTE POSE", nullptr, nullptr, nullptr, 0), first_frame_full->getState(), Eigen::Matrix3s::Identity() * 0.01);
-    CaptureFix* initial_covariance_prun = new CaptureFix(TimeStamp(0), new SensorBase("ABSLOUTE POSE", nullptr, nullptr, nullptr, 0), first_frame_prun->getState(), Eigen::Matrix3s::Identity() * 0.01);
+    CaptureFix* initial_covariance_full = new CaptureFix(TimeStamp(0), new SensorBase("ABSLOUTE POSE", nullptr, nullptr, nullptr, 0), first_frame_full->getState(), Eigen::Matrix3d::Identity() * 0.01);
+    CaptureFix* initial_covariance_prun = new CaptureFix(TimeStamp(0), new SensorBase("ABSLOUTE POSE", nullptr, nullptr, nullptr, 0), first_frame_prun->getState(), Eigen::Matrix3d::Identity() * 0.01);
     first_frame_full->addCapture(initial_covariance_full);
     first_frame_prun->addCapture(initial_covariance_prun);
     initial_covariance_full->process();
     initial_covariance_prun->process();
     //std::cout << "initial covariance: factor " << initial_covariance_prun->getFeatureList().front()->getFactorFromList().front()->id() << std::endl << initial_covariance_prun->getFeatureList().front()->getMeasurementCovariance() << std::endl;
-    Eigen::SparseMatrix<Scalar> DeltaLambda(Lambda.rows(), Lambda.cols());
-    insertSparseBlock((Eigen::Matrix3s::Identity() * 100).sparseView(), DeltaLambda, 0, 0);
+    Eigen::SparseMatrix<double> DeltaLambda(Lambda.rows(), Lambda.cols());
+    insertSparseBlock((Eigen::Matrix3d::Identity() * 100).sparseView(), DeltaLambda, 0, 0);
     Lambda = Lambda + DeltaLambda;
 
     // COMPUTE COVARIANCES
@@ -319,8 +319,8 @@ int main(int argc, char** argv)
     wolf_problem_prun->getTrajectory()->getFactorList(factors);
     // Manual covariance computation
     t1 = clock();
-    Eigen::SimplicialLLT<Eigen::SparseMatrix<Scalar>> chol(Lambda);  // performs a Cholesky factorization of A
-    Eigen::MatrixXs Sigma = chol.solve(Eigen::MatrixXs::Identity(Lambda.rows(), Lambda.cols()));
+    Eigen::SimplicialLLT<Eigen::SparseMatrix<double>> chol(Lambda);  // performs a Cholesky factorization of A
+    Eigen::MatrixXd Sigma = chol.solve(Eigen::MatrixXd::Identity(Lambda.rows(), Lambda.cols()));
     double t_sigma_manual = ((double) clock() - t1) / CLOCKS_PER_SEC;
     //std::cout << "Lambda" << std::endl << Lambda << std::endl;
     //std::cout << "Sigma" << std::endl << Sigma << std::endl;
@@ -384,7 +384,7 @@ int main(int argc, char** argv)
 
         //std::cout << "denominador : " << std::endl << Sigma_z - (Ji * Sigma_ii * Ji.transpose() + Jj * Sigma_jj * Jj.transpose() + Ji * Sigma_ij * Jj.transpose() + Jj * Sigma_ij.transpose() * Ji.transpose()) << std::endl;
         // Information gain
-        Scalar IG = 0.5 * log( Sigma_z.determinant() / (Sigma_z - (Ji * Sigma_ii * Ji.transpose() + Jj * Sigma_jj * Jj.transpose() + Ji * Sigma_ij * Jj.transpose() + Jj * Sigma_ij.transpose() * Ji.transpose())).determinant() );
+        double IG = 0.5 * log( Sigma_z.determinant() / (Sigma_z - (Ji * Sigma_ii * Ji.transpose() + Jj * Sigma_jj * Jj.transpose() + Ji * Sigma_ij * Jj.transpose() + Jj * Sigma_ij.transpose() * Ji.transpose())).determinant() );
         //std::cout << "IG = " << IG << std::endl;
 
         if (IG < 2)

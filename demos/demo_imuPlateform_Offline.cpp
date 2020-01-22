@@ -70,7 +70,7 @@ int main(int argc, char** argv)
         
     // WOLF PROBLEM
     ProblemPtr wolf_problem_ptr_ = Problem::create("PQVBB 3D");
-    Eigen::VectorXs x_origin(16);
+    Eigen::VectorXd x_origin(16);
     x_origin << 0,0,0,  0,0,0,1,  0,0,0,  0,0,0,  0,0,0; //INITIAL CONDITIONS
     TimeStamp t(0);
 
@@ -82,7 +82,7 @@ int main(int argc, char** argv)
     CeresManager* ceres_manager_wolf_diff = new CeresManager(wolf_problem_ptr_, ceres_options);
 
     // SENSOR + PROCESSOR IMU
-    SensorBasePtr sen0_ptr = wolf_problem_ptr_->installSensor("IMU", "Main IMU", (Vector7s()<<0,0,0,0,0,0,1).finished(), wolf_root + "/src/examples/sensor_imu.yaml");
+    SensorBasePtr sen0_ptr = wolf_problem_ptr_->installSensor("IMU", "Main IMU", (Vector7d()<<0,0,0,0,0,0,1).finished(), wolf_root + "/src/examples/sensor_imu.yaml");
     ProcessorIMUParamsPtr prc_imu_params = std::make_shared<ProcessorParamsIMU>();
     prc_imu_params->max_time_span = 10;
     prc_imu_params->max_buff_length = 1000000000; //make it very high so that this condition will not pass
@@ -94,7 +94,7 @@ int main(int argc, char** argv)
     ProcessorIMUPtr processor_ptr_imu = std::static_pointer_cast<ProcessorIMU>(processor_ptr_);
 
     // SENSOR + PROCESSOR ODOM 3D
-    SensorBasePtr sen1_ptr = wolf_problem_ptr_->installSensor("ODOM 3D", "odom", (Vector7s()<<0,0,0,0,0,0,1).finished(), wolf_root + "/src/examples/sensor_odom_3D.yaml");
+    SensorBasePtr sen1_ptr = wolf_problem_ptr_->installSensor("ODOM 3D", "odom", (Vector7d()<<0,0,0,0,0,0,1).finished(), wolf_root + "/src/examples/sensor_odom_3D.yaml");
     ProcessorParamsOdom3DPtr prc_odom3D_params = std::make_shared<ProcessorParamsOdom3D>();
     prc_odom3D_params->max_time_span = 1.9999;
     prc_odom3D_params->max_buff_length = 1000000000; //make it very high so that this condition will not pass
@@ -117,13 +117,13 @@ int main(int argc, char** argv)
     //===================================================== PROCESS DATA
     // PROCESS DATA
 
-    Eigen::Vector6s data_imu, data_odom3D;
+    Eigen::Vector6d data_imu, data_odom3D;
     data_imu << 0,0,-wolf::gravity()(2), 0,0,0;
     data_odom3D << 0,-0.06,0, 0,0,0;
 
-    Scalar input_clock;
+    double input_clock;
     TimeStamp ts(0);
-    wolf::CaptureIMUPtr imu_ptr = std::make_shared<CaptureIMU>(ts, sen_imu, data_imu, Matrix6s::Identity(), Vector6s::Zero());
+    wolf::CaptureIMUPtr imu_ptr = std::make_shared<CaptureIMU>(ts, sen_imu, data_imu, Matrix6d::Identity(), Vector6d::Zero());
     wolf::CaptureMotionPtr mot_ptr = std::make_shared<CaptureMotion>(t, sen_odom3D, data_odom3D, 6, 6, nullptr);
 
     //when we find a IMU timestamp corresponding with this odometry timestamp then we process odometry measurement
@@ -207,10 +207,10 @@ int main(int argc, char** argv)
     wolf_problem_ptr_->print(4,1,1,1);
 
     #ifdef DEBUG_RESULTS
-    Eigen::VectorXs frm_state(16);
-    Eigen::Matrix<wolf::Scalar, 16, 1> cov_stdev;
-    Eigen::MatrixXs covX(16,16);
-    Eigen::MatrixXs cov3(Eigen::Matrix3s::Zero());
+    Eigen::VectorXd frm_state(16);
+    Eigen::Matrix<double, 16, 1> cov_stdev;
+    Eigen::MatrixXd covX(16,16);
+    Eigen::MatrixXd cov3(Eigen::Matrix3d::Zero());
 
     wolf::FrameBasePtrList frame_list = wolf_problem_ptr_->getTrajectory()->getFrameList();
     for(FrameBasePtr frm_ptr : frame_list)
