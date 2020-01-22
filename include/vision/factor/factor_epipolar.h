@@ -21,6 +21,11 @@ class FactorEpipolar : public FactorAutodiff<FactorEpipolar, 1, 3, 4, 3, 4, 3, 4
 
         virtual ~FactorEpipolar() = default;
 
+        virtual std::string getTopology() const override
+        {
+            return std::string("GEOM");
+        }
+
         template<typename T>
         bool operator ()(const T* const _frame_own_p,
                          const T* const _frame_own_o,

@@ -32,6 +32,11 @@ class FactorPixelHP : public FactorAutodiff<FactorPixelHP, 2, 3, 4, 3, 4, 4>
 
         virtual ~FactorPixelHP() = default;
 
+        virtual std::string getTopology() const override
+        {
+            return std::string("LMK");
+        }
+
         template<typename T>
         void expectation(const T* const _frame_p,
                          const T* const _frame_o,

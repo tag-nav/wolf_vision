@@ -33,6 +33,11 @@ class FactorAutodiffTrifocal : public FactorAutodiff<FactorAutodiffTrifocal, 3, 
          */
         virtual ~FactorAutodiffTrifocal();
 
+        virtual std::string getTopology() const override
+        {
+            return std::string("GEOM");
+        }
+
         FeatureBasePtr getFeaturePrev();
 
         const Vector3d& getPixelCanonical3() const
