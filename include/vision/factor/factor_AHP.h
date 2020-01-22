@@ -33,6 +33,11 @@ class FactorAHP : public FactorAutodiff<FactorAHP, 2, 3, 4, 3, 4, 4>
 
         virtual ~FactorAHP() = default;
 
+        virtual std::string getTopology() const override
+        {
+            return std::string("LMK");
+        }
+
         template<typename T>
         void expectation(const T* const _current_frame_p,
                          const T* const _current_frame_o,
