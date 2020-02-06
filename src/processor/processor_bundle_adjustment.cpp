@@ -759,7 +759,7 @@ void ProcessorBundleAdjustment::establishFactors()
 			lmk_track_map_[trkid] = lmk;
 
 			//emplace a factor
-			FactorBase::emplace<FactorPixelHP>(ftr, ftr, lmk_hp, shared_from_this(), params_->apply_loss_function);
+			FactorBase::emplace<FactorPixelHP>(ftr, ftr, lmk_hp, shared_from_this());
 
 		}
 		else
@@ -769,7 +769,7 @@ void ProcessorBundleAdjustment::establishFactors()
 			LandmarkHPPtr lmk_hp = std::static_pointer_cast<LandmarkHP>(lmk);
 
 			//emplace a factor
-			FactorBase::emplace<FactorPixelHP>(ftr, ftr, lmk_hp, shared_from_this(), params_->apply_loss_function);
+			FactorBase::emplace<FactorPixelHP>(ftr, ftr, lmk_hp, shared_from_this());
 		}
 
 	}

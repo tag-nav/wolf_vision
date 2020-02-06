@@ -26,8 +26,8 @@ class FactorPixelHP : public FactorAutodiff<FactorPixelHP, 2, 3, 4, 3, 4, 4>
 
         FactorPixelHP(const FeatureBasePtr&   _ftr_ptr,
                       const LandmarkHPPtr&   _landmark_ptr,
-                      const ProcessorBasePtr& _processor_ptr,
-                      bool              _apply_loss_function,
+                      const ProcessorBasePtr& _processor_ptr = nullptr,
+                      bool              _apply_loss_function = false,
                       FactorStatus  _status = FAC_ACTIVE);
 
         virtual ~FactorPixelHP() = default;
@@ -54,6 +54,14 @@ class FactorPixelHP : public FactorAutodiff<FactorPixelHP, 2, 3, 4, 3, 4, 4>
                          const T* const _sensor_o,
                          const T* const _lmk_hmg,
                          T* _residuals) const;
+
+        // Static creator method
+        static FactorPixelHPPtr create(const FeatureBasePtr&   _ftr_ptr,
+                                       const LandmarkHPPtr&   _lmk_ahp_ptr,
+                                       const ProcessorBasePtr& _processor_ptr = nullptr,
+                                       bool             _apply_loss_function  = false,
+                                       FactorStatus _status               = FAC_ACTIVE);
+
 };
 
 inline FactorPixelHP::FactorPixelHP(const FeatureBasePtr&   _ftr_ptr,
@@ -62,18 +70,18 @@ inline FactorPixelHP::FactorPixelHP(const FeatureBasePtr&   _ftr_ptr,
                                     bool             _apply_loss_function,
                                     FactorStatus _status) :
         FactorAutodiff<FactorPixelHP, 2, 3, 4, 3, 4, 4>("PIXELHP",
-                                                        nullptr,
-                                                        nullptr,
-                                                        nullptr,
-                                                        _landmark_ptr,
-                                                        _processor_ptr,
-                                                        _apply_loss_function,
-                                                        _status,
-                                                        _ftr_ptr->getCapture()->getFrame()->getP(),
-                                                        _ftr_ptr->getCapture()->getFrame()->getO(),
-                                                        _ftr_ptr->getCapture()->getSensorP(),
-                                                        _ftr_ptr->getCapture()->getSensorO(),
-                                                        _landmark_ptr->getP()),
+                                                            nullptr,
+                                                            nullptr,
+                                                            nullptr,
+                                                            _landmark_ptr,
+                                                            _processor_ptr,
+                                                            _apply_loss_function,
+                                                            _status,
+                                                            _ftr_ptr->getCapture()->getFrame()->getP(),
+                                                            _ftr_ptr->getCapture()->getFrame()->getO(),
+															_ftr_ptr->getCapture()->getSensorP(),
+															_ftr_ptr->getCapture()->getSensorO(),
+                                                            _landmark_ptr->getP()),
         intrinsic_(_ftr_ptr->getCapture()->getSensor()->getIntrinsic()->getState()) //TODO: intrinsic
 {
 //	std::cout << "FactorPixelHP::Constructor\n";
@@ -174,6 +182,18 @@ inline bool FactorPixelHP::operator ()(const T* const _frame_p,
     Eigen::Map<Eigen::Matrix<T, 2, 1> > residuals(_residuals);
     residuals = getMeasurementSquareRootInformationUpper().cast<T>() * (expected - measured);
     return true;
+}
+
+inline FactorPixelHPPtr FactorPixelHP::create(const FeatureBasePtr&   _ftr_ptr,
+                                              const LandmarkHPPtr&   _lmk_ahp_ptr,
+                                              const ProcessorBasePtr& _processor_ptr,
+                                              bool             _apply_loss_function,
+                                              FactorStatus _status)
+{
+    // construct factor
+    FactorPixelHPPtr fac_ahp = std::make_shared<FactorPixelHP>(_ftr_ptr, _lmk_ahp_ptr, _processor_ptr, _apply_loss_function, _status);
+
+    return fac_ahp;
 }
 
 } // namespace wolf

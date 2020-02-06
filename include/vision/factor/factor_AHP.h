@@ -26,10 +26,10 @@ class FactorAHP : public FactorAutodiff<FactorAHP, 2, 3, 4, 3, 4, 4>
     public:
 
         FactorAHP(const FeatureBasePtr&   _ftr_ptr,
-                  const LandmarkAHPPtr&   _landmark_ptr,
-                  const ProcessorBasePtr& _processor_ptr,
-                  bool              _apply_loss_function,
-                  FactorStatus  _status = FAC_ACTIVE);
+                      const LandmarkAHPPtr&   _landmark_ptr,
+                      const ProcessorBasePtr& _processor_ptr = nullptr,
+                      bool              _apply_loss_function = false,
+                      FactorStatus  _status = FAC_ACTIVE);
 
         virtual ~FactorAHP() = default;
 
@@ -55,26 +55,34 @@ class FactorAHP : public FactorAutodiff<FactorAHP, 2, 3, 4, 3, 4, 4>
                          const T* const _anchor_frame_o,
                          const T* const _lmk_hmg,
                          T* _residuals) const;
+
+        // Static creator method
+        static FactorAHPPtr create(const FeatureBasePtr&   _ftr_ptr,
+                                       const LandmarkAHPPtr&   _lmk_ahp_ptr,
+                                       const ProcessorBasePtr& _processor_ptr = nullptr,
+                                       bool             _apply_loss_function  = false,
+                                       FactorStatus _status               = FAC_ACTIVE);
+
 };
 
 inline FactorAHP::FactorAHP(const FeatureBasePtr&   _ftr_ptr,
-                            const LandmarkAHPPtr&   _landmark_ptr,
-                            const ProcessorBasePtr& _processor_ptr,
-                            bool             _apply_loss_function,
-                            FactorStatus _status) :
+                                    const LandmarkAHPPtr&   _landmark_ptr,
+                                    const ProcessorBasePtr& _processor_ptr,
+                                    bool             _apply_loss_function,
+                                    FactorStatus _status) :
         FactorAutodiff<FactorAHP, 2, 3, 4, 3, 4, 4>("AHP",
-                                                    _landmark_ptr->getAnchorFrame(),
-                                                    nullptr,
-                                                    nullptr,
-                                                    _landmark_ptr,
-                                                    _processor_ptr,
-                                                    _apply_loss_function,
-                                                    _status,
-                                                    _ftr_ptr->getCapture()->getFrame()->getP(),
-                                                    _ftr_ptr->getCapture()->getFrame()->getO(),
-                                                    _landmark_ptr->getAnchorFrame()->getP(),
-                                                    _landmark_ptr->getAnchorFrame()->getO(),
-                                                    _landmark_ptr->getP()),
+                                                            _landmark_ptr->getAnchorFrame(),
+                                                            nullptr,
+                                                            nullptr,
+                                                            _landmark_ptr,
+                                                            _processor_ptr,
+                                                            _apply_loss_function,
+                                                            _status,
+                                                            _ftr_ptr->getCapture()->getFrame()->getP(),
+                                                            _ftr_ptr->getCapture()->getFrame()->getO(),
+                                                            _landmark_ptr->getAnchorFrame()->getP(),
+                                                            _landmark_ptr->getAnchorFrame()->getO(),
+                                                            _landmark_ptr->getP()),
         anchor_sensor_extrinsics_p_(_ftr_ptr->getCapture()->getSensorP()->getState()),
         anchor_sensor_extrinsics_o_(_ftr_ptr->getCapture()->getSensorO()->getState()),
         intrinsic_(_ftr_ptr->getCapture()->getSensor()->getIntrinsic()->getState())
@@ -104,11 +112,11 @@ inline Eigen::VectorXd FactorAHP::expectation() const
 
 template<typename T>
 inline void FactorAHP::expectation(const T* const _current_frame_p,
-                                   const T* const _current_frame_o,
-                                   const T* const _anchor_frame_p,
-                                   const T* const _anchor_frame_o,
-                                   const T* const _lmk_hmg,
-                                   T* _expectation) const
+                                       const T* const _current_frame_o,
+                                       const T* const _anchor_frame_p,
+                                       const T* const _anchor_frame_o,
+                                       const T* const _lmk_hmg,
+                                       T* _expectation) const
 {
     using namespace Eigen;
 
@@ -161,11 +169,11 @@ inline void FactorAHP::expectation(const T* const _current_frame_p,
 
 template<typename T>
 inline bool FactorAHP::operator ()(const T* const _current_frame_p,
-                                   const T* const _current_frame_o,
-                                   const T* const _anchor_frame_p,
-                                   const T* const _anchor_frame_o,
-                                   const T* const _lmk_hmg,
-                                   T* _residuals) const
+                                       const T* const _current_frame_o,
+                                       const T* const _anchor_frame_p,
+                                       const T* const _anchor_frame_o,
+                                       const T* const _lmk_hmg,
+                                       T* _residuals) const
 {
     // expected
     Eigen::Matrix<T, 2, 1> expected;
@@ -178,6 +186,18 @@ inline bool FactorAHP::operator ()(const T* const _current_frame_p,
     Eigen::Map<Eigen::Matrix<T, 2, 1> > residuals(_residuals);
     residuals = getMeasurementSquareRootInformationUpper().cast<T>() * (expected - measured);
     return true;
+}
+
+inline FactorAHPPtr FactorAHP::create(const FeatureBasePtr&   _ftr_ptr,
+                                              const LandmarkAHPPtr&   _lmk_ahp_ptr,
+                                              const ProcessorBasePtr& _processor_ptr,
+                                              bool             _apply_loss_function,
+                                              FactorStatus _status)
+{
+    // construct factor
+    FactorAHPPtr fac_ahp = std::make_shared<FactorAHP>(_ftr_ptr, _lmk_ahp_ptr, _processor_ptr, _apply_loss_function, _status);
+
+    return fac_ahp;
 }
 
 } // namespace wolf
