@@ -432,7 +432,7 @@ void ProcessorTrackerFeatureTrifocal::establishFactors()
                 assert(ftr_mid != ftr_last  && "Last and middle features are the same!");
 
                 // emplace factor
-                auto ctr = FactorBase::emplace<FactorAutodiffTrifocal>(ftr_last, ftr_first, ftr_mid, ftr_last, shared_from_this(), false, FAC_ACTIVE);
+                auto ctr = FactorBase::emplace<FactorAutodiffTrifocal>(ftr_last, ftr_first, ftr_mid, ftr_last, shared_from_this(), params_->apply_loss_function, FAC_ACTIVE);
             }
         }
     }

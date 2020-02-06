@@ -14,10 +14,10 @@ class FactorEpipolar : public FactorAutodiff<FactorEpipolar, 1, 3, 4, 3, 4, 3, 4
 {
     public:
         FactorEpipolar(const FeatureBasePtr& _feature_ptr,
-                           const FeatureBasePtr& _feature_other_ptr,
-                           const ProcessorBasePtr& _processor_ptr = nullptr,
-                           bool _apply_loss_function = false,
-                           FactorStatus _status = FAC_ACTIVE);
+                       const FeatureBasePtr& _feature_other_ptr,
+                       const ProcessorBasePtr& _processor_ptr,
+                       bool _apply_loss_function,
+                       FactorStatus _status = FAC_ACTIVE);
 
         virtual ~FactorEpipolar() = default;
 
@@ -35,11 +35,6 @@ class FactorEpipolar : public FactorAutodiff<FactorEpipolar, 1, 3, 4, 3, 4, 3, 4
                          const T* const _sensor_o,
                                T*       _residuals) const;
 
-    public:
-        static FactorBasePtr create(const FeatureBasePtr& _feature_ptr,
-                                    const NodeBasePtr& _correspondant_ptr,
-                                    const ProcessorBasePtr& _processor_ptr = nullptr);
-
     private:
         SensorCameraPtr camera_;
         Eigen::Matrix3d K_inv_; ///< Intrinsic matrix and its inverse
@@ -47,9 +42,10 @@ class FactorEpipolar : public FactorAutodiff<FactorEpipolar, 1, 3, 4, 3, 4, 3, 4
 };
 
 inline FactorEpipolar::FactorEpipolar(const FeatureBasePtr& _feature_ptr,
-                                                    const FeatureBasePtr& _feature_other_ptr,
-                                                    const ProcessorBasePtr& _processor_ptr,
-                                                    bool _apply_loss_function, FactorStatus _status) :
+                                      const FeatureBasePtr& _feature_other_ptr,
+                                      const ProcessorBasePtr& _processor_ptr,
+                                      bool _apply_loss_function,
+                                      FactorStatus _status) :
         FactorAutodiff<FactorEpipolar, 1, 3, 4, 3, 4, 3, 4>("FEATURE EPIPOLAR",
                                                             nullptr,
                                                             nullptr,
@@ -72,12 +68,12 @@ inline FactorEpipolar::FactorEpipolar(const FeatureBasePtr& _feature_ptr,
 
 template<typename T>
 inline bool FactorEpipolar::operator ()(const T* const _frame_own_p,
-                                               const T* const _frame_own_o,
-                                               const T* const _frame_other_p,
-                                               const T* const _frame_other_o,
-                                               const T* const _sensor_p,
-                                               const T* const _sensor_o,
-                                                     T*       _residuals) const
+                                        const T* const _frame_own_o,
+                                        const T* const _frame_other_p,
+                                        const T* const _frame_other_o,
+                                        const T* const _sensor_p,
+                                        const T* const _sensor_o,
+                                              T*       _residuals) const
 {
     using namespace Eigen;
 
@@ -172,13 +168,6 @@ inline bool FactorEpipolar::operator ()(const T* const _frame_own_p,
     // residual = sigma_inv * u_own.transpose() * own_F_other * u_other; // use expression below which is the same but reuses computations
     residual = sigma_inv * J_e_uother * u_other;
     return true;
-}
-
-inline FactorBasePtr FactorEpipolar::create(const FeatureBasePtr&   _feature_ptr,
-                                            const NodeBasePtr&      _correspondant_ptr,
-                                            const ProcessorBasePtr& _processor_ptr)
-{
-    return std::make_shared<FactorEpipolar>(_feature_ptr, std::static_pointer_cast<FeatureBase>(_correspondant_ptr), _processor_ptr);
 }
 
 } // namespace wolf

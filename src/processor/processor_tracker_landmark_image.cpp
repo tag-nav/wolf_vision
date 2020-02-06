@@ -273,7 +273,7 @@ FactorBasePtr ProcessorTrackerLandmarkImage::emplaceFactor(FeatureBasePtr _featu
 
         LandmarkAHPPtr landmark_ahp = std::static_pointer_cast<LandmarkAHP>(_landmark_ptr);
 
-        return FactorBase::emplace<FactorAHP>(_feature_ptr, _feature_ptr, landmark_ahp, shared_from_this(), true);
+        return FactorBase::emplace<FactorAHP>(_feature_ptr, _feature_ptr, landmark_ahp, shared_from_this(), params_->apply_loss_function);
     }
 }
 

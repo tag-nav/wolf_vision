@@ -188,9 +188,9 @@ class FactorPixelHPTest : public testing::Test{
         	L1 = std::static_pointer_cast<LandmarkHP>(LandmarkBase::emplace<LandmarkHP>(problem->getMap(),lmkHP1, camera, des));
 
             // factors
-            c11 = std::static_pointer_cast<FactorPixelHP>(FactorBase::emplace<FactorPixelHP>(f11, f11, L1, nullptr /*proc*/));
-            c21 = std::static_pointer_cast<FactorPixelHP>(FactorBase::emplace<FactorPixelHP>(f21, f21, L1, nullptr /*proc*/));
-            c31 = std::static_pointer_cast<FactorPixelHP>(FactorBase::emplace<FactorPixelHP>(f31, f31, L1, nullptr /*proc*/));
+            c11 = std::static_pointer_cast<FactorPixelHP>(FactorBase::emplace<FactorPixelHP>(f11, f11, L1, nullptr /*proc*/, false /*use loss function*/));
+            c21 = std::static_pointer_cast<FactorPixelHP>(FactorBase::emplace<FactorPixelHP>(f21, f21, L1, nullptr /*proc*/, false /*use loss function*/));
+            c31 = std::static_pointer_cast<FactorPixelHP>(FactorBase::emplace<FactorPixelHP>(f31, f31, L1, nullptr /*proc*/, false /*use loss function*/));
         }
 };
 
@@ -238,7 +238,7 @@ TEST(ProcessorFactorPixelHP, testZeroResidual)
     LandmarkHPPtr lmk_hp = std::static_pointer_cast<LandmarkHP>(lmk);
 
     // Factor
-    auto fac0 = FactorBase::emplace<FactorPixelHP>(fea0, fea0, lmk_hp, proc);
+    auto fac0 = FactorBase::emplace<FactorPixelHP>(fea0, fea0, lmk_hp, proc, false);
     auto fac_ptr = std::static_pointer_cast<FactorPixelHP>(fac0);
 
     ASSERT_TRUE(problem_ptr->check(0));
@@ -382,9 +382,9 @@ TEST_F(FactorPixelHPTest, testSolveFramePosition)
     L4 = std::static_pointer_cast<LandmarkHP>(LandmarkBase::emplace<LandmarkHP>(problem->getMap(),lmkHP4, camera, des));
 
     //create factors
-    c12 = std::static_pointer_cast<FactorPixelHP>(FactorBase::emplace<FactorPixelHP>(f12, f12, L2, nullptr /*proc*/));
-    c13 = std::static_pointer_cast<FactorPixelHP>(FactorBase::emplace<FactorPixelHP>(f13, f13, L3, nullptr /*proc*/));
-    c14 = std::static_pointer_cast<FactorPixelHP>(FactorBase::emplace<FactorPixelHP>(f14, f14, L4, nullptr /*proc*/));
+    c12 = std::static_pointer_cast<FactorPixelHP>(FactorBase::emplace<FactorPixelHP>(f12, f12, L2, nullptr /*proc*/, false /*use loss function*/));
+    c13 = std::static_pointer_cast<FactorPixelHP>(FactorBase::emplace<FactorPixelHP>(f13, f13, L3, nullptr /*proc*/, false /*use loss function*/));
+    c14 = std::static_pointer_cast<FactorPixelHP>(FactorBase::emplace<FactorPixelHP>(f14, f14, L4, nullptr /*proc*/, false /*use loss function*/));
 
     ASSERT_TRUE(problem->check());
 
@@ -528,17 +528,17 @@ TEST_F(FactorPixelHPTest, testSolveBundleAdjustment)
 	L4 = std::static_pointer_cast<LandmarkHP>(LandmarkBase::emplace<LandmarkHP>(problem->getMap(),lmkHP4, camera, des));
 
 	//create factors
-    c12 = std::static_pointer_cast<FactorPixelHP>(FactorBase::emplace<FactorPixelHP>(f12, f12, L2, nullptr /*proc*/));
-    c13 = std::static_pointer_cast<FactorPixelHP>(FactorBase::emplace<FactorPixelHP>(f13, f13, L3, nullptr /*proc*/));
-    c14 = std::static_pointer_cast<FactorPixelHP>(FactorBase::emplace<FactorPixelHP>(f14, f14, L4, nullptr /*proc*/));
+    c12 = std::static_pointer_cast<FactorPixelHP>(FactorBase::emplace<FactorPixelHP>(f12, f12, L2, nullptr /*proc*/, false /*use loss function*/));
+    c13 = std::static_pointer_cast<FactorPixelHP>(FactorBase::emplace<FactorPixelHP>(f13, f13, L3, nullptr /*proc*/, false /*use loss function*/));
+    c14 = std::static_pointer_cast<FactorPixelHP>(FactorBase::emplace<FactorPixelHP>(f14, f14, L4, nullptr /*proc*/, false /*use loss function*/));
 
-    c22 = std::static_pointer_cast<FactorPixelHP>(FactorBase::emplace<FactorPixelHP>(f22, f22, L2, nullptr /*proc*/));
-    c23 = std::static_pointer_cast<FactorPixelHP>(FactorBase::emplace<FactorPixelHP>(f23, f23, L3, nullptr /*proc*/));
-    c24 = std::static_pointer_cast<FactorPixelHP>(FactorBase::emplace<FactorPixelHP>(f24, f24, L4, nullptr /*proc*/));
+    c22 = std::static_pointer_cast<FactorPixelHP>(FactorBase::emplace<FactorPixelHP>(f22, f22, L2, nullptr /*proc*/, false /*use loss function*/));
+    c23 = std::static_pointer_cast<FactorPixelHP>(FactorBase::emplace<FactorPixelHP>(f23, f23, L3, nullptr /*proc*/, false /*use loss function*/));
+    c24 = std::static_pointer_cast<FactorPixelHP>(FactorBase::emplace<FactorPixelHP>(f24, f24, L4, nullptr /*proc*/, false /*use loss function*/));
 
-    c32 = std::static_pointer_cast<FactorPixelHP>(FactorBase::emplace<FactorPixelHP>(f32, f32, L2, nullptr /*proc*/));
-    c33 = std::static_pointer_cast<FactorPixelHP>(FactorBase::emplace<FactorPixelHP>(f33, f33, L3, nullptr /*proc*/));
-    c34 = std::static_pointer_cast<FactorPixelHP>(FactorBase::emplace<FactorPixelHP>(f34, f34, L4, nullptr /*proc*/));
+    c32 = std::static_pointer_cast<FactorPixelHP>(FactorBase::emplace<FactorPixelHP>(f32, f32, L2, nullptr /*proc*/, false /*use loss function*/));
+    c33 = std::static_pointer_cast<FactorPixelHP>(FactorBase::emplace<FactorPixelHP>(f33, f33, L3, nullptr /*proc*/, false /*use loss function*/));
+    c34 = std::static_pointer_cast<FactorPixelHP>(FactorBase::emplace<FactorPixelHP>(f34, f34, L4, nullptr /*proc*/, false /*use loss function*/));
 
 	ASSERT_TRUE(problem->check());
 
