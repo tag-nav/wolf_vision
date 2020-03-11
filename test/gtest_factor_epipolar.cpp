@@ -33,7 +33,7 @@ TEST(FactorEpipolar, exemple)
     auto P  = Problem::create("PO", 3);
 
     // Install sensor and processor
-    IntrinsicsCameraPtr intr      = std::make_shared<IntrinsicsCamera>();
+    ParamsSensorCameraPtr intr      = std::make_shared<ParamsSensorCamera>();
     intr->pinhole_model_raw       = Eigen::Vector4d(320,240,320,320);
     intr->pinhole_model_rectified = Eigen::Vector4d(320,240,320,320);
     intr->width  = 640;

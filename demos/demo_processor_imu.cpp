@@ -73,7 +73,7 @@ int main(int argc, char** argv)
     ProblemPtr problem_ptr_ = Problem::create("PQVBB 3D");
     Eigen::VectorXd extrinsics(7);
     extrinsics << 0,0,0, 0,0,0,1; // IMU pose in the robot
-    SensorBasePtr sensor_ptr = problem_ptr_->installSensor("IMU", "Main IMU", extrinsics, IntrinsicsBasePtr());
+    SensorBasePtr sensor_ptr = problem_ptr_->installSensor("IMU", "Main IMU", extrinsics, ParamsSensorBasePtr());
     problem_ptr_->installProcessor("IMU", "IMU pre-integrator", "Main IMU", "");
 
     // Time and data variables

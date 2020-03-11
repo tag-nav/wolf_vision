@@ -169,10 +169,10 @@ int main(int argc, char** argv)
   Eigen::VectorXd extrinsics(3);
   extrinsics << 0, 0, 0;
 
-  IntrinsicsBasePtr intrinsics = std::make_shared<IntrinsicsDiffDrive>();
+  ParamsSensorBasePtr intrinsics = std::make_shared<ParamsSensorDiffDrive>();
 
-  IntrinsicsDiffDrivePtr intrinsics_diff_drive =
-      std::static_pointer_cast<IntrinsicsDiffDrive>(intrinsics);
+  ParamsSensorDiffDrivePtr intrinsics_diff_drive =
+      std::static_pointer_cast<ParamsSensorDiffDrive>(intrinsics);
 
   intrinsics_diff_drive->left_radius_  = 0.1;
   intrinsics_diff_drive->right_radius_ = 0.1;

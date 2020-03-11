@@ -8,22 +8,22 @@
 namespace wolf
 {
 
-WOLF_STRUCT_PTR_TYPEDEFS(IntrinsicsCamera);
+WOLF_STRUCT_PTR_TYPEDEFS(ParamsSensorCamera);
 /** Struct of intrinsic camera parameters
  */
-struct IntrinsicsCamera : public IntrinsicsBase
+struct ParamsSensorCamera : public ParamsSensorBase
 {
         unsigned int width;                     ///< Image width in pixels
         unsigned int height;                    ///< Image height in pixels
         Eigen::Vector4d pinhole_model_raw;      ///< k = [u_0, v_0, alpha_u, alpha_v]  vector of pinhole intrinsic parameters
         Eigen::Vector4d pinhole_model_rectified;///< k = [u_0, v_0, alpha_u, alpha_v]  vector of pinhole intrinsic parameters
         Eigen::VectorXd distortion;             ///< d = [d_1, d_2, d_3, ...] radial distortion coefficients
-    IntrinsicsCamera()
+    ParamsSensorCamera()
     {
         //DEFINED FOR COMPATIBILITY PURPOSES. TO BE REMOVED IN THE FUTURE.
     }
-    IntrinsicsCamera(std::string _unique_name, const ParamsServer& _server):
-        IntrinsicsBase(_unique_name,  _server)
+    ParamsSensorCamera(std::string _unique_name, const ParamsServer& _server):
+        ParamsSensorBase(_unique_name,  _server)
     {
         width                   = _server.getParam<unsigned int>(_unique_name       + "/width");
         height                  = _server.getParam<unsigned int>(_unique_name       + "/height");
@@ -33,14 +33,14 @@ struct IntrinsicsCamera : public IntrinsicsBase
     }
     std::string print() const
     {
-        return "\n" + IntrinsicsBase::print()                                               + "\n"
+        return "\n" + ParamsSensorBase::print()                                               + "\n"
             + "width: "         + std::to_string(width)                                     + "\n"
             + "height: "        + std::to_string(height)                                    + "\n"
             + "pinhole: "       + converter<std::string>::convert(pinhole_model_raw)        + "\n"
             + "pinhole: "       + converter<std::string>::convert(pinhole_model_rectified)  + "\n"
             + "distortion: "    + converter<std::string>::convert(distortion)               + "\n";
     }
-        virtual ~IntrinsicsCamera() = default;
+        virtual ~ParamsSensorCamera() = default;
 };
 
 WOLF_PTR_TYPEDEFS(SensorCamera);
@@ -50,8 +50,8 @@ class SensorCamera : public SensorBase
 {
     public:
 
-        SensorCamera(const Eigen::VectorXd & _extrinsics, const IntrinsicsCamera& _intrinsics);
-        SensorCamera(const Eigen::VectorXd & _extrinsics, IntrinsicsCameraPtr _intrinsics_ptr);
+        SensorCamera(const Eigen::VectorXd & _extrinsics, const ParamsSensorCamera& _intrinsics);
+        SensorCamera(const Eigen::VectorXd & _extrinsics, ParamsSensorCameraPtr _intrinsics_ptr);
 
         virtual ~SensorCamera();
 
@@ -85,7 +85,7 @@ class SensorCamera : public SensorBase
 
         static SensorBasePtr create(const std::string & _unique_name, //
                                     const Eigen::VectorXd& _extrinsics, //
-                                    const IntrinsicsBasePtr _intrinsics);
+                                    const ParamsSensorBasePtr _intrinsics);
 
 };
 

@@ -75,7 +75,7 @@ TEST(ProcessorTrackerFeatureTrifocal, KeyFrameCallback)
     ProblemPtr problem = Problem::create("PO", 3);
 
     // Install tracker (sensor and processor)
-    IntrinsicsCameraPtr intr = make_shared<IntrinsicsCamera>(); // TODO init params or read from YAML
+    ParamsSensorCameraPtr intr = make_shared<ParamsSensorCamera>(); // TODO init params or read from YAML
     intr->width  = 640;
     intr->height = 480;
     // SensorCameraPtr sens_trk = make_shared<SensorCamera>((Eigen::Vector7d()<<0,0,0, 0,0,0,1).finished(),
@@ -104,7 +104,7 @@ TEST(ProcessorTrackerFeatureTrifocal, KeyFrameCallback)
     // sens_trk->addProcessor(proc_trk);
 
     // Install odometer (sensor and processor)
-    IntrinsicsOdom3DPtr params = std::make_shared<IntrinsicsOdom3D>();
+    ParamsSensorOdom3DPtr params = std::make_shared<ParamsSensorOdom3D>();
     params->min_disp_var = 0.000001;
     params->min_rot_var  = 0.000001;
     SensorBasePtr sens_odo = problem->installSensor("SensorOdom3D", "odometer", (Vector7d() << 0,0,0,  0,0,0,1).finished(), params);

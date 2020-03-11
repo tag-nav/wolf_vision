@@ -100,7 +100,7 @@ TEST(ProcessorBundleAdjustment, installProcessor)
     ProblemPtr problem = Problem::create("PO", 3);
 
     // Install camera
-    IntrinsicsCameraPtr intr = std::make_shared<IntrinsicsCamera>(); // TODO init params or read from YAML
+    ParamsSensorCameraPtr intr = std::make_shared<ParamsSensorCamera>(); // TODO init params or read from YAML
     intr->width  = 640;
     intr->height = 480;
     auto sens_cam = problem->installSensor("CAMERA", "camera", (Eigen::Vector7d() << 0,0,0,  0,0,0,1).finished(), intr);
@@ -238,7 +238,7 @@ TEST(ProcessorBundleAdjustment, emplaceLandmark)
 	ProblemPtr problem_ptr = Problem::create("PO", 3);
 
     // Install sensor
-    IntrinsicsCameraPtr intr = std::make_shared<IntrinsicsCamera>();
+    ParamsSensorCameraPtr intr = std::make_shared<ParamsSensorCamera>();
     intr->width  = 640;
     intr->height = 480;
     auto sens_cam = problem_ptr->installSensor("CAMERA", "camera", (Eigen::Vector7d() << 0,0,0,  0,0,0,1).finished(), intr);
@@ -282,7 +282,7 @@ TEST(ProcessorBundleAdjustment, process)
     ProblemPtr problem = Problem::create("PO", 3);
 
     // Install camera
-    IntrinsicsCameraPtr intr = std::make_shared<IntrinsicsCamera>(); // TODO init params or read from YAML
+    ParamsSensorCameraPtr intr = std::make_shared<ParamsSensorCamera>(); // TODO init params or read from YAML
     intr->pinhole_model_raw = Eigen::Vector4d(0,0,1,1);  //TODO: initialize
     intr->width  = 640;
     intr->height = 480;
