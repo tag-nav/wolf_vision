@@ -448,6 +448,8 @@ void ProcessorTrackerFeatureTrifocal::setParams(const ProcessorParamsTrackerFeat
 
 void ProcessorTrackerFeatureTrifocal::configure(SensorBasePtr _sensor)
 {
+    SensorCameraPtr camera = std::dynamic_pointer_cast<SensorCamera>(_sensor);
+    assert(camera != nullptr && "Sensor is not of type Camera");
     _sensor->setNoiseStd(Vector2d::Ones() * params_tracker_feature_trifocal_->pixel_noise_std);
 }
 
