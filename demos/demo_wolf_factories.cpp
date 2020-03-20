@@ -54,15 +54,15 @@ int main(void)
 
     // define some useful parameters
     Eigen::VectorXd pq_3d(7), po_2d(3), p_3d(3);
-    shared_ptr<IntrinsicsOdom2D> intr_odom2d_ptr = nullptr;
+    shared_ptr<ParamsSensorOdom2D> intr_odom2d_ptr = nullptr;
 
-    cout << "\n================== Intrinsics Factory ===================" << endl;
+    cout << "\n================== ParamsSensor Factory ===================" << endl;
 
     // Use params factory for camera intrinsics
-    IntrinsicsBasePtr intr_cam_ptr = IntrinsicsFactory::get().create("CAMERA", wolf_config + "/camera_params_ueye_sim.yaml");
+    ParamsSensorBasePtr intr_cam_ptr = ParamsSensorFactory::get().create("CAMERA", wolf_config + "/camera_params_ueye_sim.yaml");
     ProcessorParamsBasePtr params_ptr = ProcessorParamsFactory::get().create("IMAGE FEATURE", wolf_config + "/processor_image_feature.yaml");
 
-    cout << "CAMERA with intrinsics      : " << (static_pointer_cast<IntrinsicsCamera>(intr_cam_ptr))->pinhole_model_raw.transpose() << endl;
+    cout << "CAMERA with intrinsics      : " << (static_pointer_cast<ParamsSensorCamera>(intr_cam_ptr))->pinhole_model_raw.transpose() << endl;
 //    cout << "Processor IMAGE image width : " << (static_pointer_cast<ProcessorParamsImage>(params_ptr))->image.width << endl;
 
     cout << "\n==================== Install Sensors ====================" << endl;

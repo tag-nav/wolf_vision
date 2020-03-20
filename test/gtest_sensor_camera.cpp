@@ -16,7 +16,7 @@ using namespace wolf;
 TEST(SensorCamera, Img_size)
 {
     Eigen::VectorXd extrinsics(7); extrinsics << 0,0,0, 0,0,0,1;
-    IntrinsicsCamera params;
+    ParamsSensorCamera params;
     params.width  = 640;
     params.height = 480;
     SensorCameraPtr cam = std::make_shared<SensorCamera>(extrinsics, params);
@@ -31,10 +31,10 @@ TEST(SensorCamera, Img_size)
     ASSERT_EQ(cam->getImgHeight(), 100);
 }
 
-TEST(SensorCamera, Intrinsics_Raw_Rectified)
+TEST(SensorCamera, ParamsSensor_Raw_Rectified)
 {
     Eigen::VectorXd extrinsics(7); extrinsics << 0,0,0, 0,0,0,1;
-    IntrinsicsCamera params;
+    ParamsSensorCamera params;
     params.pinhole_model_raw       << 321, 241, 321, 321;
     params.pinhole_model_rectified << 320, 240, 320, 320;
     SensorCameraPtr cam = std::make_shared<SensorCamera>(extrinsics, params);
@@ -64,7 +64,7 @@ TEST(SensorCamera, Intrinsics_Raw_Rectified)
 TEST(SensorCamera, Distortion)
 {
     Eigen::VectorXd extrinsics(7); extrinsics << 0,0,0, 0,0,0,1;
-    IntrinsicsCamera params;
+    ParamsSensorCamera params;
     params.width  = 640;
     params.height = 480;
     params.pinhole_model_raw       << 321, 241, 321, 321;
@@ -80,7 +80,7 @@ TEST(SensorCamera, Distortion)
 TEST(SensorCamera, Correction_zero)
 {
     Eigen::VectorXd extrinsics(7); extrinsics << 0,0,0, 0,0,0,1;
-    IntrinsicsCamera params;
+    ParamsSensorCamera params;
     params.width  = 640;
     params.height = 480;
     params.pinhole_model_raw       << 321, 241, 321, 321;
@@ -98,7 +98,7 @@ TEST(SensorCamera, Correction_zero)
 TEST(SensorCamera, create)
 {
     Eigen::VectorXd extrinsics(7); extrinsics << 0,0,0, 0,0,0,1;
-    IntrinsicsCameraPtr params = std::make_shared<IntrinsicsCamera>();
+    ParamsSensorCameraPtr params = std::make_shared<ParamsSensorCamera>();
     params->width  = 640;
     params->height = 480;
     params->pinhole_model_raw       << 321, 241, 321, 321;
@@ -118,7 +118,7 @@ TEST(SensorCamera, create)
 TEST(SensorCamera, install)
 {
     Eigen::VectorXd extrinsics(7); extrinsics << 0,0,0, 0,0,0,1;
-    IntrinsicsCameraPtr params = std::make_shared<IntrinsicsCamera>();
+    ParamsSensorCameraPtr params = std::make_shared<ParamsSensorCamera>();
     params->width  = 640;
     params->height = 480;
     params->pinhole_model_raw       << 321, 241, 321, 321;

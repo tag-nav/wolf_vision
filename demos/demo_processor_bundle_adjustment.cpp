@@ -107,7 +107,7 @@ int main(int argc, char** argv)
 
 
     // Install camera
-//    IntrinsicsCameraPtr intr = std::make_shared<IntrinsicsCamera>(); // TODO init params or read from YAML
+//    ParamsSensorCameraPtr intr = std::make_shared<ParamsSensorCamera>(); // TODO init params or read from YAML
 //    intr->pinhole_model_raw = Eigen::Vector4d(320,240,320,320);
 //    intr->width  = img_width;
 //    intr->height = img_height;

@@ -62,7 +62,8 @@ void ProcessorBundleAdjustment::configure(SensorBasePtr _sensor)
 {
     //TODO: Implement if needed
 	//Initialize camera sensor pointer
-	camera = std::static_pointer_cast<SensorCamera>(_sensor);
+	camera = std::dynamic_pointer_cast<SensorCamera>(_sensor);
+    assert(camera != nullptr && "Sensor is not of type Camera");
 
 }
 
@@ -759,7 +760,7 @@ void ProcessorBundleAdjustment::establishFactors()
 			lmk_track_map_[trkid] = lmk;
 
 			//emplace a factor
-			FactorBase::emplace<FactorPixelHP>(ftr, ftr, lmk_hp, shared_from_this());
+			FactorBase::emplace<FactorPixelHP>(ftr, ftr, lmk_hp, shared_from_this(), params_->apply_loss_function);
 
 		}
 		else
@@ -769,7 +770,7 @@ void ProcessorBundleAdjustment::establishFactors()
 			LandmarkHPPtr lmk_hp = std::static_pointer_cast<LandmarkHP>(lmk);
 
 			//emplace a factor
-			FactorBase::emplace<FactorPixelHP>(ftr, ftr, lmk_hp, shared_from_this());
+			FactorBase::emplace<FactorPixelHP>(ftr, ftr, lmk_hp, shared_from_this(), params_->apply_loss_function);
 		}
 
 	}

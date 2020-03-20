@@ -44,7 +44,8 @@ ProcessorTrackerFeatureImage::~ProcessorTrackerFeatureImage()
 
 void ProcessorTrackerFeatureImage::configure(SensorBasePtr _sensor)
 {
-    SensorCameraPtr camera = std::static_pointer_cast<SensorCamera>(_sensor);
+    SensorCameraPtr camera = std::dynamic_pointer_cast<SensorCamera>(_sensor);
+    assert(camera != nullptr && "Sensor is not of type Camera");
 
     image_.width_ = camera->getImgWidth();
     image_.height_ = camera->getImgHeight();
@@ -262,7 +263,7 @@ double ProcessorTrackerFeatureImage::match(cv::Mat _target_descriptor, cv::Mat _
 FactorBasePtr ProcessorTrackerFeatureImage::emplaceFactor(FeatureBasePtr _feature_ptr,
                                                           FeatureBasePtr _feature_other_ptr)
 {
-    return FactorBase::emplace<FactorEpipolar>(_feature_ptr, _feature_ptr, _feature_other_ptr, shared_from_this());
+    return FactorBase::emplace<FactorEpipolar>(_feature_ptr, _feature_ptr, _feature_other_ptr, shared_from_this(), params_->apply_loss_function);
 }
 
 unsigned int ProcessorTrackerFeatureImage::detect(cv::Mat _image, cv::Rect& _roi, std::vector<cv::KeyPoint>& _new_keypoints,

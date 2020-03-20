@@ -20,7 +20,7 @@ namespace wolf
 
 namespace
 {
-static IntrinsicsBasePtr createIntrinsicsCamera(const std::string & _filename_dot_yaml)
+static ParamsSensorBasePtr createParamsSensorCamera(const std::string & _filename_dot_yaml)
 {
     YAML::Node camera_config = YAML::LoadFile(_filename_dot_yaml);
 
@@ -37,7 +37,7 @@ static IntrinsicsBasePtr createIntrinsicsCamera(const std::string & _filename_do
         VectorXd projection     = camera_config["projection_matrix"]["data"]        .as<VectorXd>();
 
         // Eigen:: to wolf::
-        std::shared_ptr<IntrinsicsCamera> intrinsics_cam = std::make_shared<IntrinsicsCamera>();
+        std::shared_ptr<ParamsSensorCamera> intrinsics_cam = std::make_shared<ParamsSensorCamera>();
 
         intrinsics_cam->width   = width;
         intrinsics_cam->height  = height;
@@ -106,7 +106,7 @@ static IntrinsicsBasePtr createIntrinsicsCamera(const std::string & _filename_do
 }
 
 // Register in the SensorFactory
-const bool WOLF_UNUSED registered_camera_intr = IntrinsicsFactory::get().registerCreator("CAMERA", createIntrinsicsCamera);
+const bool WOLF_UNUSED registered_camera_intr = ParamsSensorFactory::get().registerCreator("CAMERA", createParamsSensorCamera);
 
 } // namespace [unnamed]
 

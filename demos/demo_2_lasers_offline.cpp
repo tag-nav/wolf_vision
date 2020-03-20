@@ -115,7 +115,7 @@ int main(int argc, char** argv)
     Eigen::VectorXd laser_1_pose2D(3), laser_2_pose2D(3); //xy + theta
 
     // odometry intrinsics
-    IntrinsicsOdom2D odom_intrinsics;
+    ParamsSensorOdom2D odom_intrinsics;
     odom_intrinsics.k_disp_to_disp = odom_std_factor;
     odom_intrinsics.k_rot_to_rot = odom_std_factor;
 
@@ -125,7 +125,7 @@ int main(int argc, char** argv)
     laser_1_pose2D.head<2>() = laser_1_pose.head<2>();
     laser_1_pose2D(2) = laser_1_pose(3);
     std::vector<float> scan1(laser_1_params(8)); // number of ranges in a scan
-    IntrinsicsLaser2D laser_1_intrinsics;
+    ParamsSensorLaser2D laser_1_intrinsics;
     laser_1_intrinsics.scan_params = laserscanutils::LaserScanParams({laser_1_params(0), laser_1_params(1), laser_1_params(2), laser_1_params(3), laser_1_params(4), laser_1_params(5), laser_1_params(6), laser_1_params(7)});
 
     ProcessorParamsLaser laser_1_processor_params;
@@ -138,7 +138,7 @@ int main(int argc, char** argv)
     laser_2_pose2D.head<2>() = laser_2_pose.head<2>();
     laser_2_pose2D(2) = laser_2_pose(3);
     std::vector<float> scan2(laser_2_params(8));
-    IntrinsicsLaser2D laser_2_intrinsics;
+    ParamsSensorLaser2D laser_2_intrinsics;
     laser_2_intrinsics.scan_params = laserscanutils::LaserScanParams({laser_2_params(0), laser_2_params(1), laser_2_params(2), laser_2_params(3), laser_2_params(4), laser_2_params(5), laser_2_params(6), laser_2_params(7)});
 
     ProcessorParamsLaser laser_2_processor_params;

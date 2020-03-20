@@ -8,7 +8,7 @@
 namespace wolf
 {
 
-SensorCamera::SensorCamera(const Eigen::VectorXd& _extrinsics, const IntrinsicsCamera& _intrinsics) :
+SensorCamera::SensorCamera(const Eigen::VectorXd& _extrinsics, const ParamsSensorCamera& _intrinsics) :
                 SensorBase("CAMERA", std::make_shared<StateBlock>(_extrinsics.head(3), true), std::make_shared<StateQuaternion>(_extrinsics.tail(4), true), std::make_shared<StateBlock>(_intrinsics.pinhole_model_raw, true), 1),
                 img_width_(_intrinsics.width), //
                 img_height_(_intrinsics.height), //
@@ -23,7 +23,7 @@ SensorCamera::SensorCamera(const Eigen::VectorXd& _extrinsics, const IntrinsicsC
     pinhole::computeCorrectionModel(getIntrinsic()->getState(), distortion_, correction_);
 }
 
-SensorCamera::SensorCamera(const Eigen::VectorXd& _extrinsics, IntrinsicsCameraPtr _intrinsics_ptr) :
+SensorCamera::SensorCamera(const Eigen::VectorXd& _extrinsics, ParamsSensorCameraPtr _intrinsics_ptr) :
         SensorCamera(_extrinsics, *_intrinsics_ptr)
 {
     //
@@ -50,11 +50,11 @@ Eigen::Matrix3d SensorCamera::setIntrinsicMatrix(Eigen::Vector4d _pinhole_model)
 // Define the factory method
 SensorBasePtr SensorCamera::create(const std::string& _unique_name, //
                                  const Eigen::VectorXd& _extrinsics_pq, //
-                                 const IntrinsicsBasePtr _intrinsics)
+                                 const ParamsSensorBasePtr _intrinsics)
 {
     assert(_extrinsics_pq.size() == 7 && "Bad extrinsics vector length. Should be 7 for 3D.");
 
-    std::shared_ptr<IntrinsicsCamera> intrinsics_ptr = std::static_pointer_cast<IntrinsicsCamera>(_intrinsics);
+    std::shared_ptr<ParamsSensorCamera> intrinsics_ptr = std::static_pointer_cast<ParamsSensorCamera>(_intrinsics);
     SensorCameraPtr sen_ptr = std::make_shared<SensorCamera>(_extrinsics_pq, intrinsics_ptr);
     sen_ptr->setName(_unique_name);
 
