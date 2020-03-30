@@ -155,7 +155,7 @@ include/vision/feature/feature_point_image.h
 SET(HDRS_LANDMARK
   include/vision/landmark/landmark_AHP.h
   include/vision/landmark/landmark_HP.h
-  include/vision/landmark/landmark_point_3D.h
+  include/vision/landmark/landmark_point_3d.h
   )
 SET(HDRS_PROCESSOR
 include/vision/processor/processor_tracker_feature_trifocal.h
@@ -190,7 +190,7 @@ src/feature/feature_point_image.cpp
 SET(SRCS_LANDMARK
 src/landmark/landmark_AHP.cpp
 src/landmark/landmark_HP.cpp
-src/landmark/landmark_point_3D.cpp
+src/landmark/landmark_point_3d.cpp
   )
 SET(SRCS_PROCESSOR
 src/processor/processor_tracker_feature_trifocal.cpp
