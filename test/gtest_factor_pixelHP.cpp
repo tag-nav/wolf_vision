@@ -324,7 +324,7 @@ TEST_F(FactorPixelHPTest, testSolveFramePosition2ObservableDoF)
     std::cout << orig.transpose() << std::endl;
     std::cout << F1->getP()->getState().transpose() << std::endl;
 
-    // This test is no good because it checks 3 DoF and only 2DoF are observable.
+    // This test is no good because it checks 3 DoF and only 2doF are observable.
     //ASSERT_MATRIX_APPROX(F1->getP()->getState(), orig, 1e-6);
     // We use the following alternative:
     // Frame must be in the X axis, so Y=0 and Z=0
@@ -416,7 +416,7 @@ TEST_F(FactorPixelHPTest, testSolveFramePosition)
     std::cout << orig.transpose() << std::endl;
     std::cout << F1->getP()->getState().transpose() << std::endl;
 
-    // This test checks 3 DoF (3DoF are observable).
+    // This test checks 3 DoF (3doF are observable).
     ASSERT_MATRIX_APPROX(F1->getP()->getState(), orig, 1e-6);
 
     Eigen::VectorXd expect = c11->expectation();
@@ -619,7 +619,7 @@ TEST_F(FactorPixelHPTest, testSolveBundleAdjustment)
 	}
 
 
-	// This test checks 3 DoF (3DoF are observable).
+	// This test checks 3 DoF (3doF are observable).
     ASSERT_MATRIX_APPROX(F1->getP()->getState(), p1, 1e-6);
     ASSERT_MATRIX_APPROX(F2->getP()->getState(), p2, 1e-6);
     ASSERT_MATRIX_APPROX(F3->getP()->getState(), p3, 1e-6);

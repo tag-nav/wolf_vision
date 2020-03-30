@@ -23,7 +23,7 @@ class LandmarkAHP : public LandmarkBase
         SensorBasePtr anchor_sensor_;
 
     public:
-        LandmarkAHP(Eigen::Vector4d _position_homogeneous, FrameBasePtr _anchor_frame, SensorBasePtr _anchor_sensor, cv::Mat _2D_descriptor);
+        LandmarkAHP(Eigen::Vector4d _position_homogeneous, FrameBasePtr _anchor_frame, SensorBasePtr _anchor_sensor, cv::Mat _2d_descriptor);
 
         virtual ~LandmarkAHP();
 

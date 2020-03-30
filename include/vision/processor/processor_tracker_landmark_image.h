@@ -188,7 +188,7 @@ class ProcessorTrackerLandmarkImage : public ProcessorTrackerLandmark
 
         void landmarkInCurrentCamera(const Eigen::VectorXd& _frame_state,
                                      const LandmarkAHPPtr   _landmark,
-                                     Eigen::Vector4d&       _point3D_hmg);
+                                     Eigen::Vector4d&       _point3d_hmg);
 
         // These only to debug, will disappear one day soon
     public:

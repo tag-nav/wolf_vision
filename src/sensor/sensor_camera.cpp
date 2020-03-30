@@ -18,7 +18,7 @@ SensorCamera::SensorCamera(const Eigen::VectorXd& _extrinsics, const ParamsSenso
                 pinhole_model_rectified_(_intrinsics.pinhole_model_rectified), //
                 using_raw_(true)
 {
-    assert(_extrinsics.size() == 7 && "Wrong intrinsics vector size. Should be 7 for 3D");
+    assert(_extrinsics.size() == 7 && "Wrong intrinsics vector size. Should be 7 for 3d");
     useRawImages();
     pinhole::computeCorrectionModel(getIntrinsic()->getState(), distortion_, correction_);
 }
@@ -52,7 +52,7 @@ SensorBasePtr SensorCamera::create(const std::string& _unique_name, //
                                  const Eigen::VectorXd& _extrinsics_pq, //
                                  const ParamsSensorBasePtr _intrinsics)
 {
-    assert(_extrinsics_pq.size() == 7 && "Bad extrinsics vector length. Should be 7 for 3D.");
+    assert(_extrinsics_pq.size() == 7 && "Bad extrinsics vector length. Should be 7 for 3d.");
 
     std::shared_ptr<ParamsSensorCamera> intrinsics_ptr = std::static_pointer_cast<ParamsSensorCamera>(_intrinsics);
     SensorCameraPtr sen_ptr = std::make_shared<SensorCamera>(_extrinsics_pq, intrinsics_ptr);

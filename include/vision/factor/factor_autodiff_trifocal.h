@@ -218,7 +218,7 @@ FactorAutodiffTrifocal::FactorAutodiffTrifocal(const FeatureBasePtr& _feature_1_
 
     // Re-write info matrix (for debug only)
     //    double pix_noise = 1.0;
-    //    sqrt_information_upper = pow(1.0/pix_noise, 2) * Matrix3d::Identity(); // one PLP (2D) and one epipolar (1D) factor
+    //    sqrt_information_upper = pow(1.0/pix_noise, 2) * Matrix3d::Identity(); // one PLP (2d) and one epipolar (1d) factor
 }
 
 // Destructor
@@ -301,7 +301,7 @@ inline void FactorAutodiffTrifocal::expectation(const MatrixBase<D1>&     _wtr1,
          * C2 is specified by R and T wrt C1 so that
          *   T is the position    of C2 wrt C1
          *   R is the orientation of C2 wrt C1
-         * There is a 3D point P, noted P1 when expressed in C1 and P2 when expressed in C2:
+         * There is a 3d point P, noted P1 when expressed in C1 and P2 when expressed in C2:
          *   P1 = T + R * P2
          *
          * Coplanarity condition: a' * (b x c) = 0 with {a,b,c} three coplanar vectors.

@@ -168,7 +168,7 @@ TEST_F(FactorAutodiffTrifocalTest, InfoMatrix)
     /** Ground truth covariance. Rationale:
      * Due to the orthogonal configuration (see line 40 and onwards), we have:
      *   Let s = pixel_noise_std.
-     *   Let d = 1 the distance from the cameras to the 3D point
+     *   Let d = 1 the distance from the cameras to the 3d point
      *   Let k be a proportionality constant related to the projection and pixellization process
      *   Let S = k*d*s
      *   The pixel on camera 1 retroprojects a conic PDF with width S = k*s*d
@@ -884,7 +884,7 @@ TEST_F(FactorAutodiffTrifocalMultiPointTest, solve_multi_point_scale)
     }
 }
 
-#include "core/factor/factor_autodiff_distance_3D.h"
+#include "core/factor/factor_autodiff_distance_3d.h"
 
 TEST_F(FactorAutodiffTrifocalMultiPointTest, solve_multi_point_distance)
 {
@@ -925,8 +925,8 @@ TEST_F(FactorAutodiffTrifocalMultiPointTest, solve_multi_point_distance)
     auto fd = FeatureBase::emplace<FeatureBase>(Cd, "DISTANCE", Vector1d(distance), Matrix1d(distance_std * distance_std));
     // FeatureBasePtr fd = std::make_shared<FeatureBase>("DISTANCE", Vector1d(distance), Matrix1d(distance_std * distance_std));
     // Cd->addFeature(fd);
-    auto cd = FactorBase::emplace<FactorAutodiffDistance3D>(fd, fd, F1, nullptr, false, FAC_ACTIVE);
-    // FACTORAUTODIFFDISTANCE3DPTR cd = std::make_shared<FactorAutodiffDistance3D>(fd, F1, nullptr, false, FAC_ACTIVE);
+    auto cd = FactorBase::emplace<FactorAutodiffDistance3d>(fd, fd, F1, nullptr, false, FAC_ACTIVE);
+    // FACTORAUTODIFFDISTANCE3dPTR cd = std::make_shared<FactorAutodiffDistance3d>(fd, F1, nullptr, false, FAC_ACTIVE);
     // fd->addFactor(cd);
     // F1->addConstrainedBy(cd);
 

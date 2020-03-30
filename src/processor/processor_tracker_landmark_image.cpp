@@ -107,14 +107,14 @@ unsigned int ProcessorTrackerLandmarkImage::findLandmarks(const LandmarkBasePtrL
         // project landmark into incoming capture
         LandmarkAHPPtr landmark_ptr = std::static_pointer_cast<LandmarkAHP>(landmark_in_ptr);
         SensorCameraPtr camera = std::static_pointer_cast<SensorCamera>(this->getSensor());
-        Eigen::Vector4d point3D_hmg;
+        Eigen::Vector4d point3d_hmg;
         Eigen::Vector2d pixel;
 
-        landmarkInCurrentCamera(current_state, landmark_ptr, point3D_hmg);
+        landmarkInCurrentCamera(current_state, landmark_ptr, point3d_hmg);
 
         pixel = pinhole::projectPoint(camera->getIntrinsic()->getState(),
                                       camera->getDistortionVector(),
-                                      point3D_hmg.head<3>());
+                                      point3d_hmg.head<3>());
 
         if(pinhole::isInImage(pixel, image_.width_, image_.height_))
         {
@@ -236,23 +236,23 @@ LandmarkBasePtr ProcessorTrackerLandmarkImage::emplaceLandmark(FeatureBasePtr _f
     FeaturePointImagePtr feat_point_image_ptr = std::static_pointer_cast<FeaturePointImage>( _feature_ptr);
     FrameBasePtr anchor_frame = getLast()->getFrame();
 
-    Eigen::Vector2d point2D;
-    point2D[0] = feat_point_image_ptr->getKeypoint().pt.x;
-    point2D[1] = feat_point_image_ptr->getKeypoint().pt.y;
+    Eigen::Vector2d point2d;
+    point2d[0] = feat_point_image_ptr->getKeypoint().pt.x;
+    point2d[1] = feat_point_image_ptr->getKeypoint().pt.y;
 
     double distance = params_tracker_landmark_image_->distance; // arbitrary value
     Eigen::Vector4d vec_homogeneous;
 
-    point2D = pinhole::depixellizePoint(getSensor()->getIntrinsic()->getState(),point2D);
-    point2D = pinhole::undistortPoint((std::static_pointer_cast<SensorCamera>(getSensor()))->getCorrectionVector(),point2D);
+    point2d = pinhole::depixellizePoint(getSensor()->getIntrinsic()->getState(),point2d);
+    point2d = pinhole::undistortPoint((std::static_pointer_cast<SensorCamera>(getSensor()))->getCorrectionVector(),point2d);
 
-    Eigen::Vector3d point3D;
-    point3D.head<2>() = point2D;
-    point3D(2) = 1;
+    Eigen::Vector3d point3d;
+    point3d.head<2>() = point2d;
+    point3d(2) = 1;
 
-    point3D.normalize();
+    point3d.normalize();
 
-    vec_homogeneous = {point3D(0),point3D(1),point3D(2),1/distance};
+    vec_homogeneous = {point3d(0),point3d(1),point3d(2),1/distance};
 
     auto lmk_ahp_ptr = LandmarkBase::emplace<LandmarkAHP>(getProblem()->getMap(),
                                                           vec_homogeneous,
@@ -285,7 +285,7 @@ FactorBasePtr ProcessorTrackerLandmarkImage::emplaceFactor(FeatureBasePtr _featu
 
 void ProcessorTrackerLandmarkImage::landmarkInCurrentCamera(const Eigen::VectorXd& _current_state,
                                                      const LandmarkAHPPtr   _landmark,
-                                                     Eigen::Vector4d&       _point3D_hmg)
+                                                     Eigen::Vector4d&       _point3d_hmg)
 {
     using namespace Eigen;
 
@@ -311,8 +311,8 @@ void ProcessorTrackerLandmarkImage::landmarkInCurrentCamera(const Eigen::VectorX
      * We use Eigen::Transform which is like using homogeneous transform matrices with a simpler API
      */
 
-    // Assert frame is 3D with at least PQ
-    assert((_current_state.size() == 7 || _current_state.size() == 16) && "Wrong state size! Should be 7 for 3D pose or 16 for IMU.");
+    // Assert frame is 3d with at least PQ
+    assert((_current_state.size() == 7 || _current_state.size() == 16) && "Wrong state size! Should be 7 for 3d pose or 16 for Imu.");
 
     // ALL TRANSFORMS
     Transform<double,3,Eigen::Isometry> T_W_R0, T_W_R1, T_R0_C0, T_R1_C1;
@@ -339,7 +339,7 @@ void ProcessorTrackerLandmarkImage::landmarkInCurrentCamera(const Eigen::VectorX
 
     // Transform lmk from c0 to c1 and exit
     Vector4d landmark_hmg_c0 = _landmark->getP()->getState(); // lmk in anchor frame
-    _point3D_hmg = T_R1_C1.inverse(Eigen::Isometry) * T_W_R1.inverse(Eigen::Isometry) * T_W_R0 * T_R0_C0 * landmark_hmg_c0;
+    _point3d_hmg = T_R1_C1.inverse(Eigen::Isometry) * T_W_R1.inverse(Eigen::Isometry) * T_W_R0 * T_R0_C0 * landmark_hmg_c0;
 }
 
 double ProcessorTrackerLandmarkImage::match(const cv::Mat _target_descriptor, const cv::Mat _candidate_descriptors, DMatchVector& _cv_matches)
@@ -407,20 +407,20 @@ void ProcessorTrackerLandmarkImage::drawLandmarks(cv::Mat _image)
         {
             LandmarkAHPPtr landmark_ptr = std::static_pointer_cast<LandmarkAHP>(landmark_base_ptr);
 
-            Eigen::Vector4d point3D_hmg;
-            landmarkInCurrentCamera(current_state, landmark_ptr, point3D_hmg);
+            Eigen::Vector4d point3d_hmg;
+            landmarkInCurrentCamera(current_state, landmark_ptr, point3d_hmg);
 
-            Eigen::Vector2d point2D = pinhole::projectPoint(camera->getIntrinsic()->getState(), // k
+            Eigen::Vector2d point2d = pinhole::projectPoint(camera->getIntrinsic()->getState(), // k
                                                             camera->getDistortionVector(),          // d
-                                                            point3D_hmg.head(3));                   // v
+                                                            point3d_hmg.head(3));                   // v
 
-            if(pinhole::isInImage(point2D,image_.width_,image_.height_))
+            if(pinhole::isInImage(point2d,image_.width_,image_.height_))
             {
                 num_lmks_in_img++;
 
                 cv::Point2f point;
-                point.x = point2D[0];
-                point.y = point2D[1];
+                point.x = point2d[0];
+                point.y = point2d[1];
 
                 cv::circle(_image, point, 4, cv::Scalar(51.0, 51.0, 255.0), 1, 3, 0);
                 cv::putText(_image, std::to_string(landmark_ptr->id()), point, cv:: FONT_HERSHEY_SIMPLEX, 0.4, cv::Scalar(100.0, 100.0, 255.0) );

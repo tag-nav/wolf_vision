@@ -100,7 +100,7 @@ inline bool FactorEpipolar::operator ()(const T* const _frame_own_p,
      * C2 is specified by R and t wrt C1 so that
      *   t is the position    of C2 wrt C1
      *   R is the orientation of C2 wrt C1
-     * There is a 3D point P, noted P1 when expressed in C1 and P2 when expressed in C2:
+     * There is a 3d point P, noted P1 when expressed in C1 and P2 when expressed in C2:
      *   P1 = t + R * P2
      *
      * Co-planarity condition: a' * (b x c) = 0 with {a,b,c} three co-planar vectors.

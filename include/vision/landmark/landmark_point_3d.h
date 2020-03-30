@@ -1,5 +1,5 @@
-#ifndef LANDMARK_POINT_3D_H
-#define LANDMARK_POINT_3D_H
+#ifndef LANDMARK_POINT_3d_H
+#define LANDMARK_POINT_3d_H
 
 //Wolf includes
 #include "core/landmark/landmark_base.h"
@@ -9,18 +9,18 @@
 
 namespace wolf {
 
-WOLF_PTR_TYPEDEFS(LandmarkPoint3D);
+WOLF_PTR_TYPEDEFS(LandmarkPoint3d);
     
 //class    
-class LandmarkPoint3D : public LandmarkBase
+class LandmarkPoint3d : public LandmarkBase
 {
     protected:
         cv::Mat descriptor_;
         Eigen::Vector3d position_;
     public:
-        LandmarkPoint3D(Eigen::Vector3d _position, cv::Mat _2D_descriptor);
+        LandmarkPoint3d(Eigen::Vector3d _position, cv::Mat _2d_descriptor);
 
-        virtual ~LandmarkPoint3D();
+        virtual ~LandmarkPoint3d();
 
         const Eigen::Vector3d point() const;
 
@@ -28,21 +28,21 @@ class LandmarkPoint3D : public LandmarkBase
         void setDescriptor(const cv::Mat& _descriptor);
 };
 
-inline const Eigen::Vector3d LandmarkPoint3D::point() const
+inline const Eigen::Vector3d LandmarkPoint3d::point() const
 {
     return getP()->getState();
 }
 
-inline const cv::Mat& LandmarkPoint3D::getDescriptor() const
+inline const cv::Mat& LandmarkPoint3d::getDescriptor() const
 {
     return descriptor_;
 }
 
-inline void LandmarkPoint3D::setDescriptor(const cv::Mat& _descriptor)
+inline void LandmarkPoint3d::setDescriptor(const cv::Mat& _descriptor)
 {
     descriptor_ = _descriptor;
 }
 
 } // namespace wolf
 
-#endif // LANDMARK_POINT_3D_H
+#endif // LANDMARK_POINT_3d_H

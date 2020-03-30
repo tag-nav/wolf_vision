@@ -1,6 +1,6 @@
 #include "vision/landmark/landmark_AHP.h"
 
-#include "core/state_block/state_homogeneous_3D.h"
+#include "core/state_block/state_homogeneous_3d.h"
 #include "core/common/factory.h"
 #include "core/yaml/yaml_conversion.h"
 
@@ -10,9 +10,9 @@ namespace wolf {
 LandmarkAHP::LandmarkAHP(Eigen::Vector4d _position_homogeneous,
                          FrameBasePtr _anchor_frame,
                          SensorBasePtr _anchor_sensor,
-                         cv::Mat _2D_descriptor) :
-    LandmarkBase("AHP", std::make_shared<StateHomogeneous3D>(_position_homogeneous)),
-    cv_descriptor_(_2D_descriptor.clone()),
+                         cv::Mat _2d_descriptor) :
+    LandmarkBase("AHP", std::make_shared<StateHomogeneous3d>(_position_homogeneous)),
+    cv_descriptor_(_2d_descriptor.clone()),
     anchor_frame_(_anchor_frame),
     anchor_sensor_(_anchor_sensor)
 {

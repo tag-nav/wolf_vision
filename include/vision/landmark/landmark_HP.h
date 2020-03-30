@@ -22,7 +22,7 @@ class LandmarkHP : public LandmarkBase
 
 
     public:
-        LandmarkHP(Eigen::Vector4d _position_homogeneous, SensorBasePtr _sensor_, cv::Mat _2D_descriptor);
+        LandmarkHP(Eigen::Vector4d _position_homogeneous, SensorBasePtr _sensor_, cv::Mat _2d_descriptor);
 
         virtual ~LandmarkHP();
 

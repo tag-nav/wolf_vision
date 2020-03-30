@@ -126,7 +126,7 @@ TEST(SensorCamera, install)
     params->distortion = Eigen::Vector3d( 0, 0, 0 );
 
     // Wolf problem
-	ProblemPtr problem = Problem::create("PO 3D",3);
+	ProblemPtr problem = Problem::create("PO 3d",3);
 
 	// Install camera
 	auto sen = problem->installSensor("CAMERA", "camera", extrinsics, params);

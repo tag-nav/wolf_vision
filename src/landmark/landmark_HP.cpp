@@ -1,6 +1,6 @@
 #include "vision/landmark/landmark_HP.h"
 
-#include "core/state_block/state_homogeneous_3D.h"
+#include "core/state_block/state_homogeneous_3d.h"
 #include "core/common/factory.h"
 #include "core/yaml/yaml_conversion.h"
 
@@ -9,9 +9,9 @@ namespace wolf {
 /* Landmark - Homogeneous Point*/
 LandmarkHP::LandmarkHP(Eigen::Vector4d _position_homogeneous,
 						 SensorBasePtr _sensor,
-                         cv::Mat _2D_descriptor) :
-    LandmarkBase("HP", std::make_shared<StateHomogeneous3D>(_position_homogeneous)),
-    cv_descriptor_(_2D_descriptor.clone())
+                         cv::Mat _2d_descriptor) :
+    LandmarkBase("HP", std::make_shared<StateHomogeneous3d>(_position_homogeneous)),
+    cv_descriptor_(_2d_descriptor.clone())
 {
 }
 

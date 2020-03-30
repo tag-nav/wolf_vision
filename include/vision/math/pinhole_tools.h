@@ -29,8 +29,8 @@ using Eigen::Matrix;
 
 /**
  * Pin-hole canonical projection.
- * \param _v a 3D point to project
- * \param _up the projected point in the normalized 2D plane
+ * \param _v a 3d point to project
+ * \param _up the projected point in the normalized 2d plane
  */
 template<typename Derived1, typename Derived2>
 inline void
@@ -46,8 +46,8 @@ projectPointToNormalizedPlane(const MatrixBase<Derived1>& _v,
 
 /**
  * Pin-hole canonical projection.
- * \return the projected point in the normalized 2D plane
- * \param _v a 3D point
+ * \return the projected point in the normalized 2d plane
+ * \param _v a 3d point
  */
 template<typename Derived>
 inline Matrix<typename Derived::Scalar, 2, 1>
@@ -65,8 +65,8 @@ projectPointToNormalizedPlane(const MatrixBase<Derived>& _v)
 
 /**
  * Pin-hole canonical projection, return also distance (not depth!).
- * \param _v a 3D point
- * \param _up the projected point in the normalized 2D plane
+ * \param _v a 3d point
+ * \param _up the projected point in the normalized 2d plane
  * \param _dist the distance from the camera to the point
  */
 template<typename Derived1, typename Derived2>
@@ -84,8 +84,8 @@ projectPointToNormalizedPlane(const MatrixBase<Derived1>& _v,
 
 /**
  * Pin-hole canonical projection, with jacobian
- * \param _v the 3D point to project
- * \param _up the projected 2D point
+ * \param _v the 3d point to project
+ * \param _up the projected 2d point
  * \param _UP_v the Jacibian of \a u wrt \a v
  */
 template<typename Derived1, typename Derived2, typename Derived3>
@@ -110,8 +110,8 @@ projectPointToNormalizedPlane(const MatrixBase<Derived1>& _v,
 
 /**
  * Pin-hole canonical projection, with distance (not depth!) and jacobian
- * \param _v the 3D point to project
- * \param _up the projected 2D point
+ * \param _v the 3d point to project
+ * \param _up the projected 2d point
  * \param _UP_v the Jacibian of \a u wrt \a v
  */
 template<typename Derived1, typename Derived2, typename Derived3>
@@ -132,9 +132,9 @@ projectPointToNormalizedPlane(const MatrixBase<Derived1>& _v,
 
 /**
  * Canonical back-projection.
- * \param _u the 2D point in the image plane
+ * \param _u the 2d point in the image plane
  * \param _depth point's depth orthogonal to image plane. Defaults to 1.0
- * \return the back-projected 3D point at the given depth
+ * \return the back-projected 3d point at the given depth
  */
 template<typename Derived>
 Matrix<typename Derived::Scalar, 3, 1>
@@ -153,9 +153,9 @@ backprojectPointFromNormalizedPlane(const MatrixBase<Derived> &    _u,
 
 /**
  * Canonical back-projection.
- * \param u the 2D point in the image plane.
+ * \param u the 2d point in the image plane.
  * \param depth point's depth orthogonal to image plane.
- * \param p the 3D point.
+ * \param p the 3d point.
  * \param P_u Jacobian of p wrt u.
  * \param P_depth Jacobian of p wrt depth.
  */
@@ -514,7 +514,7 @@ void depixellizePoint(const MatrixBase<Derived1>&   k,
  * Project a point into a pin-hole camera with radial distortion
  * \param k the vector of intrinsic parameters, k = [u0, v0, au, av]
  * \param d the radial distortion parameters vector
- * \param v the 3D point to project, or the 3D director vector
+ * \param v the 3d point to project, or the 3d director vector
  * \return the projected and distorted point
  */
 template<typename Derived1, typename Derived2, typename Derived3>
@@ -533,7 +533,7 @@ Matrix<typename Derived3::Scalar, 2, 1> projectPoint(const MatrixBase<Derived1>&
  * Project a point into a pin-hole camera with radial distortion
  * \param k the vector of intrinsic parameters, k = [u0, v0, au, av]
  * \param d the radial distortion parameters vector
- * \param v the 3D point to project, or the 3D director vector
+ * \param v the 3d point to project, or the 3d director vector
  * \param u the projected and distorted point
  * \param U_v the Jacobian of \a u wrt \a v
  */
@@ -564,9 +564,9 @@ void projectPoint(const MatrixBase<Derived1>& k,
  * Project a point into a pin-hole camera with radial distortion.
  * \param k the vector of intrinsic parameters, k = [u0, v0, au, av]
  * \param d the radial distortion parameters vector
- * \param v the 3D point to project, or the 3D director vector
+ * \param v the 3d point to project, or the 3d director vector
  * \param u the projected and distorted point
- * \param dist distance from the optical center to the 3D point
+ * \param dist distance from the optical center to the 3d point
  */
 template<typename Derived1, typename Derived2, typename Derived3, typename Derived4>//, typename T>
 void projectPoint(const MatrixBase<Derived1>& k,
@@ -589,7 +589,7 @@ void projectPoint(const MatrixBase<Derived1>& k,
  * Project a point into a pin-hole camera with radial distortion
  * \param k the vector of intrinsic parameters, k = [u0, v0, au, av]
  * \param d the radial distortion parameters vector
- * \param v the 3D point to project, or the 3D director vector
+ * \param v the 3d point to project, or the 3d director vector
  * \param u the projected and distorted point
  * \param dist the distance from the camera to the point
  * \param U_v the Jacobian of \a u wrt \a v
@@ -623,9 +623,9 @@ void projectPoint(const MatrixBase<Derived1>& k,
  * Back-Project a point from a pin-hole camera with radial distortion
  * \param k the vector of intrinsic parameters, k = [u0, v0, au, av]
  * \param c the radial undistortion parameters vector
- * \param u the 2D pixel
+ * \param u the 2d pixel
  * \param depth the depth prior
- * \return the back-projected 3D point
+ * \return the back-projected 3d point
  */
 template<typename Derived1, typename Derived2, typename Derived3>
 Matrix<typename Derived3::Scalar, 3, 1> backprojectPoint(const MatrixBase<Derived1>&  k,
@@ -644,9 +644,9 @@ Matrix<typename Derived3::Scalar, 3, 1> backprojectPoint(const MatrixBase<Derive
  * Back-Project a point from a pin-hole camera with radial distortion; give Jacobians
  * \param k the vector of intrinsic parameters, k = [u0, v0, au, av]
  * \param c the radial undistortion parameters vector
- * \param u the 2D pixel
+ * \param u the 2d pixel
  * \param depth the depth prior
- * \param p the back-projected 3D point
+ * \param p the back-projected 3d point
  * \param P_u Jacobian of p wrt u
  * \param P_depth Jacobian of p wrt depth
  */

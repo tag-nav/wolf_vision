@@ -7,7 +7,7 @@
 #include <core/utils/utils_gtest.h>
 #include "core/common/wolf.h"
 #include "core/utils/logging.h"
-#include "core/processor/processor_odom_3D.h"
+#include "core/processor/processor_odom_3d.h"
 
 #include "vision_utils/vision_utils.h"
 
@@ -104,15 +104,15 @@ TEST(ProcessorTrackerFeatureTrifocal, KeyFrameCallback)
     // sens_trk->addProcessor(proc_trk);
 
     // Install odometer (sensor and processor)
-    ParamsSensorOdom3DPtr params = std::make_shared<ParamsSensorOdom3D>();
+    ParamsSensorOdom3dPtr params = std::make_shared<ParamsSensorOdom3d>();
     params->min_disp_var = 0.000001;
     params->min_rot_var  = 0.000001;
-    SensorBasePtr sens_odo = problem->installSensor("SensorOdom3D", "odometer", (Vector7d() << 0,0,0,  0,0,0,1).finished(), params);
-    ProcessorParamsOdom3DPtr proc_odo_params = make_shared<ProcessorParamsOdom3D>();
+    SensorBasePtr sens_odo = problem->installSensor("SensorOdom3d", "odometer", (Vector7d() << 0,0,0,  0,0,0,1).finished(), params);
+    ProcessorParamsOdom3dPtr proc_odo_params = make_shared<ProcessorParamsOdom3d>();
     proc_odo_params->voting_active   = true;
     proc_odo_params->time_tolerance  = dt/2;
     proc_odo_params->max_buff_length = 3;
-    ProcessorBasePtr proc_odo = problem->installProcessor("ProcessorOdom3D", "odometer", sens_odo, proc_odo_params);
+    ProcessorBasePtr proc_odo = problem->installProcessor("ProcessorOdom3d", "odometer", sens_odo, proc_odo_params);
 
     std::cout << "sensor & processor created and added to wolf problem" << std::endl;
 
@@ -124,7 +124,7 @@ TEST(ProcessorTrackerFeatureTrifocal, KeyFrameCallback)
     Matrix6d    P = Matrix6d::Identity() * 0.000001;
     problem->setPrior(x, P, t, dt/2);             // KF1
 
-    CaptureOdom3DPtr capt_odo = make_shared<CaptureOdom3D>(t, sens_odo, Vector6d::Zero(), P);
+    CaptureOdom3dPtr capt_odo = make_shared<CaptureOdom3d>(t, sens_odo, Vector6d::Zero(), P);
 
     // Track
     cv::Mat image(intr->height, intr->width, CV_8UC3); // OpenCV cv::Mat(rows, cols)
@@ -151,7 +151,7 @@ TEST(ProcessorTrackerFeatureTrifocal, KeyFrameCallback)
         problem->print(2,0,1,0);
 
         // Only odom creating KFs
-        ASSERT_TRUE( problem->getLastKeyFrame()->getType().compare("PO 3D")==0 );
+        ASSERT_TRUE( problem->getLastKeyFrame()->getType().compare("PO 3d")==0 );
     }
 }
 

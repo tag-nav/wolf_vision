@@ -122,7 +122,7 @@ void ProcessorBundleAdjustment::preProcess()
         }
 
 
-//        //get points 2D from inlier matches
+//        //get points 2d from inlier matches
 //        PointVector pts1, pts2;
 //        for (auto match : capture_image_incoming_->matches_from_precedent_)
 //        {
@@ -244,11 +244,11 @@ void ProcessorBundleAdjustment::postProcess()
 ////				if (fact->getLandmarkOther()->getConstrainedByList().size() >= 2)
 ////				{
 ////					//3d points
-////					auto point3D = std::static_pointer_cast<LandmarkHP>(fact->getLandmarkOther())->point();
-////					landmark_points.push_back(cv::Point3f(point3D(0),point3D(1),point3D(2)));
+////					auto point3d = std::static_pointer_cast<LandmarkHP>(fact->getLandmarkOther())->point();
+////					landmark_points.push_back(cv::Point3f(point3d(0),point3d(1),point3d(2)));
 ////					//2d points
-////					auto point2D = feat->getMeasurement();
-////					image_points.push_back(cv::Point2f(point2D(0), point2D(1)));
+////					auto point2d = feat->getMeasurement();
+////					image_points.push_back(cv::Point2f(point2d(0), point2d(1)));
 ////				}
 ////			}
 ////		}
@@ -263,11 +263,11 @@ void ProcessorBundleAdjustment::postProcess()
 ////				if (lmk_base->getConstrainedByList().size() >= 2)
 //				{
 //					//3d points
-//					auto point3D = std::static_pointer_cast<LandmarkHP>(lmk_base)->point();
-//					landmark_points.push_back(cv::Point3f(point3D(0),point3D(1),point3D(2)));
+//					auto point3d = std::static_pointer_cast<LandmarkHP>(lmk_base)->point();
+//					landmark_points.push_back(cv::Point3f(point3d(0),point3d(1),point3d(2)));
 //					//2d points
-//					auto point2D = feat->getMeasurement();
-//					image_points.push_back(cv::Point2f(point2D(0), point2D(1)));
+//					auto point2d = feat->getMeasurement();
+//					image_points.push_back(cv::Point2f(point2d(0), point2d(1)));
 //				}
 //			}
 //		}
@@ -404,7 +404,7 @@ void ProcessorBundleAdjustment::postProcess()
         unsigned int track_id = feat->trackId();
 		if (lmk_track_map_.count(track_id))
         {
-			Vector3d point3D = std::static_pointer_cast<LandmarkHP>(lmk_track_map_[track_id])->point();
+			Vector3d point3d = std::static_pointer_cast<LandmarkHP>(lmk_track_map_[track_id])->point();
 
 			Transform<double,3,Isometry> T_w_r
 		        = Translation<double,3>(feat_base->getFrame()->getP()->getState())
@@ -413,14 +413,14 @@ void ProcessorBundleAdjustment::postProcess()
 				= Translation<double,3>(feat_base->getCapture()->getSensorP()->getState())
 		        * Quaterniond(feat_base->getCapture()->getSensorO()->getState().data());
 
-		    Eigen::Matrix<double, 3, 1> point3D_c = T_r_c.inverse()
+		    Eigen::Matrix<double, 3, 1> point3d_c = T_r_c.inverse()
 												   * T_w_r.inverse()
-		                                           * point3D;
+		                                           * point3d;
 
 //		    SensorCameraPtr camera = std::static_pointer_cast<SensorCamera>(getSensor());
 
-		    Vector2d point2D = pinhole::projectPoint(getSensor()->getIntrinsic()->getState(), camera->getDistortionVector(), point3D_c);
-    		cv::Point point = cv::Point(point2D(0), point2D(1));
+		    Vector2d point2d = pinhole::projectPoint(getSensor()->getIntrinsic()->getState(), camera->getDistortionVector(), point3d_c);
+    		cv::Point point = cv::Point(point2d(0), point2d(1));
 
     		cv::circle(image_debug_, point, 3, cv::Scalar(0,0,255) , 1 , 8);
     		std::string id = std::to_string(lmk_track_map_[track_id]->id());
@@ -655,20 +655,20 @@ FactorBasePtr ProcessorBundleAdjustment::emplaceFactor(FeatureBasePtr _feature_p
 LandmarkBasePtr ProcessorBundleAdjustment::emplaceLandmark(FeatureBasePtr _feature_ptr)
 {
     FeaturePointImagePtr feat_point_image_ptr = std::static_pointer_cast<FeaturePointImage>( _feature_ptr);
-    Eigen::Vector2d point2D = _feature_ptr->getMeasurement();
+    Eigen::Vector2d point2d = _feature_ptr->getMeasurement();
 
-    Eigen::Vector3d point3D;
-    point3D = pinhole::backprojectPoint(
+    Eigen::Vector3d point3d;
+    point3d = pinhole::backprojectPoint(
     		getSensor()->getIntrinsic()->getState(),
     		(std::static_pointer_cast<SensorCamera>(getSensor()))->getCorrectionVector(),
-			point2D);
+			point2d);
 
 
 
     //double distance = params_bundle_adjustment_->distance; // arbitrary value
     double distance = 1;
     Eigen::Vector4d vec_homogeneous_c;
-    vec_homogeneous_c = {point3D(0),point3D(1),point3D(2),point3D.norm()/distance};
+    vec_homogeneous_c = {point3d(0),point3d(1),point3d(2),point3d.norm()/distance};
     vec_homogeneous_c.normalize();
 
     //TODO: lmk from camera to world coordinate frame.
@@ -683,8 +683,8 @@ LandmarkBasePtr ProcessorBundleAdjustment::emplaceLandmark(FeatureBasePtr _featu
                                            * vec_homogeneous_c;
 
 
-//    std::cout << "Point2D: " << point2D.transpose() << std::endl;
-//    std::cout << "Point3D: " << point3D.transpose() << std::endl;
+//    std::cout << "Point2d: " << point2d.transpose() << std::endl;
+//    std::cout << "Point3d: " << point3d.transpose() << std::endl;
 //    std::cout << "Hmg_c: " << vec_homogeneous.transpose() << std::endl;
 //    std::cout << "Hmg_w: " << vec_homogeneous_w.transpose() << std::endl;
     //vec_homogeneous_w = vec_homogeneous;
