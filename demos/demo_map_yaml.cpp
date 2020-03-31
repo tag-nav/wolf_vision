@@ -37,7 +37,7 @@ void print(MapBase& _map)
         }
         else if (lmk_ptr->getType() == "AHP")
         {
-            LandmarkAHPPtr ahp_ptr = std::static_pointer_cast<LandmarkAHP>(lmk_ptr);
+            LandmarkAhpPtr ahp_ptr = std::static_pointer_cast<LandmarkAhp>(lmk_ptr);
             std::cout << "\npos:       " << ahp_ptr->getP()->getState().transpose() << " -- fixed: " << ahp_ptr->getP()->isFixed();
             std::cout << "\ndescript:  " << ahp_ptr->getCvDescriptor().t();
             break;
@@ -57,7 +57,7 @@ int main()
     Vector4d v;
     v << 1, 2, 3, 4;
     cv::Mat d = (cv::Mat_<int>(8,1) << 1, 2, 3, 4, 5, 6, 7, 8);
-    LandmarkAHP lmk_1(v, nullptr, nullptr, d);
+    LandmarkAhp lmk_1(v, nullptr, nullptr, d);
     std::cout << "Pos 1 = " << lmk_1.getP()->getState().transpose() << std::endl;
     std::cout << "Des 1 = " << lmk_1.getCvDescriptor().t() << std::endl;
 
@@ -65,7 +65,7 @@ int main()
     std::cout << "Pos n = " << n["position"].as<VectorXd>().transpose() << std::endl;
     std::cout << "Des n = " << n["descriptor"].as<VectorXd>().transpose() << std::endl;
 
-    LandmarkAHP lmk_2 = *(std::static_pointer_cast<LandmarkAHP>(LandmarkAHP::create(n)));
+    LandmarkAhp lmk_2 = *(std::static_pointer_cast<LandmarkAhp>(LandmarkAhp::create(n)));
     std::cout << "Pos 2 = " << lmk_2.getP()->getState().transpose() << std::endl;
     std::cout << "Des 2 = " << lmk_2.getCvDescriptor().t() << std::endl;
 

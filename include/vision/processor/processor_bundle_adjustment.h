@@ -11,7 +11,7 @@
 //wolf includes
 #include "core/processor/processor_tracker_feature.h"
 #include "vision/capture/capture_image.h"
-#include "vision/landmark/landmark_HP.h"
+#include "vision/landmark/landmark_hp.h"
 #include "vision/math/pinhole_tools.h"
 #include "vision/sensor/sensor_camera.h"
 #include "core/math/rotations.h"
@@ -21,7 +21,7 @@
 #include "vision_utils/detectors.h"
 #include "vision_utils/descriptors.h"
 #include "vision_utils/matchers.h"
-#include "../factor/factor_pixelHP.h"
+#include "../factor/factor_pixel_hp.h"
 
 namespace wolf{
 

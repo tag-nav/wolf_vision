@@ -1,4 +1,4 @@
-#include "vision/landmark/landmark_AHP.h"
+#include "vision/landmark/landmark_ahp.h"
 
 #include "core/state_block/state_homogeneous_3d.h"
 #include "core/common/factory.h"
@@ -7,7 +7,7 @@
 namespace wolf {
 
 /* Landmark - Anchored Homogeneous Point*/
-LandmarkAHP::LandmarkAHP(Eigen::Vector4d _position_homogeneous,
+LandmarkAhp::LandmarkAhp(Eigen::Vector4d _position_homogeneous,
                          FrameBasePtr _anchor_frame,
                          SensorBasePtr _anchor_sensor,
                          cv::Mat _2d_descriptor) :
@@ -18,30 +18,30 @@ LandmarkAHP::LandmarkAHP(Eigen::Vector4d _position_homogeneous,
 {
 }
 
-LandmarkAHP::~LandmarkAHP()
+LandmarkAhp::~LandmarkAhp()
 {
     //
 }
 
-YAML::Node LandmarkAHP::saveToYaml() const
+YAML::Node LandmarkAhp::saveToYaml() const
 {
     // First base things
     YAML::Node node = LandmarkBase::saveToYaml();
 
     // Then add specific things
     std::vector<int> v;
-    LandmarkAHP::cv_descriptor_.copyTo(v);
+    LandmarkAhp::cv_descriptor_.copyTo(v);
     node["descriptor"] = v;
     return node;
 }
 
-Eigen::Vector3d LandmarkAHP::getPointInAnchorSensor() const
+Eigen::Vector3d LandmarkAhp::getPointInAnchorSensor() const
 {
     Eigen::Map<const Eigen::Vector4d> hmg_point(getP()->getState().data());
     return hmg_point.head<3>()/hmg_point(3);
 }
 
-Eigen::Vector3d LandmarkAHP::point() const
+Eigen::Vector3d LandmarkAhp::point() const
 {
     using namespace Eigen;
     Transform<double,3,Isometry> T_w_r
@@ -55,14 +55,14 @@ Eigen::Vector3d LandmarkAHP::point() const
     return point_hmg.head<3>()/point_hmg(3);
 }
 
-LandmarkBasePtr LandmarkAHP::create(const YAML::Node& _node)
+LandmarkBasePtr LandmarkAhp::create(const YAML::Node& _node)
 {
     unsigned int        id          = _node["id"]           .as< unsigned int     >();
     Eigen::VectorXd     pos_homog   = _node["position"]     .as< Eigen::VectorXd  >();
     std::vector<int>    v           = _node["descriptor"]   .as< std::vector<int> >();
     cv::Mat desc(v);
 
-    LandmarkBasePtr lmk = std::make_shared<LandmarkAHP>(pos_homog, nullptr, nullptr, desc);
+    LandmarkBasePtr lmk = std::make_shared<LandmarkAhp>(pos_homog, nullptr, nullptr, desc);
     lmk->setId(id);
     return lmk;
 }
@@ -70,7 +70,7 @@ LandmarkBasePtr LandmarkAHP::create(const YAML::Node& _node)
 // Register landmark creator
 namespace
 {
-const bool WOLF_UNUSED registered_lmk_ahp = LandmarkFactory::get().registerCreator("AHP", LandmarkAHP::create);
+const bool WOLF_UNUSED registered_lmk_ahp = LandmarkFactory::get().registerCreator("LandmarkAhp", LandmarkAhp::create);
 }
 
 } // namespace wolf

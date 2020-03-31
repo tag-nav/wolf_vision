@@ -153,17 +153,17 @@ int main(int argc, char** argv)
     image_2->addFeature(feat_2);
 
     // Landmark--------------------
-    LandmarkAHPPtr lmk_1 = std::make_shared<LandmarkAHP>(lmk_hmg_c, kf_1, camera, desc);
+    LandmarkAhpPtr lmk_1 = std::make_shared<LandmarkAhp>(lmk_hmg_c, kf_1, camera, desc);
     problem->addLandmark(lmk_1);
     lmk_1->fix();
     std::cout << "Landmark 1: " << lmk_1->point().transpose() << std::endl;
 
     // Factors------------------
-    FactorAHPPtr fac_0 = FactorAHP::create(feat_0, lmk_1, nullptr);
+    FactorAhpPtr fac_0 = FactorAhp::create(feat_0, lmk_1, nullptr);
     feat_0->addFactor(fac_0);
-    FactorAHPPtr fac_1 = FactorAHP::create(feat_1, lmk_1, nullptr);
+    FactorAhpPtr fac_1 = FactorAhp::create(feat_1, lmk_1, nullptr);
     feat_1->addFactor(fac_1);
-    FactorAHPPtr fac_2 = FactorAHP::create(feat_2, lmk_1, nullptr);
+    FactorAhpPtr fac_2 = FactorAhp::create(feat_2, lmk_1, nullptr);
     feat_2->addFactor(fac_2);
 
     // Projections----------------------------
@@ -204,14 +204,14 @@ int main(int argc, char** argv)
     Eigen::Vector3d dir_0 = K.inverse() * pix_0_hmg;
     Eigen::Vector4d pnt_hmg_0;
     pnt_hmg_0 << dir_0, 1/unknown_distance;
-    LandmarkAHPPtr lmk_2( std::make_shared<LandmarkAHP>(pnt_hmg_0, kf_2, camera, desc) );
+    LandmarkAhpPtr lmk_2( std::make_shared<LandmarkAhp>(pnt_hmg_0, kf_2, camera, desc) );
     problem->addLandmark(lmk_2);
     std::cout << "Landmark 2: " << lmk_2->point().transpose() << std::endl;
 
     // New factors from kf3 and kf4
-    FactorAHPPtr fac_3 = FactorAHP::create(feat_3, lmk_2, nullptr);
+    FactorAhpPtr fac_3 = FactorAhp::create(feat_3, lmk_2, nullptr);
     feat_3->addFactor(fac_3);
-    FactorAHPPtr fac_4 = FactorAHP::create(feat_4, lmk_2, nullptr);
+    FactorAhpPtr fac_4 = FactorAhp::create(feat_4, lmk_2, nullptr);
     feat_4->addFactor(fac_4);
 
     Eigen::Vector2d pix_3 = fac_3->expectation();

@@ -1,8 +1,8 @@
-#ifndef FACTOR_AHP_H
-#define FACTOR_AHP_H
+#ifndef FACTOR_pixel_hp_H
+#define FACTOR_pixel_hp_H
 
 //Wolf includes
-#include "vision/landmark/landmark_HP.h"
+#include "vision/landmark/landmark_hp.h"
 #include "vision/sensor/sensor_camera.h"
 #include "vision/math/pinhole_tools.h"
 
@@ -12,10 +12,10 @@
 
 namespace wolf {
 
-WOLF_PTR_TYPEDEFS(FactorPixelHP);
+WOLF_PTR_TYPEDEFS(FactorPixelHp);
     
 //class    
-class FactorPixelHP : public FactorAutodiff<FactorPixelHP, 2, 3, 4, 3, 4, 4>
+class FactorPixelHp : public FactorAutodiff<FactorPixelHp, 2, 3, 4, 3, 4, 4>
 {
     protected:
 
@@ -24,13 +24,13 @@ class FactorPixelHP : public FactorAutodiff<FactorPixelHP, 2, 3, 4, 3, 4, 4>
 
     public:
 
-        FactorPixelHP(const FeatureBasePtr&   _ftr_ptr,
-                      const LandmarkHPPtr&   _landmark_ptr,
+        FactorPixelHp(const FeatureBasePtr&   _ftr_ptr,
+                      const LandmarkHpPtr&   _landmark_ptr,
                       const ProcessorBasePtr& _processor_ptr,
                       bool              _apply_loss_function,
                       FactorStatus  _status = FAC_ACTIVE);
 
-        virtual ~FactorPixelHP() = default;
+        virtual ~FactorPixelHp() = default;
 
         virtual std::string getTopology() const override
         {
@@ -56,12 +56,12 @@ class FactorPixelHP : public FactorAutodiff<FactorPixelHP, 2, 3, 4, 3, 4, 4>
                          T* _residuals) const;
 };
 
-inline FactorPixelHP::FactorPixelHP(const FeatureBasePtr&   _ftr_ptr,
-                                    const LandmarkHPPtr&   _landmark_ptr,
+inline FactorPixelHp::FactorPixelHp(const FeatureBasePtr&   _ftr_ptr,
+                                    const LandmarkHpPtr&   _landmark_ptr,
                                     const ProcessorBasePtr& _processor_ptr,
                                     bool             _apply_loss_function,
                                     FactorStatus _status) :
-        FactorAutodiff<FactorPixelHP, 2, 3, 4, 3, 4, 4>("PIXELHP",
+        FactorAutodiff<FactorPixelHp, 2, 3, 4, 3, 4, 4>("PIXELHP",
                                                         nullptr,
                                                         nullptr,
                                                         nullptr,
@@ -76,12 +76,12 @@ inline FactorPixelHP::FactorPixelHP(const FeatureBasePtr&   _ftr_ptr,
                                                         _landmark_ptr->getP()),
         intrinsic_(_ftr_ptr->getCapture()->getSensor()->getIntrinsic()->getState()) //TODO: intrinsic
 {
-//	std::cout << "FactorPixelHP::Constructor\n";
+//	std::cout << "FactorPixelHp::Constructor\n";
     // obtain some intrinsics from provided sensor
     distortion_ = (std::static_pointer_cast<SensorCamera>(_ftr_ptr->getCapture()->getSensor()))->getDistortionVector();
 }
 
-inline Eigen::VectorXd FactorPixelHP::expectation() const
+inline Eigen::VectorXd FactorPixelHp::expectation() const
 {
     FrameBasePtr frm = getFeature()->getCapture()->getFrame();
     SensorBasePtr sen  = getFeature()->getCapture()->getSensor();
@@ -101,7 +101,7 @@ inline Eigen::VectorXd FactorPixelHP::expectation() const
 }
 
 template<typename T>
-inline void FactorPixelHP::expectation(const T* const _frame_p,
+inline void FactorPixelHp::expectation(const T* const _frame_p,
                                        const T* const _frame_o,
                                        const T* const _sensor_p,
                                        const T* const _sensor_o,
@@ -156,7 +156,7 @@ inline void FactorPixelHP::expectation(const T* const _frame_p,
 }
 
 template<typename T>
-inline bool FactorPixelHP::operator ()(const T* const _frame_p,
+inline bool FactorPixelHp::operator ()(const T* const _frame_p,
                                        const T* const _frame_o,
                                        const T* const _sensor_p,
                                        const T* const _sensor_o,

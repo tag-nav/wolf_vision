@@ -2,8 +2,8 @@
 // this plugin includes
 #include "vision/sensor/sensor_camera.h"
 #include "vision/processor/processor_bundle_adjustment.h"
-#include "vision/factor/factor_pixelHP.h"
-#include "vision/landmark/landmark_HP.h"
+#include "vision/factor/factor_pixel_hp.h"
+#include "vision/landmark/landmark_hp.h"
 #include "vision/capture/capture_image.h"
 #include "vision/internal/config.h"
 
@@ -103,7 +103,7 @@ TEST(ProcessorBundleAdjustment, installProcessor)
     ParamsSensorCameraPtr intr = std::make_shared<ParamsSensorCamera>(); // TODO init params or read from YAML
     intr->width  = 640;
     intr->height = 480;
-    auto sens_cam = problem->installSensor("CAMERA", "camera", (Eigen::Vector7d() << 0,0,0,  0,0,0,1).finished(), intr);
+    auto sens_cam = problem->installSensor("SensorCamera", "camera", (Eigen::Vector7d() << 0,0,0,  0,0,0,1).finished(), intr);
 
     // Install processor
     ProcessorParamsBundleAdjustmentPtr params = std::make_shared<ProcessorParamsBundleAdjustment>();
@@ -113,7 +113,7 @@ TEST(ProcessorBundleAdjustment, installProcessor)
     params->min_track_length_for_factor = 3;
     params->voting_active = true;
     params->max_new_features = 5;
-    auto proc = problem->installProcessor("TRACKER BUNDLE ADJUSTMENT", "processor", sens_cam, params);
+    auto proc = problem->installProcessor("ProcessorBundleAdjustment", "processor", sens_cam, params);
 
     std::cout << "sensor & processor created and added to wolf problem" << std::endl;
 
@@ -241,7 +241,7 @@ TEST(ProcessorBundleAdjustment, emplaceLandmark)
     ParamsSensorCameraPtr intr = std::make_shared<ParamsSensorCamera>();
     intr->width  = 640;
     intr->height = 480;
-    auto sens_cam = problem_ptr->installSensor("CAMERA", "camera", (Eigen::Vector7d() << 0,0,0,  0,0,0,1).finished(), intr);
+    auto sens_cam = problem_ptr->installSensor("SensorCamera", "camera", (Eigen::Vector7d() << 0,0,0,  0,0,0,1).finished(), intr);
     SensorCameraPtr camera = std::static_pointer_cast<SensorCamera>(sens_cam);
     // Install processor
     ProcessorParamsBundleAdjustmentPtr params = std::make_shared<ProcessorParamsBundleAdjustment>();
@@ -251,7 +251,7 @@ TEST(ProcessorBundleAdjustment, emplaceLandmark)
     params->min_track_length_for_factor = 3;
     params->voting_active = true;
     params->max_new_features = 5;
-    auto proc = problem_ptr->installProcessor("TRACKER BUNDLE ADJUSTMENT", "processor", sens_cam, params);
+    auto proc = problem_ptr->installProcessor("ProcessorBundleAdjustment", "processor", sens_cam, params);
     ProcessorBundleAdjustmentPtr proc_bundle_adj = std::static_pointer_cast<ProcessorBundleAdjustment>(proc);
 
     //Frame
@@ -270,7 +270,7 @@ TEST(ProcessorBundleAdjustment, emplaceLandmark)
 	ASSERT_TRUE(problem_ptr->check(0));
 
 	LandmarkBasePtr lmk = proc_bundle_adj->emplaceLandmark(fea0);
-	LandmarkHPPtr lmk_hp = std::static_pointer_cast<LandmarkHP>(lmk);
+	LandmarkHpPtr lmk_hp = std::static_pointer_cast<LandmarkHp>(lmk);
 
 	ASSERT_EQ(problem_ptr->getMap()->getLandmarkList().size(), 1);
 }
@@ -286,7 +286,7 @@ TEST(ProcessorBundleAdjustment, process)
     intr->pinhole_model_raw = Eigen::Vector4d(0,0,1,1);  //TODO: initialize
     intr->width  = 640;
     intr->height = 480;
-    SensorCameraPtr sens_cam = std::static_pointer_cast<SensorCamera>(problem->installSensor("CAMERA", "camera", (Eigen::Vector7d() << 0,0,0,  0,0,0,1).finished(), intr));
+    SensorCameraPtr sens_cam = std::static_pointer_cast<SensorCamera>(problem->installSensor("SensorCamera", "camera", (Eigen::Vector7d() << 0,0,0,  0,0,0,1).finished(), intr));
 
     // Install processor
     ProcessorParamsBundleAdjustmentPtr params = std::make_shared<ProcessorParamsBundleAdjustment>();
@@ -299,7 +299,7 @@ TEST(ProcessorBundleAdjustment, process)
     params->n_cells_h = 50;
     params-> n_cells_v = 50;
     params->min_response_new_feature = 50;
-    auto proc = problem->installProcessor("TRACKER BUNDLE ADJUSTMENT", "processor", sens_cam, params);
+    auto proc = problem->installProcessor("ProcessorBundleAdjustment", "processor", sens_cam, params);
 	auto proc_dummy = std::static_pointer_cast<ProcessorBundleAdjustmentDummy>(proc);
 
 	//1ST TIME

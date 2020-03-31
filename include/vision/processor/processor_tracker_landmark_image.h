@@ -3,7 +3,7 @@
 
 // Wolf includes
 
-#include "vision/landmark/landmark_AHP.h"
+#include "vision/landmark/landmark_ahp.h"
 #include "core/landmark/landmark_match.h"
 #include "vision/processor/processor_params_image.h"
 #include "core/processor/processor_tracker_landmark.h"
@@ -187,7 +187,7 @@ class ProcessorTrackerLandmarkImage : public ProcessorTrackerLandmark
         double match(const cv::Mat _target_descriptor, const cv::Mat _candidate_descriptors, std::vector<cv::DMatch>& _cv_matches);
 
         void landmarkInCurrentCamera(const Eigen::VectorXd& _frame_state,
-                                     const LandmarkAHPPtr   _landmark,
+                                     const LandmarkAhpPtr   _landmark,
                                      Eigen::Vector4d&       _point3d_hmg);
 
         // These only to debug, will disappear one day soon

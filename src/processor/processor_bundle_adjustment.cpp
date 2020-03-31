@@ -18,7 +18,7 @@
 namespace wolf{
 
 ProcessorBundleAdjustment::ProcessorBundleAdjustment(ProcessorParamsBundleAdjustmentPtr _params_bundle_adjustment) :
-                ProcessorTrackerFeature("TRACKER BUNDLE ADJUSTMENT", 3, _params_bundle_adjustment),
+                ProcessorTrackerFeature("ProcessorBundleAdjustment", 3, _params_bundle_adjustment),
                 params_bundle_adjustment_(_params_bundle_adjustment),
                 capture_image_last_(nullptr),
                 capture_image_incoming_(nullptr),
@@ -244,7 +244,7 @@ void ProcessorBundleAdjustment::postProcess()
 ////				if (fact->getLandmarkOther()->getConstrainedByList().size() >= 2)
 ////				{
 ////					//3d points
-////					auto point3d = std::static_pointer_cast<LandmarkHP>(fact->getLandmarkOther())->point();
+////					auto point3d = std::static_pointer_cast<LandmarkHp>(fact->getLandmarkOther())->point();
 ////					landmark_points.push_back(cv::Point3f(point3d(0),point3d(1),point3d(2)));
 ////					//2d points
 ////					auto point2d = feat->getMeasurement();
@@ -263,7 +263,7 @@ void ProcessorBundleAdjustment::postProcess()
 ////				if (lmk_base->getConstrainedByList().size() >= 2)
 //				{
 //					//3d points
-//					auto point3d = std::static_pointer_cast<LandmarkHP>(lmk_base)->point();
+//					auto point3d = std::static_pointer_cast<LandmarkHp>(lmk_base)->point();
 //					landmark_points.push_back(cv::Point3f(point3d(0),point3d(1),point3d(2)));
 //					//2d points
 //					auto point2d = feat->getMeasurement();
@@ -404,7 +404,7 @@ void ProcessorBundleAdjustment::postProcess()
         unsigned int track_id = feat->trackId();
 		if (lmk_track_map_.count(track_id))
         {
-			Vector3d point3d = std::static_pointer_cast<LandmarkHP>(lmk_track_map_[track_id])->point();
+			Vector3d point3d = std::static_pointer_cast<LandmarkHp>(lmk_track_map_[track_id])->point();
 
 			Transform<double,3,Isometry> T_w_r
 		        = Translation<double,3>(feat_base->getFrame()->getP()->getState())
@@ -689,7 +689,7 @@ LandmarkBasePtr ProcessorBundleAdjustment::emplaceLandmark(FeatureBasePtr _featu
 //    std::cout << "Hmg_w: " << vec_homogeneous_w.transpose() << std::endl;
     //vec_homogeneous_w = vec_homogeneous;
 
-    LandmarkBasePtr lmk_hp_ptr = LandmarkBase::emplace<LandmarkHP>(getProblem()->getMap(), vec_homogeneous_w, getSensor(), feat_point_image_ptr->getDescriptor());
+    LandmarkBasePtr lmk_hp_ptr = LandmarkBase::emplace<LandmarkHp>(getProblem()->getMap(), vec_homogeneous_w, getSensor(), feat_point_image_ptr->getDescriptor());
 
 //    std::cout << "LANDMARKS CREATED AND ADDED to MAP: " << getProblem()->getMap()->getLandmarkList().size() << std::endl;
 
@@ -719,7 +719,7 @@ void ProcessorBundleAdjustment::establishFactors()
 //        {
 //        	//emplaceLandmark
 //        	LandmarkBasePtr lmk = emplaceLandmark(feature_origin);
-//        	LandmarkHPPtr lmk_hp = std::static_pointer_cast<LandmarkHP>(lmk);
+//        	LandmarkHpPtr lmk_hp = std::static_pointer_cast<LandmarkHp>(lmk);
 //
 //        	//add only one Landmark to map: map[track_id] = landmarkptr
 //        	lmk_track_map_[trkid] = lmk;
@@ -728,17 +728,17 @@ void ProcessorBundleAdjustment::establishFactors()
 //        	Track full_track = track_matrix_.trackAtKeyframes(trkid);
 //        	for (auto it=full_track.begin(); it!=full_track.end(); ++it)
 //        	{
-//        		FactorBase::emplace<FactorPixelHP>(it->second, it->second, lmk_hp, shared_from_this());
+//        		FactorBase::emplace<FactorPixelHp>(it->second, it->second, lmk_hp, shared_from_this());
 //        	}
 //
 //        }
 //        else
 //        {
 //        	LandmarkBasePtr lmk = lmk_track_map_[trkid];
-//        	LandmarkHPPtr lmk_hp = std::static_pointer_cast<LandmarkHP>(lmk);
+//        	LandmarkHpPtr lmk_hp = std::static_pointer_cast<LandmarkHp>(lmk);
 //
 //        	//Create factor
-//        	FactorBase::emplace<FactorPixelHP>(feature_last, feature_last, lmk_hp, shared_from_this());
+//        	FactorBase::emplace<FactorPixelHp>(feature_last, feature_last, lmk_hp, shared_from_this());
 //        }
 //
 //    }
@@ -754,23 +754,23 @@ void ProcessorBundleAdjustment::establishFactors()
 		{
 			//emplaceLandmark
 			LandmarkBasePtr lmk = emplaceLandmark(ftr);
-			LandmarkHPPtr lmk_hp = std::static_pointer_cast<LandmarkHP>(lmk);
+			LandmarkHpPtr lmk_hp = std::static_pointer_cast<LandmarkHp>(lmk);
 
 			//add only one Landmark to map: map[track_id] = landmarkptr
 			lmk_track_map_[trkid] = lmk;
 
 			//emplace a factor
-			FactorBase::emplace<FactorPixelHP>(ftr, ftr, lmk_hp, shared_from_this(), params_->apply_loss_function);
+			FactorBase::emplace<FactorPixelHp>(ftr, ftr, lmk_hp, shared_from_this(), params_->apply_loss_function);
 
 		}
 		else
 		{
 			// recover the landmark
 			LandmarkBasePtr lmk = lmk_track_map_[trkid];
-			LandmarkHPPtr lmk_hp = std::static_pointer_cast<LandmarkHP>(lmk);
+			LandmarkHpPtr lmk_hp = std::static_pointer_cast<LandmarkHp>(lmk);
 
 			//emplace a factor
-			FactorBase::emplace<FactorPixelHP>(ftr, ftr, lmk_hp, shared_from_this(), params_->apply_loss_function);
+			FactorBase::emplace<FactorPixelHp>(ftr, ftr, lmk_hp, shared_from_this(), params_->apply_loss_function);
 		}
 
 	}
@@ -796,6 +796,6 @@ ProcessorBasePtr ProcessorBundleAdjustment::create(const std::string& _unique_na
 // Register in the ProcessorFactory
 #include "core/processor/processor_factory.h"
 namespace wolf {
-WOLF_REGISTER_PROCESSOR("TRACKER BUNDLE ADJUSTMENT", ProcessorBundleAdjustment)
+WOLF_REGISTER_PROCESSOR("ProcessorBundleAdjustment", ProcessorBundleAdjustment)
 } // namespace wolf
 

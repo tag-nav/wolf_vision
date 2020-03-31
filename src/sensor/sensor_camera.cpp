@@ -9,7 +9,7 @@ namespace wolf
 {
 
 SensorCamera::SensorCamera(const Eigen::VectorXd& _extrinsics, const ParamsSensorCamera& _intrinsics) :
-                SensorBase("CAMERA", std::make_shared<StateBlock>(_extrinsics.head(3), true), std::make_shared<StateQuaternion>(_extrinsics.tail(4), true), std::make_shared<StateBlock>(_intrinsics.pinhole_model_raw, true), 1),
+                SensorBase("SensorCamera", std::make_shared<StateBlock>(_extrinsics.head(3), true), std::make_shared<StateQuaternion>(_extrinsics.tail(4), true), std::make_shared<StateBlock>(_intrinsics.pinhole_model_raw, true), 1),
                 img_width_(_intrinsics.width), //
                 img_height_(_intrinsics.height), //
                 distortion_(_intrinsics.distortion), //
@@ -67,6 +67,6 @@ SensorBasePtr SensorCamera::create(const std::string& _unique_name, //
 #include "core/sensor/sensor_factory.h"
 namespace wolf
 {
-WOLF_REGISTER_SENSOR("CAMERA", SensorCamera)
+WOLF_REGISTER_SENSOR("SensorCamera", SensorCamera)
 } // namespace wolf
 

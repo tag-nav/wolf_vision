@@ -36,7 +36,6 @@ target_link_libraries(gtest_processor_tracker_feature_trifocal ${PLUGIN_NAME} ${
 wolf_add_gtest(gtest_processor_bundle_adjustment gtest_processor_bundle_adjustment.cpp)
 target_link_libraries(gtest_processor_bundle_adjustment ${PLUGIN_NAME} ${wolf_LIBRARY} ${OpenCV_LIBS} ${vision_utils_LIBRARY})
 
-# FactorPixelHP test
-wolf_add_gtest(gtest_factor_pixelHP gtest_factor_pixelHP.cpp)
-target_link_libraries(gtest_factor_pixelHP ${PLUGIN_NAME} ${wolf_LIBRARY} ${OpenCV_LIBS} ${vision_utils_LIBRARY})
-
+# FactorPixelHp test
+wolf_add_gtest(gtest_factor_pixel_hp gtest_factor_pixel_hp.cpp)
+target_link_libraries(gtest_factor_pixel_hp ${PLUGIN_NAME} ${wolf_LIBRARY} ${OpenCV_LIBS} ${vision_utils_LIBRARY})

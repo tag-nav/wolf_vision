@@ -33,7 +33,7 @@ void cleanupMap(const ProblemPtr& _problem, const TimeStamp& _t, double _dt_max,
     std::list<LandmarkBasePtr> lmks_to_remove;
     for (auto lmk : _problem->getMap()->getLandmarkList())
     {
-        TimeStamp t0 = std::static_pointer_cast<LandmarkAHP>(lmk)->getAnchorFrame()->getTimeStamp();
+        TimeStamp t0 = std::static_pointer_cast<LandmarkAhp>(lmk)->getAnchorFrame()->getTimeStamp();
         if (_t - t0 > _dt_max)
             if (lmk->getConstrainedByList().size() <= _min_factors)
                 lmks_to_remove.push_back(lmk);

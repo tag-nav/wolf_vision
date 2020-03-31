@@ -2,7 +2,7 @@
 #define FACTOR_AHP_H
 
 //Wolf includes
-#include "vision/landmark/landmark_AHP.h"
+#include "vision/landmark/landmark_ahp.h"
 #include "vision/sensor/sensor_camera.h"
 #include "vision/math/pinhole_tools.h"
 
@@ -12,10 +12,10 @@
 
 namespace wolf {
 
-WOLF_PTR_TYPEDEFS(FactorAHP);
+WOLF_PTR_TYPEDEFS(FactorAhp);
     
 //class    
-class FactorAHP : public FactorAutodiff<FactorAHP, 2, 3, 4, 3, 4, 4>
+class FactorAhp : public FactorAutodiff<FactorAhp, 2, 3, 4, 3, 4, 4>
 {
     protected:
         Eigen::Vector3d anchor_sensor_extrinsics_p_;
@@ -25,13 +25,13 @@ class FactorAHP : public FactorAutodiff<FactorAHP, 2, 3, 4, 3, 4, 4>
 
     public:
 
-        FactorAHP(const FeatureBasePtr&   _ftr_ptr,
-                  const LandmarkAHPPtr&   _landmark_ptr,
+        FactorAhp(const FeatureBasePtr&   _ftr_ptr,
+                  const LandmarkAhpPtr&   _landmark_ptr,
                   const ProcessorBasePtr& _processor_ptr,
                   bool              _apply_loss_function,
                   FactorStatus  _status = FAC_ACTIVE);
 
-        virtual ~FactorAHP() = default;
+        virtual ~FactorAhp() = default;
 
         virtual std::string getTopology() const override
         {
@@ -57,12 +57,12 @@ class FactorAHP : public FactorAutodiff<FactorAHP, 2, 3, 4, 3, 4, 4>
                          T* _residuals) const;
 };
 
-inline FactorAHP::FactorAHP(const FeatureBasePtr&   _ftr_ptr,
-                            const LandmarkAHPPtr&   _landmark_ptr,
+inline FactorAhp::FactorAhp(const FeatureBasePtr&   _ftr_ptr,
+                            const LandmarkAhpPtr&   _landmark_ptr,
                             const ProcessorBasePtr& _processor_ptr,
                             bool             _apply_loss_function,
                             FactorStatus _status) :
-        FactorAutodiff<FactorAHP, 2, 3, 4, 3, 4, 4>("AHP",
+        FactorAutodiff<FactorAhp, 2, 3, 4, 3, 4, 4>("AHP",
                                                     _landmark_ptr->getAnchorFrame(),
                                                     nullptr,
                                                     nullptr,
@@ -83,7 +83,7 @@ inline FactorAHP::FactorAHP(const FeatureBasePtr&   _ftr_ptr,
     distortion_ = (std::static_pointer_cast<SensorCamera>(_ftr_ptr->getCapture()->getSensor()))->getDistortionVector();
 }
 
-inline Eigen::VectorXd FactorAHP::expectation() const
+inline Eigen::VectorXd FactorAhp::expectation() const
 {
     FrameBasePtr frm_current = getFeature()->getCapture()->getFrame();
     FrameBasePtr frm_anchor  = getFrameOther();
@@ -103,7 +103,7 @@ inline Eigen::VectorXd FactorAHP::expectation() const
 }
 
 template<typename T>
-inline void FactorAHP::expectation(const T* const _current_frame_p,
+inline void FactorAhp::expectation(const T* const _current_frame_p,
                                    const T* const _current_frame_o,
                                    const T* const _anchor_frame_p,
                                    const T* const _anchor_frame_o,
@@ -160,7 +160,7 @@ inline void FactorAHP::expectation(const T* const _current_frame_p,
 }
 
 template<typename T>
-inline bool FactorAHP::operator ()(const T* const _current_frame_p,
+inline bool FactorAhp::operator ()(const T* const _current_frame_p,
                                    const T* const _current_frame_o,
                                    const T* const _anchor_frame_p,
                                    const T* const _anchor_frame_o,

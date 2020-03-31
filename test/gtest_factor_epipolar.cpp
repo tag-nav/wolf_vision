@@ -38,7 +38,7 @@ TEST(FactorEpipolar, exemple)
     intr->pinhole_model_rectified = Eigen::Vector4d(320,240,320,320);
     intr->width  = 640;
     intr->height = 480;
-    auto S      = P->installSensor("CAMERA", "camera", posecam, intr);
+    auto S      = P->installSensor("SensorCamera", "camera", posecam, intr);
     auto camera = std::static_pointer_cast<SensorCamera>(S);
 
     auto F0 = P             ->emplaceFrame(KEY, pose0, 0.0);

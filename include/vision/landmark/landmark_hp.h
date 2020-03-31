@@ -1,5 +1,5 @@
-#ifndef LANDMARK_AHP_H
-#define LANDMARK_AHP_H
+#ifndef LANDMARK_HP_H
+#define LANDMARK_HP_H
 
 //Wolf includes
 #include "core/landmark/landmark_base.h"
@@ -12,19 +12,19 @@
 
 namespace wolf {
     
-WOLF_PTR_TYPEDEFS(LandmarkHP);
+WOLF_PTR_TYPEDEFS(LandmarkHp);
 
 /* Landmark - Homogeneous Point*/
-class LandmarkHP : public LandmarkBase
+class LandmarkHp : public LandmarkBase
 {
     protected:
         cv::Mat cv_descriptor_;
 
 
     public:
-        LandmarkHP(Eigen::Vector4d _position_homogeneous, SensorBasePtr _sensor_, cv::Mat _2d_descriptor);
+        LandmarkHp(Eigen::Vector4d _position_homogeneous, SensorBasePtr _sensor_, cv::Mat _2d_descriptor);
 
-        virtual ~LandmarkHP();
+        virtual ~LandmarkHp();
 
         const cv::Mat& getCvDescriptor() const;
         void setCvDescriptor(const cv::Mat& _descriptor);
@@ -41,13 +41,13 @@ class LandmarkHP : public LandmarkBase
 };
 
 
-inline const cv::Mat& LandmarkHP::getCvDescriptor() const
+inline const cv::Mat& LandmarkHp::getCvDescriptor() const
 {
     return cv_descriptor_;
 }
 
 
-inline void LandmarkHP::setCvDescriptor(const cv::Mat& _descriptor)
+inline void LandmarkHp::setCvDescriptor(const cv::Mat& _descriptor)
 {
     cv_descriptor_ = _descriptor;
 }

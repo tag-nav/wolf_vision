@@ -129,7 +129,7 @@ TEST(SensorCamera, install)
 	ProblemPtr problem = Problem::create("PO 3d",3);
 
 	// Install camera
-	auto sen = problem->installSensor("CAMERA", "camera", extrinsics, params);
+	auto sen = problem->installSensor("SensorCamera", "camera", extrinsics, params);
 
     ASSERT_NE(sen, nullptr);
 

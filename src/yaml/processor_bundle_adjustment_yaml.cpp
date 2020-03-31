@@ -22,7 +22,7 @@ static ProcessorParamsBasePtr createProcessorParamsBundleAdjustment(const std::s
         WOLF_ERROR("Invalid YAML file!");
         return nullptr;
     }
-    else if (config["type"].as<std::string>() == "TRACKER BUNDLE ADJUSTMENT")
+    else if (config["type"].as<std::string>() == "ProcessorBundleAdjustment")
     {
         ProcessorParamsBundleAdjustmentPtr params = std::make_shared<ProcessorParamsBundleAdjustment>();
 
@@ -64,7 +64,7 @@ static ProcessorParamsBasePtr createProcessorParamsBundleAdjustment(const std::s
 }
 
 // Register in the SensorFactory
-const bool WOLF_UNUSED registered_prc_bundle_adjustment = ProcessorParamsFactory::get().registerCreator("TRACKER BUNDLE ADJUSTMENT", createProcessorParamsBundleAdjustment);
+const bool WOLF_UNUSED registered_prc_bundle_adjustment = ProcessorParamsFactory::get().registerCreator("ProcessorBundleAdjustment", createProcessorParamsBundleAdjustment);
 
 } // namespace [unnamed]
 

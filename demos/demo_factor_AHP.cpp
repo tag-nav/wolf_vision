@@ -107,12 +107,12 @@ int main()
     vec_homogeneous = {point3D(0),point3D(1),point3D(2),1/distance};
     std::cout << "vec_homogeneous: " << vec_homogeneous.transpose() << std::endl;
 
-    LandmarkAHPPtr landmark = std::make_shared<LandmarkAHP>(vec_homogeneous, anchor_frame, image_ptr->getSensor(), feat_point_image_ptr->getDescriptor());
+    LandmarkAhpPtr landmark = std::make_shared<LandmarkAhp>(vec_homogeneous, anchor_frame, image_ptr->getSensor(), feat_point_image_ptr->getDescriptor());
 
     std::cout << "Landmark AHP created" << std::endl;
 
     // Create the factor
-    FactorAHPPtr factor_ptr = std::make_shared<FactorAHP>(feat_point_image_ptr, std::static_pointer_cast<LandmarkAHP>(landmark), processor_ptr);
+    FactorAhpPtr factor_ptr = std::make_shared<FactorAhp>(feat_point_image_ptr, std::static_pointer_cast<LandmarkAhp>(landmark), processor_ptr);
 
     feat_point_image_ptr->addFactor(factor_ptr);
     std::cout << "Factor AHP created" << std::endl;

@@ -1,7 +1,7 @@
 #include "vision/processor/processor_tracker_landmark_image.h"
 
 #include "vision/capture/capture_image.h"
-#include "vision/factor/factor_AHP.h"
+#include "vision/factor/factor_ahp.h"
 #include "vision/feature/feature_point_image.h"
 #include "vision/math/pinhole_tools.h"
 #include "vision/sensor/sensor_camera.h"
@@ -27,7 +27,7 @@ namespace wolf
 {
 
 ProcessorTrackerLandmarkImage::ProcessorTrackerLandmarkImage(ProcessorParamsTrackerLandmarkImagePtr _params_tracker_landmark_image) :
-    ProcessorTrackerLandmark("IMAGE LANDMARK", _params_tracker_landmark_image),
+    ProcessorTrackerLandmark("ProcessorTrackerLandmarkImage", _params_tracker_landmark_image),
     cell_width_(0),
     cell_height_(0),
     params_tracker_landmark_image_(_params_tracker_landmark_image),
@@ -105,7 +105,7 @@ unsigned int ProcessorTrackerLandmarkImage::findLandmarks(const LandmarkBasePtrL
     {
 
         // project landmark into incoming capture
-        LandmarkAHPPtr landmark_ptr = std::static_pointer_cast<LandmarkAHP>(landmark_in_ptr);
+        LandmarkAhpPtr landmark_ptr = std::static_pointer_cast<LandmarkAhp>(landmark_in_ptr);
         SensorCameraPtr camera = std::static_pointer_cast<SensorCamera>(this->getSensor());
         Eigen::Vector4d point3d_hmg;
         Eigen::Vector2d pixel;
@@ -254,7 +254,7 @@ LandmarkBasePtr ProcessorTrackerLandmarkImage::emplaceLandmark(FeatureBasePtr _f
 
     vec_homogeneous = {point3d(0),point3d(1),point3d(2),1/distance};
 
-    auto lmk_ahp_ptr = LandmarkBase::emplace<LandmarkAHP>(getProblem()->getMap(),
+    auto lmk_ahp_ptr = LandmarkBase::emplace<LandmarkAhp>(getProblem()->getMap(),
                                                           vec_homogeneous,
                                                           anchor_frame,
                                                           getSensor(),
@@ -266,7 +266,7 @@ LandmarkBasePtr ProcessorTrackerLandmarkImage::emplaceLandmark(FeatureBasePtr _f
 FactorBasePtr ProcessorTrackerLandmarkImage::emplaceFactor(FeatureBasePtr _feature_ptr, LandmarkBasePtr _landmark_ptr)
 {
 
-    if ((std::static_pointer_cast<LandmarkAHP>(_landmark_ptr))->getAnchorFrame() == last_ptr_->getFrame()) //FIXME: shouldn't it be _feature_ptr->getFrame() ?
+    if ((std::static_pointer_cast<LandmarkAhp>(_landmark_ptr))->getAnchorFrame() == last_ptr_->getFrame()) //FIXME: shouldn't it be _feature_ptr->getFrame() ?
     {
         return FactorBasePtr();
     }
@@ -275,16 +275,16 @@ FactorBasePtr ProcessorTrackerLandmarkImage::emplaceFactor(FeatureBasePtr _featu
         assert (last_ptr_ && "bad last ptr");
         assert (_landmark_ptr && "bad lmk ptr");
 
-        LandmarkAHPPtr landmark_ahp = std::static_pointer_cast<LandmarkAHP>(_landmark_ptr);
+        LandmarkAhpPtr landmark_ahp = std::static_pointer_cast<LandmarkAhp>(_landmark_ptr);
 
-        return FactorBase::emplace<FactorAHP>(_feature_ptr, _feature_ptr, landmark_ahp, shared_from_this(), params_->apply_loss_function);
+        return FactorBase::emplace<FactorAhp>(_feature_ptr, _feature_ptr, landmark_ahp, shared_from_this(), params_->apply_loss_function);
     }
 }
 
 // ==================================================================== My own functions
 
 void ProcessorTrackerLandmarkImage::landmarkInCurrentCamera(const Eigen::VectorXd& _current_state,
-                                                     const LandmarkAHPPtr   _landmark,
+                                                     const LandmarkAhpPtr   _landmark,
                                                      Eigen::Vector4d&       _point3d_hmg)
 {
     using namespace Eigen;
@@ -405,7 +405,7 @@ void ProcessorTrackerLandmarkImage::drawLandmarks(cv::Mat _image)
 
         for (auto landmark_base_ptr : getProblem()->getMap()->getLandmarkList())
         {
-            LandmarkAHPPtr landmark_ptr = std::static_pointer_cast<LandmarkAHP>(landmark_base_ptr);
+            LandmarkAhpPtr landmark_ptr = std::static_pointer_cast<LandmarkAhp>(landmark_base_ptr);
 
             Eigen::Vector4d point3d_hmg;
             landmarkInCurrentCamera(current_state, landmark_ptr, point3d_hmg);
@@ -456,6 +456,6 @@ ProcessorBasePtr ProcessorTrackerLandmarkImage::create(const std::string& _uniqu
 // Register in the SensorFactory
 #include "core/processor/processor_factory.h"
 namespace wolf {
-WOLF_REGISTER_PROCESSOR("IMAGE LANDMARK", ProcessorTrackerLandmarkImage)
+WOLF_REGISTER_PROCESSOR("ProcessorTrackerLandmarkImage", ProcessorTrackerLandmarkImage)
 } // namespace wolf
 

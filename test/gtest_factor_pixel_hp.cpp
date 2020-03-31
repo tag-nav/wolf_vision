@@ -4,8 +4,8 @@
  *  Created on: May 16, 2019
  *      Author: ovendrell
  */
-#include "vision/factor/factor_pixelHP.h"
-#include "vision/landmark/landmark_HP.h"
+#include "vision/factor/factor_pixel_hp.h"
+#include "vision/landmark/landmark_hp.h"
 #include "vision/capture/capture_image.h"
 #include "vision/processor/processor_bundle_adjustment.h"
 #include "vision/internal/config.h"
@@ -23,7 +23,7 @@ using namespace Eigen;
 std::string wolf_vision_root = _WOLF_VISION_ROOT_DIR;
 
 
-class FactorPixelHPTest : public testing::Test{
+class FactorPixelHpTest : public testing::Test{
     public:
         Vector3d    pos1,   pos2,   pos3,   pos_cam, point;
         Vector3d    euler1, euler2, euler3, euler_cam;
@@ -46,18 +46,18 @@ class FactorPixelHPTest : public testing::Test{
         FeaturePointImagePtr  f21, f22, f23, f24;
         FeaturePointImagePtr  f31, f32, f33, f34;
 
-        LandmarkHPPtr L1; //only one landmark L1 is initialized
-        LandmarkHPPtr L2;
-        LandmarkHPPtr L3;
-        LandmarkHPPtr L4;
+        LandmarkHpPtr L1; //only one landmark L1 is initialized
+        LandmarkHpPtr L2;
+        LandmarkHpPtr L3;
+        LandmarkHpPtr L4;
 
-        FactorPixelHPPtr c11, c12, c13, c14;
-        FactorPixelHPPtr c21, c22, c23, c24;
-        FactorPixelHPPtr c31, c32, c33, c34;
+        FactorPixelHpPtr c11, c12, c13, c14;
+        FactorPixelHpPtr c21, c22, c23, c24;
+        FactorPixelHpPtr c31, c32, c33, c34;
 
         double pixel_noise_std;
 
-        virtual ~FactorPixelHPTest()
+        virtual ~FactorPixelHpTest()
         {
             std::cout << "destructor\n";
         }
@@ -159,7 +159,7 @@ class FactorPixelHPTest : public testing::Test{
             intr->pinhole_model_rectified = Eigen::Vector4d(320,240,320,320);
         	intr->width  = 640;
         	intr->height = 480;
-            S      = problem->installSensor("CAMERA", "camera", pose_cam, intr);
+            S      = problem->installSensor("SensorCamera", "camera", pose_cam, intr);
             camera = std::static_pointer_cast<SensorCamera>(S);
 
             // Add three viewpoints with frame, capture and feature
@@ -185,16 +185,16 @@ class FactorPixelHPTest : public testing::Test{
             f31 = std::static_pointer_cast<FeaturePointImage>(FeatureBase::emplace<FeaturePointImage>(I3, kp, 0, des, pix_cov));  // pixel at origin
 
             // create Landmark
-        	L1 = std::static_pointer_cast<LandmarkHP>(LandmarkBase::emplace<LandmarkHP>(problem->getMap(),lmkHP1, camera, des));
+        	L1 = std::static_pointer_cast<LandmarkHp>(LandmarkBase::emplace<LandmarkHp>(problem->getMap(),lmkHP1, camera, des));
 
             // factors
-            c11 = std::static_pointer_cast<FactorPixelHP>(FactorBase::emplace<FactorPixelHP>(f11, f11, L1, nullptr /*proc*/, false /*use loss function*/));
-            c21 = std::static_pointer_cast<FactorPixelHP>(FactorBase::emplace<FactorPixelHP>(f21, f21, L1, nullptr /*proc*/, false /*use loss function*/));
-            c31 = std::static_pointer_cast<FactorPixelHP>(FactorBase::emplace<FactorPixelHP>(f31, f31, L1, nullptr /*proc*/, false /*use loss function*/));
+            c11 = std::static_pointer_cast<FactorPixelHp>(FactorBase::emplace<FactorPixelHp>(f11, f11, L1, nullptr /*proc*/, false /*use loss function*/));
+            c21 = std::static_pointer_cast<FactorPixelHp>(FactorBase::emplace<FactorPixelHp>(f21, f21, L1, nullptr /*proc*/, false /*use loss function*/));
+            c31 = std::static_pointer_cast<FactorPixelHp>(FactorBase::emplace<FactorPixelHp>(f31, f31, L1, nullptr /*proc*/, false /*use loss function*/));
         }
 };
 
-TEST(ProcessorFactorPixelHP, testZeroResidual)
+TEST(ProcessorFactorPixelHp, testZeroResidual)
 {
     //Build problem
     ProblemPtr problem_ptr = Problem::create("PO", 3);
@@ -206,7 +206,7 @@ TEST(ProcessorFactorPixelHP, testZeroResidual)
     intr->pinhole_model_rectified = Eigen::Vector4d(320,240,320,320);
     intr->width  = 640;
     intr->height = 480;
-    auto sens_cam = problem_ptr->installSensor("CAMERA", "camera", (Eigen::Vector7d() << 0,0,0,  0,0,0,1).finished(), intr);
+    auto sens_cam = problem_ptr->installSensor("SensorCamera", "camera", (Eigen::Vector7d() << 0,0,0,  0,0,0,1).finished(), intr);
     SensorCameraPtr camera = std::static_pointer_cast<SensorCamera>(sens_cam);
 
     // Install processor
@@ -217,7 +217,7 @@ TEST(ProcessorFactorPixelHP, testZeroResidual)
     params->min_track_length_for_factor = 3;
     params->voting_active = true;
     params->max_new_features = 5;
-    auto proc = problem_ptr->installProcessor("TRACKER BUNDLE ADJUSTMENT", "processor", sens_cam, params);
+    auto proc = problem_ptr->installProcessor("ProcessorBundleAdjustment", "processor", sens_cam, params);
     ProcessorBundleAdjustmentPtr proc_bundle_adj = std::static_pointer_cast<ProcessorBundleAdjustment>(proc);
 
     // Frame
@@ -235,11 +235,11 @@ TEST(ProcessorFactorPixelHP, testZeroResidual)
 
     // Landmark
     LandmarkBasePtr lmk = proc_bundle_adj->emplaceLandmark(fea0);
-    LandmarkHPPtr lmk_hp = std::static_pointer_cast<LandmarkHP>(lmk);
+    LandmarkHpPtr lmk_hp = std::static_pointer_cast<LandmarkHp>(lmk);
 
     // Factor
-    auto fac0 = FactorBase::emplace<FactorPixelHP>(fea0, fea0, lmk_hp, proc, false);
-    auto fac_ptr = std::static_pointer_cast<FactorPixelHP>(fac0);
+    auto fac0 = FactorBase::emplace<FactorPixelHp>(fea0, fea0, lmk_hp, proc, false);
+    auto fac_ptr = std::static_pointer_cast<FactorPixelHp>(fac0);
 
     ASSERT_TRUE(problem_ptr->check(0));
 
@@ -250,7 +250,7 @@ TEST(ProcessorFactorPixelHP, testZeroResidual)
     ASSERT_FLOAT_EQ(expect(1,0),fea0->getMeasurement()(1,0));
 }
 
-TEST_F(FactorPixelHPTest, testSolveLandmark)
+TEST_F(FactorPixelHpTest, testSolveLandmark)
 {
     ASSERT_TRUE(problem->check(0));
 
@@ -272,7 +272,7 @@ TEST_F(FactorPixelHPTest, testSolveLandmark)
 
 }
 
-TEST_F(FactorPixelHPTest, testSolveLandmarkAltered)
+TEST_F(FactorPixelHpTest, testSolveLandmarkAltered)
 {
     ASSERT_TRUE(problem->check(0));
 
@@ -295,7 +295,7 @@ TEST_F(FactorPixelHPTest, testSolveLandmarkAltered)
 
 }
 
-TEST_F(FactorPixelHPTest, testSolveFramePosition2ObservableDoF)
+TEST_F(FactorPixelHpTest, testSolveFramePosition2ObservableDoF)
 {
     ASSERT_TRUE(problem->check(0));
 
@@ -336,7 +336,7 @@ TEST_F(FactorPixelHPTest, testSolveFramePosition2ObservableDoF)
 
 }
 
-TEST_F(FactorPixelHPTest, testSolveFramePosition)
+TEST_F(FactorPixelHpTest, testSolveFramePosition)
 {
     //landmark homogeneous coordinates in world reference
     lmkHP2 << 0.5, 0.5, 0.5, 1;
@@ -377,14 +377,14 @@ TEST_F(FactorPixelHPTest, testSolveFramePosition)
     f14 = std::static_pointer_cast<FeaturePointImage>(FeatureBase::emplace<FeaturePointImage>(I1, kp4, 0, des, pix_cov));
 
     //create landmarks
-    L2 = std::static_pointer_cast<LandmarkHP>(LandmarkBase::emplace<LandmarkHP>(problem->getMap(),lmkHP2, camera, des));
-    L3 = std::static_pointer_cast<LandmarkHP>(LandmarkBase::emplace<LandmarkHP>(problem->getMap(),lmkHP3, camera, des));
-    L4 = std::static_pointer_cast<LandmarkHP>(LandmarkBase::emplace<LandmarkHP>(problem->getMap(),lmkHP4, camera, des));
+    L2 = std::static_pointer_cast<LandmarkHp>(LandmarkBase::emplace<LandmarkHp>(problem->getMap(),lmkHP2, camera, des));
+    L3 = std::static_pointer_cast<LandmarkHp>(LandmarkBase::emplace<LandmarkHp>(problem->getMap(),lmkHP3, camera, des));
+    L4 = std::static_pointer_cast<LandmarkHp>(LandmarkBase::emplace<LandmarkHp>(problem->getMap(),lmkHP4, camera, des));
 
     //create factors
-    c12 = std::static_pointer_cast<FactorPixelHP>(FactorBase::emplace<FactorPixelHP>(f12, f12, L2, nullptr /*proc*/, false /*use loss function*/));
-    c13 = std::static_pointer_cast<FactorPixelHP>(FactorBase::emplace<FactorPixelHP>(f13, f13, L3, nullptr /*proc*/, false /*use loss function*/));
-    c14 = std::static_pointer_cast<FactorPixelHP>(FactorBase::emplace<FactorPixelHP>(f14, f14, L4, nullptr /*proc*/, false /*use loss function*/));
+    c12 = std::static_pointer_cast<FactorPixelHp>(FactorBase::emplace<FactorPixelHp>(f12, f12, L2, nullptr /*proc*/, false /*use loss function*/));
+    c13 = std::static_pointer_cast<FactorPixelHp>(FactorBase::emplace<FactorPixelHp>(f13, f13, L3, nullptr /*proc*/, false /*use loss function*/));
+    c14 = std::static_pointer_cast<FactorPixelHp>(FactorBase::emplace<FactorPixelHp>(f14, f14, L4, nullptr /*proc*/, false /*use loss function*/));
 
     ASSERT_TRUE(problem->check());
 
@@ -425,7 +425,7 @@ TEST_F(FactorPixelHPTest, testSolveFramePosition)
 }
 
 
-TEST_F(FactorPixelHPTest, testSolveBundleAdjustment)
+TEST_F(FactorPixelHpTest, testSolveBundleAdjustment)
 {
 
 
@@ -523,22 +523,22 @@ TEST_F(FactorPixelHPTest, testSolveBundleAdjustment)
 	f34 = std::static_pointer_cast<FeaturePointImage>(FeatureBase::emplace<FeaturePointImage>(I3, kp34, 0, des, pix_cov));
 
 	//create landmarks
-	L2 = std::static_pointer_cast<LandmarkHP>(LandmarkBase::emplace<LandmarkHP>(problem->getMap(),lmkHP2, camera, des));
-	L3 = std::static_pointer_cast<LandmarkHP>(LandmarkBase::emplace<LandmarkHP>(problem->getMap(),lmkHP3, camera, des));
-	L4 = std::static_pointer_cast<LandmarkHP>(LandmarkBase::emplace<LandmarkHP>(problem->getMap(),lmkHP4, camera, des));
+	L2 = std::static_pointer_cast<LandmarkHp>(LandmarkBase::emplace<LandmarkHp>(problem->getMap(),lmkHP2, camera, des));
+	L3 = std::static_pointer_cast<LandmarkHp>(LandmarkBase::emplace<LandmarkHp>(problem->getMap(),lmkHP3, camera, des));
+	L4 = std::static_pointer_cast<LandmarkHp>(LandmarkBase::emplace<LandmarkHp>(problem->getMap(),lmkHP4, camera, des));
 
 	//create factors
-    c12 = std::static_pointer_cast<FactorPixelHP>(FactorBase::emplace<FactorPixelHP>(f12, f12, L2, nullptr /*proc*/, false /*use loss function*/));
-    c13 = std::static_pointer_cast<FactorPixelHP>(FactorBase::emplace<FactorPixelHP>(f13, f13, L3, nullptr /*proc*/, false /*use loss function*/));
-    c14 = std::static_pointer_cast<FactorPixelHP>(FactorBase::emplace<FactorPixelHP>(f14, f14, L4, nullptr /*proc*/, false /*use loss function*/));
+    c12 = std::static_pointer_cast<FactorPixelHp>(FactorBase::emplace<FactorPixelHp>(f12, f12, L2, nullptr /*proc*/, false /*use loss function*/));
+    c13 = std::static_pointer_cast<FactorPixelHp>(FactorBase::emplace<FactorPixelHp>(f13, f13, L3, nullptr /*proc*/, false /*use loss function*/));
+    c14 = std::static_pointer_cast<FactorPixelHp>(FactorBase::emplace<FactorPixelHp>(f14, f14, L4, nullptr /*proc*/, false /*use loss function*/));
 
-    c22 = std::static_pointer_cast<FactorPixelHP>(FactorBase::emplace<FactorPixelHP>(f22, f22, L2, nullptr /*proc*/, false /*use loss function*/));
-    c23 = std::static_pointer_cast<FactorPixelHP>(FactorBase::emplace<FactorPixelHP>(f23, f23, L3, nullptr /*proc*/, false /*use loss function*/));
-    c24 = std::static_pointer_cast<FactorPixelHP>(FactorBase::emplace<FactorPixelHP>(f24, f24, L4, nullptr /*proc*/, false /*use loss function*/));
+    c22 = std::static_pointer_cast<FactorPixelHp>(FactorBase::emplace<FactorPixelHp>(f22, f22, L2, nullptr /*proc*/, false /*use loss function*/));
+    c23 = std::static_pointer_cast<FactorPixelHp>(FactorBase::emplace<FactorPixelHp>(f23, f23, L3, nullptr /*proc*/, false /*use loss function*/));
+    c24 = std::static_pointer_cast<FactorPixelHp>(FactorBase::emplace<FactorPixelHp>(f24, f24, L4, nullptr /*proc*/, false /*use loss function*/));
 
-    c32 = std::static_pointer_cast<FactorPixelHP>(FactorBase::emplace<FactorPixelHP>(f32, f32, L2, nullptr /*proc*/, false /*use loss function*/));
-    c33 = std::static_pointer_cast<FactorPixelHP>(FactorBase::emplace<FactorPixelHP>(f33, f33, L3, nullptr /*proc*/, false /*use loss function*/));
-    c34 = std::static_pointer_cast<FactorPixelHP>(FactorBase::emplace<FactorPixelHP>(f34, f34, L4, nullptr /*proc*/, false /*use loss function*/));
+    c32 = std::static_pointer_cast<FactorPixelHp>(FactorBase::emplace<FactorPixelHp>(f32, f32, L2, nullptr /*proc*/, false /*use loss function*/));
+    c33 = std::static_pointer_cast<FactorPixelHp>(FactorBase::emplace<FactorPixelHp>(f33, f33, L3, nullptr /*proc*/, false /*use loss function*/));
+    c34 = std::static_pointer_cast<FactorPixelHp>(FactorBase::emplace<FactorPixelHp>(f34, f34, L4, nullptr /*proc*/, false /*use loss function*/));
 
 	ASSERT_TRUE(problem->check());
 
@@ -615,7 +615,7 @@ TEST_F(FactorPixelHPTest, testSolveBundleAdjustment)
 	problem->print(1,0,1,1);
 	for (auto lmk : problem->getMap()->getLandmarkList())
 	{
-		std::cout << "L" << lmk->id()<< ": " << std::static_pointer_cast<LandmarkHP>(lmk)->point().transpose() << std::endl;
+		std::cout << "L" << lmk->id()<< ": " << std::static_pointer_cast<LandmarkHp>(lmk)->point().transpose() << std::endl;
 	}
 
 
@@ -644,7 +644,7 @@ TEST_F(FactorPixelHPTest, testSolveBundleAdjustment)
 int main(int argc, char **argv)
 {
   testing::InitGoogleTest(&argc, argv);
-//  ::testing::GTEST_FLAG(filter) = "FactorPixelHPTest.testSolveBundleAdjustment*";
+//  ::testing::GTEST_FLAG(filter) = "FactorPixelHpTest.testSolveBundleAdjustment*";
 
   return RUN_ALL_TESTS();
 }

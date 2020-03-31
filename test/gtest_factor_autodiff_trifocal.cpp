@@ -125,7 +125,7 @@ class FactorAutodiffTrifocalTest : public testing::Test{
             ceres_manager = std::make_shared<CeresManager>(problem, options);
 
             // Install sensor and processor
-            S      = problem->installSensor("CAMERA", "canonical", pose_cam, wolf_root + "/demos/camera_params_canonical.yaml");
+            S      = problem->installSensor("SensorCamera", "canonical", pose_cam, wolf_root + "/demos/camera_params_canonical.yaml");
             camera = std::static_pointer_cast<SensorCamera>(S);
 
             ProcessorParamsTrackerFeatureTrifocalPtr params_tracker_feature_trifocal_trifocal = std::make_shared<ProcessorParamsTrackerFeatureTrifocal>();
@@ -134,7 +134,7 @@ class FactorAutodiffTrifocalTest : public testing::Test{
             params_tracker_feature_trifocal_trifocal->min_features_for_keyframe     = 5;
             params_tracker_feature_trifocal_trifocal->yaml_file_params_vision_utils = wolf_root + "/demos/processor_tracker_feature_trifocal_vision_utils.yaml";
 
-            ProcessorBasePtr proc = problem->installProcessor("TRACKER FEATURE TRIFOCAL", "trifocal", camera, params_tracker_feature_trifocal_trifocal);
+            ProcessorBasePtr proc = problem->installProcessor("ProcessorTrackerFeatureTrifocal", "trifocal", camera, params_tracker_feature_trifocal_trifocal);
             proc_trifocal = std::static_pointer_cast<ProcessorTrackerFeatureTrifocal>(proc);
 
             // Add three viewpoints with frame, capture and feature
