@@ -30,7 +30,7 @@ namespace wolf {
 
 // Constructor
 ProcessorTrackerFeatureTrifocal::ProcessorTrackerFeatureTrifocal(ProcessorParamsTrackerFeatureTrifocalPtr _params_tracker_feature_trifocal) :
-        ProcessorTrackerFeature("TRACKER FEATURE TRIFOCAL", _params_tracker_feature_trifocal ),
+        ProcessorTrackerFeature("TRACKER FEATURE TRIFOCAL", 3, _params_tracker_feature_trifocal ),
         params_tracker_feature_trifocal_(_params_tracker_feature_trifocal),
         capture_image_last_(nullptr),
         capture_image_incoming_(nullptr),
