@@ -4,7 +4,7 @@
 //Wolf includes
 #include "core/processor/processor_tracker_feature.h"
 #include "vision/capture/capture_image.h"
-#include "core/utils/params_server.hpp"
+#include "core/utils/params_server.h"
 
 // Vision utils
 #include <vision_utils/vision_utils.h>
