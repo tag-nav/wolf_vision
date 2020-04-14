@@ -83,7 +83,7 @@ TEST(ProcessorTrackerFeatureTrifocal, KeyFrameCallback)
 
     auto sens_trk = SensorBase::emplace<SensorCamera>(problem->getHardware(), (Eigen::Vector7d()<<0,0,0, 0,0,0,1).finished(),
                                                       intr);
-    ProcessorParamsTrackerFeatureTrifocalPtr params_tracker_feature_trifocal = std::make_shared<ProcessorParamsTrackerFeatureTrifocal>();
+    ParamsProcessorTrackerFeatureTrifocalPtr params_tracker_feature_trifocal = std::make_shared<ParamsProcessorTrackerFeatureTrifocal>();
     params_tracker_feature_trifocal->pixel_noise_std                = 1.0;
     params_tracker_feature_trifocal->voting_active                  = true;
     params_tracker_feature_trifocal->min_features_for_keyframe      = 5;
@@ -108,7 +108,7 @@ TEST(ProcessorTrackerFeatureTrifocal, KeyFrameCallback)
     params->min_disp_var = 0.000001;
     params->min_rot_var  = 0.000001;
     SensorBasePtr sens_odo = problem->installSensor("SensorOdom3d", "odometer", (Vector7d() << 0,0,0,  0,0,0,1).finished(), params);
-    ProcessorParamsOdom3dPtr proc_odo_params = make_shared<ProcessorParamsOdom3d>();
+    ParamsProcessorOdom3dPtr proc_odo_params = make_shared<ParamsProcessorOdom3d>();
     proc_odo_params->voting_active   = true;
     proc_odo_params->time_tolerance  = dt/2;
     proc_odo_params->max_buff_length = 3;

@@ -29,7 +29,7 @@ namespace wolf {
 //// ===========================================
 
 // Constructor
-ProcessorTrackerFeatureTrifocal::ProcessorTrackerFeatureTrifocal(ProcessorParamsTrackerFeatureTrifocalPtr _params_tracker_feature_trifocal) :
+ProcessorTrackerFeatureTrifocal::ProcessorTrackerFeatureTrifocal(ParamsProcessorTrackerFeatureTrifocalPtr _params_tracker_feature_trifocal) :
         ProcessorTrackerFeature("ProcessorTrackerFeatureTrifocal", 3, _params_tracker_feature_trifocal ),
         params_tracker_feature_trifocal_(_params_tracker_feature_trifocal),
         capture_image_last_(nullptr),
@@ -441,7 +441,7 @@ void ProcessorTrackerFeatureTrifocal::establishFactors()
 
 }
 
-void ProcessorTrackerFeatureTrifocal::setParams(const ProcessorParamsTrackerFeatureTrifocalPtr _params)
+void ProcessorTrackerFeatureTrifocal::setParams(const ParamsProcessorTrackerFeatureTrifocalPtr _params)
 {
     params_tracker_feature_trifocal_ = _params;
 }
@@ -454,9 +454,9 @@ void ProcessorTrackerFeatureTrifocal::configure(SensorBasePtr _sensor)
 }
 
 ProcessorBasePtr ProcessorTrackerFeatureTrifocal::create(const std::string& _unique_name,
-                                                         const ProcessorParamsBasePtr _params)
+                                                         const ParamsProcessorBasePtr _params)
 {
-  const auto params = std::static_pointer_cast<ProcessorParamsTrackerFeatureTrifocal>(_params);
+  const auto params = std::static_pointer_cast<ParamsProcessorTrackerFeatureTrifocal>(_params);
 
   ProcessorBasePtr prc_ptr = std::make_shared<ProcessorTrackerFeatureTrifocal>(params);
   prc_ptr->setName(_unique_name);
@@ -465,8 +465,8 @@ ProcessorBasePtr ProcessorTrackerFeatureTrifocal::create(const std::string& _uni
 
 } // namespace wolf
 
-// Register in the ProcessorFactory
-#include "core/processor/processor_factory.h"
+// Register in the FactoryProcessor
+#include "core/processor/factory_processor.h"
 namespace wolf {
 WOLF_REGISTER_PROCESSOR("ProcessorTrackerFeatureTrifocal", ProcessorTrackerFeatureTrifocal)
 } // namespace wolf

@@ -45,7 +45,7 @@ class ProcessorTrackerFeatureImage : public ProcessorTrackerFeature
 
     protected:
 
-        ProcessorParamsTrackerFeatureImagePtr params_tracker_feature_image_;           ///< Struct with parameters of the processors
+        ParamsProcessorTrackerFeatureImagePtr params_tracker_feature_image_;           ///< Struct with parameters of the processors
         cv::Mat image_last_, image_incoming_;   ///< Images of the "last" and "incoming" Captures
 
         struct
@@ -62,7 +62,7 @@ class ProcessorTrackerFeatureImage : public ProcessorTrackerFeature
         std::list<cv::Rect> detector_roi_;
         std::list<cv::Point> tracker_target_;
 
-        ProcessorTrackerFeatureImage(ProcessorParamsTrackerFeatureImagePtr _params_image);
+        ProcessorTrackerFeatureImage(ParamsProcessorTrackerFeatureImagePtr _params_image);
         virtual ~ProcessorTrackerFeatureImage();
 
         virtual void configure(SensorBasePtr _sensor) override ;
@@ -185,7 +185,7 @@ class ProcessorTrackerFeatureImage : public ProcessorTrackerFeature
         virtual void resetVisualizationFlag(const FeatureBasePtrList& _feature_list_last);
 
     public:
-        static ProcessorBasePtr create(const std::string& _unique_name, const ProcessorParamsBasePtr _params);
+        static ProcessorBasePtr create(const std::string& _unique_name, const ParamsProcessorBasePtr _params);
 
 };
 

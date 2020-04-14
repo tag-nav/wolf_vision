@@ -13,7 +13,7 @@ namespace wolf
 
 namespace
 {
-static ProcessorParamsBasePtr createProcessorParamsBundleAdjustment(const std::string & _filename_dot_yaml)
+static ParamsProcessorBasePtr createParamsProcessorBundleAdjustment(const std::string & _filename_dot_yaml)
 {
     YAML::Node config = YAML::LoadFile(_filename_dot_yaml);
 
@@ -24,7 +24,7 @@ static ProcessorParamsBasePtr createProcessorParamsBundleAdjustment(const std::s
     }
     else if (config["type"].as<std::string>() == "ProcessorBundleAdjustment")
     {
-        ProcessorParamsBundleAdjustmentPtr params = std::make_shared<ProcessorParamsBundleAdjustment>();
+        ParamsProcessorBundleAdjustmentPtr params = std::make_shared<ParamsProcessorBundleAdjustment>();
 
         YAML::Node vision_utils               = config      ["vision_utils"];
         params->yaml_file_params_vision_utils = vision_utils["YAML file params"].as<std::string>();
@@ -63,8 +63,8 @@ static ProcessorParamsBasePtr createProcessorParamsBundleAdjustment(const std::s
     return nullptr;
 }
 
-// Register in the SensorFactory
-const bool WOLF_UNUSED registered_prc_bundle_adjustment = ProcessorParamsFactory::get().registerCreator("ProcessorBundleAdjustment", createProcessorParamsBundleAdjustment);
+// Register in the FactorySensor
+const bool WOLF_UNUSED registered_prc_bundle_adjustment = FactoryParamsProcessor::get().registerCreator("ProcessorBundleAdjustment", createParamsProcessorBundleAdjustment);
 
 } // namespace [unnamed]
 

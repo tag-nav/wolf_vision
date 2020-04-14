@@ -128,7 +128,7 @@ class FactorAutodiffTrifocalTest : public testing::Test{
             S      = problem->installSensor("SensorCamera", "canonical", pose_cam, wolf_root + "/demos/camera_params_canonical.yaml");
             camera = std::static_pointer_cast<SensorCamera>(S);
 
-            ProcessorParamsTrackerFeatureTrifocalPtr params_tracker_feature_trifocal_trifocal = std::make_shared<ProcessorParamsTrackerFeatureTrifocal>();
+            ParamsProcessorTrackerFeatureTrifocalPtr params_tracker_feature_trifocal_trifocal = std::make_shared<ParamsProcessorTrackerFeatureTrifocal>();
             params_tracker_feature_trifocal_trifocal->time_tolerance                = 1.0/2;
             params_tracker_feature_trifocal_trifocal->max_new_features              = 5;
             params_tracker_feature_trifocal_trifocal->min_features_for_keyframe     = 5;

@@ -26,7 +26,7 @@
 namespace wolf
 {
 
-ProcessorTrackerLandmarkImage::ProcessorTrackerLandmarkImage(ProcessorParamsTrackerLandmarkImagePtr _params_tracker_landmark_image) :
+ProcessorTrackerLandmarkImage::ProcessorTrackerLandmarkImage(ParamsProcessorTrackerLandmarkImagePtr _params_tracker_landmark_image) :
     ProcessorTrackerLandmark("ProcessorTrackerLandmarkImage", _params_tracker_landmark_image),
     cell_width_(0),
     cell_height_(0),
@@ -444,17 +444,17 @@ void ProcessorTrackerLandmarkImage::drawLandmarks(cv::Mat _image)
 
 //namespace wolf{
 
-ProcessorBasePtr ProcessorTrackerLandmarkImage::create(const std::string& _unique_name, const ProcessorParamsBasePtr _params)
+ProcessorBasePtr ProcessorTrackerLandmarkImage::create(const std::string& _unique_name, const ParamsProcessorBasePtr _params)
 {
-    ProcessorTrackerLandmarkImagePtr prc_ptr = std::make_shared<ProcessorTrackerLandmarkImage>(std::static_pointer_cast<ProcessorParamsTrackerLandmarkImage>(_params));
+    ProcessorTrackerLandmarkImagePtr prc_ptr = std::make_shared<ProcessorTrackerLandmarkImage>(std::static_pointer_cast<ParamsProcessorTrackerLandmarkImage>(_params));
     prc_ptr->setName(_unique_name);
     return prc_ptr;
 }
 
 } // namespace wolf
 
-// Register in the SensorFactory
-#include "core/processor/processor_factory.h"
+// Register in the FactorySensor
+#include "core/processor/factory_processor.h"
 namespace wolf {
 WOLF_REGISTER_PROCESSOR("ProcessorTrackerLandmarkImage", ProcessorTrackerLandmarkImage)
 } // namespace wolf

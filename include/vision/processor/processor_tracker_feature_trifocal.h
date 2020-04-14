@@ -16,9 +16,9 @@
 namespace wolf
 {
 
-WOLF_STRUCT_PTR_TYPEDEFS(ProcessorParamsTrackerFeatureTrifocal);
+WOLF_STRUCT_PTR_TYPEDEFS(ParamsProcessorTrackerFeatureTrifocal);
 
-struct ProcessorParamsTrackerFeatureTrifocal : public ProcessorParamsTrackerFeature
+struct ParamsProcessorTrackerFeatureTrifocal : public ParamsProcessorTrackerFeature
 {
         std::string yaml_file_params_vision_utils;
 
@@ -27,9 +27,9 @@ struct ProcessorParamsTrackerFeatureTrifocal : public ProcessorParamsTrackerFeat
         int min_response_new_feature;
         double pixel_noise_std; ///< std noise of the pixel
         int min_track_length_for_factor; ///< Minimum track length of a matched feature to create a factor
-    ProcessorParamsTrackerFeatureTrifocal() = default;
-    ProcessorParamsTrackerFeatureTrifocal(std::string _unique_name, const ParamsServer& _server):
-        ProcessorParamsTrackerFeature(_unique_name, _server)
+    ParamsProcessorTrackerFeatureTrifocal() = default;
+    ParamsProcessorTrackerFeatureTrifocal(std::string _unique_name, const ParamsServer& _server):
+        ParamsProcessorTrackerFeature(_unique_name, _server)
     {
         yaml_file_params_vision_utils   = _server.getParam<std::string>(_unique_name    + "/yaml_file_params_vision_utils");
         n_cells_h                       = _server.getParam<int>(_unique_name            + "/n_cells_h");
@@ -40,7 +40,7 @@ struct ProcessorParamsTrackerFeatureTrifocal : public ProcessorParamsTrackerFeat
     }
     std::string print() const
     {
-        return "\n" + ProcessorParamsTrackerFeature::print()                                    + "\n"
+        return "\n" + ParamsProcessorTrackerFeature::print()                                    + "\n"
             + "yaml_file_params_vision_utils: " + yaml_file_params_vision_utils                 + "\n"
             + "n_cells_h: "                     + std::to_string(n_cells_h)                     + "\n"
             + "n_cells_v: "                     + std::to_string(n_cells_v)                     + "\n"
@@ -62,7 +62,7 @@ class ProcessorTrackerFeatureTrifocal : public ProcessorTrackerFeature
 
     protected:
 
-        ProcessorParamsTrackerFeatureTrifocalPtr params_tracker_feature_trifocal_;      ///< Configuration parameters
+        ParamsProcessorTrackerFeatureTrifocalPtr params_tracker_feature_trifocal_;      ///< Configuration parameters
 
         CaptureImagePtr capture_image_last_;
         CaptureImagePtr capture_image_incoming_;
@@ -76,7 +76,7 @@ class ProcessorTrackerFeatureTrifocal : public ProcessorTrackerFeature
 
         /** \brief Class constructor
          */
-        ProcessorTrackerFeatureTrifocal( ProcessorParamsTrackerFeatureTrifocalPtr _params_tracker_feature_trifocal );
+        ProcessorTrackerFeatureTrifocal( ParamsProcessorTrackerFeatureTrifocalPtr _params_tracker_feature_trifocal );
 
         /** \brief Class Destructor
          */
@@ -165,13 +165,13 @@ class ProcessorTrackerFeatureTrifocal : public ProcessorTrackerFeature
 
         bool isInlier(const cv::KeyPoint& _kp_incoming, const cv::KeyPoint& _kp_last);
 
-        void setParams(const ProcessorParamsTrackerFeatureTrifocalPtr _params);
+        void setParams(const ParamsProcessorTrackerFeatureTrifocalPtr _params);
 
     public:
 
         /// @brief Factory method
         static ProcessorBasePtr create(const std::string& _unique_name,
-                                       const ProcessorParamsBasePtr _params);
+                                       const ParamsProcessorBasePtr _params);
     private:
 
         cv::Mat image_debug_;

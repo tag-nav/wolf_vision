@@ -9,9 +9,9 @@
 namespace wolf
 {
 
-WOLF_STRUCT_PTR_TYPEDEFS(ProcessorParamsTrackerFeatureImage);
+WOLF_STRUCT_PTR_TYPEDEFS(ParamsProcessorTrackerFeatureImage);
 
-struct ProcessorParamsTrackerFeatureImage : public ProcessorParamsTrackerFeature
+struct ParamsProcessorTrackerFeatureImage : public ParamsProcessorTrackerFeature
 {
         std::string yaml_file_params_vision_utils;
 
@@ -20,9 +20,9 @@ struct ProcessorParamsTrackerFeatureImage : public ProcessorParamsTrackerFeature
 
         double pixel_noise_std; ///< std noise of the pixel
         double pixel_noise_var; ///< var noise of the pixel
-    ProcessorParamsTrackerFeatureImage() = default;
-    ProcessorParamsTrackerFeatureImage(std::string _unique_name, const ParamsServer& _server):
-        ProcessorParamsTrackerFeature(_unique_name, _server)
+    ParamsProcessorTrackerFeatureImage() = default;
+    ParamsProcessorTrackerFeatureImage(std::string _unique_name, const ParamsServer& _server):
+        ParamsProcessorTrackerFeature(_unique_name, _server)
     {
         yaml_file_params_vision_utils   = _server.getParam<std::string>(_unique_name    + "/yaml_file_params_vision_utils");
         min_response_for_new_features   = _server.getParam<double>(_unique_name         + "/min_response_for_new_features");
@@ -32,7 +32,7 @@ struct ProcessorParamsTrackerFeatureImage : public ProcessorParamsTrackerFeature
     }
     std::string print() const
     {
-        return "\n" + ProcessorParamsTrackerFeature::print()                                    + "\n"
+        return "\n" + ParamsProcessorTrackerFeature::print()                                    + "\n"
             + "yaml_file_params_vision_utils: " + yaml_file_params_vision_utils                 + "\n"
             + "min_response_for_new_features: " + std::to_string(min_response_for_new_features) + "\n"
             + "distance: "                      + std::to_string(distance)                      + "\n"
@@ -41,9 +41,9 @@ struct ProcessorParamsTrackerFeatureImage : public ProcessorParamsTrackerFeature
     }
 };
 
-WOLF_STRUCT_PTR_TYPEDEFS(ProcessorParamsTrackerLandmarkImage);
+WOLF_STRUCT_PTR_TYPEDEFS(ParamsProcessorTrackerLandmarkImage);
 
-struct ProcessorParamsTrackerLandmarkImage : public ProcessorParamsTrackerLandmark
+struct ParamsProcessorTrackerLandmarkImage : public ParamsProcessorTrackerLandmark
 {
         std::string yaml_file_params_vision_utils;
 
@@ -53,8 +53,8 @@ struct ProcessorParamsTrackerLandmarkImage : public ProcessorParamsTrackerLandma
         double pixel_noise_std; ///< std noise of the pixel
         double pixel_noise_var; ///< var noise of the pixel
 
-        ProcessorParamsTrackerLandmarkImage(std::string _unique_name, const ParamsServer& _server):
-            ProcessorParamsTrackerLandmark(_unique_name, _server)
+        ParamsProcessorTrackerLandmarkImage(std::string _unique_name, const ParamsServer& _server):
+            ParamsProcessorTrackerLandmark(_unique_name, _server)
         {
             yaml_file_params_vision_utils   = _server.getParam<std::string>(_unique_name    + "/yaml_file_params_vision_utils");
 
@@ -66,7 +66,7 @@ struct ProcessorParamsTrackerLandmarkImage : public ProcessorParamsTrackerLandma
         }
         std::string print() const
         {
-            return "\n" + ProcessorParamsTrackerLandmark::print()                                       + "\n"
+            return "\n" + ParamsProcessorTrackerLandmark::print()                                       + "\n"
                     + "yaml_file_params_vision_utils: " + yaml_file_params_vision_utils                 + "\n"
                     + "min_response_for_new_features: " + std::to_string(min_response_for_new_features) + "\n"
                     + "distance: "                      + std::to_string(distance)                      + "\n"

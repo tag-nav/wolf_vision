@@ -22,12 +22,12 @@ namespace wolf
 {
 namespace
 {
-static ProcessorParamsBasePtr createProcessorParamsImage(const std::string & _filename_dot_yaml)
+static ParamsProcessorBasePtr createParamsProcessorImage(const std::string & _filename_dot_yaml)
 {
     using std::string;
     using YAML::Node;
 
-    std::shared_ptr<ProcessorParamsTrackerFeatureImage> p = std::make_shared<ProcessorParamsTrackerFeatureImage>();
+    std::shared_ptr<ParamsProcessorTrackerFeatureImage> p = std::make_shared<ParamsProcessorTrackerFeatureImage>();
 
     Node params = YAML::LoadFile(_filename_dot_yaml);
 
@@ -62,9 +62,9 @@ static ProcessorParamsBasePtr createProcessorParamsImage(const std::string & _fi
     return p;
 }
 
-// Register in the SensorFactory
-const bool WOLF_UNUSED registered_prc_image_feature_par = ProcessorParamsFactory::get().registerCreator("ProcessorTrackerFeatureImage", createProcessorParamsImage);
-const bool WOLF_UNUSED registered_prc_image_landmark_par = ProcessorParamsFactory::get().registerCreator("ProcessorTrackerLandmarkImage", createProcessorParamsImage);
+// Register in the FactorySensor
+const bool WOLF_UNUSED registered_prc_image_feature_par = FactoryParamsProcessor::get().registerCreator("ProcessorTrackerFeatureImage", createParamsProcessorImage);
+const bool WOLF_UNUSED registered_prc_image_landmark_par = FactoryParamsProcessor::get().registerCreator("ProcessorTrackerLandmarkImage", createParamsProcessorImage);
 
 }
 }

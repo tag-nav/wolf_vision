@@ -17,7 +17,7 @@
 
 namespace wolf{
 
-ProcessorBundleAdjustment::ProcessorBundleAdjustment(ProcessorParamsBundleAdjustmentPtr _params_bundle_adjustment) :
+ProcessorBundleAdjustment::ProcessorBundleAdjustment(ParamsProcessorBundleAdjustmentPtr _params_bundle_adjustment) :
                 ProcessorTrackerFeature("ProcessorBundleAdjustment", 3, _params_bundle_adjustment),
                 params_bundle_adjustment_(_params_bundle_adjustment),
                 capture_image_last_(nullptr),
@@ -776,15 +776,15 @@ void ProcessorBundleAdjustment::establishFactors()
 	}
 }
 
-void ProcessorBundleAdjustment::setParams(const ProcessorParamsBundleAdjustmentPtr _params)
+void ProcessorBundleAdjustment::setParams(const ParamsProcessorBundleAdjustmentPtr _params)
 {
     params_bundle_adjustment_ = _params;
 }
 
 ProcessorBasePtr ProcessorBundleAdjustment::create(const std::string& _unique_name,
-                                                         const ProcessorParamsBasePtr _params)
+                                                         const ParamsProcessorBasePtr _params)
 {
-  const auto params = std::static_pointer_cast<ProcessorParamsBundleAdjustment>(_params);
+  const auto params = std::static_pointer_cast<ParamsProcessorBundleAdjustment>(_params);
 
   ProcessorBasePtr prc_ptr = std::make_shared<ProcessorBundleAdjustment>(params);
   prc_ptr->setName(_unique_name);
@@ -793,8 +793,8 @@ ProcessorBasePtr ProcessorBundleAdjustment::create(const std::string& _unique_na
 
 } //namespace wolf
 
-// Register in the ProcessorFactory
-#include "core/processor/processor_factory.h"
+// Register in the FactoryProcessor
+#include "core/processor/factory_processor.h"
 namespace wolf {
 WOLF_REGISTER_PROCESSOR("ProcessorBundleAdjustment", ProcessorBundleAdjustment)
 } // namespace wolf

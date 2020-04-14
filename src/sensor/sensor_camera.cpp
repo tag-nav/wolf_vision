@@ -63,8 +63,8 @@ SensorBasePtr SensorCamera::create(const std::string& _unique_name, //
 
 } // namespace wolf
 
-// Register in the SensorFactory
-#include "core/sensor/sensor_factory.h"
+// Register in the FactorySensor
+#include "core/sensor/factory_sensor.h"
 namespace wolf
 {
 WOLF_REGISTER_SENSOR("SensorCamera", SensorCamera)

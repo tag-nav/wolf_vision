@@ -42,7 +42,7 @@ class ProcessorTrackerLandmarkImage : public ProcessorTrackerLandmark
         vision_utils::AlgorithmParamsACTIVESEARCHPtr params_tracker_landmark_image_activesearch_ptr_; ///< Active search parameters
 
     protected:
-        ProcessorParamsTrackerLandmarkImagePtr params_tracker_landmark_image_;           // Struct with parameters of the processors
+        ParamsProcessorTrackerLandmarkImagePtr params_tracker_landmark_image_;           // Struct with parameters of the processors
 
         cv::Mat image_last_, image_incoming_;   // Images of the "last" and "incoming" Captures
 
@@ -78,7 +78,7 @@ class ProcessorTrackerLandmarkImage : public ProcessorTrackerLandmark
         std::list<cv::Point> tracker_target_;
         FeatureBasePtrList feat_lmk_found_;
 
-        ProcessorTrackerLandmarkImage(ProcessorParamsTrackerLandmarkImagePtr _params_tracker_landmark_image);
+        ProcessorTrackerLandmarkImage(ParamsProcessorTrackerLandmarkImagePtr _params_tracker_landmark_image);
         virtual ~ProcessorTrackerLandmarkImage();
 
         virtual void configure(SensorBasePtr _sensor) override;
@@ -156,7 +156,7 @@ class ProcessorTrackerLandmarkImage : public ProcessorTrackerLandmark
         virtual LandmarkBasePtr emplaceLandmark(FeatureBasePtr _feature_ptr) override;
 
     public:
-        static ProcessorBasePtr create(const std::string& _unique_name, const ProcessorParamsBasePtr _params);
+        static ProcessorBasePtr create(const std::string& _unique_name, const ParamsProcessorBasePtr _params);
 
         /** \brief Emplaces a new factor
          * \param _feature_ptr pointer to the Feature to constrain

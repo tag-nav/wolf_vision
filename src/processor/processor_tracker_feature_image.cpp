@@ -14,7 +14,7 @@
 namespace wolf
 {
 
-ProcessorTrackerFeatureImage::ProcessorTrackerFeatureImage(ProcessorParamsTrackerFeatureImagePtr _params_tracker_feature_image) :
+ProcessorTrackerFeatureImage::ProcessorTrackerFeatureImage(ParamsProcessorTrackerFeatureImagePtr _params_tracker_feature_image) :
     ProcessorTrackerFeature("ProcessorTrackerFeatureImage", 3, _params_tracker_feature_image),
     cell_width_(0), cell_height_(0),  // These will be initialized to proper values taken from the sensor via function configure()
     params_tracker_feature_image_(_params_tracker_feature_image)
@@ -332,17 +332,17 @@ void ProcessorTrackerFeatureImage::drawFeatures(cv::Mat _image)
     }
 }
 
-ProcessorBasePtr ProcessorTrackerFeatureImage::create(const std::string& _unique_name, const ProcessorParamsBasePtr _params)
+ProcessorBasePtr ProcessorTrackerFeatureImage::create(const std::string& _unique_name, const ParamsProcessorBasePtr _params)
 {
-    ProcessorTrackerFeatureImagePtr prc_ptr = std::make_shared<ProcessorTrackerFeatureImage>(std::static_pointer_cast<ProcessorParamsTrackerFeatureImage>(_params));
+    ProcessorTrackerFeatureImagePtr prc_ptr = std::make_shared<ProcessorTrackerFeatureImage>(std::static_pointer_cast<ParamsProcessorTrackerFeatureImage>(_params));
     prc_ptr->setName(_unique_name);
     return prc_ptr;
 }
 
 } // namespace wolf
 
-// Register in the SensorFactory
-#include "core/processor/processor_factory.h"
+// Register in the FactorySensor
+#include "core/processor/factory_processor.h"
 namespace wolf {
 WOLF_REGISTER_PROCESSOR("ProcessorTrackerFeatureImage", ProcessorTrackerFeatureImage)
 } // namespace wolf

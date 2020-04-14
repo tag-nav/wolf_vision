@@ -210,7 +210,7 @@ TEST(ProcessorFactorPixelHp, testZeroResidual)
     SensorCameraPtr camera = std::static_pointer_cast<SensorCamera>(sens_cam);
 
     // Install processor
-    ProcessorParamsBundleAdjustmentPtr params = std::make_shared<ProcessorParamsBundleAdjustment>();
+    ParamsProcessorBundleAdjustmentPtr params = std::make_shared<ParamsProcessorBundleAdjustment>();
     params->delete_ambiguities = true;
     params->yaml_file_params_vision_utils = wolf_vision_root + "/demos/processor_bundle_adjustment_vision_utils.yaml";
     params->pixel_noise_std                = 1.0;

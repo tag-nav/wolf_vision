@@ -25,9 +25,9 @@
 
 namespace wolf{
 
-WOLF_STRUCT_PTR_TYPEDEFS(ProcessorParamsBundleAdjustment);
+WOLF_STRUCT_PTR_TYPEDEFS(ParamsProcessorBundleAdjustment);
 
-struct ProcessorParamsBundleAdjustment : public ProcessorParamsTrackerFeature
+struct ParamsProcessorBundleAdjustment : public ParamsProcessorTrackerFeature
 {
 	std::string yaml_file_params_vision_utils;
 
@@ -40,7 +40,7 @@ struct ProcessorParamsBundleAdjustment : public ProcessorParamsTrackerFeature
 	double pixel_noise_std; ///< std noise of the pixel
 	int min_track_length_for_factor; ///< Minimum track length of a matched feature to create a factor
 
-	ProcessorParamsBundleAdjustment() = default;
+	ParamsProcessorBundleAdjustment() = default;
 
 };
 
@@ -53,7 +53,7 @@ class ProcessorBundleAdjustment : public ProcessorTrackerFeature
         vision_utils::DescriptorBasePtr des_ptr_;
         vision_utils::MatcherBasePtr mat_ptr_;
 
-        ProcessorParamsBundleAdjustmentPtr params_bundle_adjustment_;  // Configuration parameters
+        ParamsProcessorBundleAdjustmentPtr params_bundle_adjustment_;  // Configuration parameters
 
         CaptureImagePtr capture_image_last_;
         CaptureImagePtr capture_image_incoming_;
@@ -81,7 +81,7 @@ class ProcessorBundleAdjustment : public ProcessorTrackerFeature
     public:
         /** \brief Class constructor
         */
-        ProcessorBundleAdjustment(ProcessorParamsBundleAdjustmentPtr _params_bundle_adjustment);
+        ProcessorBundleAdjustment(ParamsProcessorBundleAdjustmentPtr _params_bundle_adjustment);
         /** \brief Class destructor
         */
         virtual ~ProcessorBundleAdjustment()
@@ -187,12 +187,12 @@ class ProcessorBundleAdjustment : public ProcessorTrackerFeature
          */
         virtual void establishFactors() override;
 
-        void setParams(const ProcessorParamsBundleAdjustmentPtr _params);
+        void setParams(const ParamsProcessorBundleAdjustmentPtr _params);
 
     public:
         /// @brief Factory method
         static ProcessorBasePtr create(const std::string& _unique_name,
-                                       const ProcessorParamsBasePtr _params);
+                                       const ParamsProcessorBasePtr _params);
 
     private:
 

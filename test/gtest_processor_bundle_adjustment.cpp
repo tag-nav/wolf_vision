@@ -10,7 +10,7 @@
 
 // wolf includes
 #include <core/utils/utils_gtest.h>
-#include <core/sensor/sensor_factory.h>
+#include <core/sensor/factory_sensor.h>
 
 // Vision utils includes
 #include <vision_utils/vision_utils.h>
@@ -26,7 +26,7 @@ class ProcessorBundleAdjustmentDummy : public ProcessorBundleAdjustment
 {
 	public:
 
-		ProcessorBundleAdjustmentDummy(ProcessorParamsBundleAdjustmentPtr& _params_bundle_adjustment):ProcessorBundleAdjustment(_params_bundle_adjustment){}
+		ProcessorBundleAdjustmentDummy(ParamsProcessorBundleAdjustmentPtr& _params_bundle_adjustment):ProcessorBundleAdjustment(_params_bundle_adjustment){}
 
 		void setLast(CaptureImagePtr _last_ptr)
 		{
@@ -106,7 +106,7 @@ TEST(ProcessorBundleAdjustment, installProcessor)
     auto sens_cam = problem->installSensor("SensorCamera", "camera", (Eigen::Vector7d() << 0,0,0,  0,0,0,1).finished(), intr);
 
     // Install processor
-    ProcessorParamsBundleAdjustmentPtr params = std::make_shared<ProcessorParamsBundleAdjustment>();
+    ParamsProcessorBundleAdjustmentPtr params = std::make_shared<ParamsProcessorBundleAdjustment>();
     params->delete_ambiguities = true;
     params->yaml_file_params_vision_utils = wolf_vision_root + "/demos/processor_bundle_adjustment_vision_utils.yaml";
     params->pixel_noise_std                = 1.0;
@@ -124,7 +124,7 @@ TEST(ProcessorBundleAdjustment, installProcessor)
 TEST(ProcessorBundleAdjustment, preProcess)
 {
     // Create processor
-    ProcessorParamsBundleAdjustmentPtr params = std::make_shared<ProcessorParamsBundleAdjustment>();
+    ParamsProcessorBundleAdjustmentPtr params = std::make_shared<ParamsProcessorBundleAdjustment>();
     params->delete_ambiguities = true;
     params->yaml_file_params_vision_utils = wolf_vision_root + "/demos/processor_bundle_adjustment_vision_utils.yaml";
     params->pixel_noise_std                = 1.0;
@@ -154,7 +154,7 @@ TEST(ProcessorBundleAdjustment, preProcess)
 TEST(ProcessorBundleAdjustment, detectNewFeatures)
 {
     // Create processor
-    ProcessorParamsBundleAdjustmentPtr params = std::make_shared<ProcessorParamsBundleAdjustment>();
+    ParamsProcessorBundleAdjustmentPtr params = std::make_shared<ParamsProcessorBundleAdjustment>();
     params->delete_ambiguities = true;
     params->yaml_file_params_vision_utils = wolf_vision_root + "/demos/processor_bundle_adjustment_vision_utils.yaml";
     params->pixel_noise_std                = 1.0;
@@ -198,7 +198,7 @@ TEST(ProcessorBundleAdjustment, detectNewFeatures)
 TEST(ProcessorBundleAdjustment, trackFeatures)
 {
     // Create processor
-    ProcessorParamsBundleAdjustmentPtr params = std::make_shared<ProcessorParamsBundleAdjustment>();
+    ParamsProcessorBundleAdjustmentPtr params = std::make_shared<ParamsProcessorBundleAdjustment>();
     params->delete_ambiguities = true;
     params->yaml_file_params_vision_utils = wolf_vision_root + "/demos/processor_bundle_adjustment_vision_utils.yaml";
     params->pixel_noise_std                = 1.0;
@@ -244,7 +244,7 @@ TEST(ProcessorBundleAdjustment, emplaceLandmark)
     auto sens_cam = problem_ptr->installSensor("SensorCamera", "camera", (Eigen::Vector7d() << 0,0,0,  0,0,0,1).finished(), intr);
     SensorCameraPtr camera = std::static_pointer_cast<SensorCamera>(sens_cam);
     // Install processor
-    ProcessorParamsBundleAdjustmentPtr params = std::make_shared<ProcessorParamsBundleAdjustment>();
+    ParamsProcessorBundleAdjustmentPtr params = std::make_shared<ParamsProcessorBundleAdjustment>();
     params->delete_ambiguities = true;
     params->yaml_file_params_vision_utils = wolf_vision_root + "/demos/processor_bundle_adjustment_vision_utils.yaml";
     params->pixel_noise_std                = 1.0;
@@ -289,7 +289,7 @@ TEST(ProcessorBundleAdjustment, process)
     SensorCameraPtr sens_cam = std::static_pointer_cast<SensorCamera>(problem->installSensor("SensorCamera", "camera", (Eigen::Vector7d() << 0,0,0,  0,0,0,1).finished(), intr));
 
     // Install processor
-    ProcessorParamsBundleAdjustmentPtr params = std::make_shared<ProcessorParamsBundleAdjustment>();
+    ParamsProcessorBundleAdjustmentPtr params = std::make_shared<ParamsProcessorBundleAdjustment>();
     params->delete_ambiguities = true;
     params->yaml_file_params_vision_utils = wolf_vision_root + "/demos/processor_bundle_adjustment_vision_utils.yaml";
     params->pixel_noise_std                = 1.0;

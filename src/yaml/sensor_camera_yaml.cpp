@@ -105,8 +105,8 @@ static ParamsSensorBasePtr createParamsSensorCamera(const std::string & _filenam
     return nullptr;
 }
 
-// Register in the SensorFactory
-const bool WOLF_UNUSED registered_camera_intr = ParamsSensorFactory::get().registerCreator("SensorCamera", createParamsSensorCamera);
+// Register in the FactorySensor
+const bool WOLF_UNUSED registered_camera_intr = FactoryParamsSensor::get().registerCreator("SensorCamera", createParamsSensorCamera);
 
 } // namespace [unnamed]
 
