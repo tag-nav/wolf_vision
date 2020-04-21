@@ -468,5 +468,5 @@ ProcessorBasePtr ProcessorTrackerFeatureTrifocal::create(const std::string& _uni
 // Register in the FactoryProcessor
 #include "core/processor/factory_processor.h"
 namespace wolf {
-WOLF_REGISTER_PROCESSOR("ProcessorTrackerFeatureTrifocal", ProcessorTrackerFeatureTrifocal)
+WOLF_REGISTER_PROCESSOR(ProcessorTrackerFeatureTrifocal)
 } // namespace wolf

@@ -344,6 +344,6 @@ ProcessorBasePtr ProcessorTrackerFeatureImage::create(const std::string& _unique
 // Register in the FactorySensor
 #include "core/processor/factory_processor.h"
 namespace wolf {
-WOLF_REGISTER_PROCESSOR("ProcessorTrackerFeatureImage", ProcessorTrackerFeatureImage)
+WOLF_REGISTER_PROCESSOR(ProcessorTrackerFeatureImage)
 } // namespace wolf
 

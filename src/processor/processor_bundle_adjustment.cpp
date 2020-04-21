@@ -796,6 +796,6 @@ ProcessorBasePtr ProcessorBundleAdjustment::create(const std::string& _unique_na
 // Register in the FactoryProcessor
 #include "core/processor/factory_processor.h"
 namespace wolf {
-WOLF_REGISTER_PROCESSOR("ProcessorBundleAdjustment", ProcessorBundleAdjustment)
+WOLF_REGISTER_PROCESSOR(ProcessorBundleAdjustment)
 } // namespace wolf
 
