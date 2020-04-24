@@ -58,10 +58,6 @@ ProcessorTrackerLandmarkImage::~ProcessorTrackerLandmarkImage()
 
 void ProcessorTrackerLandmarkImage::configure(SensorBasePtr _sensor)
 {
-
-    auto sensor = std::dynamic_pointer_cast<SensorCamera>(_sensor);
-    assert(sensor != nullptr && "Sensor is not of type Camera");
-
     SensorCameraPtr camera(std::static_pointer_cast<SensorCamera>(_sensor));
     image_.width_ = camera->getImgWidth();
     image_.height_ = camera->getImgHeight();

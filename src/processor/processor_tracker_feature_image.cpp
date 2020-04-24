@@ -44,8 +44,7 @@ ProcessorTrackerFeatureImage::~ProcessorTrackerFeatureImage()
 
 void ProcessorTrackerFeatureImage::configure(SensorBasePtr _sensor)
 {
-    SensorCameraPtr camera = std::dynamic_pointer_cast<SensorCamera>(_sensor);
-    assert(camera != nullptr && "Sensor is not of type Camera");
+    SensorCameraPtr camera = std::static_pointer_cast<SensorCamera>(_sensor);
 
     image_.width_ = camera->getImgWidth();
     image_.height_ = camera->getImgHeight();

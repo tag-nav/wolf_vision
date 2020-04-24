@@ -62,8 +62,7 @@ void ProcessorBundleAdjustment::configure(SensorBasePtr _sensor)
 {
     //TODO: Implement if needed
 	//Initialize camera sensor pointer
-	camera = std::dynamic_pointer_cast<SensorCamera>(_sensor);
-    assert(camera != nullptr && "Sensor is not of type Camera");
+	camera = std::static_pointer_cast<SensorCamera>(_sensor);
 
 }
 
