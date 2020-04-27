@@ -70,7 +70,10 @@ void ProcessorBundleAdjustment::preProcess()
 {
     // This method implements all Vision algorithms concerning OpenCV, so wolf algorithm only has to manage the data obtained
     // Get Capture
-    capture_image_incoming_ = std::static_pointer_cast<CaptureImage>(incoming_ptr_);
+    capture_image_incoming_ = std::dynamic_pointer_cast<CaptureImage>(incoming_ptr_);
+    assert(capture_image_incoming_ != nullptr && ("Capture type mismatch. Processor " + getName() + " can only process captures of type CaptureImage").c_str());
+    // capture_image_incoming_ = std::static_pointer_cast<CaptureImage>(incoming_ptr_);
+
     // Detect KeyPoints
     capture_image_incoming_->keypoints_ = det_ptr_->detect(capture_image_incoming_->getImage());
 

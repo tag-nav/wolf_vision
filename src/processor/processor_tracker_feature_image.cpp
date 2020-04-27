@@ -59,7 +59,9 @@ void ProcessorTrackerFeatureImage::configure(SensorBasePtr _sensor)
 
 void ProcessorTrackerFeatureImage::preProcess()
 {
-    image_incoming_ = std::static_pointer_cast<CaptureImage>(incoming_ptr_)->getImage();
+    auto incoming_ptr = std::dynamic_pointer_cast<CaptureImage>(incoming_ptr_);
+    assert(incoming_ptr != nullptr && ("Capture type mismatch. Processor " + getName() + " can only process captures of type CaptureImage").c_str());
+    image_incoming_ = incoming_ptr->getImage();
 
     active_search_ptr_->renew();
 
