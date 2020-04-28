@@ -122,7 +122,8 @@ TEST(ProcessorTrackerFeatureTrifocal, KeyFrameCallback)
     TimeStamp   t(0.0);
     Vector7d    x; x << 0,0,0, 0,0,0,1;
     Matrix6d    P = Matrix6d::Identity() * 0.000001;
-    problem->setPrior(x, P, t, dt/2);             // KF1
+    auto KF1 = problem->setPriorFactor(x, P, t, dt/2);             // KF1
+    std::static_pointer_cast<ProcessorOdom3d>(proc_odo)->setOrigin(KF1);
 
     CaptureOdom3dPtr capt_odo = make_shared<CaptureOdom3d>(t, sens_odo, Vector6d::Zero(), P);
 
