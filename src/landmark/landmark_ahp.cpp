@@ -70,7 +70,7 @@ LandmarkBasePtr LandmarkAhp::create(const YAML::Node& _node)
 // Register landmark creator
 namespace
 {
-const bool WOLF_UNUSED registered_lmk_ahp = LandmarkFactory::get().registerCreator("LandmarkAhp", LandmarkAhp::create);
+const bool WOLF_UNUSED registered_lmk_ahp = FactoryLandmark::get().registerCreator("LandmarkAhp", LandmarkAhp::create);
 }
 
 } // namespace wolf

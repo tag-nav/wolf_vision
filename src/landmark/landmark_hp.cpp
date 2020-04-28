@@ -56,7 +56,7 @@ LandmarkBasePtr LandmarkHp::create(const YAML::Node& _node)
 // Register landmark creator
 namespace
 {
-const bool WOLF_UNUSED registered_lmk_hp = LandmarkFactory::get().registerCreator("LandmarkHp", LandmarkHp::create);
+const bool WOLF_UNUSED registered_lmk_hp = FactoryLandmark::get().registerCreator("LandmarkHp", LandmarkHp::create);
 }
 
 } // namespace wolf
