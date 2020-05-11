@@ -5,13 +5,13 @@
 #include "core/ceres_wrapper/ceres_manager.h"
 #include "vision/processor/processor_tracker_feature_trifocal.h"
 #include "vision/capture/capture_image.h"
-#include "vision/factor/factor_autodiff_trifocal.h"
+#include "vision/factor/factor_trifocal.h"
 #include "vision/internal/config.h"
 
 using namespace Eigen;
 using namespace wolf;
 
-class FactorAutodiffTrifocalTest : public testing::Test{
+class FactorTrifocalTest : public testing::Test{
     public:
         Vector3d    pos1,   pos2,   pos3,   pos_cam, point;
         Vector3d    euler1, euler2, euler3, euler_cam;
@@ -29,11 +29,11 @@ class FactorAutodiffTrifocalTest : public testing::Test{
         FrameBasePtr    F1, F2, F3;
         CaptureImagePtr I1, I2, I3;
         FeatureBasePtr  f1, f2, f3;
-        FactorAutodiffTrifocalPtr c123;
+        FactorTrifocalPtr c123;
 
         double pixel_noise_std;
 
-        virtual ~FactorAutodiffTrifocalTest()
+        virtual ~FactorTrifocalTest()
         {
             std::cout << "destructor\n";
         }
@@ -155,15 +155,15 @@ class FactorAutodiffTrifocalTest : public testing::Test{
             f3 = FeatureBase::emplace<FeatureBase>(I3, "PIXEL", pix, pix_cov); // pixel at origin
 
             // trifocal factor
-            // c123 = std::make_shared<FactorAutodiffTrifocal>(f1, f2, f3, proc_trifocal, false, FAC_ACTIVE);
-            c123 = std::static_pointer_cast<FactorAutodiffTrifocal>(FactorBase::emplace<FactorAutodiffTrifocal>(f3, f1, f2, f3, proc_trifocal, false, FAC_ACTIVE));
+            // c123 = std::make_shared<FactorTrifocal>(f1, f2, f3, proc_trifocal, false, FAC_ACTIVE);
+            c123 = std::static_pointer_cast<FactorTrifocal>(FactorBase::emplace<FactorTrifocal>(f3, f1, f2, f3, proc_trifocal, false, FAC_ACTIVE));
             // f3   ->addFactor   (c123);
             // f1   ->addConstrainedBy(c123);
             // f2   ->addConstrainedBy(c123);
         }
 };
 
-TEST_F(FactorAutodiffTrifocalTest, InfoMatrix)
+TEST_F(FactorTrifocalTest, InfoMatrix)
 {
     /** Ground truth covariance. Rationale:
      * Due to the orthogonal configuration (see line 40 and onwards), we have:
@@ -187,7 +187,7 @@ TEST_F(FactorAutodiffTrifocalTest, InfoMatrix)
 
 }
 
-TEST_F(FactorAutodiffTrifocalTest, expectation)
+TEST_F(FactorTrifocalTest, expectation)
 {
     //    Homogeneous transform C2 wrt C1
     Matrix4d _c1Hc2; _c1Hc2 <<
@@ -256,7 +256,7 @@ TEST_F(FactorAutodiffTrifocalTest, expectation)
     ASSERT_MATRIX_APPROX(c2Ec1/c2Ec1(0,1), _c2Ec1/_c2Ec1(0,1), 1e-8);
 }
 
-TEST_F(FactorAutodiffTrifocalTest, residual)
+TEST_F(FactorTrifocalTest, residual)
 {
     vision_utils::TrifocalTensor tensor;
     Matrix3d c2Ec1;
@@ -269,7 +269,7 @@ TEST_F(FactorAutodiffTrifocalTest, residual)
     ASSERT_MATRIX_APPROX(residual, Vector3d::Zero(), 1e-8);
 }
 
-TEST_F(FactorAutodiffTrifocalTest, error_jacobians)
+TEST_F(FactorTrifocalTest, error_jacobians)
 {
     vision_utils::TrifocalTensor tensor;
     Matrix3d c2Ec1;
@@ -340,7 +340,7 @@ TEST_F(FactorAutodiffTrifocalTest, error_jacobians)
 
 }
 
-TEST_F(FactorAutodiffTrifocalTest, operator_parenthesis)
+TEST_F(FactorTrifocalTest, operator_parenthesis)
 {
     Vector3d res;
 
@@ -354,7 +354,7 @@ TEST_F(FactorAutodiffTrifocalTest, operator_parenthesis)
     ASSERT_MATRIX_APPROX(res, Vector3d::Zero(), 1e-8);
 }
 
-TEST_F(FactorAutodiffTrifocalTest, solve_F1)
+TEST_F(FactorTrifocalTest, solve_F1)
 {
     F1->setState(pose1);
     F2->setState(pose2);
@@ -435,7 +435,7 @@ TEST_F(FactorAutodiffTrifocalTest, solve_F1)
 
 }
 
-TEST_F(FactorAutodiffTrifocalTest, solve_F2)
+TEST_F(FactorTrifocalTest, solve_F2)
 {
     F1->setState(pose1);
     F2->setState(pose2);
@@ -517,7 +517,7 @@ TEST_F(FactorAutodiffTrifocalTest, solve_F2)
 
 }
 
-TEST_F(FactorAutodiffTrifocalTest, solve_F3)
+TEST_F(FactorTrifocalTest, solve_F3)
 {
     F1->setState(pose1);
     F2->setState(pose2);
@@ -600,7 +600,7 @@ TEST_F(FactorAutodiffTrifocalTest, solve_F3)
 
 }
 
-TEST_F(FactorAutodiffTrifocalTest, solve_S)
+TEST_F(FactorTrifocalTest, solve_S)
 {
     F1->setState(pose1);
     F2->setState(pose2);
@@ -685,7 +685,7 @@ TEST_F(FactorAutodiffTrifocalTest, solve_S)
 
 }
 
-class FactorAutodiffTrifocalMultiPointTest : public FactorAutodiffTrifocalTest
+class FactorTrifocalMultiPointTest : public FactorTrifocalTest
 {
         /*
          * In this test class we add 8 more points and perform optimization on the camera frames.
@@ -699,11 +699,11 @@ class FactorAutodiffTrifocalMultiPointTest : public FactorAutodiffTrifocalTest
 
     public:
         std::vector<FeatureBasePtr> fv1, fv2, fv3;
-        std::vector<FactorAutodiffTrifocalPtr> cv123;
+        std::vector<FactorTrifocalPtr> cv123;
 
         virtual void SetUp() override
         {
-            FactorAutodiffTrifocalTest::SetUp();
+            FactorTrifocalTest::SetUp();
 
             Matrix<double, 2, 9> c1p_can;
             c1p_can <<
@@ -744,7 +744,7 @@ class FactorAutodiffTrifocalMultiPointTest : public FactorAutodiffTrifocalTest
                 fv3.push_back(f3);
                 // I3->addFeature(fv3.at(i));
 
-                auto ff = std::static_pointer_cast<FactorAutodiffTrifocal>(FactorBase::emplace<FactorAutodiffTrifocal>(fv3.at(i), fv1.at(i), fv2.at(i), fv3.at(i), proc_trifocal, false, FAC_ACTIVE));
+                auto ff = std::static_pointer_cast<FactorTrifocal>(FactorBase::emplace<FactorTrifocal>(fv3.at(i), fv1.at(i), fv2.at(i), fv3.at(i), proc_trifocal, false, FAC_ACTIVE));
                 cv123.push_back(ff);
                 // fv3.at(i)->addFactor(cv123.at(i));
                 // fv1.at(i)->addConstrainedBy(cv123.at(i));
@@ -755,7 +755,7 @@ class FactorAutodiffTrifocalMultiPointTest : public FactorAutodiffTrifocalTest
 
 };
 
-TEST_F(FactorAutodiffTrifocalMultiPointTest, solve_multi_point)
+TEST_F(FactorTrifocalMultiPointTest, solve_multi_point)
 {
     /*
      * In this test we add 8 more points and perform optimization on the camera frames.
@@ -820,7 +820,7 @@ TEST_F(FactorAutodiffTrifocalMultiPointTest, solve_multi_point)
 
 }
 
-TEST_F(FactorAutodiffTrifocalMultiPointTest, solve_multi_point_scale)
+TEST_F(FactorTrifocalMultiPointTest, solve_multi_point_scale)
 {
     /*
      * In this test we add 8 more points and perform optimization on the camera frames.
@@ -886,7 +886,7 @@ TEST_F(FactorAutodiffTrifocalMultiPointTest, solve_multi_point_scale)
 
 #include "core/factor/factor_autodiff_distance_3d.h"
 
-TEST_F(FactorAutodiffTrifocalMultiPointTest, solve_multi_point_distance)
+TEST_F(FactorTrifocalMultiPointTest, solve_multi_point_distance)
 {
     /*
      * In this test we add 8 more points and perform optimization on the camera frames.
@@ -975,12 +975,12 @@ TEST_F(FactorAutodiffTrifocalMultiPointTest, solve_multi_point_distance)
 int main(int argc, char **argv)
 {
     testing::InitGoogleTest(&argc, argv);
-    //    ::testing::GTEST_FLAG(filter) = "FactorAutodiffTrifocalTest.solve_F1";
-    //    ::testing::GTEST_FLAG(filter) = "FactorAutodiffTrifocalTest.solve_F2";
-    //    ::testing::GTEST_FLAG(filter) = "FactorAutodiffTrifocalTest.solve_F3";
-    //    ::testing::GTEST_FLAG(filter) = "FactorAutodiffTrifocalTest.solve_S";
-    //    ::testing::GTEST_FLAG(filter) = "FactorAutodiffTrifocalTest.solve_multi_point";
-    //    ::testing::GTEST_FLAG(filter) = "FactorAutodiffTrifocalMultiPointTest.solve_multi_point_distance";
+    //    ::testing::GTEST_FLAG(filter) = "FactorTrifocalTest.solve_F1";
+    //    ::testing::GTEST_FLAG(filter) = "FactorTrifocalTest.solve_F2";
+    //    ::testing::GTEST_FLAG(filter) = "FactorTrifocalTest.solve_F3";
+    //    ::testing::GTEST_FLAG(filter) = "FactorTrifocalTest.solve_S";
+    //    ::testing::GTEST_FLAG(filter) = "FactorTrifocalTest.solve_multi_point";
+    //    ::testing::GTEST_FLAG(filter) = "FactorTrifocalMultiPointTest.solve_multi_point_distance";
     return RUN_ALL_TESTS();
 }
 

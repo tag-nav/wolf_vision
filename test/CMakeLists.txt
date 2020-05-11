@@ -20,9 +20,9 @@ target_link_libraries(gtest_pinhole ${PLUGIN_NAME} ${wolf_LIBRARY})
 wolf_add_gtest(gtest_sensor_camera gtest_sensor_camera.cpp)
 target_link_libraries(gtest_sensor_camera ${PLUGIN_NAME} ${wolf_LIBRARY} ${OpenCV_LIBS} ${vision_utils_LIBRARY})
 
-# FactorAutodiffTrifocal test
-wolf_add_gtest(gtest_factor_autodiff_trifocal gtest_factor_autodiff_trifocal.cpp)
-target_link_libraries(gtest_factor_autodiff_trifocal ${PLUGIN_NAME} ${wolf_LIBRARY} ${OpenCV_LIBS} ${vision_utils_LIBRARY})
+# FactorTrifocal test
+wolf_add_gtest(gtest_factor_trifocal gtest_factor_trifocal.cpp)
+target_link_libraries(gtest_factor_trifocal ${PLUGIN_NAME} ${wolf_LIBRARY} ${OpenCV_LIBS} ${vision_utils_LIBRARY})
 
 # FactorFeatureEpipolar test
 wolf_add_gtest(gtest_factor_epipolar gtest_factor_epipolar.cpp)

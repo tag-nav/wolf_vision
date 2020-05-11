@@ -1,5 +1,5 @@
-#ifndef _FACTOR_AUTODIFF_TRIFOCAL_H_
-#define _FACTOR_AUTODIFF_TRIFOCAL_H_
+#ifndef _FACTOR_TRIFOCAL_H_
+#define _FACTOR_TRIFOCAL_H_
 
 //Wolf includes
 //#include "core/common/wolf.h"
@@ -12,17 +12,17 @@
 namespace wolf
 {
 
-WOLF_PTR_TYPEDEFS(FactorAutodiffTrifocal);
+WOLF_PTR_TYPEDEFS(FactorTrifocal);
 
 using namespace Eigen;
 
-class FactorAutodiffTrifocal : public FactorAutodiff<FactorAutodiffTrifocal, 3, 3, 4, 3, 4, 3, 4, 3, 4>
+class FactorTrifocal : public FactorAutodiff<FactorTrifocal, 3, 3, 4, 3, 4, 3, 4, 3, 4>
 {
     public:
 
         /** \brief Class constructor
          */
-        FactorAutodiffTrifocal(const FeatureBasePtr& _feature_1_ptr,
+        FactorTrifocal(const FeatureBasePtr& _feature_1_ptr,
                                const FeatureBasePtr& _feature_2_ptr,
                                const FeatureBasePtr& _feature_own_ptr,
                                const ProcessorBasePtr& _processor_ptr,
@@ -31,7 +31,7 @@ class FactorAutodiffTrifocal : public FactorAutodiff<FactorAutodiffTrifocal, 3, 
 
         /** \brief Class Destructor
          */
-        virtual ~FactorAutodiffTrifocal();
+        virtual ~FactorTrifocal();
 
         virtual std::string getTopology() const override
         {
@@ -144,7 +144,7 @@ namespace wolf
 using namespace Eigen;
 
 // Constructor
-FactorAutodiffTrifocal::FactorAutodiffTrifocal(const FeatureBasePtr& _feature_1_ptr,
+FactorTrifocal::FactorTrifocal(const FeatureBasePtr& _feature_1_ptr,
                                                const FeatureBasePtr& _feature_2_ptr,
                                                const FeatureBasePtr& _feature_own_ptr,
                                                const ProcessorBasePtr& _processor_ptr,
@@ -222,17 +222,17 @@ FactorAutodiffTrifocal::FactorAutodiffTrifocal(const FeatureBasePtr& _feature_1_
 }
 
 // Destructor
-FactorAutodiffTrifocal::~FactorAutodiffTrifocal()
+FactorTrifocal::~FactorTrifocal()
 {
 }
 
-inline FeatureBasePtr FactorAutodiffTrifocal::getFeaturePrev()
+inline FeatureBasePtr FactorTrifocal::getFeaturePrev()
 {
     return feature_prev_ptr_.lock();
 }
 
 template<typename T>
-bool FactorAutodiffTrifocal::operator ()( const T* const _pos1,
+bool FactorTrifocal::operator ()( const T* const _pos1,
                                           const T* const _quat1,
                                           const T* const _pos2,
                                           const T* const _quat2,
@@ -262,7 +262,7 @@ bool FactorAutodiffTrifocal::operator ()( const T* const _pos1,
 }
 
 template<typename D1, typename D2, class T, typename D3>
-inline void FactorAutodiffTrifocal::expectation(const MatrixBase<D1>&     _wtr1,
+inline void FactorTrifocal::expectation(const MatrixBase<D1>&     _wtr1,
                                                 const QuaternionBase<D2>& _wqr1,
                                                 const MatrixBase<D1>&     _wtr2,
                                                 const QuaternionBase<D2>& _wqr2,
@@ -333,7 +333,7 @@ inline void FactorAutodiffTrifocal::expectation(const MatrixBase<D1>&     _wtr1,
 }
 
 template<typename T, typename D1>
-inline Matrix<T, 3, 1> FactorAutodiffTrifocal::residual(const vision_utils::TrifocalTensorBase<T>& _tensor,
+inline Matrix<T, 3, 1> FactorTrifocal::residual(const vision_utils::TrifocalTensorBase<T>& _tensor,
                                                         const MatrixBase<D1>& _c2Ec1) const
 {
     // 1. COMMON COMPUTATIONS
@@ -363,7 +363,7 @@ inline Matrix<T, 3, 1> FactorAutodiffTrifocal::residual(const vision_utils::Trif
 
 // Helper functions to be used by the above
 template<class T, typename D1, typename D2, typename D3, typename D4>
-inline Matrix<T, 3, 1> FactorAutodiffTrifocal::error_jacobians(const vision_utils::TrifocalTensorBase<T>& _tensor,
+inline Matrix<T, 3, 1> FactorTrifocal::error_jacobians(const vision_utils::TrifocalTensorBase<T>& _tensor,
                                                                const MatrixBase<D1>& _c2Ec1,
                                                                MatrixBase<D2>& _J_e_m1,
                                                                MatrixBase<D3>& _J_e_m2,
@@ -411,20 +411,20 @@ inline Matrix<T, 3, 1> FactorAutodiffTrifocal::error_jacobians(const vision_util
 
 // Print function
 template<class T, int ROWS, int COLS>
-void FactorAutodiffTrifocal::print_matrix(const Eigen::Matrix<T, ROWS, COLS>& _mat) const
+void FactorTrifocal::print_matrix(const Eigen::Matrix<T, ROWS, COLS>& _mat) const
 {}
 
 template<int ROWS, int COLS>
-void FactorAutodiffTrifocal::print_matrix(const Eigen::Matrix<double, ROWS, COLS>& _mat) const
+void FactorTrifocal::print_matrix(const Eigen::Matrix<double, ROWS, COLS>& _mat) const
 {
     std::cout << _mat << std::endl;
 }
 
 template<class T>
-void FactorAutodiffTrifocal::print_scalar(const T& _val) const
+void FactorTrifocal::print_scalar(const T& _val) const
 {}
 
-void FactorAutodiffTrifocal::print_scalar(const double& _val) const
+void FactorTrifocal::print_scalar(const double& _val) const
 {
     std::cout << _val << std::endl;
 }

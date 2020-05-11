@@ -144,7 +144,7 @@ SET(HDRS_CAPTURE
 include/vision/capture/capture_image.h
   )
 SET(HDRS_FACTOR
-include/vision/factor/factor_autodiff_trifocal.h
+include/vision/factor/factor_trifocal.h
 include/vision/factor/factor_ahp.h
 include/vision/factor/factor_pixel_hp.h
 include/vision/factor/factor_epipolar.h
