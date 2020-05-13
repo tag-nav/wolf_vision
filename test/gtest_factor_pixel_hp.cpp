@@ -283,7 +283,7 @@ TEST_F(FactorPixelHpTest, testSolveLandmarkAltered)
     L1->unfix();
 
     auto orig = L1->point();
-    L1->getP()->setState(L1->getState() + Vector4d::Random());
+    L1->getP()->setState(L1->getState().vector("P") + Vector4d::Random());
     std::string report = ceres_manager->solve(wolf::SolverManager::ReportVerbosity::FULL);
 
     std::cout << report << std::endl;
@@ -312,7 +312,7 @@ TEST_F(FactorPixelHpTest, testSolveFramePosition2ObservableDoF)
     auto ori = F1->getO()->getState();
     Vector7d state;
     state << position, ori;
-    F1->setState(state);
+    F1->setState(VectorComposite(state, "PO", {3,4}));
 
     F1->getO()->fix();
     F1->getP()->unfix();
@@ -402,9 +402,9 @@ TEST_F(FactorPixelHpTest, testSolveFramePosition)
     Vector3d position;
     position << Vector3d::Random()*100;//2.0, 2.0, 2.0;
     auto ori = F1->getO()->getState();
-    Vector7d state;
-    state << position, ori;
-    F1->setState(state);
+//    Vector7d state;
+//    state << position, ori;
+    F1->setState("PO", {position, ori});
 
     F1->getO()->fix();
     F1->getP()->unfix();
@@ -430,7 +430,7 @@ TEST_F(FactorPixelHpTest, testSolveBundleAdjustment)
 
 
     // Go around a weird bug: if we do not perturbate this LMK then the test fails.
-    L1->getP()->setState(L1->getState() + Vector4d::Random()*1e-12);
+    L1->perturb(1e-12);
 
 
 

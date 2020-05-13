@@ -356,9 +356,9 @@ TEST_F(FactorTrifocalTest, operator_parenthesis)
 
 TEST_F(FactorTrifocalTest, solve_F1)
 {
-    F1->setState(pose1);
-    F2->setState(pose2);
-    F3->setState(pose3);
+    F1->setState("PO", { pose1.head(3), pose1.tail(4) } );
+    F2->setState("PO", { pose2.head(3), pose2.tail(4) } );
+    F3->setState("PO", { pose3.head(3), pose3.tail(4) } );
     S ->getP()->setState(pos_cam);
     S ->getO()->setState(vquat_cam);
     // Residual with prior
@@ -386,9 +386,11 @@ TEST_F(FactorTrifocalTest, solve_F1)
 
     // Residual with perturbated state
 
-    Vector7d pose_perturbated = F1->getState() + 0.1 * Vector7d::Random();
-    pose_perturbated.segment(3,4).normalize();
-    F1->setState(pose_perturbated);
+//    Vector7d pose_perturbated = F1->getState() + 0.1 * Vector7d::Random();
+//    pose_perturbated.segment(3,4).normalize();
+//    F1->setState(pose_perturbated);
+    F1->perturb(0.1);
+//    VectorXd pose_perturbated = F1->getState().vector("PO");
 
     F1_p = F1->getP()->getState();
     F1_o = F1->getO()->getState();
@@ -399,7 +401,7 @@ TEST_F(FactorTrifocalTest, solve_F1)
                       S_p. data(), S_o. data(),
                       res.data());
 
-    WOLF_DEBUG("perturbed state:            ", pose_perturbated.transpose());
+    WOLF_DEBUG("perturbed state:            ", F1->getState().vector("PO").transpose());
     WOLF_DEBUG("residual before solve:      ", res.transpose());
 
     // Residual with solved state
@@ -426,7 +428,7 @@ TEST_F(FactorTrifocalTest, solve_F1)
                       S_p. data(), S_o. data(),
                       res.data());
 
-    WOLF_DEBUG("solved state:               ", F1->getState().transpose());
+    WOLF_DEBUG("solved state:               ", F1->getState().vector("PO").transpose());
     WOLF_DEBUG("residual after solve:       ", res.transpose());
 
     WOLF_DEBUG(report, " AND UNION");
@@ -437,9 +439,9 @@ TEST_F(FactorTrifocalTest, solve_F1)
 
 TEST_F(FactorTrifocalTest, solve_F2)
 {
-    F1->setState(pose1);
-    F2->setState(pose2);
-    F3->setState(pose3);
+    F1->setState("PO", { pose1.head(3), pose1.tail(4) } );
+    F2->setState("PO", { pose2.head(3), pose2.tail(4) } );
+    F3->setState("PO", { pose3.head(3), pose3.tail(4) } );
     S ->getP()->setState(pos_cam);
     S ->getO()->setState(vquat_cam);
 
@@ -462,15 +464,13 @@ TEST_F(FactorTrifocalTest, solve_F2)
                       S_p. data(), S_o. data(),
                       res.data());
 
-    WOLF_DEBUG("Initial state:              ", F2->getState().transpose());
+    WOLF_DEBUG("Initial state:              ", F2->getState().vector("PO").transpose());
     WOLF_DEBUG("residual before perturbing: ", res.transpose());
     ASSERT_MATRIX_APPROX(res, Vector3d::Zero(), 1e-8);
 
     // Residual with perturbated state
 
-    Vector7d pose_perturbated = F2->getState() + 0.1 * Vector7d::Random();
-    pose_perturbated.segment(3,4).normalize();
-    F2->setState(pose_perturbated);
+    F2->perturb(0.1);
 
     F2_p = F2->getP()->getState();
     F2_o = F2->getO()->getState();
@@ -481,7 +481,7 @@ TEST_F(FactorTrifocalTest, solve_F2)
                       S_p. data(), S_o. data(),
                       res.data());
 
-    WOLF_DEBUG("perturbed state:            ", pose_perturbated.transpose());
+    WOLF_DEBUG("perturbed state:            ", F2->getState().vector("PO").transpose());
     WOLF_DEBUG("residual before solve:      ", res.transpose());
 
     // Residual with solved state
@@ -508,7 +508,7 @@ TEST_F(FactorTrifocalTest, solve_F2)
                       S_p. data(), S_o. data(),
                       res.data());
 
-    WOLF_DEBUG("solved state:               ", F2->getState().transpose());
+    WOLF_DEBUG("solved state:               ", F2->getState().vector("PO").transpose());
     WOLF_DEBUG("residual after solve:       ", res.transpose());
 
     WOLF_DEBUG(report, " AND UNION");
@@ -519,9 +519,9 @@ TEST_F(FactorTrifocalTest, solve_F2)
 
 TEST_F(FactorTrifocalTest, solve_F3)
 {
-    F1->setState(pose1);
-    F2->setState(pose2);
-    F3->setState(pose3);
+    F1->setState("PO", { pose1.head(3), pose1.tail(4) } );
+    F2->setState("PO", { pose2.head(3), pose2.tail(4) } );
+    F3->setState("PO", { pose3.head(3), pose3.tail(4) } );
     S ->getP()->setState(pos_cam);
     S ->getO()->setState(vquat_cam);
 
@@ -544,15 +544,13 @@ TEST_F(FactorTrifocalTest, solve_F3)
                       S_p. data(), S_o. data(),
                       res.data());
 
-    WOLF_DEBUG("Initial state:              ", F3->getState().transpose());
+    WOLF_DEBUG("Initial state:              ", F3->getState().vector("PO").transpose());
     WOLF_DEBUG("residual before perturbing: ", res.transpose());
     ASSERT_MATRIX_APPROX(res, Vector3d::Zero(), 1e-8);
 
     // Residual with perturbated state
 
-    Vector7d pose_perturbated = F3->getState() + 0.1 * Vector7d::Random();
-    pose_perturbated.segment(3,4).normalize();
-    F3->setState(pose_perturbated);
+    F3->perturb(0.1);
 
     F3_p = F3->getP()->getState();
     F3_o = F3->getO()->getState();
@@ -563,7 +561,7 @@ TEST_F(FactorTrifocalTest, solve_F3)
                       S_p. data(), S_o. data(),
                       res.data());
 
-    WOLF_DEBUG("perturbed state:            ", pose_perturbated.transpose());
+    WOLF_DEBUG("perturbed state:            ", F3->getState().vector("PO").transpose());
     WOLF_DEBUG("residual before solve:      ", res.transpose());
     ASSERT_NEAR(res(2), 0, 1e-8); // Epipolar c2-c1 should be respected when perturbing F3
 
@@ -591,7 +589,7 @@ TEST_F(FactorTrifocalTest, solve_F3)
                       S_p. data(), S_o. data(),
                       res.data());
 
-    WOLF_DEBUG("solved state:               ", F3->getState().transpose());
+    WOLF_DEBUG("solved state:               ", F3->getState().vector("PO").transpose());
     WOLF_DEBUG("residual after solve:       ", res.transpose());
 
     WOLF_DEBUG(report, " AND UNION");
@@ -602,9 +600,9 @@ TEST_F(FactorTrifocalTest, solve_F3)
 
 TEST_F(FactorTrifocalTest, solve_S)
 {
-    F1->setState(pose1);
-    F2->setState(pose2);
-    F3->setState(pose3);
+    F1->setState(pose1, "PO", {3,4});
+    F2->setState(pose2, "PO", {3,4});
+    F3->setState(pose3, "PO", {3,4});
     S ->getP()->setState(pos_cam);
     S ->getO()->setState(vquat_cam);
 
@@ -633,12 +631,7 @@ TEST_F(FactorTrifocalTest, solve_S)
 
     // Residual with perturbated state
 
-    Vector3d pos_perturbated = pos_cam   + 0.1 * Vector3d::Random();
-    Vector4d ori_perturbated = vquat_cam + 0.1 * Vector4d::Random();
-    ori_perturbated.normalize();
-    Vector7d pose_perturbated; pose_perturbated << pos_perturbated, ori_perturbated;
-    S->getP()->setState(pos_perturbated);
-    S->getO()->setState(ori_perturbated);
+    S->perturb(0.1);
 
     S_p = S->getP()->getState();
     S_o = S->getO()->getState();
@@ -649,7 +642,7 @@ TEST_F(FactorTrifocalTest, solve_S)
                       S_p. data(), S_o. data(),
                       res.data());
 
-    WOLF_DEBUG("perturbed state:            ", pose_perturbated.transpose());
+    WOLF_DEBUG("perturbed state:            ", S->getState().vector("PO").transpose());
     WOLF_DEBUG("residual before solve:      ", res.transpose());
 
     // Residual with solved state
@@ -791,10 +784,10 @@ TEST_F(FactorTrifocalMultiPointTest, solve_multi_point)
     problem->print(1,0,1,0);
 
     // Evaluate final states
-    ASSERT_MATRIX_APPROX(F2->getP()->getState(), pos2  , 1e-10);
-    ASSERT_MATRIX_APPROX(F2->getO()->getState(), vquat2, 1e-10);
-    ASSERT_MATRIX_APPROX(F3->getP()->getState(), pos3  , 1e-10);
-    ASSERT_MATRIX_APPROX(F3->getO()->getState(), vquat3, 1e-10);
+    ASSERT_MATRIX_APPROX(F2->getP()->getState(), pos2  , 1e-6);
+    ASSERT_MATRIX_APPROX(F2->getO()->getState(), vquat2, 1e-6);
+    ASSERT_MATRIX_APPROX(F3->getP()->getState(), pos3  , 1e-6);
+    ASSERT_MATRIX_APPROX(F3->getO()->getState(), vquat3, 1e-6);
 
     Eigen::VectorXd F1_p = F1->getP()->getState();
     Eigen::VectorXd F1_o = F1->getO()->getState();
@@ -815,7 +808,7 @@ TEST_F(FactorTrifocalMultiPointTest, solve_multi_point)
                                  S_p. data(), S_o. data(),
                                  res.data());
 
-        ASSERT_MATRIX_APPROX(res, Vector3d::Zero(), 1e-10);
+        ASSERT_MATRIX_APPROX(res, Vector3d::Zero(), 1e-8);
     }
 
 }

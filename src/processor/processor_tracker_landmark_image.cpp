@@ -96,7 +96,7 @@ unsigned int ProcessorTrackerLandmarkImage::findLandmarks(const LandmarkBasePtrL
     cv::Mat candidate_descriptors;
     DMatchVector cv_matches;
 
-    Eigen::VectorXd current_state = getProblem()->getState(incoming_ptr_->getTimeStamp());
+    Eigen::VectorXd current_state = getProblem()->getState(incoming_ptr_->getTimeStamp()).vector("PO");
 
     for (auto landmark_in_ptr : _landmarks_in)
     {
@@ -397,7 +397,7 @@ void ProcessorTrackerLandmarkImage::drawLandmarks(cv::Mat _image)
     {
         unsigned int num_lmks_in_img = 0;
 
-        Eigen::VectorXd current_state = last_ptr_->getFrame()->getState();
+        Eigen::VectorXd current_state = last_ptr_->getFrame()->getState().vector("PO");
         SensorCameraPtr camera = std::static_pointer_cast<SensorCamera>(getSensor());
 
         for (auto landmark_base_ptr : getProblem()->getMap()->getLandmarkList())
