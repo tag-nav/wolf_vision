@@ -168,7 +168,7 @@ int main(int argc, char** argv)
         delta_debug = wolf_problem_ptr_->getProcessorMotion()->getMotion().delta_;
         delta_integr_debug = wolf_problem_ptr_->getProcessorMotion()->getMotion().delta_integr_;
         x_debug = wolf_problem_ptr_->getProcessorMotion()->getCurrentState();
-        ts = wolf_problem_ptr_->getProcessorMotion()->getBuffer().get().back().ts_;
+        ts = wolf_problem_ptr_->getProcessorMotion()->getBuffer().back().ts_;
 
         if(debug_results)
             debug_results << ts.get() << "\t" << delta_debug(0) << "\t" << delta_debug(1) << "\t" << delta_debug(2) << "\t" << delta_debug(3) << "\t" << delta_debug(4) << "\t"
@@ -204,9 +204,9 @@ int main(int argc, char** argv)
 #endif
 
     TimeStamp t0, tf;
-    t0 = wolf_problem_ptr_->getProcessorMotion()->getBuffer().get().front().ts_;
-    tf = wolf_problem_ptr_->getProcessorMotion()->getBuffer().get().back().ts_;
-    int N = wolf_problem_ptr_->getProcessorMotion()->getBuffer().get().size();
+    t0 = wolf_problem_ptr_->getProcessorMotion()->getBuffer().front().ts_;
+    tf = wolf_problem_ptr_->getProcessorMotion()->getBuffer().back().ts_;
+    int N = wolf_problem_ptr_->getProcessorMotion()->getBuffer().size();
     std::cout << "t0        : " << t0.get() << " s" << std::endl;
     std::cout << "tf        : " << tf.get() << " s" << std::endl;
     std::cout << "duration  : " << tf-t0 << " s" << std::endl;
