@@ -41,8 +41,8 @@ TEST(FactorEpipolar, exemple)
     auto S      = P->installSensor("SensorCamera", "camera", posecam, intr);
     auto camera = std::static_pointer_cast<SensorCamera>(S);
 
-    auto F0 = P             ->emplaceFrame(KEY, pose0, 0.0);
-    auto F1 = P             ->emplaceFrame(KEY, pose1, 1.0);
+    auto F0 = P             ->emplaceFrame(KEY, 0.0, pose0);
+    auto F1 = P             ->emplaceFrame(KEY, 1.0, pose1);
     auto C0 = CaptureBase   ::emplace<CaptureImage>(F0, F0->getTimeStamp(), camera, cv::Mat());
     auto C1 = CaptureBase   ::emplace<CaptureImage>(F1, F1->getTimeStamp(), camera, cv::Mat());
     auto f0 = FeatureBase   ::emplace<FeaturePointImage>(C0, pix0, 0, cv::Mat(), Matrix2d::Identity());

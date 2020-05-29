@@ -255,7 +255,7 @@ TEST(ProcessorBundleAdjustment, emplaceLandmark)
     ProcessorBundleAdjustmentPtr proc_bundle_adj = std::static_pointer_cast<ProcessorBundleAdjustment>(proc);
 
     //Frame
-	FrameBasePtr frm0 = problem_ptr->emplaceFrame(KEY, problem_ptr->zeroState(), TimeStamp(0));
+	FrameBasePtr frm0 = problem_ptr->emplaceFrame(KEY, 0.0, problem_ptr->stateZero());
 
 	// Capture, feature and factor
 	auto cap0 = std::static_pointer_cast<CaptureImage>(CaptureImage::emplace<CaptureImage>(frm0, TimeStamp(0), camera, cv::Mat::zeros(480,640, 1)));
