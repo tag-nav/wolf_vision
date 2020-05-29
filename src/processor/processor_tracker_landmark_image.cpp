@@ -27,7 +27,7 @@ namespace wolf
 {
 
 ProcessorTrackerLandmarkImage::ProcessorTrackerLandmarkImage(ParamsProcessorTrackerLandmarkImagePtr _params_tracker_landmark_image) :
-    ProcessorTrackerLandmark("ProcessorTrackerLandmarkImage", _params_tracker_landmark_image),
+    ProcessorTrackerLandmark("ProcessorTrackerLandmarkImage", "PO", _params_tracker_landmark_image),
     cell_width_(0),
     cell_height_(0),
     params_tracker_landmark_image_(_params_tracker_landmark_image),

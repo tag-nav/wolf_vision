@@ -18,7 +18,7 @@
 namespace wolf{
 
 ProcessorBundleAdjustment::ProcessorBundleAdjustment(ParamsProcessorBundleAdjustmentPtr _params_bundle_adjustment) :
-                ProcessorTrackerFeature("ProcessorBundleAdjustment", 3, _params_bundle_adjustment),
+                ProcessorTrackerFeature("ProcessorBundleAdjustment", "PO", 3, _params_bundle_adjustment),
                 params_bundle_adjustment_(_params_bundle_adjustment),
                 capture_image_last_(nullptr),
                 capture_image_incoming_(nullptr),

@@ -15,7 +15,7 @@ namespace wolf
 {
 
 ProcessorTrackerFeatureImage::ProcessorTrackerFeatureImage(ParamsProcessorTrackerFeatureImagePtr _params_tracker_feature_image) :
-    ProcessorTrackerFeature("ProcessorTrackerFeatureImage", 3, _params_tracker_feature_image),
+    ProcessorTrackerFeature("ProcessorTrackerFeatureImage", "PO", 3, _params_tracker_feature_image),
     cell_width_(0), cell_height_(0),  // These will be initialized to proper values taken from the sensor via function configure()
     params_tracker_feature_image_(_params_tracker_feature_image)
 {
