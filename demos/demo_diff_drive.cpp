@@ -279,10 +279,10 @@ int main(int argc, char** argv)
 
   // Print statistics
   TimeStamp t0, tf;
-  t0 = wolf_problem_ptr_->getProcessorMotion()->getBuffer().get().front().ts_;
-  tf = wolf_problem_ptr_->getProcessorMotion()->getBuffer().get().back().ts_;
+  t0 = wolf_problem_ptr_->getProcessorMotion()->getBuffer().front().ts_;
+  tf = wolf_problem_ptr_->getProcessorMotion()->getBuffer().back().ts_;
 
-  double N = (double)wolf_problem_ptr_->getProcessorMotion()->getBuffer().get().size();
+  double N = (double)wolf_problem_ptr_->getProcessorMotion()->getBuffer().size();
 
   WOLF_INFO("t0        : " , t0.get()               , " secs");
   WOLF_INFO("tf        : " , tf.get()               , " secs");
