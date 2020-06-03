@@ -47,6 +47,7 @@ inline FactorEpipolar::FactorEpipolar(const FeatureBasePtr& _feature_ptr,
                                       bool _apply_loss_function,
                                       FactorStatus _status) :
         FactorAutodiff<FactorEpipolar, 1, 3, 4, 3, 4, 3, 4>("FEATURE EPIPOLAR",
+                                                            _feature_ptr,
                                                             nullptr,
                                                             nullptr,
                                                             _feature_other_ptr,

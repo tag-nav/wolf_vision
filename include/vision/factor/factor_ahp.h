@@ -63,6 +63,7 @@ inline FactorAhp::FactorAhp(const FeatureBasePtr&   _ftr_ptr,
                             bool             _apply_loss_function,
                             FactorStatus _status) :
         FactorAutodiff<FactorAhp, 2, 3, 4, 3, 4, 4>("AHP",
+                                                    _ftr_ptr,
                                                     _landmark_ptr->getAnchorFrame(),
                                                     nullptr,
                                                     nullptr,
