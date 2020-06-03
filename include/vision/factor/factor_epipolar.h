@@ -158,8 +158,8 @@ inline bool FactorEpipolar::operator ()(const T* const _frame_own_p,
 
     // Covariance of error
     Matrix<T, 1, 1> Q_e =
-            J_e_uown  .template block<1, 2>(0, 0) * getFeature()     ->getMeasurementCovariance().cast<T>() * J_e_uown  .template block<1, 2>(0, 0). transpose()
-          + J_e_uother.template block<1, 2>(0, 0) * getFeatureOther()->getMeasurementCovariance().cast<T>() * J_e_uother.template block<1, 2>(0, 0). transpose();
+            J_e_uown  .template block<1, 2>(0, 0) * getFeature()     ->getMeasurementCovariance().cast<T>() * J_e_uown  .template block<1, 2>(0, 0).transpose()
+          + J_e_uother.template block<1, 2>(0, 0) * getFeatureOther()->getMeasurementCovariance().cast<T>() * J_e_uother.template block<1, 2>(0, 0).transpose();
 
     // Sqrt of inverse of the covariance is sigma^-1
     T sigma_inv = 1.0 / sqrt(Q_e(0, 0));
