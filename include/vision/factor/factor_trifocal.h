@@ -151,6 +151,7 @@ FactorTrifocal::FactorTrifocal(const FeatureBasePtr& _feature_1_ptr,
                                                bool _apply_loss_function,
                                                FactorStatus _status) :
         FactorAutodiff( "TRIFOCAL PLP",
+                        _feature_own_ptr,
                         nullptr,
                         nullptr,
                         _feature_2_ptr, //< this sets feature 2 (the one between the oldest and the newest)

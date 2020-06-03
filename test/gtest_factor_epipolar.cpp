@@ -46,59 +46,65 @@ TEST(FactorEpipolar, exemple)
     auto C0 = CaptureBase   ::emplace<CaptureImage>(F0, F0->getTimeStamp(), camera, cv::Mat());
     auto C1 = CaptureBase   ::emplace<CaptureImage>(F1, F1->getTimeStamp(), camera, cv::Mat());
     auto f0 = FeatureBase   ::emplace<FeaturePointImage>(C0, pix0, 0, cv::Mat(), Matrix2d::Identity());
-    auto f1 = FeatureBase   ::emplace<FeaturePointImage>(C1, pix1, 0, cv::Mat(), Matrix2d::Identity());
-    auto c  = FactorBase    ::emplace<FactorEpipolar>(f0, f0, f1, nullptr, false);
 
     double residual_0, residual_1, residual_2, residual_n1;
 
     // same line
-    c->operator()(F0->getP()->getState().data(),
-                  F0->getO()->getState().data(),
-                  F1->getP()->getState().data(),
-                  F1->getO()->getState().data(),
-                  camera->getP()->getState().data(),
-                  camera->getO()->getState().data(),
-                  &residual_0);
+    auto f1 = FeatureBase   ::emplace<FeaturePointImage>(C1, pix1, 0, cv::Mat(), Matrix2d::Identity());
+    auto c0 = FactorBase    ::emplace<FactorEpipolar>(f0, f0, f1, nullptr, false);
+    c0->operator()(F0->getP()->getState().data(),
+                   F0->getO()->getState().data(),
+                   F1->getP()->getState().data(),
+                   F1->getO()->getState().data(),
+                   camera->getP()->getState().data(),
+                   camera->getO()->getState().data(),
+                   &residual_0);
 
     WOLF_TRACE("residual @  0 pix: ", residual_0);
 
     ASSERT_NEAR(residual_0, 0.0, 1e-6);
 
     // lines 1 pix difference
-    f1->setMeasurement(Vector2d(300, 241));
-    c->operator()(F0->getP()->getState().data(),
-                  F0->getO()->getState().data(),
-                  F1->getP()->getState().data(),
-                  F1->getO()->getState().data(),
-                  camera->getP()->getState().data(),
-                  camera->getO()->getState().data(),
-                  &residual_1);
+    auto f2 = FeatureBase   ::emplace<FeaturePointImage>(C1, Vector2d(300, 241), 0, cv::Mat(), Matrix2d::Identity());
+    auto c1 = FactorBase    ::emplace<FactorEpipolar>(f0, f0, f2, nullptr, false);
+    //f1->setMeasurement(Vector2d(300, 241));
+    c1->operator()(F0->getP()->getState().data(),
+                   F0->getO()->getState().data(),
+                   F1->getP()->getState().data(),
+                   F1->getO()->getState().data(),
+                   camera->getP()->getState().data(),
+                   camera->getO()->getState().data(),
+                   &residual_1);
 
     WOLF_TRACE("residual @  1 pix : ", residual_1);
 
     // lines 2 pixels difference
-    f1->setMeasurement(Vector2d(300, 242));
-    c->operator()(F0->getP()->getState().data(),
-                  F0->getO()->getState().data(),
-                  F1->getP()->getState().data(),
-                  F1->getO()->getState().data(),
-                  camera->getP()->getState().data(),
-                  camera->getO()->getState().data(),
-                  &residual_2);
+    auto f3 = FeatureBase   ::emplace<FeaturePointImage>(C1, Vector2d(300, 242), 0, cv::Mat(), Matrix2d::Identity());
+    auto c2 = FactorBase    ::emplace<FactorEpipolar>(f0, f0, f3, nullptr, false);
+    //f1->setMeasurement(Vector2d(300, 242));
+    c2->operator()(F0->getP()->getState().data(),
+                   F0->getO()->getState().data(),
+                   F1->getP()->getState().data(),
+                   F1->getO()->getState().data(),
+                   camera->getP()->getState().data(),
+                   camera->getO()->getState().data(),
+                   &residual_2);
 
     WOLF_TRACE("residual @  2 pix : ", residual_2);
 
     ASSERT_NEAR(residual_2, 2.0 * residual_1, 1e-6);
 
     // lines 1 pix difference in the other direction
-    f1->setMeasurement(Vector2d(300, 239));
-    c->operator()(F0->getP()->getState().data(),
-                  F0->getO()->getState().data(),
-                  F1->getP()->getState().data(),
-                  F1->getO()->getState().data(),
-                  camera->getP()->getState().data(),
-                  camera->getO()->getState().data(),
-                  &residual_n1);
+    auto f4 = FeatureBase   ::emplace<FeaturePointImage>(C1, Vector2d(300, 239), 0, cv::Mat(), Matrix2d::Identity());
+    auto c3 = FactorBase    ::emplace<FactorEpipolar>(f0, f0, f4, nullptr, false);
+    //f1->setMeasurement(Vector2d(300, 239));
+    c3->operator()(F0->getP()->getState().data(),
+                   F0->getO()->getState().data(),
+                   F1->getP()->getState().data(),
+                   F1->getO()->getState().data(),
+                   camera->getP()->getState().data(),
+                   camera->getO()->getState().data(),
+                   &residual_n1);
 
     WOLF_TRACE("residual @ -1 pix : ", residual_n1);
 
