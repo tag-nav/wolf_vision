@@ -233,16 +233,6 @@ src/yaml/processor_bundle_adjustment_yaml.cpp
 #   SET(SRCS_WRAPPER)
 # ENDIF(Ceres_FOUND)
 
-if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-  message(STATUS "Using C++ compiler clang")
-  target_compile_options(${PROJECT_NAME} PRIVATE -Winconsistent-missing-override)
-  # using Clang
-elseif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-  message(STATUS "Using C++ compiler gnu")
-  target_compile_options(${PROJECT_NAME} PRIVATE -Wsuggest-override)
-  # using GCC
-endif()
-
 # create the shared library
 ADD_LIBRARY(${PLUGIN_NAME}
   SHARED
@@ -260,6 +250,20 @@ ADD_LIBRARY(${PLUGIN_NAME}
   ${SRCS_WRAPPER}
   ${SRCS_YAML}
   )
+  
+# Set compiler options
+# ====================
+if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+  message(STATUS "Using C++ compiler clang")
+  target_compile_options(${PLUGIN_NAME} PRIVATE -Winconsistent-missing-override)
+  # using Clang
+elseif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+  message(STATUS "Using C++ compiler gnu")
+  target_compile_options(${PLUGIN_NAME} PRIVATE -Wsuggest-override)
+  # using GCC
+endif()
+
+  
 TARGET_LINK_LIBRARIES(${PLUGIN_NAME} ${wolf_LIBRARIES})
 TARGET_LINK_LIBRARIES(${PLUGIN_NAME} ${OpenCV_LIBS})
 TARGET_LINK_LIBRARIES(${PLUGIN_NAME} ${vision_utils_LIBRARY})
