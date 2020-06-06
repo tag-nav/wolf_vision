@@ -145,11 +145,11 @@ using namespace Eigen;
 
 // Constructor
 FactorTrifocal::FactorTrifocal(const FeatureBasePtr& _feature_1_ptr,
-                                               const FeatureBasePtr& _feature_2_ptr,
-                                               const FeatureBasePtr& _feature_own_ptr,
-                                               const ProcessorBasePtr& _processor_ptr,
-                                               bool _apply_loss_function,
-                                               FactorStatus _status) :
+                               const FeatureBasePtr& _feature_2_ptr,
+                               const FeatureBasePtr& _feature_own_ptr,
+                               const ProcessorBasePtr& _processor_ptr,
+                               bool _apply_loss_function,
+                               FactorStatus _status) :
         FactorAutodiff( "TRIFOCAL PLP",
                         _feature_own_ptr,
                         nullptr,

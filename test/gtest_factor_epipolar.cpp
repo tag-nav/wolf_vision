@@ -41,8 +41,8 @@ TEST(FactorEpipolar, exemple)
     auto S      = P->installSensor("SensorCamera", "camera", posecam, intr);
     auto camera = std::static_pointer_cast<SensorCamera>(S);
 
-    auto F0 = P             ->emplaceFrame(KEY, pose0, 0.0);
-    auto F1 = P             ->emplaceFrame(KEY, pose1, 1.0);
+    auto F0 = P             ->emplaceFrame(KEY, 0.0, pose0);
+    auto F1 = P             ->emplaceFrame(KEY, 1.0, pose1);
     auto C0 = CaptureBase   ::emplace<CaptureImage>(F0, F0->getTimeStamp(), camera, cv::Mat());
     auto C1 = CaptureBase   ::emplace<CaptureImage>(F1, F1->getTimeStamp(), camera, cv::Mat());
     auto f0 = FeatureBase   ::emplace<FeaturePointImage>(C0, pix0, 0, cv::Mat(), Matrix2d::Identity());
@@ -60,9 +60,8 @@ TEST(FactorEpipolar, exemple)
                    camera->getO()->getState().data(),
                    &residual_0);
 
-    WOLF_TRACE("residual @  0 pix: ", residual_0);
+    WOLF_TRACE("residual @  0 pix : ", residual_0);
 
-    ASSERT_NEAR(residual_0, 0.0, 1e-6);
 
     // lines 1 pix difference
     auto f2 = FeatureBase   ::emplace<FeaturePointImage>(C1, Vector2d(300, 241), 0, cv::Mat(), Matrix2d::Identity());
@@ -92,7 +91,6 @@ TEST(FactorEpipolar, exemple)
 
     WOLF_TRACE("residual @  2 pix : ", residual_2);
 
-    ASSERT_NEAR(residual_2, 2.0 * residual_1, 1e-6);
 
     // lines 1 pix difference in the other direction
     auto f4 = FeatureBase   ::emplace<FeaturePointImage>(C1, Vector2d(300, 239), 0, cv::Mat(), Matrix2d::Identity());
@@ -108,6 +106,19 @@ TEST(FactorEpipolar, exemple)
 
     WOLF_TRACE("residual @ -1 pix : ", residual_n1);
 
+
+    // all asserts down here:
+
+    // residual zero when nominal
+    ASSERT_NEAR(residual_0, 0.0, 1e-6);
+
+    // residual positive when camera up
+    ASSERT_GT(residual_1, 0.0);
+
+    // residual double when camera doubly up
+    ASSERT_NEAR(residual_2, 2.0 * residual_1, 1e-6);
+
+    // residual opposite when cam down
     ASSERT_NEAR(residual_1, -residual_n1, 1e-6);
 
 }

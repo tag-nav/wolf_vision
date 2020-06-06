@@ -172,15 +172,15 @@ class FactorPixelHpTest : public testing::Test{
         	cv::KeyPoint kp = cv::KeyPoint(p, 32.0f);
         	cv::Mat des = cv::Mat::zeros(1,8, CV_8UC1);
 
-            F1 = problem->emplaceFrame(KEY, pose1, 1.0);
+            F1 = problem->emplaceFrame(KEY, 1.0, pose1);
             I1 = std::static_pointer_cast<CaptureImage>(CaptureBase::emplace<CaptureImage>(F1, 1.0, camera, cv::Mat(intr->width,intr->height,CV_8UC1)));
             f11 = std::static_pointer_cast<FeaturePointImage>(FeatureBase::emplace<FeaturePointImage>(I1, kp, 0, des, pix_cov)); // pixel at origin
 
-            F2 = problem->emplaceFrame(KEY, pose2, 2.0);
+            F2 = problem->emplaceFrame(KEY, 2.0, pose2);
             I2 = std::static_pointer_cast<CaptureImage>((CaptureBase::emplace<CaptureImage>(F2, 2.0, camera, cv::Mat(intr->width,intr->height,CV_8UC1))));
             f21 = std::static_pointer_cast<FeaturePointImage>(FeatureBase::emplace<FeaturePointImage>(I2, kp, 0, des, pix_cov));  // pixel at origin
 
-            F3 = problem->emplaceFrame(KEY, pose3, 3.0);
+            F3 = problem->emplaceFrame(KEY, 3.0, pose3);
             I3 = std::static_pointer_cast<CaptureImage>(CaptureBase::emplace<CaptureImage>(F3, 3.0, camera, cv::Mat(intr->width,intr->height,CV_8UC1)));
             f31 = std::static_pointer_cast<FeaturePointImage>(FeatureBase::emplace<FeaturePointImage>(I3, kp, 0, des, pix_cov));  // pixel at origin
 
@@ -221,7 +221,7 @@ TEST(ProcessorFactorPixelHp, testZeroResidual)
     ProcessorBundleAdjustmentPtr proc_bundle_adj = std::static_pointer_cast<ProcessorBundleAdjustment>(proc);
 
     // Frame
-    FrameBasePtr frm0 = problem_ptr->emplaceFrame(KEY, problem_ptr->zeroState(), TimeStamp(0));
+    FrameBasePtr frm0 = problem_ptr->emplaceFrame(KEY, 0.0, problem_ptr->stateZero());
 
     // Capture
     auto cap0 = std::static_pointer_cast<CaptureImage>(CaptureImage::emplace<CaptureImage>(frm0, TimeStamp(0), camera, cv::Mat::zeros(480,640, 1)));
@@ -283,7 +283,7 @@ TEST_F(FactorPixelHpTest, testSolveLandmarkAltered)
     L1->unfix();
 
     auto orig = L1->point();
-    L1->getP()->setState(L1->getState() + Vector4d::Random());
+    L1->getP()->setState(L1->getState().vector("P") + Vector4d::Random());
     std::string report = ceres_manager->solve(wolf::SolverManager::ReportVerbosity::FULL);
 
     std::cout << report << std::endl;
@@ -312,7 +312,7 @@ TEST_F(FactorPixelHpTest, testSolveFramePosition2ObservableDoF)
     auto ori = F1->getO()->getState();
     Vector7d state;
     state << position, ori;
-    F1->setState(state);
+    F1->setState(VectorComposite(state, "PO", {3,4}));
 
     F1->getO()->fix();
     F1->getP()->unfix();
@@ -402,9 +402,9 @@ TEST_F(FactorPixelHpTest, testSolveFramePosition)
     Vector3d position;
     position << Vector3d::Random()*100;//2.0, 2.0, 2.0;
     auto ori = F1->getO()->getState();
-    Vector7d state;
-    state << position, ori;
-    F1->setState(state);
+//    Vector7d state;
+//    state << position, ori;
+    F1->setState("PO", {position, ori});
 
     F1->getO()->fix();
     F1->getP()->unfix();
@@ -430,7 +430,7 @@ TEST_F(FactorPixelHpTest, testSolveBundleAdjustment)
 
 
     // Go around a weird bug: if we do not perturbate this LMK then the test fails.
-    L1->getP()->setState(L1->getState() + Vector4d::Random()*1e-12);
+    L1->perturb(1e-12);
 
 
 
