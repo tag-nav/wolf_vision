@@ -62,6 +62,7 @@ inline FactorPixelHp::FactorPixelHp(const FeatureBasePtr&   _ftr_ptr,
                                     bool             _apply_loss_function,
                                     FactorStatus _status) :
         FactorAutodiff<FactorPixelHp, 2, 3, 4, 3, 4, 4>("PIXELHP",
+                                                        _ftr_ptr,
                                                         nullptr,
                                                         nullptr,
                                                         nullptr,
