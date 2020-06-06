@@ -60,12 +60,11 @@ TEST(FactorEpipolar, exemple)
                   camera->getO()->getState().data(),
                   &residual_0);
 
-    WOLF_TRACE("residual @  0 pix: ", residual_0);
+    WOLF_TRACE("residual @  0 pix : ", residual_0);
 
-    ASSERT_NEAR(residual_0, 0.0, 1e-6);
 
-    // lines 1 pix difference
-    f1->setMeasurement(Vector2d(300, 241));
+    // Move F0 up a lil
+    F0->getP()->setState(Vector3d(0, -0.001, 0));
     c->operator()(F0->getP()->getState().data(),
                   F0->getO()->getState().data(),
                   F1->getP()->getState().data(),
@@ -76,8 +75,9 @@ TEST(FactorEpipolar, exemple)
 
     WOLF_TRACE("residual @  1 pix : ", residual_1);
 
-    // lines 2 pixels difference
-    f1->setMeasurement(Vector2d(300, 242));
+
+    // move F0 up double than before
+    F0->getP()->setState(Vector3d(0, -0.002, 0));
     c->operator()(F0->getP()->getState().data(),
                   F0->getO()->getState().data(),
                   F1->getP()->getState().data(),
@@ -88,10 +88,9 @@ TEST(FactorEpipolar, exemple)
 
     WOLF_TRACE("residual @  2 pix : ", residual_2);
 
-    ASSERT_NEAR(residual_2, 2.0 * residual_1, 1e-6);
 
-    // lines 1 pix difference in the other direction
-    f1->setMeasurement(Vector2d(300, 239));
+    // Move F0 down a lil
+    F0->getP()->setState(Vector3d(0, +0.001, 0));
     c->operator()(F0->getP()->getState().data(),
                   F0->getO()->getState().data(),
                   F1->getP()->getState().data(),
@@ -102,6 +101,19 @@ TEST(FactorEpipolar, exemple)
 
     WOLF_TRACE("residual @ -1 pix : ", residual_n1);
 
+
+    // all asserts down here:
+
+    // residual zero when nominal
+    ASSERT_NEAR(residual_0, 0.0, 1e-6);
+
+    // residual positive when camera up
+    ASSERT_GT(residual_1, 0.0);
+
+    // residual double when camera doubly up
+    ASSERT_NEAR(residual_2, 2.0 * residual_1, 1e-6);
+
+    // residual opposite when cam down
     ASSERT_NEAR(residual_1, -residual_n1, 1e-6);
 
 }
