@@ -430,7 +430,10 @@ TEST_F(FactorPixelHpTest, testSolveBundleAdjustment)
 
 
     // Go around a weird bug: if we do not perturbate this LMK then the test fails.
-    L1->perturb(1e-12);
+    // EDIT 2020/06/07: it seems to work
+    // todo remove this if working fine long after this edit
+    // todo close issue wolf/#245 related to this
+    //    L1->perturb(1e-12);
 
 
 
