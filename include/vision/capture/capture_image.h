@@ -37,7 +37,7 @@ class CaptureImage : public CaptureBase
 
     public:
         CaptureImage(const TimeStamp& _ts, SensorCameraPtr _camera_ptr, cv::Mat _data_cv);
-        virtual ~CaptureImage();
+        ~CaptureImage() override;
 
         const cv::Mat& getImage() const;
         void setDescriptors(const cv::Mat &_descriptors);

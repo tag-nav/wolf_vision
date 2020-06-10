@@ -84,14 +84,14 @@ class ProcessorBundleAdjustment : public ProcessorTrackerFeature
         ProcessorBundleAdjustment(ParamsProcessorBundleAdjustmentPtr _params_bundle_adjustment);
         /** \brief Class destructor
         */
-        virtual ~ProcessorBundleAdjustment()
+        ~ProcessorBundleAdjustment() override
         {
             //
         }
 
     public:
 
-        virtual void configure(SensorBasePtr _sensor) override;
+        void configure(SensorBasePtr _sensor) override;
 
         /** Pre-process incoming Capture
          *
@@ -104,7 +104,7 @@ class ProcessorBundleAdjustment : public ProcessorTrackerFeature
          *   - initializing counters, flags, or any derived variables
          *   - initializing algorithms needed for processing the derived data
          */
-        virtual void preProcess() override;
+        void preProcess() override;
 
         /** Post-process
          *
@@ -116,7 +116,7 @@ class ProcessorBundleAdjustment : public ProcessorTrackerFeature
          *   - resetting and/or clearing variables and/or algorithms at the end of processing
          *   - drawing / printing / logging the results of the processing
          */
-        virtual void postProcess() override;
+        void postProcess() override;
 
         /** \brief Track provided features in \b _capture
          * \param _features_in input list of features in \b last to track
@@ -126,7 +126,7 @@ class ProcessorBundleAdjustment : public ProcessorTrackerFeature
          *
          * \return the number of features tracked
          */
-        virtual unsigned int trackFeatures(const FeatureBasePtrList& _features_in,
+        unsigned int trackFeatures(const FeatureBasePtrList& _features_in,
                                            const CaptureBasePtr& _capture,
                                            FeatureBasePtrList& _features_out,
                                            FeatureMatchMap& _feature_correspondences) override;
@@ -136,7 +136,7 @@ class ProcessorBundleAdjustment : public ProcessorTrackerFeature
          * \param _incoming_feature input/output feature in incoming capture to be corrected
          * \return false if the the process discards the correspondence with origin's feature
          */
-        virtual bool correctFeatureDrift(const FeatureBasePtr _origin_feature, const FeatureBasePtr _last_feature, FeatureBasePtr _incoming_feature) override;
+        bool correctFeatureDrift(const FeatureBasePtr _origin_feature, const FeatureBasePtr _last_feature, FeatureBasePtr _incoming_feature) override;
 
         /** \brief Vote for KeyFrame generation
          *
@@ -145,7 +145,7 @@ class ProcessorBundleAdjustment : public ProcessorTrackerFeature
          *
          * WARNING! This function only votes! It does not create KeyFrames!
          */
-        virtual bool voteForKeyFrame() const override;
+        bool voteForKeyFrame() const override;
 
         bool isInlier(const cv::KeyPoint& _kp_incoming, const cv::KeyPoint& _kp_last) const;
 
@@ -167,7 +167,7 @@ class ProcessorBundleAdjustment : public ProcessorTrackerFeature
          * The function is called in ProcessorTrackerFeature::processNew() to set the member new_features_last_,
          * the list of newly detected features of the capture last_ptr_.
          */
-        virtual unsigned int detectNewFeatures(const int& _max_new_features,
+        unsigned int detectNewFeatures(const int& _max_new_features,
                                                const CaptureBasePtr& _capture,
                                                FeatureBasePtrList& _features_out) override;
 
@@ -179,13 +179,13 @@ class ProcessorBundleAdjustment : public ProcessorTrackerFeature
          *
          * This function emplaces a factor of the appropriate type for the derived processor.
          */
-        virtual FactorBasePtr emplaceFactor(FeatureBasePtr _feature_ptr, FeatureBasePtr _feature_other_ptr) override;
+        FactorBasePtr emplaceFactor(FeatureBasePtr _feature_ptr, FeatureBasePtr _feature_other_ptr) override;
 
         virtual LandmarkBasePtr emplaceLandmark(FeatureBasePtr _feature_ptr);
 
         /** \brief Establish factors between features in Captures \b last and \b origin
          */
-        virtual void establishFactors() override;
+        void establishFactors() override;
 
         void setParams(const ParamsProcessorBundleAdjustmentPtr _params);
 

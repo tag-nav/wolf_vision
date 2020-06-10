@@ -31,9 +31,9 @@ class FactorTrifocal : public FactorAutodiff<FactorTrifocal, 3, 3, 4, 3, 4, 3, 4
 
         /** \brief Class Destructor
          */
-        virtual ~FactorTrifocal();
+        ~FactorTrifocal() override;
 
-        virtual std::string getTopology() const override
+        std::string getTopology() const override
         {
             return std::string("GEOM");
         }

@@ -56,7 +56,7 @@ class FeaturePointImage : public FeatureBase
             measurement_(1) = double(_keypoint.pt.y);
         }
 
-       virtual ~FeaturePointImage();
+       ~FeaturePointImage() override;
 
         const cv::KeyPoint& getKeypoint() const;
         void setKeypoint(const cv::KeyPoint& _kp);

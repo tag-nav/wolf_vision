@@ -63,9 +63,9 @@ class ProcessorTrackerFeatureImage : public ProcessorTrackerFeature
         std::list<cv::Point> tracker_target_;
 
         ProcessorTrackerFeatureImage(ParamsProcessorTrackerFeatureImagePtr _params_image);
-        virtual ~ProcessorTrackerFeatureImage();
+        ~ProcessorTrackerFeatureImage() override;
 
-        virtual void configure(SensorBasePtr _sensor) override ;
+        void configure(SensorBasePtr _sensor) override ;
 
     protected:
 
@@ -101,7 +101,7 @@ class ProcessorTrackerFeatureImage : public ProcessorTrackerFeature
          *
          * \return the number of features tracked
          */
-        virtual unsigned int trackFeatures(const FeatureBasePtrList& _features_in,
+        unsigned int trackFeatures(const FeatureBasePtrList& _features_in,
                                            const CaptureBasePtr& _capture,
                                            FeatureBasePtrList& _features_out,
                                            FeatureMatchMap& _feature_correspondences) override;
@@ -111,7 +111,7 @@ class ProcessorTrackerFeatureImage : public ProcessorTrackerFeature
          * \param _incoming_feature input/output feature in incoming capture to be corrected
          * \return false if the the process discards the correspondence with origin's feature
          */
-        virtual bool correctFeatureDrift(const FeatureBasePtr _origin_feature,
+        bool correctFeatureDrift(const FeatureBasePtr _origin_feature,
                                          const FeatureBasePtr _last_feature,
                                          FeatureBasePtr _incoming_feature) override;
 
@@ -122,7 +122,7 @@ class ProcessorTrackerFeatureImage : public ProcessorTrackerFeature
          *
          * WARNING! This function only votes! It does not create KeyFrames!
          */
-        virtual bool voteForKeyFrame() const override;
+        bool voteForKeyFrame() const override;
 
         /** \brief Detect new Features
          * \param _max_features maximum number of features detected (-1: unlimited. 0: none)
@@ -140,7 +140,7 @@ class ProcessorTrackerFeatureImage : public ProcessorTrackerFeature
          * The function is called in ProcessorTrackerFeature::processNew() to set the member new_features_last_,
          * the list of newly detected features of the capture last_ptr_.
          */
-        virtual unsigned int detectNewFeatures(const int& _max_new_features,
+        unsigned int detectNewFeatures(const int& _max_new_features,
                                                const CaptureBasePtr& _capture,
                                                FeatureBasePtrList& _features_out) override;
 
@@ -152,7 +152,7 @@ class ProcessorTrackerFeatureImage : public ProcessorTrackerFeature
          *
          * This function emplaces a factor of the appropriate type for the derived processor.
          */
-        virtual FactorBasePtr emplaceFactor(FeatureBasePtr _feature_ptr, FeatureBasePtr _feature_other_ptr) override;
+        FactorBasePtr emplaceFactor(FeatureBasePtr _feature_ptr, FeatureBasePtr _feature_other_ptr) override;
 
     private:
 

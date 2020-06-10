@@ -80,8 +80,8 @@ class ProcessorTrackerFeatureTrifocal : public ProcessorTrackerFeature
 
         /** \brief Class Destructor
          */
-        virtual ~ProcessorTrackerFeatureTrifocal();
-        virtual void configure(SensorBasePtr _sensor) override;
+        ~ProcessorTrackerFeatureTrifocal() override;
+        void configure(SensorBasePtr _sensor) override;
 
         /** \brief Track provided features in \b _capture
          * \param _features_in input list of features in \b last to track
@@ -91,7 +91,7 @@ class ProcessorTrackerFeatureTrifocal : public ProcessorTrackerFeature
          *
          * \return the number of features tracked
          */
-        virtual unsigned int trackFeatures(const FeatureBasePtrList& _features_in,
+        unsigned int trackFeatures(const FeatureBasePtrList& _features_in,
                                            const CaptureBasePtr& _capture,
                                            FeatureBasePtrList& _features_out,
                                            FeatureMatchMap& _feature_correspondences) override;
@@ -101,7 +101,7 @@ class ProcessorTrackerFeatureTrifocal : public ProcessorTrackerFeature
          * \param _incoming_feature input/output feature in incoming capture to be corrected
          * \return false if the the process discards the correspondence with origin's feature
          */
-        virtual bool correctFeatureDrift(const FeatureBasePtr _origin_feature, const FeatureBasePtr _last_feature, FeatureBasePtr _incoming_feature) override;
+        bool correctFeatureDrift(const FeatureBasePtr _origin_feature, const FeatureBasePtr _last_feature, FeatureBasePtr _incoming_feature) override;
 
         /** \brief Vote for KeyFrame generation
          *
@@ -110,7 +110,7 @@ class ProcessorTrackerFeatureTrifocal : public ProcessorTrackerFeature
          *
          * WARNING! This function only votes! It does not create KeyFrames!
          */
-        virtual bool voteForKeyFrame() const override;
+        bool voteForKeyFrame() const override;
 
         /** \brief Detect new Features
          * \param _max_features maximum number of features detected (-1: unlimited. 0: none)
@@ -123,7 +123,7 @@ class ProcessorTrackerFeatureTrifocal : public ProcessorTrackerFeature
          * The function is called in ProcessorTrackerFeature::processNew() to set the member new_features_last_,
          * the list of newly detected features of the capture last_ptr_.
          */
-        virtual unsigned int detectNewFeatures(const int& _max_new_features,
+        unsigned int detectNewFeatures(const int& _max_new_features,
                                                const CaptureBasePtr& _capture,
                                                FeatureBasePtrList& _features_out) override;
 
@@ -133,33 +133,33 @@ class ProcessorTrackerFeatureTrifocal : public ProcessorTrackerFeature
          *
          * This function emplaces a factor of the appropriate type for the derived processor.
          */
-        virtual FactorBasePtr emplaceFactor(FeatureBasePtr _feature_ptr, FeatureBasePtr _feature_other_ptr) override;
+        FactorBasePtr emplaceFactor(FeatureBasePtr _feature_ptr, FeatureBasePtr _feature_other_ptr) override;
 
         //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
         /** \brief advance pointers
          *
          */
-        virtual void advanceDerived() override;
+        void advanceDerived() override;
 
         /** \brief reset pointers and match lists at KF creation
          *
          */
-        virtual void resetDerived() override;
+        void resetDerived() override;
 
         /** \brief Pre-process: check if all captures (prev-origin, origin, last) are initialized to allow factors creation
          *
          */
-        virtual void preProcess() override;
+        void preProcess() override;
 
         /** \brief Post-process
          *
          */
-        virtual void postProcess() override;
+        void postProcess() override;
 
         /** \brief Establish factors between features in Captures \b last and \b origin
          */
-        virtual void establishFactors() override;
+        void establishFactors() override;
 
         CaptureBasePtr getPrevOrigin();
 

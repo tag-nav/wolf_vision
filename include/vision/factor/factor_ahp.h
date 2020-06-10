@@ -31,9 +31,9 @@ class FactorAhp : public FactorAutodiff<FactorAhp, 2, 3, 4, 3, 4, 4>
                   bool              _apply_loss_function,
                   FactorStatus  _status = FAC_ACTIVE);
 
-        virtual ~FactorAhp() = default;
+        ~FactorAhp() override = default;
 
-        virtual std::string getTopology() const override
+        std::string getTopology() const override
         {
             return std::string("LMK");
         }

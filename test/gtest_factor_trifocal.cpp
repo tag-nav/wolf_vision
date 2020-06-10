@@ -33,12 +33,12 @@ class FactorTrifocalTest : public testing::Test{
 
         double pixel_noise_std;
 
-        virtual ~FactorTrifocalTest()
+        ~FactorTrifocalTest() override
         {
             std::cout << "destructor\n";
         }
 
-        virtual void SetUp() override
+        void SetUp() override
         {
             std::string wolf_root = _WOLF_VISION_ROOT_DIR;
 
@@ -694,7 +694,7 @@ class FactorTrifocalMultiPointTest : public FactorTrifocalTest
         std::vector<FeatureBasePtr> fv1, fv2, fv3;
         std::vector<FactorTrifocalPtr> cv123;
 
-        virtual void SetUp() override
+        void SetUp() override
         {
             FactorTrifocalTest::SetUp();
 

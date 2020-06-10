@@ -25,7 +25,7 @@ class LandmarkAhp : public LandmarkBase
     public:
         LandmarkAhp(Eigen::Vector4d _position_homogeneous, FrameBasePtr _anchor_frame, SensorBasePtr _anchor_sensor, cv::Mat _2d_descriptor);
 
-        virtual ~LandmarkAhp();
+        ~LandmarkAhp() override;
 
         const cv::Mat& getCvDescriptor() const;
         void setCvDescriptor(const cv::Mat& _descriptor);
@@ -39,7 +39,7 @@ class LandmarkAhp : public LandmarkBase
         Eigen::Vector3d getPointInAnchorSensor() const;
         Eigen::Vector3d point() const;
 
-        YAML::Node saveToYaml() const;
+        YAML::Node saveToYaml() const override;
 
         /** \brief Creator for Factory<LandmarkBase, YAML::Node>
          * Caution: This creator does not set the landmark's anchor frame and sensor.

@@ -24,14 +24,14 @@ class LandmarkHp : public LandmarkBase
     public:
         LandmarkHp(Eigen::Vector4d _position_homogeneous, SensorBasePtr _sensor_, cv::Mat _2d_descriptor);
 
-        virtual ~LandmarkHp();
+        ~LandmarkHp() override;
 
         const cv::Mat& getCvDescriptor() const;
         void setCvDescriptor(const cv::Mat& _descriptor);
 
         Eigen::Vector3d point() const;
 
-        YAML::Node saveToYaml() const;
+        YAML::Node saveToYaml() const override;
 
         /** \brief Creator for Factory<LandmarkBase, YAML::Node>
          * Caution: This creator does not set the landmark's sensor.

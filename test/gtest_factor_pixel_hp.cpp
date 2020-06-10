@@ -57,12 +57,12 @@ class FactorPixelHpTest : public testing::Test{
 
         double pixel_noise_std;
 
-        virtual ~FactorPixelHpTest()
+        ~FactorPixelHpTest() override
         {
             std::cout << "destructor\n";
         }
 
-        virtual void SetUp() override
+        void SetUp() override
         {
             // configuration
             /*

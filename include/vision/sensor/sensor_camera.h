@@ -40,7 +40,7 @@ struct ParamsSensorCamera : public ParamsSensorBase
             + "pinhole: "       + converter<std::string>::convert(pinhole_model_rectified)  + "\n"
             + "distortion: "    + converter<std::string>::convert(distortion)               + "\n";
     }
-        virtual ~ParamsSensorCamera() = default;
+        ~ParamsSensorCamera() override = default;
 };
 
 WOLF_PTR_TYPEDEFS(SensorCamera);
@@ -53,7 +53,7 @@ class SensorCamera : public SensorBase
         SensorCamera(const Eigen::VectorXd & _extrinsics, const ParamsSensorCamera& _intrinsics);
         SensorCamera(const Eigen::VectorXd & _extrinsics, ParamsSensorCameraPtr _intrinsics_ptr);
 
-        virtual ~SensorCamera();
+        ~SensorCamera() override;
 
         Eigen::VectorXd getDistortionVector()   { return distortion_; }
         Eigen::VectorXd getCorrectionVector()   { return correction_; }

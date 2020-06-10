@@ -20,7 +20,7 @@ class LandmarkPoint3d : public LandmarkBase
     public:
         LandmarkPoint3d(Eigen::Vector3d _position, cv::Mat _2d_descriptor);
 
-        virtual ~LandmarkPoint3d();
+        ~LandmarkPoint3d() override;
 
         const Eigen::Vector3d point() const;
 
