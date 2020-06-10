@@ -64,7 +64,7 @@ static ParamsProcessorBasePtr createParamsProcessorBundleAdjustment(const std::s
 }
 
 // Register in the FactorySensor
-const bool WOLF_UNUSED registered_prc_bundle_adjustment = FactoryParamsProcessor::get().registerCreator("ProcessorBundleAdjustment", createParamsProcessorBundleAdjustment);
+const bool WOLF_UNUSED registered_prc_bundle_adjustment = FactoryParamsProcessor::registerCreator("ProcessorBundleAdjustment", createParamsProcessorBundleAdjustment);
 
 } // namespace [unnamed]
 

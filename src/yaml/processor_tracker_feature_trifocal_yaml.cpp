@@ -66,7 +66,7 @@ static ParamsProcessorBasePtr createParamsProcessorTrackerFeatureTrifocal(const 
 }
 
 // Register in the FactorySensor
-const bool WOLF_UNUSED registered_prc_trifocal = FactoryParamsProcessor::get().registerCreator("ProcessorTrackerFeatureTrifocal", createParamsProcessorTrackerFeatureTrifocal);
+const bool WOLF_UNUSED registered_prc_trifocal = FactoryParamsProcessor::registerCreator("ProcessorTrackerFeatureTrifocal", createParamsProcessorTrackerFeatureTrifocal);
 
 } // namespace [unnamed]
 

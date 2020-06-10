@@ -59,8 +59,8 @@ int main(void)
     cout << "\n================== ParamsSensor Factory ===================" << endl;
 
     // Use params factory for camera intrinsics
-    ParamsSensorBasePtr intr_cam_ptr = ParamsSensorFactory::get().create("CAMERA", wolf_config + "/camera_params_ueye_sim.yaml");
-    ProcessorParamsBasePtr params_ptr = ProcessorParamsFactory::get().create("IMAGE FEATURE", wolf_config + "/processor_image_feature.yaml");
+    ParamsSensorBasePtr intr_cam_ptr = ParamsSensorFactory::create("CAMERA", wolf_config + "/camera_params_ueye_sim.yaml");
+    ProcessorParamsBasePtr params_ptr = ProcessorParamsFactory::create("IMAGE FEATURE", wolf_config + "/processor_image_feature.yaml");
 
     cout << "CAMERA with intrinsics      : " << (static_pointer_cast<ParamsSensorCamera>(intr_cam_ptr))->pinhole_model_raw.transpose() << endl;
 //    cout << "Processor IMAGE image width : " << (static_pointer_cast<ProcessorParamsImage>(params_ptr))->image.width << endl;

@@ -63,8 +63,8 @@ static ParamsProcessorBasePtr createParamsProcessorImage(const std::string & _fi
 }
 
 // Register in the FactorySensor
-const bool WOLF_UNUSED registered_prc_image_feature_par = FactoryParamsProcessor::get().registerCreator("ProcessorTrackerFeatureImage", createParamsProcessorImage);
-const bool WOLF_UNUSED registered_prc_image_landmark_par = FactoryParamsProcessor::get().registerCreator("ProcessorTrackerLandmarkImage", createParamsProcessorImage);
+const bool WOLF_UNUSED registered_prc_image_feature_par = FactoryParamsProcessor::registerCreator("ProcessorTrackerFeatureImage", createParamsProcessorImage);
+const bool WOLF_UNUSED registered_prc_image_landmark_par = FactoryParamsProcessor::registerCreator("ProcessorTrackerLandmarkImage", createParamsProcessorImage);
 
 }
 }
