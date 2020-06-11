@@ -216,7 +216,7 @@ int main(int argc, char** argv)
 
 	// ------------------------ START EXPERIMENT ------------------------
 	// First frame FIXED
-	last_frame_ptr = bl_problem_ptr->emplaceFrame(KEY, Eigen::Vector3d::Zero(),TimeStamp(0));
+	last_frame_ptr = bl_problem_ptr->emplaceKeyFrame(Eigen::Vector3d::Zero(),TimeStamp(0));
 	last_frame_ptr->fix();
 	bl_problem_ptr->print(4, true, false, true);
 
@@ -238,7 +238,7 @@ int main(int argc, char** argv)
 				Eigen::Vector3d from_pose = frame_from_ptr->getState();
 				R.topLeftCorner(2,2) = Eigen::Rotation2Dd(from_pose(2)).matrix();
 				Eigen::Vector3d new_frame_pose = from_pose + R*meas;
-				last_frame_ptr = bl_problem_ptr->emplaceFrame(KEY, new_frame_pose, TimeStamp(double(edge_to)));
+				last_frame_ptr = bl_problem_ptr->emplaceKeyFrame(new_frame_pose, TimeStamp(double(edge_to)));
 
 				frame_to_ptr = last_frame_ptr;
 

@@ -142,15 +142,15 @@ class FactorTrifocalTest : public testing::Test{
             Vector2d pix(0,0);
             Matrix2d pix_cov(Matrix2d::Identity() * pow(pixel_noise_std, 2));
 
-            F1 = problem->emplaceFrame(KEY, 1.0, pose1);
+            F1 = problem->emplaceKeyFrame(1.0, pose1);
             I1 = std::static_pointer_cast<CaptureImage>(CaptureBase::emplace<CaptureImage>(F1, 1.0, camera, cv::Mat(2,2,CV_8UC1)));
             f1 = FeatureBase::emplace<FeatureBase>(I1, "PIXEL", pix, pix_cov); // pixel at origin
 
-            F2 = problem->emplaceFrame(KEY, 2.0, pose2);
+            F2 = problem->emplaceKeyFrame(2.0, pose2);
             I2 = std::static_pointer_cast<CaptureImage>((CaptureBase::emplace<CaptureImage>(F2, 2.0, camera, cv::Mat(2,2,CV_8UC1))));
             f2 = FeatureBase::emplace<FeatureBase>(I2, "PIXEL", pix, pix_cov); // pixel at origin
 
-            F3 = problem->emplaceFrame(KEY, 3.0, pose3);
+            F3 = problem->emplaceKeyFrame(3.0, pose3);
             I3 = std::static_pointer_cast<CaptureImage>(CaptureBase::emplace<CaptureImage>(F3, 3.0, camera, cv::Mat(2,2,CV_8UC1)));
             f3 = FeatureBase::emplace<FeatureBase>(I3, "PIXEL", pix, pix_cov); // pixel at origin
 
