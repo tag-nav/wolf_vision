@@ -9,7 +9,7 @@
 #include "base/wolf.h"
 #include "base/rotations.h"
 #include "base/problem.h"
-#include "base/ceres_wrapper/ceres_manager.h"
+#include "base/ceres_wrapper/solver_ceres.h"
 #include "base/sensor/sensor_camera.h"
 #include "base/processor/processor_tracker_landmark_apriltag.h"
 #include "base/capture/capture_image.h"
@@ -55,10 +55,9 @@ int main(int argc, char *argv[])
     std::string wolf_root = _WOLF_ROOT_DIR;
     // Wolf problem
     ProblemPtr problem              = Problem::create("PO", 3);
-    ceres::Solver::Options options;
-    options.function_tolerance = 1e-6;
-    options.max_num_iterations = 100;
-    CeresManagerPtr ceres_manager   = std::make_shared<CeresManager>(problem, options);
+    SolverCeresPtr solver   = std::make_shared<SolverCeres>(problem);
+    solver->getSolverOptions().function_tolerance = 1e-6;
+    solver->getSolverOptions().max_num_iterations = 100;
 
 
     WOLF_INFO( "====================    Configure Problem      ======================" )
@@ -184,7 +183,7 @@ int main(int argc, char *argv[])
 //    }
 
     WOLF_INFO( "====================    Solve problem    ======================" )
-    std::string report = ceres_manager->solve(SolverManager::ReportVerbosity::FULL); // 0: nothing, 1: BriefReport, 2: FullReport
+    std::string report = solver->solve(SolverManager::ReportVerbosity::FULL); // 0: nothing, 1: BriefReport, 2: FullReport
     WOLF_DEBUG(report);
     problem->print(3,0,1,1);
 
@@ -219,7 +218,7 @@ int main(int argc, char *argv[])
     // ===============================================
     // Print COVARIANCES of all states
     WOLF_INFO("======== COVARIANCES OF SOLVED PROBLEM : POS | QUAT =======")
-    ceres_manager->computeCovariances(SolverManager::CovarianceBlocksToBeComputed::ALL_MARGINALS);
+    solver->computeCovariances(SolverManager::CovarianceBlocksToBeComputed::ALL_MARGINALS);
     for (auto kf : problem->getTrajectory()->getFrameList())
         if (kf->isKey())
         {

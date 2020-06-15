@@ -13,7 +13,7 @@
 #include "core/capture/capture_image.h"
 #include "core/landmark/landmark_AHP.h"
 #include "core/factor/factor_AHP.h"
-#include "core/ceres_wrapper/ceres_manager.h"
+#include "core/ceres_wrapper/solver_ceres.h"
 
 // Vision utils
 #include <vision_utils/vision_utils.h>
@@ -227,17 +227,16 @@ int main(int argc, char** argv)
     // ========== solve ==================================================================================================
     /* 12 */
     // Ceres wrapper
-    ceres::Solver::Options ceres_options;
-    ceres_options.minimizer_type = ceres::TRUST_REGION; //ceres::TRUST_REGION;LINE_SEARCH
-    ceres_options.max_line_search_step_contraction = 1e-3;
-    //    ceres_options.minimizer_progress_to_stdout = false;
-    //    ceres_options.line_search_direction_type = ceres::LBFGS;
-    //    ceres_options.max_num_iterations = 100;
+    SolverCeres solver(problem);
+    solver.getSolverOptions().minimizer_type = ceres::TRUST_REGION; //ceres::TRUST_REGION;LINE_SEARCH
+    solver.getSolverOptions().max_line_search_step_contraction = 1e-3;
+    //    solver.getSolverOptions().minimizer_progress_to_stdout = false;
+    //    solver.getSolverOptions().line_search_direction_type = ceres::LBFGS;
+    //    solver.getSolverOptions().max_num_iterations = 100;
     google::InitGoogleLogging(argv[0]);
 
-    CeresManager ceres_manager(problem, ceres_options);
 
-    std::string summary = ceres_manager.solve(SolverManager::ReportVerbosity::FULL);// 0: nothing, 1: BriefReport, 2: FullReport
+    std::string summary = solver.solve(SolverManager::ReportVerbosity::FULL);// 0: nothing, 1: BriefReport, 2: FullReport
     std::cout << summary << std::endl;
 
     // Test of convergence over the lmk params

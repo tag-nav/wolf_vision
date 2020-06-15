@@ -4,7 +4,7 @@
 #include "core/sensor/sensor_camera.h"
 #include "core/capture/capture_image.h"
 #include "core/processor/processor_tracker_feature_image.h"
-#include "core/ceres_wrapper/ceres_manager.h"
+#include "core/ceres_wrapper/solver_ceres.h"
 
 // Vision utils includes
 #include <vision_utils.h>

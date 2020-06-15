@@ -9,7 +9,7 @@
 #include <core/state_block/state_block.h>
 #include "vision/sensor/sensor_camera.h"
 #include "vision/capture/capture_image.h"
-#include <core/ceres_wrapper/ceres_manager.h>
+#include <core/ceres_wrapper/solver_ceres.h>
 #include "vision/landmark/landmark_HP.h"
 #include "vision/internal/config.h"
 
@@ -100,10 +100,9 @@ int main(int argc, char** argv)
 
     // Wolf problem
     ProblemPtr problem = Problem::create("PO", 3);
-    ceres::Solver::Options options;
-    options.max_num_iterations = 100;
-    options.function_tolerance = 1e-4;
-    CeresManagerPtr ceres_manager = std::make_shared<CeresManager>(problem, options);
+    SolverCeresPtr solver = std::make_shared<SolverCeres>(problem);
+    solver->getSolverOptions().max_num_iterations = 100;
+    solver->getSolverOptions().function_tolerance = 1e-4;
 
 
     // Install camera
@@ -156,7 +155,7 @@ int main(int argc, char** argv)
         if (problem->getTrajectory()->getFrameList().size() > number_of_KFs)
         {
             number_of_KFs = problem->getTrajectory()->getFrameList().size();
-            std::string report = ceres_manager->solve(wolf::SolverManager::ReportVerbosity::BRIEF);
+            std::string report = solver->solve(wolf::SolverManager::ReportVerbosity::BRIEF);
             std::cout << report << std::endl;
             if (number_of_KFs > 5)
             	break;
