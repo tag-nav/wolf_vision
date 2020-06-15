@@ -14,8 +14,7 @@
 #include <core/utils/utils_gtest.h>
 #include <core/factor/factor_block_absolute.h>
 #include <core/factor/factor_quaternion_absolute.h>
-#include <core/ceres_wrapper/ceres_manager.h>
-#include <core/ceres_wrapper/ceres_manager.h>
+#include <core/ceres_wrapper/solver_ceres.h>
 
 using namespace wolf;
 using namespace Eigen;
@@ -33,7 +32,7 @@ class FactorPixelHpTest : public testing::Test{
         Vector4d    lmkHP1, lmkHP2, lmkHP3, lmkHP4;
 
         ProblemPtr      problem;
-        CeresManagerPtr ceres_manager;
+        SolverCeresPtr  solver;
 
 
         SensorCameraPtr camera;
@@ -147,11 +146,9 @@ class FactorPixelHpTest : public testing::Test{
 
             // Build problem
             problem = Problem::create("PO", 3);
-            ceres::Solver::Options options;
-            options.function_tolerance  = 1e-6;
-            options.max_num_iterations  = 200;
-            ceres_manager = std::make_shared<CeresManager>(problem, options);
-
+            solver = std::make_shared<SolverCeres>(problem);
+            solver->getSolverOptions().function_tolerance  = 1e-6;
+            solver->getSolverOptions().max_num_iterations  = 200;
 
             // Install sensor and processor
         	ParamsSensorCameraPtr intr      = std::make_shared<ParamsSensorCamera>();
@@ -198,7 +195,6 @@ TEST(ProcessorFactorPixelHp, testZeroResidual)
 {
     //Build problem
     ProblemPtr problem_ptr = Problem::create("PO", 3);
-    CeresManagerPtr ceres_mgr = std::make_shared<CeresManager>(problem_ptr);
 
     // Install sensor
     ParamsSensorCameraPtr intr      = std::make_shared<ParamsSensorCamera>();
@@ -261,7 +257,7 @@ TEST_F(FactorPixelHpTest, testSolveLandmark)
     L1->unfix();
 
     auto orig = L1->point();
-    std::string report = ceres_manager->solve(wolf::SolverManager::ReportVerbosity::FULL);
+    std::string report = solver->solve(wolf::SolverManager::ReportVerbosity::FULL);
 
     std::cout << report << std::endl;
 
@@ -284,7 +280,7 @@ TEST_F(FactorPixelHpTest, testSolveLandmarkAltered)
 
     auto orig = L1->point();
     L1->getP()->setState(L1->getState().vector("P") + Vector4d::Random());
-    std::string report = ceres_manager->solve(wolf::SolverManager::ReportVerbosity::FULL);
+    std::string report = solver->solve(wolf::SolverManager::ReportVerbosity::FULL);
 
     std::cout << report << std::endl;
 
@@ -317,7 +313,7 @@ TEST_F(FactorPixelHpTest, testSolveFramePosition2ObservableDoF)
     F1->getO()->fix();
     F1->getP()->unfix();
 
-    std::string report = ceres_manager->solve(wolf::SolverManager::ReportVerbosity::FULL);
+    std::string report = solver->solve(wolf::SolverManager::ReportVerbosity::FULL);
 
     std::cout << report << std::endl;
 
@@ -409,7 +405,7 @@ TEST_F(FactorPixelHpTest, testSolveFramePosition)
     F1->getO()->fix();
     F1->getP()->unfix();
 
-    std::string report = ceres_manager->solve(wolf::SolverManager::ReportVerbosity::FULL);
+    std::string report = solver->solve(wolf::SolverManager::ReportVerbosity::FULL);
 
     std::cout << report << std::endl;
 
@@ -566,7 +562,7 @@ TEST_F(FactorPixelHpTest, testSolveBundleAdjustment)
 	auto l4 = L4->getP()->getState();
 
 
-	std::string report = ceres_manager->solve(wolf::SolverManager::ReportVerbosity::FULL);
+	std::string report = solver->solve(wolf::SolverManager::ReportVerbosity::FULL);
 	std::cout << report << std::endl;
 
 	//
@@ -612,7 +608,7 @@ TEST_F(FactorPixelHpTest, testSolveBundleAdjustment)
 	// solve again
     problem->print(1,0,1,1);
 
-    report = ceres_manager->solve(wolf::SolverManager::ReportVerbosity::FULL);
+    report = solver->solve(wolf::SolverManager::ReportVerbosity::FULL);
 	std::cout << report << std::endl;
 
 	problem->print(1,0,1,1);
