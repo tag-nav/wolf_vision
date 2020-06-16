@@ -206,9 +206,9 @@ FactorTrifocal::FactorTrifocal(const FeatureBasePtr& _feature_1_ptr,
     Matrix<double,3,2> J_e_u3 = J_e_m3 * J_m_u;
 
     // Error covariances induced by each of the measurement covariance // canonical units
-    Matrix3d Q1 = J_e_u1 * _feature_1_ptr   ->getMeasurementCovariance() * J_e_u1.transpose(); // FIXME: changed getFeaturePrev() by _feature_1_ptr
-    Matrix3d Q2 = J_e_u2 * _feature_2_ptr   ->getMeasurementCovariance() * J_e_u2.transpose(); // FIXME: changed getFeatureOther() by _feature_2_ptr
-    Matrix3d Q3 = J_e_u3 * _feature_own_ptr ->getMeasurementCovariance() * J_e_u3.transpose(); // FIXME: changed getFeature() by _feature_own_ptr
+    Matrix3d Q1 = J_e_u1 * _feature_1_ptr   ->getMeasurementCovariance() * J_e_u1.transpose();
+    Matrix3d Q2 = J_e_u2 * _feature_2_ptr   ->getMeasurementCovariance() * J_e_u2.transpose();
+    Matrix3d Q3 = J_e_u3 * _feature_own_ptr ->getMeasurementCovariance() * J_e_u3.transpose();
 
     // Total error covariance // canonical units
     Matrix3d Q = Q1 + Q2 + Q3;
