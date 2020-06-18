@@ -25,11 +25,11 @@ struct ParamsSensorCamera : public ParamsSensorBase
     ParamsSensorCamera(std::string _unique_name, const ParamsServer& _server):
         ParamsSensorBase(_unique_name,  _server)
     {
-        width                   = _server.getParam<unsigned int>(_unique_name       + "/width");
-        height                  = _server.getParam<unsigned int>(_unique_name       + "/height");
-        pinhole_model_raw       = _server.getParam<Eigen::Vector4d>(_unique_name    + "/pinhole_model_raw");
-        pinhole_model_rectified = _server.getParam<Eigen::Vector4d>(_unique_name    + "/pinhole_model_rectified");
-        distortion              = _server.getParam<Eigen::VectorXd>(_unique_name    + "/distortion");
+        width                   = _server.getParam<unsigned int>(prefix + _unique_name       + "/width");
+        height                  = _server.getParam<unsigned int>(prefix + _unique_name       + "/height");
+        pinhole_model_raw       = _server.getParam<Eigen::Vector4d>(prefix + _unique_name    + "/pinhole_model_raw");
+        pinhole_model_rectified = _server.getParam<Eigen::Vector4d>(prefix + _unique_name    + "/pinhole_model_rectified");
+        distortion              = _server.getParam<Eigen::VectorXd>(prefix + _unique_name    + "/distortion");
     }
     std::string print() const
     {
@@ -52,6 +52,7 @@ class SensorCamera : public SensorBase
 
         SensorCamera(const Eigen::VectorXd & _extrinsics, const ParamsSensorCamera& _intrinsics);
         SensorCamera(const Eigen::VectorXd & _extrinsics, ParamsSensorCameraPtr _intrinsics_ptr);
+        WOLF_SENSOR_CREATE(SensorCamera, ParamsSensorCamera, 7);
 
         ~SensorCamera() override;
 
@@ -82,11 +83,6 @@ class SensorCamera : public SensorBase
 
     public:
         EIGEN_MAKE_ALIGNED_OPERATOR_NEW; // to guarantee alignment (see http://eigen.tuxfamily.org/dox-devel/group__TopicStructHavingEigenMembers.html)
-
-        static SensorBasePtr create(const std::string & _unique_name, //
-                                    const Eigen::VectorXd& _extrinsics, //
-                                    const ParamsSensorBasePtr _intrinsics);
-
 };
 
 inline bool SensorCamera::useRawImages()

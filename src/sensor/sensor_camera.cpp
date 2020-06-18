@@ -46,21 +46,6 @@ Eigen::Matrix3d SensorCamera::setIntrinsicMatrix(Eigen::Vector4d _pinhole_model)
     K.row(2) << 0, 0, 1;
     return K;
 }
-
-// Define the factory method
-SensorBasePtr SensorCamera::create(const std::string& _unique_name, //
-                                 const Eigen::VectorXd& _extrinsics_pq, //
-                                 const ParamsSensorBasePtr _intrinsics)
-{
-    assert(_extrinsics_pq.size() == 7 && "Bad extrinsics vector length. Should be 7 for 3d.");
-
-    std::shared_ptr<ParamsSensorCamera> intrinsics_ptr = std::static_pointer_cast<ParamsSensorCamera>(_intrinsics);
-    SensorCameraPtr sen_ptr = std::make_shared<SensorCamera>(_extrinsics_pq, intrinsics_ptr);
-    sen_ptr->setName(_unique_name);
-
-    return sen_ptr;
-}
-
 } // namespace wolf
 
 // Register in the FactorySensor
@@ -68,5 +53,6 @@ SensorBasePtr SensorCamera::create(const std::string& _unique_name, //
 namespace wolf
 {
 WOLF_REGISTER_SENSOR(SensorCamera)
+WOLF_REGISTER_SENSOR_AUTO(SensorCamera)
 } // namespace wolf
 
