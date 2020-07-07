@@ -27,17 +27,52 @@ struct ParamsSensorCamera : public ParamsSensorBase
     {
         width                   = _server.getParam<unsigned int>(prefix + _unique_name       + "/width");
         height                  = _server.getParam<unsigned int>(prefix + _unique_name       + "/height");
-        pinhole_model_raw       = _server.getParam<Eigen::Vector4d>(prefix + _unique_name    + "/pinhole_model_raw");
-        pinhole_model_rectified = _server.getParam<Eigen::Vector4d>(prefix + _unique_name    + "/pinhole_model_rectified");
-        distortion              = _server.getParam<Eigen::VectorXd>(prefix + _unique_name    + "/distortion");
+        VectorXd distortion     = _server.getParam<Eigen::VectorXd>(prefix + _unique_name + "/distortion_coefficients/data");
+        VectorXd intrinsic      = _server.getParam<Eigen::VectorXd>(prefix + _unique_name + "/camera_matrix/data");
+        VectorXd projection     = _server.getParam<Eigen::VectorXd>(prefix + _unique_name + "/projection_matrix/data");
+
+        pinhole_model_raw[0] = intrinsic[2];
+        pinhole_model_raw[1] = intrinsic[5];
+        pinhole_model_raw[2] = intrinsic[0];
+        pinhole_model_raw[3] = intrinsic[4];
+
+        pinhole_model_rectified[0] = projection[2];
+        pinhole_model_rectified[1] = projection[6];
+        pinhole_model_rectified[2] = projection[0];
+        pinhole_model_rectified[3] = projection[5];
+
+        assert (distortion.size() == 5 && "Distortion size must be size 5!");
+
+        WOLF_WARN_COND( distortion(2) != 0 || distortion(3) != 0 , "Wolf does not handle tangential distortion. Please consider re-calibrating without tangential distortion!");
+
+        if (distortion(4) == 0)
+            if (distortion(1) == 0)
+                if (distortion(0) == 0)
+                    distortion.resize(0);
+                else
+                {
+                    distortion.resize(1);
+                    distortion = distortion.head<1>();
+                }
+            else
+            {
+                distortion.resize(2);
+                distortion = distortion.head<2>();
+            }
+        else
+        {
+            distortion.resize(3);
+            distortion.head<2>() = distortion.head<2>();
+            distortion.tail<1>() = distortion.tail<1>();
+        }
     }
     std::string print() const
     {
-        return "\n" + ParamsSensorBase::print()                                               + "\n"
+        return "\n" + ParamsSensorBase::print()                                             + "\n"
             + "width: "         + std::to_string(width)                                     + "\n"
             + "height: "        + std::to_string(height)                                    + "\n"
             + "pinhole: "       + converter<std::string>::convert(pinhole_model_raw)        + "\n"
-            + "pinhole: "       + converter<std::string>::convert(pinhole_model_rectified)  + "\n"
+            + "pinhole rect.: " + converter<std::string>::convert(pinhole_model_rectified)  + "\n"
             + "distortion: "    + converter<std::string>::convert(distortion)               + "\n";
     }
         ~ParamsSensorCamera() override = default;
