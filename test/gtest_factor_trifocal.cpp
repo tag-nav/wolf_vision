@@ -2,7 +2,7 @@
 
 #include "core/utils/logging.h"
 
-#include "core/ceres_wrapper/ceres_manager.h"
+#include "core/ceres_wrapper/solver_ceres.h"
 #include "vision/processor/processor_tracker_feature_trifocal.h"
 #include "vision/capture/capture_image.h"
 #include "vision/factor/factor_trifocal.h"
@@ -20,7 +20,7 @@ class FactorTrifocalTest : public testing::Test{
         Vector7d    pose1,  pose2,  pose3,  pose_cam;
 
         ProblemPtr      problem;
-        CeresManagerPtr ceres_manager;
+        SolverCeresPtr  solver;
 
         SensorCameraPtr camera;
         ProcessorTrackerFeatureTrifocalPtr proc_trifocal;
@@ -121,8 +121,7 @@ class FactorTrifocalTest : public testing::Test{
 
             // Build problem
             problem = Problem::create("PO", 3);
-            ceres::Solver::Options options;
-            ceres_manager = std::make_shared<CeresManager>(problem, options);
+            solver = std::make_shared<SolverCeres>(problem);
 
             // Install sensor and processor
             S      = problem->installSensor("SensorCamera", "canonical", pose_cam, wolf_root + "/demos/camera_params_canonical.yaml");
@@ -411,7 +410,7 @@ TEST_F(FactorTrifocalTest, solve_F1)
     F2->fix();
     F3->fix();
 
-    std::string report = ceres_manager->solve(SolverManager::ReportVerbosity::BRIEF);
+    std::string report = solver->solve(SolverManager::ReportVerbosity::BRIEF);
 
     F1_p = F1->getP()->getState();
     F1_o = F1->getO()->getState();
@@ -491,7 +490,7 @@ TEST_F(FactorTrifocalTest, solve_F2)
     F2->unfix();
     F3->fix();
 
-    std::string report = ceres_manager->solve(SolverManager::ReportVerbosity::BRIEF);
+    std::string report = solver->solve(SolverManager::ReportVerbosity::BRIEF);
 
     F1_p = F1->getP()->getState();
     F1_o = F1->getO()->getState();
@@ -572,7 +571,7 @@ TEST_F(FactorTrifocalTest, solve_F3)
     F2->fix();
     F3->unfix();
 
-    std::string report = ceres_manager->solve(SolverManager::ReportVerbosity::BRIEF);
+    std::string report = solver->solve(SolverManager::ReportVerbosity::BRIEF);
 
     F1_p = F1->getP()->getState();
     F1_o = F1->getO()->getState();
@@ -652,7 +651,7 @@ TEST_F(FactorTrifocalTest, solve_S)
     F2->fix();
     F3->fix();
 
-    std::string report = ceres_manager->solve(SolverManager::ReportVerbosity::BRIEF);
+    std::string report = solver->solve(SolverManager::ReportVerbosity::BRIEF);
 
     F1_p = F1->getP()->getState();
     F1_o = F1->getO()->getState();
@@ -777,10 +776,10 @@ TEST_F(FactorTrifocalMultiPointTest, solve_multi_point)
     F3->getP()->setState( pos3   + 0.2*Vector3d::Random());
     F3->getO()->setState((vquat3 + 0.2*Vector4d::Random()).normalized());
 
-    std::string report = ceres_manager->solve(SolverManager::ReportVerbosity::BRIEF);
+    std::string report = solver->solve(SolverManager::ReportVerbosity::FULL);
 
     // Print results
-    WOLF_DEBUG("report: ", report);
+    WOLF_INFO("report: ", report);
     problem->print(1,0,1,0);
 
     // Evaluate final states
@@ -842,7 +841,7 @@ TEST_F(FactorTrifocalMultiPointTest, solve_multi_point_scale)
     F3->getP()->setState( 2 * pos3 + 0.2*Vector3d::Random());
     F3->getO()->setState((  vquat3 + 0.2*Vector4d::Random()).normalized());
 
-    std::string report = ceres_manager->solve(SolverManager::ReportVerbosity::BRIEF);
+    std::string report = solver->solve(SolverManager::ReportVerbosity::BRIEF);
 
     // Print results
     WOLF_DEBUG("report: ", report);
@@ -924,13 +923,13 @@ TEST_F(FactorTrifocalMultiPointTest, solve_multi_point_distance)
     // F1->addConstrainedBy(cd);
 
     cd->setStatus(FAC_INACTIVE);
-    std::string report = ceres_manager->solve(SolverManager::ReportVerbosity::BRIEF);
+    std::string report = solver->solve(SolverManager::ReportVerbosity::BRIEF);
     WOLF_DEBUG("DISTANCE CONSTRAINT INACTIVE: \n", report);
 
     problem->print(1,0,1,0);
 
     cd->setStatus(FAC_ACTIVE);
-    report = ceres_manager->solve(SolverManager::ReportVerbosity::BRIEF);
+    report = solver->solve(SolverManager::ReportVerbosity::BRIEF);
 
     // Print results
     WOLF_DEBUG("DISTANCE CONSTRAINT ACTIVE: \n", report);

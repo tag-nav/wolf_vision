@@ -75,7 +75,7 @@ inline FactorPixelHp::FactorPixelHp(const FeatureBasePtr&   _ftr_ptr,
                                                         _ftr_ptr->getCapture()->getSensorP(),
                                                         _ftr_ptr->getCapture()->getSensorO(),
                                                         _landmark_ptr->getP()),
-        intrinsic_(_ftr_ptr->getCapture()->getSensor()->getIntrinsic()->getState()) //TODO: intrinsic
+        intrinsic_(_ftr_ptr->getCapture()->getSensor()->getIntrinsic()->getState())
 {
 //	std::cout << "FactorPixelHp::Constructor\n";
     // obtain some intrinsics from provided sensor

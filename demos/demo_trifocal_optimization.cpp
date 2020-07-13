@@ -13,7 +13,7 @@
 #include "../processors/processor_tracker_feature_trifocal.h"
 #include "../capture_image.h"
 #include "../sensor_camera.h"
-#include "../ceres_wrapper/ceres_manager.h"
+#include "../ceres_wrapper/solver_ceres.h"
 #include "../rotations.h"
 #include "../capture_pose.h"
 #include "../capture_void.h"
@@ -87,11 +87,9 @@ int main(int argc, char** argv)
     ProblemPtr problem = Problem::create("PO", 3);
 
     // CERES WRAPPER
-    CeresManagerPtr ceres_manager;
-    ceres::Solver::Options ceres_options;
-    ceres_options.max_num_iterations = 50;
-    ceres_options.function_tolerance = 1e-6;
-    ceres_manager = make_shared<CeresManager>(problem, ceres_options);
+    SolverCeresPtr solver = make_shared<SolverCeres>(problem, ceres_options);
+    solver->getSolverOptions().max_num_iterations = 50;
+    solver->getSolverOptions().function_tolerance = 1e-6;
 
     // Install tracker (sensor and processor)
     Eigen::Vector7d cam_ext; cam_ext << 0.0,0.0,0.0, 0.0,0.0,0.0,1.0;
@@ -189,7 +187,7 @@ int main(int argc, char** argv)
 
     std::cout << "================== SOLVE 1rst TIME ========================" << std::endl;
 
-    std::string report = ceres_manager->solve(SolverManager::ReportVerbosity::FULL);
+    std::string report = solver->solve(SolverManager::ReportVerbosity::FULL);
     std::cout << report << std::endl;
 
     problem->print(1,1,1,0);
@@ -204,7 +202,7 @@ int main(int argc, char** argv)
     // ===============================================
     // GET COVARIANCES of all states
     WOLF_TRACE("======== COVARIANCES OF SOLVED PROBLEM =======")
-    ceres_manager->computeCovariances(SolverManager::CovarianceBlocksToBeComputed::ALL_MARGINALS);
+    solver->computeCovariances(SolverManager::CovarianceBlocksToBeComputed::ALL_MARGINALS);
     for (auto kf : problem->getTrajectoryPtr()->getFrameList())
         if (kf->isKey())
         {
@@ -239,7 +237,7 @@ int main(int argc, char** argv)
     // ===============================================
 
     // ===== SOLVE SECOND TIME =====
-    report = ceres_manager->solve(SolverManager::ReportVerbosity::FULL);
+    report = solver->solve(SolverManager::ReportVerbosity::FULL);
 
     std::cout << report << std::endl;
 
