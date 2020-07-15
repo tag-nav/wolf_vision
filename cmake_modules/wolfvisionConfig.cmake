@@ -76,14 +76,14 @@ list(APPEND wolfvision_LIBRARIES ${OpenCV_LIBS})
 
 #Making sure wolf is looked for
 if(NOT wolf_FOUND)
-  FIND_PACKAGE(wolf REQUIRED)
+  FIND_PACKAGE(wolfcore REQUIRED)
 
   #We reverse in order to insert at the start
   list(REVERSE wolfvision_INCLUDE_DIRS)
-  list(APPEND wolfvision_INCLUDE_DIRS ${wolf_INCLUDE_DIRS})
+  list(APPEND wolfvision_INCLUDE_DIRS ${wolfcore_INCLUDE_DIRS})
   list(REVERSE wolfvision_INCLUDE_DIRS)
 
   list(REVERSE wolfvision_LIBRARIES)
-  list(APPEND wolfvision_LIBRARIES ${wolf_LIBRARIES})
+  list(APPEND wolfvision_LIBRARIES ${wolfcore_LIBRARIES})
   list(REVERSE wolfvision_LIBRARIES)
 endif()
