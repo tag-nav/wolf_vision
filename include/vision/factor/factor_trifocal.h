@@ -171,7 +171,11 @@ FactorTrifocal::FactorTrifocal(const FeatureBasePtr& _feature_1_ptr,
         camera_ptr_(std::static_pointer_cast<SensorCamera>(_processor_ptr->getSensor())),
         sqrt_information_upper(Matrix3d::Zero())
 {
-    Matrix3d K_inv           = camera_ptr_->getIntrinsicMatrix().inverse();
+    // First add feature_1_ptr to the list of features (because the constructor FeatureAutodiff did not do so)
+    if (_feature_1_ptr) feature_other_list_.push_back(_feature_1_ptr);
+
+    // Store some geometry elements
+    Matrix3d K_inv          = camera_ptr_->getIntrinsicMatrix().inverse();
     pixel_canonical_1_      = K_inv * Vector3d(_feature_1_ptr->getMeasurement(0), _feature_1_ptr->getMeasurement(1), 1.0);
     pixel_canonical_2_      = K_inv * Vector3d(_feature_2_ptr->getMeasurement(0), _feature_2_ptr->getMeasurement(1), 1.0);
     pixel_canonical_3_      = K_inv * Vector3d(_feature_own_ptr->getMeasurement(0), _feature_own_ptr->getMeasurement(1), 1.0);
