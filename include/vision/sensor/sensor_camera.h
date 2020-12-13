@@ -66,9 +66,9 @@ struct ParamsSensorCamera : public ParamsSensorBase
             distortion.tail<1>() = distortion.tail<1>();
         }
     }
-    std::string print() const
+    std::string print() const override
     {
-        return "\n" + ParamsSensorBase::print()                                             + "\n"
+        return ParamsSensorBase::print()                                             + "\n"
             + "width: "         + std::to_string(width)                                     + "\n"
             + "height: "        + std::to_string(height)                                    + "\n"
             + "pinhole: "       + converter<std::string>::convert(pinhole_model_raw)        + "\n"

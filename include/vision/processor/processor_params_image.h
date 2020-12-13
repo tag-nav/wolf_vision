@@ -30,7 +30,7 @@ struct ParamsProcessorTrackerFeatureImage : public ParamsProcessorTrackerFeature
         pixel_noise_std                 = _server.getParam<double>(_unique_name         + "/pixel_noise_std");
         pixel_noise_var                 = _server.getParam<double>(_unique_name         + "/pixel_noise_var");
     }
-    std::string print() const
+    std::string print() const override
     {
         return "\n" + ParamsProcessorTrackerFeature::print()                                    + "\n"
             + "yaml_file_params_vision_utils: " + yaml_file_params_vision_utils                 + "\n"
