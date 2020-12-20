@@ -384,12 +384,7 @@ TEST_F(FactorTrifocalTest, solve_F1)
     ASSERT_MATRIX_APPROX(res, Vector3d::Zero(), 1e-8);
 
     // Residual with perturbated state
-
-//    Vector7d pose_perturbated = F1->getState() + 0.1 * Vector7d::Random();
-//    pose_perturbated.segment(3,4).normalize();
-//    F1->setState(pose_perturbated);
     F1->perturb(0.1);
-//    VectorXd pose_perturbated = F1->getState().vector("PO");
 
     F1_p = F1->getP()->getState();
     F1_o = F1->getO()->getState();
@@ -769,12 +764,7 @@ TEST_F(FactorTrifocalMultiPointTest, solve_multi_point)
     F3->getO()->unfix(); // Estimate Cam 3 ori
 
     // Perturbate states, keep scale
-    F1->getP()->setState( pos1   );
-    F1->getO()->setState( vquat1 );
-    F2->getP()->setState( pos2   ); // this fixes the scale
-    F2->getO()->setState((vquat2 + 0.2*Vector4d::Random()).normalized());
-    F3->getP()->setState( pos3   + 0.2*Vector3d::Random());
-    F3->getO()->setState((vquat3 + 0.2*Vector4d::Random()).normalized());
+    problem->perturb(0.1);
 
     std::string report = solver->solve(SolverManager::ReportVerbosity::FULL);
 
@@ -834,12 +824,7 @@ TEST_F(FactorTrifocalMultiPointTest, solve_multi_point_scale)
     F3->getO()->unfix(); // Estimate Cam 3 ori
 
     // Perturbate states, change scale
-    F1->getP()->setState( 2 * pos1 );
-    F1->getO()->setState(   vquat1 );
-    F2->getP()->setState( 2 * pos2 );
-    F2->getO()->setState((  vquat2 + 0.2*Vector4d::Random()).normalized());
-    F3->getP()->setState( 2 * pos3 + 0.2*Vector3d::Random());
-    F3->getO()->setState((  vquat3 + 0.2*Vector4d::Random()).normalized());
+    problem->perturb(0.1);
 
     std::string report = solver->solve(SolverManager::ReportVerbosity::BRIEF);
 
@@ -900,12 +885,7 @@ TEST_F(FactorTrifocalMultiPointTest, solve_multi_point_distance)
     F3->getO()->unfix(); // Estimate Cam 3 ori
 
     // Perturbate states, change scale
-    F1->getP()->setState( pos1   );
-    F1->getO()->setState( vquat1 );
-    F2->getP()->setState( pos2   + 0.2*Vector3d::Random() );
-    F2->getO()->setState((vquat2 + 0.2*Vector4d::Random()).normalized());
-    F3->getP()->setState( pos3   + 0.2*Vector3d::Random());
-    F3->getO()->setState((vquat3 + 0.2*Vector4d::Random()).normalized());
+    problem->perturb(0.1);
 
     // Add a distance factor to fix the scale
     double distance     = sqrt(2.0);
