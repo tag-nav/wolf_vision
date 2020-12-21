@@ -26,7 +26,11 @@ class ProcessorBundleAdjustmentDummy : public ProcessorBundleAdjustment
 {
 	public:
 
-		ProcessorBundleAdjustmentDummy(ParamsProcessorBundleAdjustmentPtr& _params_bundle_adjustment):ProcessorBundleAdjustment(_params_bundle_adjustment){}
+		ProcessorBundleAdjustmentDummy(ParamsProcessorBundleAdjustmentPtr& _params_bundle_adjustment):
+		    ProcessorBundleAdjustment(_params_bundle_adjustment)
+	    {
+
+	    }
 
 		void setLast(CaptureImagePtr _last_ptr)
 		{
@@ -68,11 +72,9 @@ class ProcessorBundleAdjustmentDummy : public ProcessorBundleAdjustment
 			return matches_last_from_incoming_;
 		}
 
-		CaptureImagePtr createCaptureImage(std::string _path, SensorCameraPtr _sensor, bool detectAndDescript = false)
+		CaptureImagePtr createCaptureImage(TimeStamp _ts, std::string _path, SensorCameraPtr _sensor, bool detectAndDescript = false)
 		{
-			const double time = 0.0;
-			TimeStamp ts(time);
-		    CaptureImagePtr im = std::make_shared<CaptureImage>(ts, _sensor, cv::imread(_path));
+		    CaptureImagePtr im = std::make_shared<CaptureImage>(_ts, _sensor, cv::imread(_path));
 		    if (detectAndDescript){
 		    	// Detect KeyPoints
 		    	im->keypoints_ = det_ptr_->detect(im->getImage());
@@ -138,10 +140,10 @@ TEST(ProcessorBundleAdjustment, preProcess)
     auto proc_dummy = std::make_shared<ProcessorBundleAdjustmentDummy>(params);
 
     // Put an image on incoming_ptr_
-    CaptureImagePtr image_inc_ptr = proc_dummy->createCaptureImage(wolf_vision_root + "/demos/demo_gazebo_x00cm_y00cm.jpg", nullptr);
+    CaptureImagePtr image_inc_ptr = proc_dummy->createCaptureImage(0, wolf_vision_root + "/demos/demo_gazebo_x00cm_y00cm.jpg", nullptr);
     proc_dummy->setInc(image_inc_ptr);
     // Put an image on last_ptr_
-    CaptureImagePtr image_last_ptr = proc_dummy->createCaptureImage(wolf_vision_root + "/demos/demo_gazebo_x00cm_y00cm.jpg", nullptr, true);
+    CaptureImagePtr image_last_ptr = proc_dummy->createCaptureImage(1, wolf_vision_root + "/demos/demo_gazebo_x00cm_y00cm.jpg", nullptr, true);
     proc_dummy->setLast(image_last_ptr);
     // demo dpreProcess
     proc_dummy->preProcess();
@@ -169,7 +171,7 @@ TEST(ProcessorBundleAdjustment, detectNewFeatures)
     FeatureBasePtrList feat_list = std::list<FeatureBasePtr>();
 
     // Put an image on last_ptr_
-    CaptureImagePtr image_last_ptr = proc_dummy->createCaptureImage(wolf_vision_root + "/demos/demo_gazebo_x00cm_y00cm.jpg", nullptr, true);
+    CaptureImagePtr image_last_ptr = proc_dummy->createCaptureImage(0, wolf_vision_root + "/demos/demo_gazebo_x00cm_y00cm.jpg", nullptr, true);
     ASSERT_NE(image_last_ptr->keypoints_.size(), 0);
     proc_dummy->setLast(image_last_ptr);
 
@@ -178,7 +180,7 @@ TEST(ProcessorBundleAdjustment, detectNewFeatures)
     ASSERT_EQ(num, 0);
 
     // Put an image on incoming_ptr_
-    CaptureImagePtr image_inc_ptr = proc_dummy->createCaptureImage(wolf_vision_root + "/demos/demo_gazebo_x00cm_y00cm.jpg", nullptr);
+    CaptureImagePtr image_inc_ptr = proc_dummy->createCaptureImage(1, wolf_vision_root + "/demos/demo_gazebo_x00cm_y00cm.jpg", nullptr);
     proc_dummy->setInc(image_inc_ptr);
 
     // demo detectNewFeatures
@@ -212,9 +214,9 @@ TEST(ProcessorBundleAdjustment, trackFeatures)
 
     //fill feat_last list
     FeatureBasePtrList feat_list = std::list<FeatureBasePtr>();
-    CaptureImagePtr image_last_ptr = proc_dummy->createCaptureImage(wolf_vision_root + "/demos/demo_gazebo_x00cm_y00cm.jpg", nullptr, true);
+    CaptureImagePtr image_last_ptr = proc_dummy->createCaptureImage(0, wolf_vision_root + "/demos/demo_gazebo_x00cm_y00cm.jpg", nullptr, true);
     proc_dummy->setLast(image_last_ptr);
-    CaptureImagePtr image_inc_ptr = proc_dummy->createCaptureImage(wolf_vision_root + "/demos/demo_gazebo_x00cm_y00cm.jpg", nullptr);
+    CaptureImagePtr image_inc_ptr = proc_dummy->createCaptureImage(1, wolf_vision_root + "/demos/demo_gazebo_x00cm_y00cm.jpg", nullptr);
     proc_dummy->setInc(image_inc_ptr);
     proc_dummy->preProcess();
     CaptureImagePtr last = std::static_pointer_cast<CaptureImage>(proc_dummy->getLast());
@@ -255,7 +257,7 @@ TEST(ProcessorBundleAdjustment, emplaceLandmark)
     ProcessorBundleAdjustmentPtr proc_bundle_adj = std::static_pointer_cast<ProcessorBundleAdjustment>(proc);
 
     //Frame
-	FrameBasePtr frm0 = problem_ptr->emplaceKeyFrame(0.0, problem_ptr->stateZero());
+	FrameBasePtr frm0 = problem_ptr->emplaceFrame(0.0, problem_ptr->stateZero());
 
 	// Capture, feature and factor
 	auto cap0 = std::static_pointer_cast<CaptureImage>(CaptureImage::emplace<CaptureImage>(frm0, TimeStamp(0), camera, cv::Mat::zeros(480,640, 1)));
@@ -282,10 +284,10 @@ TEST(ProcessorBundleAdjustment, process)
     ProblemPtr problem = Problem::create("PO", 3);
 
     // Install camera
-    ParamsSensorCameraPtr intr = std::make_shared<ParamsSensorCamera>(); // TODO init params or read from YAML
-    intr->pinhole_model_raw = Eigen::Vector4d(0,0,1,1);  //TODO: initialize
-    intr->width  = 640;
-    intr->height = 480;
+    ParamsSensorCameraPtr intr = std::make_shared<ParamsSensorCamera>();
+    intr->pinhole_model_raw = Eigen::Vector4d(640, 480, 640, 640);
+    intr->width  = 1280;
+    intr->height = 960;
     SensorCameraPtr sens_cam = std::static_pointer_cast<SensorCamera>(problem->installSensor("SensorCamera", "camera", (Eigen::Vector7d() << 0,0,0,  0,0,0,1).finished(), intr));
 
     // Install processor
@@ -303,38 +305,42 @@ TEST(ProcessorBundleAdjustment, process)
 	auto proc_dummy = std::static_pointer_cast<ProcessorBundleAdjustmentDummy>(proc);
 
 	//1ST TIME
-	CaptureImagePtr image_inc_ptr = proc_dummy->createCaptureImage(wolf_vision_root + "/demos/demo_gazebo_x00cm_y00cm.jpg", sens_cam);
+	CaptureImagePtr image_inc_ptr = proc_dummy->createCaptureImage(1, wolf_vision_root + "/demos/demo_gazebo_x00cm_y00cm.jpg", sens_cam);
 	image_inc_ptr->process();
-//	proc_dummy->process(image_inc_ptr);
+
+	problem->print(4,0,1,0);
+
 	ASSERT_EQ(proc_dummy->getTrackMatrix().numTracks(), 0);
 	ASSERT_EQ(problem->getMap()->getLandmarkList().size(), 0);
 
 	//2ND TIME
-	CaptureImagePtr image_inc_ptr2 = proc_dummy->createCaptureImage(wolf_vision_root + "/demos/demo_gazebo_x00cm_y00cm.jpg", sens_cam);
-//	proc_dummy->setInc(image_inc_ptr2);
-//	proc_dummy->preProcess();
-//	proc_dummy->getProcessKnown();
-//	proc_dummy->getProcessNew(params->max_new_features);
-//	proc_dummy->establishFactors();
+	CaptureImagePtr image_inc_ptr2 = proc_dummy->createCaptureImage(2, wolf_vision_root + "/demos/demo_gazebo_x00cm_y-10cm.jpg", sens_cam);
 	image_inc_ptr2->process();
-//	proc_dummy->process(image_inc_ptr2);
+
+    problem->print(4,0,1,0);
+
 	ASSERT_LE(proc_dummy->getTrackMatrix().numTracks(), params->max_new_features);
 	ASSERT_NE(problem->getMap(), nullptr);
-	ASSERT_EQ(problem->getMap()->getLandmarkList().empty(), true);
 
 
 	//3RD TIME -- RUNNING
-	CaptureImagePtr image_inc_ptr3 = proc_dummy->createCaptureImage(wolf_vision_root + "/demos/demo_gazebo_x00cm_y00cm.jpg", sens_cam);
+	CaptureImagePtr image_inc_ptr3 = proc_dummy->createCaptureImage(3, wolf_vision_root + "/demos/demo_gazebo_x00cm_y-20cm.jpg", sens_cam);
 	assert(proc_dummy->getOrigin()!=nullptr);
 	assert(proc_dummy->getLast()!= nullptr && proc_dummy->getLast()!=proc_dummy->getOrigin());
 	image_inc_ptr3->process();
-//	proc_dummy->process(image_inc_ptr3);
+
+    problem->print(4,0,1,0);
+
+
 	ASSERT_LE(proc_dummy->getTrackMatrix().numTracks(), params->max_new_features);
 
 	//4TH TIME -- RUNNING
-	CaptureImagePtr image_inc_ptr4 = proc_dummy->createCaptureImage(wolf_vision_root + "/demos/demo_gazebo_x00cm_y00cm.jpg", sens_cam);
+	CaptureImagePtr image_inc_ptr4 = proc_dummy->createCaptureImage(4, wolf_vision_root + "/demos/demo_gazebo_x-10cm_y-20cm.jpg", sens_cam);
 	image_inc_ptr4->process();
-//	proc_dummy->process(image_inc_ptr4);
+
+    problem->print(4,0,1,0);
+
+
 	ASSERT_LE(image_inc_ptr4->getFeatureList().size(), params->max_new_features);
 
 }
@@ -353,6 +359,7 @@ TEST(ProcessorBundleAdjustment, processNew)
 int main(int argc, char **argv)
 {
     testing::InitGoogleTest(&argc, argv);
+//    ::testing::GTEST_FLAG(filter) = "ProcessorBundleAdjustment.process";
     return RUN_ALL_TESTS();
 }
 

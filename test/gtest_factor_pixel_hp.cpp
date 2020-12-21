@@ -169,15 +169,15 @@ class FactorPixelHpTest : public testing::Test{
         	cv::KeyPoint kp = cv::KeyPoint(p, 32.0f);
         	cv::Mat des = cv::Mat::zeros(1,8, CV_8UC1);
 
-            F1 = problem->emplaceKeyFrame(1.0, pose1);
+            F1 = problem->emplaceFrame(1.0, pose1);
             I1 = std::static_pointer_cast<CaptureImage>(CaptureBase::emplace<CaptureImage>(F1, 1.0, camera, cv::Mat(intr->width,intr->height,CV_8UC1)));
             f11 = std::static_pointer_cast<FeaturePointImage>(FeatureBase::emplace<FeaturePointImage>(I1, kp, 0, des, pix_cov)); // pixel at origin
 
-            F2 = problem->emplaceKeyFrame(2.0, pose2);
+            F2 = problem->emplaceFrame(2.0, pose2);
             I2 = std::static_pointer_cast<CaptureImage>((CaptureBase::emplace<CaptureImage>(F2, 2.0, camera, cv::Mat(intr->width,intr->height,CV_8UC1))));
             f21 = std::static_pointer_cast<FeaturePointImage>(FeatureBase::emplace<FeaturePointImage>(I2, kp, 0, des, pix_cov));  // pixel at origin
 
-            F3 = problem->emplaceKeyFrame(3.0, pose3);
+            F3 = problem->emplaceFrame(3.0, pose3);
             I3 = std::static_pointer_cast<CaptureImage>(CaptureBase::emplace<CaptureImage>(F3, 3.0, camera, cv::Mat(intr->width,intr->height,CV_8UC1)));
             f31 = std::static_pointer_cast<FeaturePointImage>(FeatureBase::emplace<FeaturePointImage>(I3, kp, 0, des, pix_cov));  // pixel at origin
 
@@ -217,7 +217,7 @@ TEST(ProcessorFactorPixelHp, testZeroResidual)
     ProcessorBundleAdjustmentPtr proc_bundle_adj = std::static_pointer_cast<ProcessorBundleAdjustment>(proc);
 
     // Frame
-    FrameBasePtr frm0 = problem_ptr->emplaceKeyFrame(0.0, problem_ptr->stateZero());
+    FrameBasePtr frm0 = problem_ptr->emplaceFrame(0.0, problem_ptr->stateZero());
 
     // Capture
     auto cap0 = std::static_pointer_cast<CaptureImage>(CaptureImage::emplace<CaptureImage>(frm0, TimeStamp(0), camera, cv::Mat::zeros(480,640, 1)));
@@ -279,7 +279,8 @@ TEST_F(FactorPixelHpTest, testSolveLandmarkAltered)
     L1->unfix();
 
     auto orig = L1->point();
-    L1->getP()->setState(L1->getState().vector("P") + Vector4d::Random());
+    L1->getP()->perturb(1.0);
+
     std::string report = solver->solve(wolf::SolverManager::ReportVerbosity::FULL);
 
     std::cout << report << std::endl;
@@ -341,11 +342,11 @@ TEST_F(FactorPixelHpTest, testSolveFramePosition)
 
     //landmarks to camera coordinates
     Transform<double,3,Isometry> T_w_r
-    = Translation<double,3>(F1->getP()->getState())
-    * Quaterniond(F1->getO()->getState().data());
+        = Translation<double,3>(F1->getP()->getState())
+        * Quaterniond(F1->getO()->getState().data());
     Transform<double,3,Isometry> T_r_c
-    = Translation<double,3>(I1->getSensorP()->getState())
-    * Quaterniond(I1->getSensorO()->getState().data());
+        = Translation<double,3>(I1->getSensorP()->getState())
+        * Quaterniond(I1->getSensorO()->getState().data());
     Eigen::Matrix<double, 4, 1> lmkHP2_c =  T_r_c.inverse() * T_w_r.inverse() * lmkHP2;
     Eigen::Matrix<double, 4, 1> lmkHP3_c =  T_r_c.inverse() * T_w_r.inverse() * lmkHP3;
     Eigen::Matrix<double, 4, 1> lmkHP4_c =  T_r_c.inverse() * T_w_r.inverse() * lmkHP4;
@@ -395,15 +396,10 @@ TEST_F(FactorPixelHpTest, testSolveFramePosition)
     auto orig = F1->getP()->getState();
 
     //change state
-    Vector3d position;
-    position << Vector3d::Random()*100;//2.0, 2.0, 2.0;
-    auto ori = F1->getO()->getState();
-//    Vector7d state;
-//    state << position, ori;
-    F1->setState("PO", {position, ori});
+    F1->getP()->unfix();
+    F1->getP()->perturb(0.1);
 
     F1->getO()->fix();
-    F1->getP()->unfix();
 
     std::string report = solver->solve(wolf::SolverManager::ReportVerbosity::FULL);
 
@@ -415,9 +411,7 @@ TEST_F(FactorPixelHpTest, testSolveFramePosition)
     // This test checks 3 DoF (3doF are observable).
     ASSERT_MATRIX_APPROX(F1->getP()->getState(), orig, 1e-6);
 
-    Eigen::VectorXd expect = c11->expectation();
-    ASSERT_FLOAT_EQ(expect(0,0),f11->getMeasurement()(0,0));
-    ASSERT_FLOAT_EQ(expect(1,0),f11->getMeasurement()(1,0));
+    ASSERT_MATRIX_APPROX(c11->expectation(), f11->getMeasurement(), 1e-3);
 }
 
 
@@ -584,26 +578,7 @@ TEST_F(FactorPixelHpTest, testSolveBundleAdjustment)
     ASSERT_MATRIX_APPROX(L4->getP()->getState(), l4, 1e-6);
 
 	// perturb states
-
-    // kfs
-	for (auto kf : *problem->getTrajectory())
-	{
-		if (kf == F1) continue;
-
-		if (!kf->getP()->isFixed())
-		    kf->getP()->setState(kf->getP()->getState() + 0.2*Vector3d::Random());
-        if (!kf->getO()->isFixed())
-            kf->getO()->setState((Quaterniond(kf->getO()->getState().data()) * exp_q(0.2*Vector3d::Random())).coeffs());
-	}
-
-	// lmks
-	for (auto lmk : problem->getMap()->getLandmarkList())
-	{
-		if (lmk == L1) continue;
-
-        if (!lmk->isFixed())
-            lmk->getP()->setState(lmk->getP()->getState() + 0.2*Vector4d::Random());
-	}
+    problem->perturb(0.1);
 
 	// solve again
     problem->print(1,0,1,1);
