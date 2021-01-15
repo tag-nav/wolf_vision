@@ -867,7 +867,7 @@ TEST_F(FactorTrifocalMultiPointTest, solve_multi_point_scale)
     }
 }
 
-#include "core/factor/factor_autodiff_distance_3d.h"
+#include <core/factor/factor_distance_3d.h>
 
 TEST_F(FactorTrifocalMultiPointTest, solve_multi_point_distance)
 {
@@ -909,8 +909,8 @@ TEST_F(FactorTrifocalMultiPointTest, solve_multi_point_distance)
     auto fd = FeatureBase::emplace<FeatureBase>(Cd, "DISTANCE", Vector1d(distance), Matrix1d(distance_std * distance_std));
     // FeatureBasePtr fd = std::make_shared<FeatureBase>("DISTANCE", Vector1d(distance), Matrix1d(distance_std * distance_std));
     // Cd->addFeature(fd);
-    auto cd = FactorBase::emplace<FactorAutodiffDistance3d>(fd, fd, F1, nullptr, false, FAC_ACTIVE);
-    // FACTORAUTODIFFDISTANCE3dPTR cd = std::make_shared<FactorAutodiffDistance3d>(fd, F1, nullptr, false, FAC_ACTIVE);
+    auto cd = FactorBase::emplace<FactorDistance3d>(fd, fd, F1, nullptr, false, FAC_ACTIVE);
+    // FactorDistance3dPtr cd = std::make_shared<FactorAutodiffDistance3d>(fd, F1, nullptr, false, FAC_ACTIVE);
     // fd->addFactor(cd);
     // F1->addConstrainedBy(cd);
 
