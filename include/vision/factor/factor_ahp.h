@@ -33,11 +33,6 @@ class FactorAhp : public FactorAutodiff<FactorAhp, 2, 3, 4, 3, 4, 4>
 
         ~FactorAhp() override = default;
 
-        std::string getTopology() const override
-        {
-            return std::string("LMK");
-        }
-
         template<typename T>
         void expectation(const T* const _current_frame_p,
                          const T* const _current_frame_o,
@@ -63,6 +58,7 @@ inline FactorAhp::FactorAhp(const FeatureBasePtr&   _ftr_ptr,
                             bool             _apply_loss_function,
                             FactorStatus _status) :
         FactorAutodiff<FactorAhp, 2, 3, 4, 3, 4, 4>("AHP",
+                                                    TOP_LMK,
                                                     _ftr_ptr,
                                                     _landmark_ptr->getAnchorFrame(),
                                                     nullptr,

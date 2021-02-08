@@ -21,11 +21,6 @@ class FactorEpipolar : public FactorAutodiff<FactorEpipolar, 1, 3, 4, 3, 4, 3, 4
 
         ~FactorEpipolar() override = default;
 
-        std::string getTopology() const override
-        {
-            return std::string("GEOM");
-        }
-
         template<typename T>
         bool operator ()(const T* const _frame_own_p,
                          const T* const _frame_own_o,
@@ -47,6 +42,7 @@ inline FactorEpipolar::FactorEpipolar(const FeatureBasePtr& _feature_ptr,
                                       bool _apply_loss_function,
                                       FactorStatus _status) :
         FactorAutodiff<FactorEpipolar, 1, 3, 4, 3, 4, 3, 4>("FEATURE EPIPOLAR",
+                                                            TOP_GEOM,
                                                             _feature_ptr,
                                                             nullptr,
                                                             nullptr,
