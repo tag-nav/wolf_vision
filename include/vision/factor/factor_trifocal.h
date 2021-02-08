@@ -33,11 +33,6 @@ class FactorTrifocal : public FactorAutodiff<FactorTrifocal, 3, 3, 4, 3, 4, 3, 4
          */
         ~FactorTrifocal() override;
 
-        std::string getTopology() const override
-        {
-            return std::string("GEOM");
-        }
-
         FeatureBasePtr getFeaturePrev();
 
         const Vector3d& getPixelCanonical3() const
@@ -151,6 +146,7 @@ FactorTrifocal::FactorTrifocal(const FeatureBasePtr& _feature_1_ptr,
                                bool _apply_loss_function,
                                FactorStatus _status) :
         FactorAutodiff( "TRIFOCAL PLP",
+                        TOP_GEOM,
                         _feature_own_ptr,
                         nullptr,
                         nullptr,

@@ -32,11 +32,6 @@ class FactorPixelHp : public FactorAutodiff<FactorPixelHp, 2, 3, 4, 3, 4, 4>
 
         ~FactorPixelHp() override = default;
 
-        std::string getTopology() const override
-        {
-            return std::string("LMK");
-        }
-
         template<typename T>
         void expectation(const T* const _frame_p,
                          const T* const _frame_o,
@@ -62,6 +57,7 @@ inline FactorPixelHp::FactorPixelHp(const FeatureBasePtr&   _ftr_ptr,
                                     bool             _apply_loss_function,
                                     FactorStatus _status) :
         FactorAutodiff<FactorPixelHp, 2, 3, 4, 3, 4, 4>("PIXELHP",
+                                                        TOP_LMK,
                                                         _ftr_ptr,
                                                         nullptr,
                                                         nullptr,
