@@ -28,7 +28,6 @@ src/examples/map_polyline_example_write.yaml
 src/CMakeCache.txt
 
 src/CMakeFiles/cmake.check_cache
-src/examples/map_apriltag_save.yaml
 vision.found
 
 \.vscode/
