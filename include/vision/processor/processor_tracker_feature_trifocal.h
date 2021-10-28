@@ -20,13 +20,15 @@ WOLF_STRUCT_PTR_TYPEDEFS(ParamsProcessorTrackerFeatureTrifocal);
 
 struct ParamsProcessorTrackerFeatureTrifocal : public ParamsProcessorTrackerFeature
 {
-        std::string yaml_file_params_vision_utils;
+    std::string yaml_file_params_vision_utils;
 
-        int n_cells_h;
-        int n_cells_v;
-        int min_response_new_feature;
-        double pixel_noise_std; ///< std noise of the pixel
-        int min_track_length_for_factor; ///< Minimum track length of a matched feature to create a factor
+    int n_cells_h;
+    int n_cells_v;
+    int min_response_new_feature;
+    double pixel_noise_std; ///< std noise of the pixel
+    int min_track_length_for_factor; ///< Minimum track length of a matched feature to create a factor
+    bool debug_view;
+
     ParamsProcessorTrackerFeatureTrifocal() = default;
     ParamsProcessorTrackerFeatureTrifocal(std::string _unique_name, const ParamsServer& _server):
         ParamsProcessorTrackerFeature(_unique_name, _server)
@@ -37,6 +39,7 @@ struct ParamsProcessorTrackerFeatureTrifocal : public ParamsProcessorTrackerFeat
         min_response_new_feature        = _server.getParam<int>(_unique_name            + "/min_response_new_feature");
         pixel_noise_std                 = _server.getParam<double>(_unique_name         + "/pixel_noise_std");
         min_track_length_for_factor     = _server.getParam<int>(_unique_name            + "/min_track_length_for_factor");
+        debug_view                      = _server.getParam<bool>(_unique_name           + "/debug_view");
     }
     std::string print() const override
     {
@@ -46,7 +49,8 @@ struct ParamsProcessorTrackerFeatureTrifocal : public ParamsProcessorTrackerFeat
             + "n_cells_v: "                     + std::to_string(n_cells_v)                     + "\n"
             + "min_response_new_feature: "      + std::to_string(min_response_new_feature)      + "\n"
             + "pixel_noise_std: "               + std::to_string(pixel_noise_std)               + "\n"
-            + "min_track_length_for_factor: "   + std::to_string(min_track_length_for_factor)   + "\n";
+            + "min_track_length_for_factor: "   + std::to_string(min_track_length_for_factor)   + "\n"
+            + "debug_view: "                    + std::to_string(debug_view)                    + "\n";
     }
 };
 

@@ -132,6 +132,7 @@ class FactorTrifocalTest : public testing::Test{
             params_tracker_feature_trifocal_trifocal->max_new_features              = 5;
             params_tracker_feature_trifocal_trifocal->min_features_for_keyframe     = 5;
             params_tracker_feature_trifocal_trifocal->yaml_file_params_vision_utils = wolf_root + "/demos/processor_tracker_feature_trifocal_vision_utils.yaml";
+            params_tracker_feature_trifocal_trifocal->debug_view                    = false;
 
             ProcessorBasePtr proc = problem->installProcessor("ProcessorTrackerFeatureTrifocal", "trifocal", camera, params_tracker_feature_trifocal_trifocal);
             proc_trifocal = std::static_pointer_cast<ProcessorTrackerFeatureTrifocal>(proc);

@@ -54,16 +54,20 @@ ProcessorTrackerFeatureTrifocal::ProcessorTrackerFeatureTrifocal(ParamsProcessor
     std::string mat_name = vision_utils::readYamlType(params_tracker_feature_trifocal_->yaml_file_params_vision_utils, "matcher");
     mat_ptr_ = vision_utils::setupMatcher(mat_name, mat_name + " matcher", params_tracker_feature_trifocal_->yaml_file_params_vision_utils);
 
-//    // DEBUG VIEW
-    cv::startWindowThread();
-    cv::namedWindow("DEBUG VIEW", cv::WINDOW_NORMAL);
-//    cv::namedWindow("DEBUG MATCHES", cv::WINDOW_NORMAL);
+    // DEBUG VIEW
+    if (params_tracker_feature_trifocal_->debug_view)
+    {
+        cv::startWindowThread();
+        cv::namedWindow("DEBUG VIEW", cv::WINDOW_NORMAL);
+        //cv::namedWindow("DEBUG MATCHES", cv::WINDOW_NORMAL);
+    }
 }
 
 // Destructor
 ProcessorTrackerFeatureTrifocal::~ProcessorTrackerFeatureTrifocal()
 {
-//    cv::destroyAllWindows();
+    if (params_tracker_feature_trifocal_->debug_view)
+        cv::destroyAllWindows();
 }
 
 bool ProcessorTrackerFeatureTrifocal::isInlier(const cv::KeyPoint& _kp_last, const cv::KeyPoint& _kp_incoming)
@@ -316,17 +320,20 @@ void ProcessorTrackerFeatureTrifocal::preProcess()
         for (auto match : capture_image_incoming_->matches_from_precedent_)
             capture_image_last_->map_index_to_next_[match.trainIdx] = match.queryIdx; // map[last] = incoming
 
-        // DEBUG
-//        cv::Mat img_last = (std::static_pointer_cast<CaptureImage>(last_ptr_))->getImage();
-//        cv::Mat img_incoming = (std::static_pointer_cast<CaptureImage>(incoming_ptr_))->getImage();
+        // DEBUG VIEW
+//        if (params_tracker_feature_trifocal_->debug_view)
+//        {
+//            cv::Mat img_last = (std::static_pointer_cast<CaptureImage>(last_ptr_))->getImage();
+//            cv::Mat img_incoming = (std::static_pointer_cast<CaptureImage>(incoming_ptr_))->getImage();
 //
-//        cv::putText(img_last, "LAST",    cv::Point(img_last.cols/2,20), cv::FONT_HERSHEY_PLAIN, 1.0, CV_RGB(255,0,0), 10.0);
-//        cv::putText(img_incoming, "INCOMING",cv::Point(img_last.cols/2,20), cv::FONT_HERSHEY_PLAIN, 1.0, CV_RGB(255,0,0), 10.0);
+//            cv::putText(img_last, "LAST",    cv::Point(img_last.cols/2,20), cv::FONT_HERSHEY_PLAIN, 1.0, CV_RGB(255,0,0), 10.0);
+//            cv::putText(img_incoming, "INCOMING",cv::Point(img_last.cols/2,20), cv::FONT_HERSHEY_PLAIN, 1.0, CV_RGB(255,0,0), 10.0);
 //
-//        cv::Mat img_matches;
-//        cv::drawMatches(img_incoming, capture_incoming_->keypoints_, img_last, capture_last_->keypoints_, capture_incoming_->matches_from_precedent_, img_matches);
-//        cv::imshow("DEBUG MATCHES", img_matches);
-//        cv::waitKey(0);
+//            cv::Mat img_matches;
+//            cv::drawMatches(img_incoming, capture_incoming_->keypoints_, img_last, capture_last_->keypoints_, capture_incoming_->matches_from_precedent_, img_matches);
+//            cv::imshow("DEBUG MATCHES", img_matches);
+//            cv::waitKey(0);
+//        }
     }
 }
 
@@ -356,11 +363,14 @@ void ProcessorTrackerFeatureTrifocal::postProcess()
         kp_enh_tracks[feat_id] = kp_enh_track;
     }
 
-    // DEBUG
-    image_debug_ = vision_utils::buildImageProcessed((std::static_pointer_cast<CaptureImage>(last_ptr_))->getImage(), kp_enh_tracks);
+    // DEBUG VIEW
+    if (params_tracker_feature_trifocal_->debug_view)
+    {
+        image_debug_ = vision_utils::buildImageProcessed((std::static_pointer_cast<CaptureImage>(last_ptr_))->getImage(), kp_enh_tracks);
 
-    cv::imshow("DEBUG VIEW", image_debug_);
-    cv::waitKey(1);
+        cv::imshow("DEBUG VIEW", image_debug_);
+        cv::waitKey(1);
+    }
 }
 
 FactorBasePtr ProcessorTrackerFeatureTrifocal::emplaceFactor(FeatureBasePtr _feature_ptr, FeatureBasePtr _feature_other_ptr)
