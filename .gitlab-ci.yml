@@ -20,24 +20,37 @@
   # update apt
   - apt-get update
 
+
 .install_wolf_template: &install_wolf_definition
-  - git clone ssh://git@gitlab.iri.upc.edu:2202/mobile_robotics/wolf_projects/wolf_lib/wolf.git
-  - cd wolf
+  - if [ -d wolf ]; then
+  -   echo "directory wolf exists"
+  -   cd wolf
+  -   git pull
+  - else
+  -   git clone ssh://git@gitlab.iri.upc.edu:2202/mobile_robotics/wolf_projects/wolf_lib/wolf.git
+  -   cd wolf
+  - fi
   - mkdir -pv build
   - cd build
   - cmake -DCMAKE_BUILD_TYPE=release -DBUILD_EXAMPLES=ON -DBUILD_TESTS=ON ..
-  - make -j$(nproc)
-  - ctest -j$(nproc)
+  - make -j2
+  - ctest -j2
   - make install
   - cd ../..
 
 .install_visionutils_template: &install_visionutils_definition
-  - git clone https://gitlab.iri.upc.edu/labrobotica/algorithms/vision_utils.git
-  - cd laser_scan_utils
+  - if [ -d vision_utils ]; then
+  -   echo "directory vision_utils exists"
+  -   cd vision_utils
+  -   git pull
+  - else
+  -   git clone https://gitlab.iri.upc.edu/labrobotica/algorithms/vision_utils.git
+  -   cd vision_utils
+  - fi
   - mkdir -pv build
   - cd build
   - cmake -DCMAKE_BUILD_TYPE=release ..
-  - make -j$(nproc)
+  - make -j2
   - make install
   - cd ../..
 
@@ -45,13 +58,20 @@
   - mkdir -pv build
   - cd build
   - cmake -DCMAKE_BUILD_TYPE=release -DBUILD_EXAMPLES=ON -DBUILD_TESTS=ON ..
-  - make -j$(nproc)
-  - ctest -j$(nproc)
+  - make -j2
+  - ctest -j2
   - make install
 
 ############ UBUNTU 16.04 TESTS ############
 wolf_build_and_test_none:xenial:
   image: labrobotica/wolf_vision_deps:16.04
+  cache:
+    - key: wolf-xenial
+      paths:
+      - wolf/
+    - key: visionutils-xenial
+      paths:
+      - vision_utils/
   except:
     - master
   before_script:
@@ -65,6 +85,13 @@ wolf_build_and_test_none:xenial:
 ############ UBUNTU 18.04 TESTS ############
 wolf_build_and_test_none:bionic:
   image: labrobotica/wolf_vision_deps:18.04
+  cache:
+    - key: wolf-bionic
+      paths:
+      - wolf/
+    - key: visionutils-bionic
+      paths:
+      - vision_utils/
   except:
     - master
   before_script:
