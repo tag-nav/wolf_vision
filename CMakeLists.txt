@@ -102,7 +102,6 @@ ENDIF(BUILD_EXAMPLES OR BUILD_TESTS)
 FIND_PACKAGE(wolfcore REQUIRED)
 
 FIND_PACKAGE(vision_utils REQUIRED)
-MESSAGE("vision_utils Library FOUND: vision related sources will be built.")
 SET(PRINT_INFO_VU false)
 FIND_PACKAGE(OpenCV REQUIRED)
 
