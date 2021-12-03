@@ -1,5 +1,4 @@
 # Pre-requisites about cmake itself
-MESSAGE("Starting ${PLUGIN_NAME} CMakeLists ...")
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
 
 if(COMMAND cmake_policy)
@@ -9,11 +8,11 @@ endif(COMMAND cmake_policy)
 # MAC OSX RPATH
 SET(CMAKE_MACOSX_RPATH true)
 
-
 # The project name
 PROJECT(vision)
 set(PLUGIN_NAME wolf${PROJECT_NAME})
 
+MESSAGE("Starting ${PROJECT_NAME} CMakeLists ...")
 
 SET(EXECUTABLE_OUTPUT_PATH ${CMAKE_CURRENT_SOURCE_DIR}/bin)
 SET(LIBRARY_OUTPUT_PATH ${CMAKE_CURRENT_SOURCE_DIR}/lib)
@@ -69,14 +68,11 @@ if(BUILD_TESTS)
     enable_testing()
 endif()
 
-
 #CMAKE modules
-
 SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake_modules")
 MESSAGE(STATUS ${CMAKE_MODULE_PATH})
 
 # Some wolf compilation options
-
 IF((CMAKE_BUILD_TYPE MATCHES DEBUG) OR (CMAKE_BUILD_TYPE MATCHES debug) OR (CMAKE_BUILD_TYPE MATCHES Debug))
   set(_WOLF_DEBUG true)
 ENDIF()
@@ -91,12 +87,9 @@ IF(BUILD_EXAMPLES OR BUILD_TESTS)
   set(_WOLF_ROOT_DIR ${CMAKE_SOURCE_DIR})
 ENDIF(BUILD_EXAMPLES OR BUILD_TESTS)
 
-
 #find dependencies.
 # ============EXAMPLE==================
-
 FIND_PACKAGE(wolfcore REQUIRED)
-
 FIND_PACKAGE(vision_utils REQUIRED)
 SET(PRINT_INFO_VU false)
 FIND_PACKAGE(OpenCV REQUIRED)
@@ -126,14 +119,6 @@ INCLUDE_DIRECTORIES(${OpenCV_INCLUDE_DIRS})
 INCLUDE_DIRECTORIES(BEFORE "include")
 
 #HEADERS
-
-SET(HDRS_COMMON
-  )
-SET(HDRS_MATH
-include/vision/math/pinhole_tools.h
-  )
-SET(HDRS_UTILS
-  )
 SET(HDRS_CAPTURE
 include/vision/capture/capture_image.h
   )
@@ -151,6 +136,9 @@ SET(HDRS_LANDMARK
   include/vision/landmark/landmark_hp.h
   include/vision/landmark/landmark_point_3d.h
   )
+SET(HDRS_MATH
+include/vision/math/pinhole_tools.h
+  )
 SET(HDRS_PROCESSOR
 include/vision/processor/processor_tracker_feature_trifocal.h
 include/vision/processor/processor_params_image.h
@@ -161,22 +149,10 @@ include/vision/processor/processor_bundle_adjustment.h
 SET(HDRS_SENSOR
 include/vision/sensor/sensor_camera.h
   )
-SET(HDRS_SOLVER
-  )
-SET(HDRS_DTASSC
-  )
 
 #SOURCES
-SET(SRCS_COMMON
-  )
-SET(SRCS_MATH
-  )
-SET(SRCS_UTILS
-  )
 SET(SRCS_CAPTURE
 src/capture/capture_image.cpp
-  )
-SET(SRCS_FACTOR
   )
 SET(SRCS_FEATURE
 src/feature/feature_point_image.cpp
@@ -195,53 +171,21 @@ src/processor/processor_bundle_adjustment.cpp
 SET(SRCS_SENSOR
 src/sensor/sensor_camera.cpp
   )
-SET(SRCS_DTASSC
-  )
-SET(SRCS_SOLVER
-  )
 SET(SRCS_YAML
 src/yaml/processor_tracker_feature_trifocal_yaml.cpp
 src/yaml/sensor_camera_yaml.cpp
 src/yaml/processor_image_yaml.cpp
 src/yaml/processor_bundle_adjustment_yaml.cpp
   )
-#OPTIONALS
-#optional HDRS and SRCS
-# ==================EXAMPLE===============
-# IF (Ceres_FOUND)
-#     SET(HDRS_WRAPPER
-#       include/base/solver_suitesparse/sparse_utils.h
-#       include/base/solver/solver_manager.h
-#       include/base/ceres_wrapper/ceres_manager.h
-#       include/base/ceres_wrapper/cost_function_wrapper.h
-#       include/base/ceres_wrapper/create_numeric_diff_cost_function.h
-#       include/base/ceres_wrapper/local_parametrization_wrapper.h 
-#       )
-#     SET(SRCS_WRAPPER
-#       src/solver/solver_manager.cpp
-#       src/ceres_wrapper/ceres_manager.cpp
-#       src/ceres_wrapper/local_parametrization_wrapper.cpp 
-#       )
-# ELSE(Ceres_FOUND)
-#   SET(HDRS_WRAPPER)
-#   SET(SRCS_WRAPPER)
-# ENDIF(Ceres_FOUND)
 
 # create the shared library
 ADD_LIBRARY(${PLUGIN_NAME}
   SHARED
   ${SRCS_CAPTURE}
-  ${SRCS_COMMON}
-  ${SRCS_DTASSC}
-  ${SRCS_FACTOR}
   ${SRCS_FEATURE}
   ${SRCS_LANDMARK}
-  ${SRCS_MATH}
   ${SRCS_PROCESSOR}
   ${SRCS_SENSOR}
-  ${SRCS_SOLVER}
-  ${SRCS_UTILS}
-  ${SRCS_WRAPPER}
   ${SRCS_YAML}
   )
   
@@ -257,17 +201,14 @@ elseif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
   # using GCC
 endif()
 
-  
+#Link the created libraries
+#===============EXAMPLE=========================
 TARGET_LINK_LIBRARIES(${PLUGIN_NAME} ${wolfcore_LIBRARIES})
 TARGET_LINK_LIBRARIES(${PLUGIN_NAME} ${OpenCV_LIBS})
 TARGET_LINK_LIBRARIES(${PLUGIN_NAME} ${vision_utils_LIBRARY})
 
-#Link the created libraries
+#Build demos
 #===============EXAMPLE=========================
-# IF (Ceres_FOUND)
-#     TARGET_LINK_LIBRARIES(${PLUGIN_NAME} ${CERES_LIBRARIES})
-# ENDIF(Ceres_FOUND)
-
 IF(BUILD_DEMOS)
   MESSAGE(STATUS "Building demos.")
   add_subdirectory(demos)
@@ -281,58 +222,36 @@ IF(BUILD_TESTS)
 ENDIF(BUILD_TESTS)
 
 #install library
-
 #=============================================================
 INSTALL(TARGETS ${PLUGIN_NAME} EXPORT ${PLUGIN_NAME}Targets
       RUNTIME DESTINATION bin
-      LIBRARY DESTINATION lib/iri-algorithms
-      ARCHIVE DESTINATION lib/iri-algorithms)
+      LIBRARY DESTINATION lib
+      ARCHIVE DESTINATION lib)
 
 install(EXPORT ${PLUGIN_NAME}Targets DESTINATION lib/cmake/${PLUGIN_NAME})
 #install headers
-INSTALL(FILES ${HDRS_DTASSC}
-  DESTINATION include/iri-algorithms/wolf/plugin_${PROJECT_NAME}/${PROJECT_NAME}/association)
-INSTALL(FILES ${HDRS_COMMON}
-  DESTINATION include/iri-algorithms/wolf/plugin_${PROJECT_NAME}/${PROJECT_NAME}/common)
-INSTALL(FILES ${HDRS_MATH}
-  DESTINATION include/iri-algorithms/wolf/plugin_${PROJECT_NAME}/${PROJECT_NAME}/math)
-INSTALL(FILES ${HDRS_UTILS}
-  DESTINATION include/iri-algorithms/wolf/plugin_${PROJECT_NAME}/${PROJECT_NAME}/utils)
 INSTALL(FILES ${HDRS_CAPTURE}
   DESTINATION include/iri-algorithms/wolf/plugin_${PROJECT_NAME}/${PROJECT_NAME}/capture)
 INSTALL(FILES ${HDRS_FACTOR}
   DESTINATION include/iri-algorithms/wolf/plugin_${PROJECT_NAME}/${PROJECT_NAME}/factor)
 INSTALL(FILES ${HDRS_FEATURE}
   DESTINATION include/iri-algorithms/wolf/plugin_${PROJECT_NAME}/${PROJECT_NAME}/feature)
-INSTALL(FILES ${HDRS_SENSOR}
-  DESTINATION include/iri-algorithms/wolf/plugin_${PROJECT_NAME}/${PROJECT_NAME}/sensor)
-INSTALL(FILES ${HDRS_PROCESSOR}
-  DESTINATION include/iri-algorithms/wolf/plugin_${PROJECT_NAME}/${PROJECT_NAME}/processor)
 INSTALL(FILES ${HDRS_LANDMARK}
   DESTINATION include/iri-algorithms/wolf/plugin_${PROJECT_NAME}/${PROJECT_NAME}/landmark)
-INSTALL(FILES ${HDRS_WRAPPER}
-  DESTINATION include/iri-algorithms/wolf/plugin_${PROJECT_NAME}/${PROJECT_NAME}/ceres_wrapper)
-INSTALL(FILES ${HDRS_SOLVER_SUITESPARSE}
-  DESTINATION include/iri-algorithms/wolf/plugin_${PROJECT_NAME}/${PROJECT_NAME}/solver_suitesparse)
-INSTALL(FILES ${HDRS_SOLVER}
-  DESTINATION include/iri-algorithms/wolf/plugin_${PROJECT_NAME}/${PROJECT_NAME}/solver)
-INSTALL(FILES ${HDRS_SERIALIZATION}
-  DESTINATION include/iri-algorithms/wolf/plugin_${PROJECT_NAME}/${PROJECT_NAME}/serialization)
-INSTALL(FILES ${HDRS_YAML}
-  DESTINATION include/iri-algorithms/wolf/plugin_${PROJECT_NAME}/${PROJECT_NAME}/yaml)
+INSTALL(FILES ${HDRS_MATH}
+  DESTINATION include/iri-algorithms/wolf/plugin_${PROJECT_NAME}/${PROJECT_NAME}/math)
+INSTALL(FILES ${HDRS_PROCESSOR}
+  DESTINATION include/iri-algorithms/wolf/plugin_${PROJECT_NAME}/${PROJECT_NAME}/processor)
+INSTALL(FILES ${HDRS_SENSOR}
+  DESTINATION include/iri-algorithms/wolf/plugin_${PROJECT_NAME}/${PROJECT_NAME}/sensor)
 
-# INSTALL(FILES "${CMAKE_SOURCE_DIR}/cmake_modules/Find${PLUGIN_NAME}.cmake"
-#   DESTINATION "lib/cmake/${PLUGIN_NAME}")
-INSTALL(FILES "${CMAKE_SOURCE_DIR}/cmake_modules/${PLUGIN_NAME}Config.cmake" DESTINATION "lib/cmake/${PLUGIN_NAME}")
 FILE(WRITE ${PROJECT_NAME}.found "")
 INSTALL(FILES ${PROJECT_NAME}.found
   DESTINATION include/iri-algorithms/wolf/plugin_${PROJECT_NAME})
-
 INSTALL(FILES "${WOLF_CONFIG_DIR}/config.h"
   DESTINATION include/iri-algorithms/wolf/plugin_${PROJECT_NAME}/${PROJECT_NAME}/internal)
 
-# INSTALL(FILES "${CMAKE_BINARY_DIR}/cmake_modules/Findwolf${PLUGIN_NAME}.cmake"
-#   DESTINATION "lib/cmake/${PLUGIN_NAME}")
+INSTALL(FILES "${CMAKE_SOURCE_DIR}/cmake_modules/${PLUGIN_NAME}Config.cmake" DESTINATION "lib/cmake/${PLUGIN_NAME}")
 
 INSTALL(DIRECTORY ${SPDLOG_INCLUDE_DIRS} DESTINATION "include/iri-algorithms/")
 

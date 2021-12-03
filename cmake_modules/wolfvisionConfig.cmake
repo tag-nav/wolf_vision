@@ -12,7 +12,7 @@ ENDIF(wolfvision_INCLUDE_DIRS)
 FIND_LIBRARY(
     wolfvision_LIBRARIES
     NAMES libwolfvision.so libwolfvision.dylib
-    PATHS /usr/local/lib/iri-algorithms)
+    PATHS /usr/local/lib)
 IF(wolfvision_LIBRARIES)
   MESSAGE("Found vision lib: ${wolfvision_LIBRARIES}")
 ELSE(wolfvision_LIBRARIES)
@@ -87,3 +87,8 @@ if(NOT wolf_FOUND)
   list(APPEND wolfvision_LIBRARIES ${wolfcore_LIBRARIES})
   list(REVERSE wolfvision_LIBRARIES)
 endif()
+
+# provide both INCLUDE_DIR and INCLUDE_DIRS
+SET(wolfvision_INCLUDE_DIR ${wolfvision_INCLUDE_DIRS})
+# provide both LIBRARY and LIBRARIES 
+SET(wolfvision_LIBRARY ${wolfvision_LIBRARIES})
