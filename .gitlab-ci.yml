@@ -75,9 +75,8 @@ stages:
   - fi
   - mkdir -pv build
   - cd build
-  - cmake -DCMAKE_BUILD_TYPE=release -DBUILD_EXAMPLES=ON -DBUILD_TESTS=ON ..
+  - cmake -DCMAKE_BUILD_TYPE=release -DBUILD_DEMOS=OFF -DBUILD_TESTS=OFF ..
   - make -j$(nproc)
-  - ctest -j$(nproc)
   - make install
 
 .install_visionutils_template: &install_visionutils_definition
@@ -101,7 +100,7 @@ stages:
   - cd $CI_PROJECT_DIR
   - mkdir -pv build
   - cd build
-  - cmake -DCMAKE_BUILD_TYPE=release -DBUILD_EXAMPLES=ON -DBUILD_TESTS=ON ..
+  - cmake -DCMAKE_BUILD_TYPE=release -DBUILD_TESTS=ON ..
   - make -j$(nproc)
   - ctest -j$(nproc)
   - make install
