@@ -134,7 +134,7 @@ int main(int argc, char** argv)
     Matrix6d    P = Matrix6d::Identity() * 0.000001; // 1mm
 
     // ====== KF1 ======
-    FrameBasePtr kf1 = problem->setPrior(x, P, t, dt/2);
+    FrameBasePtr kf1 = problem->setPrior(x, P, t);
 
     // Process capture
     CaptureImagePtr capture_1 = make_shared<CaptureImage>(t, camera, images.at(0));

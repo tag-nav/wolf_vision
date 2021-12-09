@@ -142,7 +142,7 @@ TEST(ProcessorTrackerFeatureTrifocal, KeyFrameCallback)
     TimeStamp   t(0.0);
     VectorComposite x("PO", {Vector3d::Zero(), Quaterniond::Identity().coeffs()});
     VectorComposite s("PO", {1e-3*Vector3d::Ones(), 1e-3*Vector3d::Ones()});
-    auto KF1 = problem->setPriorFactor(x, s, t, dt/2);             // KF1
+    auto KF1 = problem->setPriorFactor(x, s, t);             // KF1
     std::static_pointer_cast<ProcessorOdom3d>(proc_odo)->setOrigin(KF1);
 
     MatrixXd P = (s.vector("PO").array() * s.vector("PO").array()).matrix().asDiagonal();
