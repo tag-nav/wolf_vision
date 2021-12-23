@@ -79,15 +79,16 @@ ENDIF()
 
 option(_WOLF_TRACE "Enable wolf tracing macro" ON)
 
-# ============DEPENDENCIES==================
+# ============ DEPENDENCIES ==================
 FIND_PACKAGE(wolfcore REQUIRED)
 FIND_PACKAGE(vision_utils REQUIRED)
 SET(PRINT_INFO_VU false)
 FIND_PACKAGE(OpenCV REQUIRED)
 
-# ============config.h==================
+# ============ config.h ==================
 string(TOUPPER ${PROJECT_NAME} UPPER_NAME)
 set(_WOLF_ROOT_DIR ${CMAKE_SOURCE_DIR})
+
 # Define the directory where will be the configured config.h
 SET(WOLF_CONFIG_DIR ${PROJECT_BINARY_DIR}/conf/${PROJECT_NAME}/internal)
 
@@ -105,13 +106,13 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/internal/config.h.in "${WOLF_CONFIG_D
 message("CONFIG DIRECTORY ${PROJECT_BINARY_DIR}")
 include_directories("${PROJECT_BINARY_DIR}/conf")
 
-# ============INCLUDES SECTION==================
+# ============ INCLUDES ==================
 INCLUDE_DIRECTORIES(${wolfcore_INCLUDE_DIRS})
 INCLUDE_DIRECTORIES(${vision_utils_INCLUDE_DIR})
 INCLUDE_DIRECTORIES(${OpenCV_INCLUDE_DIRS})
 INCLUDE_DIRECTORIES(BEFORE "include")
 
-#HEADERS
+# ============ HEADERS ============ 
 SET(HDRS_CAPTURE
 include/vision/capture/capture_image.h
   )
@@ -143,7 +144,7 @@ SET(HDRS_SENSOR
 include/vision/sensor/sensor_camera.h
   )
 
-#SOURCES
+# ============ SOURCES ============ 
 SET(SRCS_CAPTURE
 src/capture/capture_image.cpp
   )
