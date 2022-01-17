@@ -1,3 +1,24 @@
+//--------LICENSE_START--------
+//
+// Copyright (C) 2020,2021,2022 Institut de Robòtica i Informàtica Industrial, CSIC-UPC.
+// Authors: Joan Solà Ortega (jsola@iri.upc.edu)
+// All rights reserved.
+//
+// This file is part of WOLF
+// WOLF is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Lesser General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU Lesser General Public License for more details.
+//
+// You should have received a copy of the GNU Lesser General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
+//
+//--------LICENSE_END--------
 /**
  * \file sensor_camera_yaml.cpp
  *
@@ -20,11 +41,11 @@ namespace wolf
 
 namespace
 {
-static IntrinsicsBasePtr createIntrinsicsCamera(const std::string & _filename_dot_yaml)
+static ParamsSensorBasePtr createParamsSensorCamera(const std::string & _filename_dot_yaml)
 {
     YAML::Node camera_config = YAML::LoadFile(_filename_dot_yaml);
 
-    //    if (camera_config["sensor type"].as<std::string>() == "CAMERA") // this does not work: camera YAML files are ROS-styled
+    //    if (camera_config["type"].as<std::string>() == "CAMERA") // this does not work: camera YAML files are ROS-styled
     if (camera_config["camera_matrix"]) // check that at least this field exists to validate YAML file of the correct type
     {
 
@@ -37,7 +58,7 @@ static IntrinsicsBasePtr createIntrinsicsCamera(const std::string & _filename_do
         VectorXd projection     = camera_config["projection_matrix"]["data"]        .as<VectorXd>();
 
         // Eigen:: to wolf::
-        std::shared_ptr<IntrinsicsCamera> intrinsics_cam = std::make_shared<IntrinsicsCamera>();
+        std::shared_ptr<ParamsSensorCamera> intrinsics_cam = std::make_shared<ParamsSensorCamera>();
 
         intrinsics_cam->width   = width;
         intrinsics_cam->height  = height;
@@ -87,7 +108,7 @@ static IntrinsicsBasePtr createIntrinsicsCamera(const std::string & _filename_do
 //        // extrinsics discarded in this creator
 //        Vector3d pos            = camera_config["extrinsic"]["position"].as<Vector3d>();
 //        Vector3d ori            = camera_config["extrinsic"]["orientation"].as<Vector3d>() * M_PI / 180; // roll, pitch, yaw [rad]
-//        Quaternions quat; v2q(ori, quat);
+//        Quaterniond quat; v2q(ori, quat);
 //        std::cout << "sensor extrinsics: " << std::endl;
 //        std::cout << "\tposition    : " << pos.transpose() << std::endl;
 //        std::cout << "\torientation : " << ori.transpose() << std::endl;
@@ -105,8 +126,8 @@ static IntrinsicsBasePtr createIntrinsicsCamera(const std::string & _filename_do
     return nullptr;
 }
 
-// Register in the SensorFactory
-const bool WOLF_UNUSED registered_camera_intr = IntrinsicsFactory::get().registerCreator("CAMERA", createIntrinsicsCamera);
+// Register in the FactorySensor
+const bool WOLF_UNUSED registered_camera_intr = FactoryParamsSensor::registerCreator("SensorCamera", createParamsSensorCamera);
 
 } // namespace [unnamed]
 

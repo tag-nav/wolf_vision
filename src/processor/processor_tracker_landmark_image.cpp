@@ -1,23 +1,45 @@
+//--------LICENSE_START--------
+//
+// Copyright (C) 2020,2021,2022 Institut de Robòtica i Informàtica Industrial, CSIC-UPC.
+// Authors: Joan Solà Ortega (jsola@iri.upc.edu)
+// All rights reserved.
+//
+// This file is part of WOLF
+// WOLF is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Lesser General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU Lesser General Public License for more details.
+//
+// You should have received a copy of the GNU Lesser General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
+//
+//--------LICENSE_END--------
 #include "vision/processor/processor_tracker_landmark_image.h"
 
 #include "vision/capture/capture_image.h"
-#include "vision/factor/factor_AHP.h"
-#include "core/feature/feature_base.h"
+#include "vision/factor/factor_ahp.h"
 #include "vision/feature/feature_point_image.h"
+#include "vision/math/pinhole_tools.h"
+#include "vision/sensor/sensor_camera.h"
+
+#include "core/feature/feature_base.h"
 #include "core/frame/frame_base.h"
 #include "core/utils/logging.h"
 #include "core/map/map_base.h"
-#include "core/math/pinhole_tools.h"
 #include "core/problem/problem.h"
-#include "vision/sensor/sensor_camera.h"
 #include "core/state_block/state_block.h"
 #include "core/common/time_stamp.h"
 
 // vision_utils
-#include <detectors.h>
-#include <descriptors.h>
-#include <matchers.h>
-#include <algorithms.h>
+#include <vision_utils/detectors.h>
+#include <vision_utils/descriptors.h>
+#include <vision_utils/matchers.h>
+#include <vision_utils/algorithms.h>
 
 #include <Eigen/Geometry>
 #include <iomanip> //setprecision
@@ -25,8 +47,8 @@
 namespace wolf
 {
 
-ProcessorTrackerLandmarkImage::ProcessorTrackerLandmarkImage(ProcessorParamsTrackerLandmarkImagePtr _params_tracker_landmark_image) :
-    ProcessorTrackerLandmark("IMAGE LANDMARK", _params_tracker_landmark_image),
+ProcessorTrackerLandmarkImage::ProcessorTrackerLandmarkImage(ParamsProcessorTrackerLandmarkImagePtr _params_tracker_landmark_image) :
+    ProcessorTrackerLandmark("ProcessorTrackerLandmarkImage", "PO", _params_tracker_landmark_image),
     cell_width_(0),
     cell_height_(0),
     params_tracker_landmark_image_(_params_tracker_landmark_image),
@@ -71,8 +93,9 @@ void ProcessorTrackerLandmarkImage::configure(SensorBasePtr _sensor)
 
 void ProcessorTrackerLandmarkImage::preProcess()
 {
-    image_incoming_ = std::static_pointer_cast<CaptureImage>(incoming_ptr_)->getImage();
-
+    auto incoming_ptr = std::dynamic_pointer_cast<CaptureImage>(incoming_ptr_);
+    assert(incoming_ptr != nullptr && ("Capture type mismatch. Processor " + getName() + " can only process captures of type CaptureImage").c_str());
+    image_incoming_ = incoming_ptr->getImage();
     active_search_ptr_->renew();
 
     detector_roi_.clear();
@@ -86,29 +109,30 @@ void ProcessorTrackerLandmarkImage::postProcess()
 }
 
 unsigned int ProcessorTrackerLandmarkImage::findLandmarks(const LandmarkBasePtrList& _landmarks_in,
-                                                         FeatureBasePtrList&  _features_incoming_out,
-                                                         LandmarkMatchMap& _feature_landmark_correspondences)
+                                                          const CaptureBasePtr& _capture,
+                                                          FeatureBasePtrList& _features_out,
+                                                          LandmarkMatchMap& _feature_landmark_correspondences)
 {
     KeyPointVector candidate_keypoints;
     cv::Mat candidate_descriptors;
     DMatchVector cv_matches;
 
-    Eigen::VectorXs current_state = getProblem()->getState(incoming_ptr_->getTimeStamp());
+    Eigen::VectorXd current_state = getProblem()->getState(incoming_ptr_->getTimeStamp()).vector("PO");
 
     for (auto landmark_in_ptr : _landmarks_in)
     {
 
         // project landmark into incoming capture
-        LandmarkAHPPtr landmark_ptr = std::static_pointer_cast<LandmarkAHP>(landmark_in_ptr);
+        LandmarkAhpPtr landmark_ptr = std::static_pointer_cast<LandmarkAhp>(landmark_in_ptr);
         SensorCameraPtr camera = std::static_pointer_cast<SensorCamera>(this->getSensor());
-        Eigen::Vector4s point3D_hmg;
-        Eigen::Vector2s pixel;
+        Eigen::Vector4d point3d_hmg;
+        Eigen::Vector2d pixel;
 
-        landmarkInCurrentCamera(current_state, landmark_ptr, point3D_hmg);
+        landmarkInCurrentCamera(current_state, landmark_ptr, point3d_hmg);
 
         pixel = pinhole::projectPoint(camera->getIntrinsic()->getState(),
                                       camera->getDistortionVector(),
-                                      point3D_hmg.head<3>());
+                                      point3d_hmg.head<3>());
 
         if(pinhole::isInImage(pixel, image_.width_, image_.height_))
         {
@@ -120,22 +144,23 @@ unsigned int ProcessorTrackerLandmarkImage::findLandmarks(const LandmarkBasePtrL
 
             if (detect(image_incoming_, roi, candidate_keypoints, candidate_descriptors))
             {
-                Scalar normalized_score = match(target_descriptor,candidate_descriptors,cv_matches);
+                double normalized_score = match(target_descriptor,candidate_descriptors,cv_matches);
 
                 if (normalized_score > mat_ptr_->getParams()->min_norm_score )
                 {
-                    FeaturePointImagePtr incoming_point_ptr = std::make_shared<FeaturePointImage>(
-                            candidate_keypoints[cv_matches[0].trainIdx],
-                            cv_matches[0].trainIdx,
-                            candidate_descriptors.row(cv_matches[0].trainIdx),
-                            Eigen::Matrix2s::Identity()*params_tracker_landmark_image_->pixel_noise_var);
+                    FeaturePointImagePtr incoming_point_ptr = std::static_pointer_cast<FeaturePointImage>(
+                            FeatureBase::emplace<FeaturePointImage>(_capture,
+                                                                    candidate_keypoints[cv_matches[0].trainIdx],
+                                                                    cv_matches[0].trainIdx,
+                                                                    candidate_descriptors.row(cv_matches[0].trainIdx),
+                                                                    Eigen::Matrix2d::Identity()*params_tracker_landmark_image_->pixel_noise_var) );
 
                     incoming_point_ptr->setTrackId(landmark_in_ptr->id());
                     incoming_point_ptr->setLandmarkId(landmark_in_ptr->id());
                     incoming_point_ptr->setScore(normalized_score);
                     incoming_point_ptr->setExpectation(pixel);
 
-                    _features_incoming_out.push_back(incoming_point_ptr);
+                    _features_out.push_back(incoming_point_ptr);
 
                     _feature_landmark_correspondences[incoming_point_ptr] = std::make_shared<LandmarkMatch>(landmark_in_ptr, normalized_score);
 
@@ -156,17 +181,19 @@ unsigned int ProcessorTrackerLandmarkImage::findLandmarks(const LandmarkBasePtrL
 //            std::cout << "NOT in the image" << std::endl;
     }
 //    std::cout << "\tNumber of Features tracked: " << _features_incoming_out.size() << std::endl;
-    landmarks_tracked_ = _features_incoming_out.size();
-    return _features_incoming_out.size();
+    landmarks_tracked_ = _features_out.size();
+    return _features_out.size();
 }
 
-bool ProcessorTrackerLandmarkImage::voteForKeyFrame()
+bool ProcessorTrackerLandmarkImage::voteForKeyFrame() const
 {
     return false;
 //    return landmarks_tracked_ < params_tracker_landmark_image_->min_features_for_keyframe;
 }
 
-unsigned int ProcessorTrackerLandmarkImage::detectNewFeatures(const int& _max_features, FeatureBasePtrList& _features_last_out)
+unsigned int ProcessorTrackerLandmarkImage::detectNewFeatures(const int& _max_new_features,
+                                                              const CaptureBasePtr& _capture,
+                                                              FeatureBasePtrList& _features_out)
 {
     cv::Rect roi;
     KeyPointVector new_keypoints;
@@ -174,7 +201,7 @@ unsigned int ProcessorTrackerLandmarkImage::detectNewFeatures(const int& _max_fe
     cv::KeyPointsFilter keypoint_filter;
     unsigned int n_new_features = 0;
 
-    for (unsigned int n_iterations = 0; _max_features == -1 || n_iterations < _max_features; n_iterations++)
+    for (unsigned int n_iterations = 0; _max_new_features == -1 || n_iterations < _max_new_features; n_iterations++)
     {
         if (active_search_ptr_->pickEmptyRoi(roi))
         {
@@ -193,15 +220,16 @@ unsigned int ProcessorTrackerLandmarkImage::detectNewFeatures(const int& _max_fe
                 if(new_keypoints[0].response > params_tracker_landmark_image_activesearch_ptr_->min_response_new_feature)
                 {
                     list_response_.push_back(new_keypoints[0].response);
-                    FeaturePointImagePtr point_ptr = std::make_shared<FeaturePointImage>(
-                            new_keypoints[0],
-                            0,
-                            new_descriptors.row(index),
-                            Eigen::Matrix2s::Identity()*params_tracker_landmark_image_->pixel_noise_var);
+                    FeaturePointImagePtr point_ptr = std::static_pointer_cast<FeaturePointImage>(
+                            FeatureBase::emplace<FeaturePointImage>(_capture,
+                                                                    new_keypoints[0],
+                                                                    0,
+                                                                    new_descriptors.row(index),
+                                                                    Eigen::Matrix2d::Identity()*params_tracker_landmark_image_->pixel_noise_var) );
                     point_ptr->setIsKnown(false);
                     point_ptr->setTrackId(point_ptr->id());
-                    point_ptr->setExpectation(Eigen::Vector2s(new_keypoints[0].pt.x,new_keypoints[0].pt.y));
-                    _features_last_out.push_back(point_ptr);
+                    point_ptr->setExpectation(Eigen::Vector2d(new_keypoints[0].pt.x,new_keypoints[0].pt.y));
+                    _features_out.push_back(point_ptr);
 
                     active_search_ptr_->hitCell(new_keypoints[0]);
 
@@ -220,39 +248,43 @@ unsigned int ProcessorTrackerLandmarkImage::detectNewFeatures(const int& _max_fe
     return n_new_features;
 }
 
-LandmarkBasePtr ProcessorTrackerLandmarkImage::createLandmark(FeatureBasePtr _feature_ptr)
+LandmarkBasePtr ProcessorTrackerLandmarkImage::emplaceLandmark(FeatureBasePtr _feature_ptr)
 {
 
     FeaturePointImagePtr feat_point_image_ptr = std::static_pointer_cast<FeaturePointImage>( _feature_ptr);
     FrameBasePtr anchor_frame = getLast()->getFrame();
 
-    Eigen::Vector2s point2D;
-    point2D[0] = feat_point_image_ptr->getKeypoint().pt.x;
-    point2D[1] = feat_point_image_ptr->getKeypoint().pt.y;
+    Eigen::Vector2d point2d;
+    point2d[0] = feat_point_image_ptr->getKeypoint().pt.x;
+    point2d[1] = feat_point_image_ptr->getKeypoint().pt.y;
 
-    Scalar distance = params_tracker_landmark_image_->distance; // arbitrary value
-    Eigen::Vector4s vec_homogeneous;
+    double distance = params_tracker_landmark_image_->distance; // arbitrary value
+    Eigen::Vector4d vec_homogeneous;
 
-    point2D = pinhole::depixellizePoint(getSensor()->getIntrinsic()->getState(),point2D);
-    point2D = pinhole::undistortPoint((std::static_pointer_cast<SensorCamera>(getSensor()))->getCorrectionVector(),point2D);
+    point2d = pinhole::depixellizePoint(getSensor()->getIntrinsic()->getState(),point2d);
+    point2d = pinhole::undistortPoint((std::static_pointer_cast<SensorCamera>(getSensor()))->getCorrectionVector(),point2d);
 
-    Eigen::Vector3s point3D;
-    point3D.head<2>() = point2D;
-    point3D(2) = 1;
+    Eigen::Vector3d point3d;
+    point3d.head<2>() = point2d;
+    point3d(2) = 1;
 
-    point3D.normalize();
+    point3d.normalize();
 
-    vec_homogeneous = {point3D(0),point3D(1),point3D(2),1/distance};
+    vec_homogeneous = {point3d(0),point3d(1),point3d(2),1/distance};
 
-    LandmarkAHPPtr lmk_ahp_ptr = std::make_shared<LandmarkAHP>(vec_homogeneous, anchor_frame, getSensor(), feat_point_image_ptr->getDescriptor());
+    auto lmk_ahp_ptr = LandmarkBase::emplace<LandmarkAhp>(getProblem()->getMap(),
+                                                          vec_homogeneous,
+                                                          anchor_frame,
+                                                          getSensor(),
+                                                          feat_point_image_ptr->getDescriptor());
     _feature_ptr->setLandmarkId(lmk_ahp_ptr->id());
     return lmk_ahp_ptr;
 }
 
-FactorBasePtr ProcessorTrackerLandmarkImage::createFactor(FeatureBasePtr _feature_ptr, LandmarkBasePtr _landmark_ptr)
+FactorBasePtr ProcessorTrackerLandmarkImage::emplaceFactor(FeatureBasePtr _feature_ptr, LandmarkBasePtr _landmark_ptr)
 {
 
-    if ((std::static_pointer_cast<LandmarkAHP>(_landmark_ptr))->getAnchorFrame() == last_ptr_->getFrame())
+    if ((std::static_pointer_cast<LandmarkAhp>(_landmark_ptr))->getAnchorFrame() == last_ptr_->getFrame()) //FIXME: shouldn't it be _feature_ptr->getFrame() ?
     {
         return FactorBasePtr();
     }
@@ -261,19 +293,17 @@ FactorBasePtr ProcessorTrackerLandmarkImage::createFactor(FeatureBasePtr _featur
         assert (last_ptr_ && "bad last ptr");
         assert (_landmark_ptr && "bad lmk ptr");
 
-        LandmarkAHPPtr landmark_ahp = std::static_pointer_cast<LandmarkAHP>(_landmark_ptr);
+        LandmarkAhpPtr landmark_ahp = std::static_pointer_cast<LandmarkAhp>(_landmark_ptr);
 
-        FactorAHPPtr factor_ptr = FactorAHP::create(_feature_ptr, landmark_ahp, shared_from_this(), true);
-
-        return factor_ptr;
+        return FactorBase::emplace<FactorAhp>(_feature_ptr, _feature_ptr, landmark_ahp, shared_from_this(), params_->apply_loss_function);
     }
 }
 
 // ==================================================================== My own functions
 
-void ProcessorTrackerLandmarkImage::landmarkInCurrentCamera(const Eigen::VectorXs& _current_state,
-                                                     const LandmarkAHPPtr   _landmark,
-                                                     Eigen::Vector4s&       _point3D_hmg)
+void ProcessorTrackerLandmarkImage::landmarkInCurrentCamera(const Eigen::VectorXd& _current_state,
+                                                     const LandmarkAhpPtr   _landmark,
+                                                     Eigen::Vector4d&       _point3d_hmg)
 {
     using namespace Eigen;
 
@@ -299,40 +329,40 @@ void ProcessorTrackerLandmarkImage::landmarkInCurrentCamera(const Eigen::VectorX
      * We use Eigen::Transform which is like using homogeneous transform matrices with a simpler API
      */
 
-    // Assert frame is 3D with at least PQ
-    assert((_current_state.size() == 7 || _current_state.size() == 16) && "Wrong state size! Should be 7 for 3D pose or 16 for IMU.");
+    // Assert frame is 3d with at least PQ
+    assert((_current_state.size() == 7 || _current_state.size() == 16) && "Wrong state size! Should be 7 for 3d pose or 16 for Imu.");
 
     // ALL TRANSFORMS
-    Transform<Scalar,3,Eigen::Affine> T_W_R0, T_W_R1, T_R0_C0, T_R1_C1;
+    Transform<double,3,Eigen::Isometry> T_W_R0, T_W_R1, T_R0_C0, T_R1_C1;
 
     // world to anchor robot frame
-    Translation<Scalar,3>  t_w_r0(_landmark->getAnchorFrame()->getP()->getState()); // sadly we cannot put a Map over a translation
-    const Quaternions q_w_r0(Eigen::Vector4s(_landmark->getAnchorFrame()->getO()->getState()));
+    Translation<double,3>  t_w_r0(_landmark->getAnchorFrame()->getP()->getState()); // sadly we cannot put a Map over a translation
+    const Quaterniond q_w_r0(Eigen::Vector4d(_landmark->getAnchorFrame()->getO()->getState()));
     T_W_R0 = t_w_r0 * q_w_r0;
 
     // world to current robot frame
-    Translation<Scalar,3>  t_w_r1(_current_state.head<3>());
-    Map<const Quaternions> q_w_r1(_current_state.data() + 3);
+    Translation<double,3>  t_w_r1(_current_state.head<3>());
+    Map<const Quaterniond> q_w_r1(_current_state.data() + 3);
     T_W_R1 = t_w_r1 * q_w_r1;
 
     // anchor robot to anchor camera
-    Translation<Scalar,3>  t_r0_c0(_landmark->getAnchorSensor()->getP()->getState());
-    const Quaternions q_r0_c0(Eigen::Vector4s(_landmark->getAnchorSensor()->getO()->getState()));
+    Translation<double,3>  t_r0_c0(_landmark->getAnchorSensor()->getP()->getState());
+    const Quaterniond q_r0_c0(Eigen::Vector4d(_landmark->getAnchorSensor()->getO()->getState()));
     T_R0_C0 = t_r0_c0 * q_r0_c0;
 
     // current robot to current camera
-    Translation<Scalar,3>  t_r1_c1(this->getSensor()->getP()->getState());
-    const Quaternions q_r1_c1(Eigen::Vector4s(this->getSensor()->getO()->getState()));
+    Translation<double,3>  t_r1_c1(this->getSensor()->getP()->getState());
+    const Quaterniond q_r1_c1(Eigen::Vector4d(this->getSensor()->getO()->getState()));
     T_R1_C1 = t_r1_c1 * q_r1_c1;
 
     // Transform lmk from c0 to c1 and exit
-    Vector4s landmark_hmg_c0 = _landmark->getP()->getState(); // lmk in anchor frame
-    _point3D_hmg = T_R1_C1.inverse(Eigen::Affine) * T_W_R1.inverse(Eigen::Affine) * T_W_R0 * T_R0_C0 * landmark_hmg_c0;
+    Vector4d landmark_hmg_c0 = _landmark->getP()->getState(); // lmk in anchor frame
+    _point3d_hmg = T_R1_C1.inverse(Eigen::Isometry) * T_W_R1.inverse(Eigen::Isometry) * T_W_R0 * T_R0_C0 * landmark_hmg_c0;
 }
 
-Scalar ProcessorTrackerLandmarkImage::match(const cv::Mat _target_descriptor, const cv::Mat _candidate_descriptors, DMatchVector& _cv_matches)
+double ProcessorTrackerLandmarkImage::match(const cv::Mat _target_descriptor, const cv::Mat _candidate_descriptors, DMatchVector& _cv_matches)
 {
-    std::vector<Scalar> normalized_scores = mat_ptr_->match(_target_descriptor, _candidate_descriptors, des_ptr_->getSize(), _cv_matches);
+    std::vector<double> normalized_scores = mat_ptr_->match(_target_descriptor, _candidate_descriptors, des_ptr_->getSize(), _cv_matches);
     return normalized_scores[0];
 }
 
@@ -388,27 +418,27 @@ void ProcessorTrackerLandmarkImage::drawLandmarks(cv::Mat _image)
     {
         unsigned int num_lmks_in_img = 0;
 
-        Eigen::VectorXs current_state = last_ptr_->getFrame()->getState();
+        Eigen::VectorXd current_state = last_ptr_->getFrame()->getState().vector("PO");
         SensorCameraPtr camera = std::static_pointer_cast<SensorCamera>(getSensor());
 
         for (auto landmark_base_ptr : getProblem()->getMap()->getLandmarkList())
         {
-            LandmarkAHPPtr landmark_ptr = std::static_pointer_cast<LandmarkAHP>(landmark_base_ptr);
+            LandmarkAhpPtr landmark_ptr = std::static_pointer_cast<LandmarkAhp>(landmark_base_ptr);
 
-            Eigen::Vector4s point3D_hmg;
-            landmarkInCurrentCamera(current_state, landmark_ptr, point3D_hmg);
+            Eigen::Vector4d point3d_hmg;
+            landmarkInCurrentCamera(current_state, landmark_ptr, point3d_hmg);
 
-            Eigen::Vector2s point2D = pinhole::projectPoint(camera->getIntrinsic()->getState(), // k
+            Eigen::Vector2d point2d = pinhole::projectPoint(camera->getIntrinsic()->getState(), // k
                                                             camera->getDistortionVector(),          // d
-                                                            point3D_hmg.head(3));                   // v
+                                                            point3d_hmg.head(3));                   // v
 
-            if(pinhole::isInImage(point2D,image_.width_,image_.height_))
+            if(pinhole::isInImage(point2d,image_.width_,image_.height_))
             {
                 num_lmks_in_img++;
 
                 cv::Point2f point;
-                point.x = point2D[0];
-                point.y = point2D[1];
+                point.x = point2d[0];
+                point.y = point2d[1];
 
                 cv::circle(_image, point, 4, cv::Scalar(51.0, 51.0, 255.0), 1, 3, 0);
                 cv::putText(_image, std::to_string(landmark_ptr->id()), point, cv:: FONT_HERSHEY_SIMPLEX, 0.4, cv::Scalar(100.0, 100.0, 255.0) );
@@ -432,18 +462,18 @@ void ProcessorTrackerLandmarkImage::drawLandmarks(cv::Mat _image)
 
 //namespace wolf{
 
-ProcessorBasePtr ProcessorTrackerLandmarkImage::create(const std::string& _unique_name, const ProcessorParamsBasePtr _params, const SensorBasePtr _sen_ptr)
+ProcessorBasePtr ProcessorTrackerLandmarkImage::create(const std::string& _unique_name, const ParamsProcessorBasePtr _params)
 {
-    ProcessorTrackerLandmarkImagePtr prc_ptr = std::make_shared<ProcessorTrackerLandmarkImage>(std::static_pointer_cast<ProcessorParamsTrackerLandmarkImage>(_params));
+    ProcessorTrackerLandmarkImagePtr prc_ptr = std::make_shared<ProcessorTrackerLandmarkImage>(std::static_pointer_cast<ParamsProcessorTrackerLandmarkImage>(_params));
     prc_ptr->setName(_unique_name);
     return prc_ptr;
 }
 
 } // namespace wolf
 
-// Register in the SensorFactory
-#include "core/processor/processor_factory.h"
+// Register in the FactorySensor
+#include "core/processor/factory_processor.h"
 namespace wolf {
-WOLF_REGISTER_PROCESSOR("IMAGE LANDMARK", ProcessorTrackerLandmarkImage)
+WOLF_REGISTER_PROCESSOR(ProcessorTrackerLandmarkImage)
 } // namespace wolf
 

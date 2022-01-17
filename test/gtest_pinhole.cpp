@@ -1,3 +1,24 @@
+//--------LICENSE_START--------
+//
+// Copyright (C) 2020,2021,2022 Institut de Robòtica i Informàtica Industrial, CSIC-UPC.
+// Authors: Joan Solà Ortega (jsola@iri.upc.edu)
+// All rights reserved.
+//
+// This file is part of WOLF
+// WOLF is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Lesser General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU Lesser General Public License for more details.
+//
+// You should have received a copy of the GNU Lesser General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
+//
+//--------LICENSE_END--------
 /*
  * gtest_pinhole.cpp
  *
@@ -5,8 +26,9 @@
  *      Author: jsola
  */
 
-#include "core/math/pinhole_tools.h"
-#include "utils_gtest.h"
+#include "vision/math/pinhole_tools.h"
+
+#include <core/utils/utils_gtest.h>
 
 using namespace Eigen;
 using namespace wolf;
@@ -16,15 +38,15 @@ using Constants::EPS_SMALL;
 
 TEST(Pinhole, EigenTypes)
 {
-    Vector3s vs; vs << 1,2,4;
-    Vector2s ps;
-    Map<Vector3s> vm(vs.data());
-    Map<Vector2s> pm(ps.data());
-    Map<const Vector3s> cvm(vs.data());
-    VectorXs vd(3); vd = vs;
-    VectorXs pd(2);
+    Vector3d vs; vs << 1,2,4;
+    Vector2d ps;
+    Map<Vector3d> vm(vs.data());
+    Map<Vector2d> pm(ps.data());
+    Map<const Vector3d> cvm(vs.data());
+    VectorXd vd(3); vd = vs;
+    VectorXd pd(2);
 
-    Vector2s pe; pe << 0.25, 0.5; // expected result
+    Vector2d pe; pe << 0.25, 0.5; // expected result
 
     // static size
     projectPointToNormalizedPlane(vs,ps);
@@ -45,14 +67,14 @@ TEST(Pinhole, EigenTypes)
 
 TEST(Pinhole, pix_pnt_pix)
 {
-    Vector4s k; k << 516.686, 355.129, 991.852, 995.269; // From Joan Sola thesis example
-    Vector2s d; d << -0.301701, 0.0963189;
-    Vector2s u0;
-    Vector3s p;
-    Vector2s u1;
-    Vector2s c; // should be close to (0.297923, 0.216263)
-    Scalar depth = 10;
-    Scalar pix_error_allowed = 0.1;
+    Vector4d k; k << 516.686, 355.129, 991.852, 995.269; // From Joan Sola thesis example
+    Vector2d d; d << -0.301701, 0.0963189;
+    Vector2d u0;
+    Vector3d p;
+    Vector2d u1;
+    Vector2d c; // should be close to (0.297923, 0.216263)
+    double depth = 10;
+    double pix_error_allowed = 0.1;
 
     computeCorrectionModel(k, d, c);
 
@@ -90,27 +112,27 @@ TEST(Pinhole, pix_pnt_pix)
 
 TEST(Pinhole, Jacobians)
 {
-    Vector4s k; k << 516.686, 355.129, 991.852, 995.269; // From Joan Sola thesis example
-    Vector2s d; d << -0.301701, 0.0963189;
-    Vector3s v;
-    Vector2s u;
-    MatrixXs U_v(2, 3);
+    Vector4d k; k << 516.686, 355.129, 991.852, 995.269; // From Joan Sola thesis example
+    Vector2d d; d << -0.301701, 0.0963189;
+    Vector3d v;
+    Vector2d u;
+    MatrixXd U_v(2, 3);
 
     v << 1,2,4;
     projectPoint(k, d, v, u, U_v);
 
-    Vector2s c;
+    Vector2d c;
     computeCorrectionModel(k, d, c);
 
-    Vector3s p;
-    MatrixXs P_u(3,2), P_depth(3,1);
+    Vector3d p;
+    MatrixXd P_u(3,2), P_depth(3,1);
     backprojectPoint(k, c, u, 4, p, P_u, P_depth);
 
     // check that reprojected point is close to original
     ASSERT_LT((p-v).norm(), 1e-3) << "p: " << p.transpose() << "\nv: " << v.transpose();
 
     // Check that both Jacobians are inverse one another (in the smallest dimension)
-    ASSERT_TRUE((U_v*P_u - Matrix2s::Identity()).isMuchSmallerThan(1, 1e-3)) << "U_v*P_u: " << U_v*P_u;
+    ASSERT_TRUE((U_v*P_u - Matrix2d::Identity()).isMuchSmallerThan(1, 1e-3)) << "U_v*P_u: " << U_v*P_u;
 
     WOLF_DEBUG("U_v*P_u: \n", U_v*P_u);
     WOLF_DEBUG("P_u*U_v: \n", P_u*U_v);
@@ -118,12 +140,12 @@ TEST(Pinhole, Jacobians)
 
 TEST(Pinhole, JacobiansDist)
 {
-    Vector4s k; k << 516.686, 355.129, 991.852, 995.269; // From Joan Sola thesis example
-    Vector2s d; d << -0.301701, 0.0963189;
-    Vector3s v;
-    Vector2s u;
-    MatrixXs U_v(2, 3);
-    Scalar dist;
+    Vector4d k; k << 516.686, 355.129, 991.852, 995.269; // From Joan Sola thesis example
+    Vector2d d; d << -0.301701, 0.0963189;
+    Vector3d v;
+    Vector2d u;
+    MatrixXd U_v(2, 3);
+    double dist;
 
     v << 1,2,4;
     projectPoint(k, d, v, u, dist, U_v);
@@ -131,23 +153,23 @@ TEST(Pinhole, JacobiansDist)
     // check that the recovered distance is indeed the distance to v
     ASSERT_DOUBLE_EQ(dist, v.norm());
 
-    Vector2s c;
+    Vector2d c;
     computeCorrectionModel(k, d, c);
 
-    Vector3s p;
-    MatrixXs P_u(3,2), P_depth(3,1);
+    Vector3d p;
+    MatrixXd P_u(3,2), P_depth(3,1);
     backprojectPoint(k, c, u, 4, p, P_u, P_depth);
 
     // check that reprojected point is close to original
     ASSERT_LT((p-v).norm(), 1e-3) << "p: " << p.transpose() << "\nv: " << v.transpose();
 
     // Check that both Jacobians are inverse one another (in the smallest dimension)
-    ASSERT_TRUE((U_v*P_u - Matrix2s::Identity()).isMuchSmallerThan(1, 1e-3)) << "U_v*P_u: " << U_v*P_u;
+    ASSERT_TRUE((U_v*P_u - Matrix2d::Identity()).isMuchSmallerThan(1, 1e-3)) << "U_v*P_u: " << U_v*P_u;
 }
 
 TEST(Pinhole, isInRoi)
 {
-    Vector2s p;
+    Vector2d p;
     p << 15, 15;
 
     ASSERT_TRUE (isInRoi(p, 10, 10, 10, 10));
@@ -163,7 +185,7 @@ TEST(Pinhole, isInRoi)
 
 TEST(Pinhole, isInImage)
 {
-    Vector2s p;
+    Vector2d p;
     p << 15, 15;
     ASSERT_TRUE (isInImage(p, 640, 480));
 

@@ -1,18 +1,39 @@
+//--------LICENSE_START--------
+//
+// Copyright (C) 2020,2021,2022 Institut de Robòtica i Informàtica Industrial, CSIC-UPC.
+// Authors: Joan Solà Ortega (jsola@iri.upc.edu)
+// All rights reserved.
+//
+// This file is part of WOLF
+// WOLF is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Lesser General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU Lesser General Public License for more details.
+//
+// You should have received a copy of the GNU Lesser General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
+//
+//--------LICENSE_END--------
 #ifndef PROCESSOR_TRACKER_LANDMARK_IMAGE_H
 #define PROCESSOR_TRACKER_LANDMARK_IMAGE_H
 
 // Wolf includes
 
-#include "vision/landmark/landmark_AHP.h"
+#include "vision/landmark/landmark_ahp.h"
 #include "core/landmark/landmark_match.h"
 #include "vision/processor/processor_params_image.h"
 #include "core/processor/processor_tracker_landmark.h"
 #include "core/common/wolf.h"
 
-#include <algorithms/activesearch/alg_activesearch.h>
-#include <descriptors/descriptor_base.h>
-#include <detectors/detector_base.h>
-#include <matchers/matcher_base.h>
+#include <vision_utils/algorithms/activesearch/alg_activesearch.h>
+#include <vision_utils/descriptors/descriptor_base.h>
+#include <vision_utils/detectors/detector_base.h>
+#include <vision_utils/matchers/matcher_base.h>
 
 #include <opencv2/core/mat.hpp>
 #include <opencv2/core/mat.inl.hpp>
@@ -42,7 +63,7 @@ class ProcessorTrackerLandmarkImage : public ProcessorTrackerLandmark
         vision_utils::AlgorithmParamsACTIVESEARCHPtr params_tracker_landmark_image_activesearch_ptr_; ///< Active search parameters
 
     protected:
-        ProcessorParamsTrackerLandmarkImagePtr params_tracker_landmark_image_;           // Struct with parameters of the processors
+        ParamsProcessorTrackerLandmarkImagePtr params_tracker_landmark_image_;           // Struct with parameters of the processors
 
         cv::Mat image_last_, image_incoming_;   // Images of the "last" and "incoming" Captures
 
@@ -55,15 +76,15 @@ class ProcessorTrackerLandmarkImage : public ProcessorTrackerLandmark
         unsigned int landmarks_tracked_ = 0;
 
         /* pinhole params */
-        Eigen::Vector2s distortion_;
-        Eigen::Vector2s correction_;
+        Eigen::Vector2d distortion_;
+        Eigen::Vector2d correction_;
 
         /* transformations */
-        Eigen::Vector3s world2cam_translation_;
-        Eigen::Vector4s world2cam_orientation_;
+        Eigen::Vector3d world2cam_translation_;
+        Eigen::Vector4d world2cam_orientation_;
 
-        Eigen::Vector3s cam2world_translation_;
-        Eigen::Vector4s cam2world_orientation_;
+        Eigen::Vector3d cam2world_translation_;
+        Eigen::Vector4d cam2world_orientation_;
 
         unsigned int n_feature_;
         unsigned int landmark_idx_non_visible_;
@@ -78,25 +99,25 @@ class ProcessorTrackerLandmarkImage : public ProcessorTrackerLandmark
         std::list<cv::Point> tracker_target_;
         FeatureBasePtrList feat_lmk_found_;
 
-        ProcessorTrackerLandmarkImage(ProcessorParamsTrackerLandmarkImagePtr _params_tracker_landmark_image);
-        virtual ~ProcessorTrackerLandmarkImage();
+        ProcessorTrackerLandmarkImage(ParamsProcessorTrackerLandmarkImagePtr _params_tracker_landmark_image);
+        ~ProcessorTrackerLandmarkImage() override;
 
-        virtual void configure(SensorBasePtr _sensor) ;
+        void configure(SensorBasePtr _sensor) override;
 
     protected:
 
         /**
          * \brief Does cast of the images and renews the active grid.
          */
-        void preProcess();
+        void preProcess() override;
 
-        void advanceDerived()
+        void advanceDerived() override
         {
             ProcessorTrackerLandmark::advanceDerived();
             image_last_ = image_incoming_;
         }
 
-        void resetDerived()
+        void resetDerived() override
         {
             ProcessorTrackerLandmark::resetDerived();
             image_last_ = image_incoming_;
@@ -107,16 +128,20 @@ class ProcessorTrackerLandmarkImage : public ProcessorTrackerLandmark
          *
          * Used for debugging
          */
-        void postProcess();
+        void postProcess() override;
 
-        //Pure virtual
-        /** \brief Find provided landmarks in the incoming capture
-         * \param _landmarks_in input list of landmarks to be found in incoming
-         * \param _features_incoming_out returned list of incoming features corresponding to a landmark of _landmarks_in
+        /** \brief Find provided landmarks as features in the provided capture
+         * \param _landmarks_in input list of landmarks to be found
+         * \param _capture the capture in which the _landmarks_in should be searched
+         * \param _features_out returned list of features  found in \b _capture corresponding to a landmark of _landmarks_in
          * \param _feature_landmark_correspondences returned map of landmark correspondences: _feature_landmark_correspondences[_feature_out_ptr] = landmark_in_ptr
+         *
+         * \return the number of landmarks found
          */
-        virtual unsigned int findLandmarks(const LandmarkBasePtrList& _landmarks_in, FeatureBasePtrList& _features_incoming_out,
-                                           LandmarkMatchMap& _feature_landmark_correspondences);
+        unsigned int findLandmarks(const LandmarkBasePtrList& _landmarks_in,
+                                           const CaptureBasePtr& _capture,
+                                           FeatureBasePtrList& _features_out,
+                                           LandmarkMatchMap& _feature_landmark_correspondences) override;
 
         /** \brief Vote for KeyFrame generation
          *
@@ -125,34 +150,40 @@ class ProcessorTrackerLandmarkImage : public ProcessorTrackerLandmark
          *
          * WARNING! This function only votes! It does not create KeyFrames!
          */
-        virtual bool voteForKeyFrame();
+        bool voteForKeyFrame() const override;
 
         /** \brief Detect new Features
          * \param _max_features maximum number of features detected (-1: unlimited. 0: none)
-         * \param _features_last_out The list of detected Features.
+         * \param _capture The capture in which the new features should be detected.
+         * \param _features_out The list of detected Features in _capture.
          * \return The number of detected Features.
          *
          * This function detects Features that do not correspond to known Features/Landmarks in the system.
          *
+         * IMPORTANT: The features in _features_out should be emplaced. Don't use `make_shared`, use `FeatureBase::emplace` instead.
+         * Then, they will be already linked to the _capture.
+         * If you detect all the features at once in `preprocess()`, you should either emplace them (`FeatureBase::emplace()`) and remove the not returned features in _features_out (`FeatureBase::remove()`),
+         * or create them (`make_shared()`) and link all the returned features in _features_out (`FeatureBase::link(_capture)`).
+         *
          * The function is called in ProcessorTrackerLandmark::processNew() to set the member new_features_last_,
          * the list of newly detected features of the capture last_ptr_.
          */
-        virtual unsigned int detectNewFeatures(const int& _max_new_features, FeatureBasePtrList& _features_last_out);
+        unsigned int detectNewFeatures(const int& _max_new_features,
+                                               const CaptureBasePtr& _capture,
+                                               FeatureBasePtrList& _features_out) override;
 
-        /** \brief Create one landmark
-         *
-         * Implement in derived classes to build the type of landmark you need for this tracker.
+        /** \brief Emplaces one landmark
          */
-        virtual LandmarkBasePtr createLandmark(FeatureBasePtr _feature_ptr);
+        LandmarkBasePtr emplaceLandmark(FeatureBasePtr _feature_ptr) override;
 
     public:
-        static ProcessorBasePtr create(const std::string& _unique_name, const ProcessorParamsBasePtr _params, const SensorBasePtr sensor_ptr = nullptr);
+        static ProcessorBasePtr create(const std::string& _unique_name, const ParamsProcessorBasePtr _params);
 
-        /** \brief Create a new factor
+        /** \brief Emplaces a new factor
          * \param _feature_ptr pointer to the Feature to constrain
          * \param _landmark_ptr LandmarkBase pointer to the Landmark constrained.
          */
-        virtual FactorBasePtr createFactor(FeatureBasePtr _feature_ptr, LandmarkBasePtr _landmark_ptr);
+        FactorBasePtr emplaceFactor(FeatureBasePtr _feature_ptr, LandmarkBasePtr _landmark_ptr) override;
 
         //Other functions
     private:
@@ -174,11 +205,11 @@ class ProcessorTrackerLandmarkImage : public ProcessorTrackerLandmark
          * \param _cv_matches output variable in which the best result will be stored (in the position [0])
          * \return normalized score of similarity (1 - exact match; 0 - complete mismatch)
          */
-        Scalar match(const cv::Mat _target_descriptor, const cv::Mat _candidate_descriptors, std::vector<cv::DMatch>& _cv_matches);
+        double match(const cv::Mat _target_descriptor, const cv::Mat _candidate_descriptors, std::vector<cv::DMatch>& _cv_matches);
 
-        void landmarkInCurrentCamera(const Eigen::VectorXs& _frame_state,
-                                     const LandmarkAHPPtr   _landmark,
-                                     Eigen::Vector4s&       _point3D_hmg);
+        void landmarkInCurrentCamera(const Eigen::VectorXd& _frame_state,
+                                     const LandmarkAhpPtr   _landmark,
+                                     Eigen::Vector4d&       _point3d_hmg);
 
         // These only to debug, will disappear one day soon
     public:

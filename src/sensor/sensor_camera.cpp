@@ -1,28 +1,50 @@
-#include "vision/sensor/sensor_camera.h"
+//--------LICENSE_START--------
+//
+// Copyright (C) 2020,2021,2022 Institut de Robòtica i Informàtica Industrial, CSIC-UPC.
+// Authors: Joan Solà Ortega (jsola@iri.upc.edu)
+// All rights reserved.
+//
+// This file is part of WOLF
+// WOLF is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Lesser General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU Lesser General Public License for more details.
+//
+// You should have received a copy of the GNU Lesser General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
+//
+//--------LICENSE_END--------
 
-#include "core/math/pinhole_tools.h"
+#include "vision/sensor/sensor_camera.h"
+#include "vision/math/pinhole_tools.h"
+
 #include "core/state_block/state_block.h"
 #include "core/state_block/state_quaternion.h"
 
 namespace wolf
 {
 
-SensorCamera::SensorCamera(const Eigen::VectorXs& _extrinsics, const IntrinsicsCamera& _intrinsics) :
-                SensorBase("CAMERA", std::make_shared<StateBlock>(_extrinsics.head(3), true), std::make_shared<StateQuaternion>(_extrinsics.tail(4), true), std::make_shared<StateBlock>(_intrinsics.pinhole_model_raw, true), 1),
+SensorCamera::SensorCamera(const Eigen::VectorXd& _extrinsics, const ParamsSensorCamera& _intrinsics) :
+                SensorBase("SensorCamera", std::make_shared<StateBlock>(_extrinsics.head(3), true), std::make_shared<StateQuaternion>(_extrinsics.tail(4), true), std::make_shared<StateBlock>(_intrinsics.pinhole_model_raw, true), 1),
                 img_width_(_intrinsics.width), //
                 img_height_(_intrinsics.height), //
                 distortion_(_intrinsics.distortion), //
-                correction_(distortion_.size() + 1), // make correction vector slightly larger in size than the distortion vector
+                correction_(distortion_.size()==0 ? 0 : distortion_.size() + 1), // make correction vector slightly larger in size than the distortion vector
                 pinhole_model_raw_(_intrinsics.pinhole_model_raw), //
                 pinhole_model_rectified_(_intrinsics.pinhole_model_rectified), //
                 using_raw_(true)
 {
-    assert(_extrinsics.size() == 7 && "Wrong intrinsics vector size. Should be 7 for 3D");
+    assert(_extrinsics.size() == 7 && "Wrong intrinsics vector size. Should be 7 for 3d");
     useRawImages();
     pinhole::computeCorrectionModel(getIntrinsic()->getState(), distortion_, correction_);
 }
 
-SensorCamera::SensorCamera(const Eigen::VectorXs& _extrinsics, IntrinsicsCameraPtr _intrinsics_ptr) :
+SensorCamera::SensorCamera(const Eigen::VectorXd& _extrinsics, ParamsSensorCameraPtr _intrinsics_ptr) :
         SensorCamera(_extrinsics, *_intrinsics_ptr)
 {
     //
@@ -33,9 +55,9 @@ SensorCamera::~SensorCamera()
     //
 }
 
-Eigen::Matrix3s SensorCamera::setIntrinsicMatrix(Eigen::Vector4s _pinhole_model)
+Eigen::Matrix3d SensorCamera::setIntrinsicMatrix(Eigen::Vector4d _pinhole_model)
 {
-    Eigen::Matrix3s K;
+    Eigen::Matrix3d K;
     K(0, 0) = _pinhole_model(2);
     K(0, 1) = 0;
     K(0, 2) = _pinhole_model(0);
@@ -45,27 +67,13 @@ Eigen::Matrix3s SensorCamera::setIntrinsicMatrix(Eigen::Vector4s _pinhole_model)
     K.row(2) << 0, 0, 1;
     return K;
 }
-
-// Define the factory method
-SensorBasePtr SensorCamera::create(const std::string& _unique_name, //
-                                 const Eigen::VectorXs& _extrinsics_pq, //
-                                 const IntrinsicsBasePtr _intrinsics)
-{
-    assert(_extrinsics_pq.size() == 7 && "Bad extrinsics vector length. Should be 7 for 3D.");
-
-    std::shared_ptr<IntrinsicsCamera> intrinsics_ptr = std::static_pointer_cast<IntrinsicsCamera>(_intrinsics);
-    SensorCameraPtr sen_ptr = std::make_shared<SensorCamera>(_extrinsics_pq, intrinsics_ptr);
-    sen_ptr->setName(_unique_name);
-
-    return sen_ptr;
-}
-
 } // namespace wolf
 
-// Register in the SensorFactory
-#include "core/sensor/sensor_factory.h"
+// Register in the FactorySensor
+#include "core/sensor/factory_sensor.h"
 namespace wolf
 {
-WOLF_REGISTER_SENSOR("CAMERA", SensorCamera)
+WOLF_REGISTER_SENSOR(SensorCamera)
+WOLF_REGISTER_SENSOR_AUTO(SensorCamera)
 } // namespace wolf
 

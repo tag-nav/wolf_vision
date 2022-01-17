@@ -19,28 +19,22 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 //--------LICENSE_END--------
-/*
- * processor_tracker_feature_trifocal_yaml.cpp
- *
- *  Created on: Apr 12, 2018
- *      Author: asantamaria
- */
+// wolf yaml
+#include "core/yaml/yaml_conversion.h"
 
 // wolf
-#include "vision/processor/processor_tracker_feature_trifocal.h"
-
-#include "core/yaml/yaml_conversion.h"
 #include "core/common/factory.h"
 
 // yaml-cpp library
 #include <yaml-cpp/yaml.h>
+#include "vision/processor/processor_bundle_adjustment.h"
 
 namespace wolf
 {
 
 namespace
 {
-static ParamsProcessorBasePtr createParamsProcessorTrackerFeatureTrifocal(const std::string & _filename_dot_yaml)
+static ParamsProcessorBasePtr createParamsProcessorBundleAdjustment(const std::string & _filename_dot_yaml)
 {
     YAML::Node config = YAML::LoadFile(_filename_dot_yaml);
 
@@ -49,9 +43,9 @@ static ParamsProcessorBasePtr createParamsProcessorTrackerFeatureTrifocal(const 
         WOLF_ERROR("Invalid YAML file!");
         return nullptr;
     }
-    else if (config["type"].as<std::string>() == "ProcessorTrackerFeatureTrifocal")
+    else if (config["type"].as<std::string>() == "ProcessorBundleAdjustment")
     {
-        ParamsProcessorTrackerFeatureTrifocalPtr params = std::make_shared<ParamsProcessorTrackerFeatureTrifocal>();
+        ParamsProcessorBundleAdjustmentPtr params = std::make_shared<ParamsProcessorBundleAdjustment>();
 
         YAML::Node vision_utils               = config      ["vision_utils"];
         params->yaml_file_params_vision_utils = vision_utils["YAML file params"].as<std::string>();
@@ -66,13 +60,16 @@ static ParamsProcessorBasePtr createParamsProcessorTrackerFeatureTrifocal(const 
         YAML::Node algorithm                    = config   ["algorithm"];
         params->time_tolerance                  = algorithm["time tolerance"]                 .as<double>();
         params->voting_active                   = algorithm["voting active"]                  .as<bool>();
+        params->delete_ambiguities              = algorithm["delete ambiguities"]             .as<bool>();
         params->min_features_for_keyframe       = algorithm["minimum features for keyframe"]  .as<unsigned int>();
-        params->max_new_features                = algorithm["maximum new features"]           .as<int>();
+        params->max_new_features                = algorithm["maximum new features"]           .as<unsigned int>();
+
         params->n_cells_h                       = algorithm["grid horiz cells"]               .as<int>();
         params->n_cells_v                       = algorithm["grid vert cells"]                .as<int>();
         params->min_response_new_feature        = algorithm["min response new features"]      .as<int>();
-        params->min_track_length_for_factor     = algorithm["min track length for factor"].as<int>();
-        params->debug_view                      = algorithm["debug view"].as<bool>();
+
+        params->min_track_length_for_factor = algorithm["min track length for factor"].as<int>();
+
 
         YAML::Node noise                      = config["noise"];
         params->pixel_noise_std               = noise ["pixel noise std"].as<double>();
@@ -81,14 +78,14 @@ static ParamsProcessorBasePtr createParamsProcessorTrackerFeatureTrifocal(const 
     }
     else
     {
-        WOLF_ERROR("Wrong processor type! Should be \"TRACKER FEATURE TRIFOCAL\"");
+        WOLF_ERROR("Wrong processor type! Should be \"TRACKER BUNDLE ADJUSTMENT\"");
         return nullptr;
     }
     return nullptr;
 }
 
 // Register in the FactorySensor
-const bool WOLF_UNUSED registered_prc_trifocal = FactoryParamsProcessor::registerCreator("ProcessorTrackerFeatureTrifocal", createParamsProcessorTrackerFeatureTrifocal);
+const bool WOLF_UNUSED registered_prc_bundle_adjustment = FactoryParamsProcessor::registerCreator("ProcessorBundleAdjustment", createParamsProcessorBundleAdjustment);
 
 } // namespace [unnamed]
 
