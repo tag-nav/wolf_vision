@@ -31,7 +31,7 @@
 #include "vision/sensor/sensor_camera.h"
 #include "vision/capture/capture_image.h"
 #include <core/ceres_wrapper/solver_ceres.h>
-#include "vision/landmark/landmark_HP.h"
+#include "vision/landmark/landmark_hp.h"
 #include "vision/internal/config.h"
 
 
