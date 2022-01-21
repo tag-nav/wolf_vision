@@ -31,15 +31,15 @@
 #include "vision/sensor/sensor_camera.h"
 #include "vision/capture/capture_image.h"
 #include <core/ceres_wrapper/solver_ceres.h>
-#include "vision/landmark/landmark_HP.h"
+#include "vision/landmark/landmark_hp.h"
 #include "vision/internal/config.h"
 
 
 // Vision utils includes
-#include <vision_utils.h>
-#include <sensors.h>
-#include <common_class/buffer.h>
-#include <common_class/frame.h>
+#include "vision_utils/vision_utils.h"
+#include "vision_utils/sensors.h"
+#include "vision_utils/common_class/buffer.h"
+#include "vision_utils/common_class/frame.h"
 
 ////Mvbluefox includes
 //#include <iri/mvbluefox3/mvbluefox3.h>
@@ -138,7 +138,7 @@ int main(int argc, char** argv)
     camera->setImgHeight(img_height);
 
     // Install processor
-    ProcessorParamsBundleAdjustmentPtr params = std::make_shared<ProcessorParamsBundleAdjustment>();
+    ParamsProcessorBundleAdjustmentPtr params = std::make_shared<ParamsProcessorBundleAdjustment>();
     params->delete_ambiguities = true;
     params->yaml_file_params_vision_utils = wolf_vision_root + "/demos/processor_bundle_adjustment_vision_utils.yaml";
     params->pixel_noise_std                = 1.0;
@@ -173,9 +173,9 @@ int main(int argc, char** argv)
         camera->process(image);
 
         // solve only when new KFs are added
-        if (problem->getTrajectory()->getFrameList().size() > number_of_KFs)
+        if (problem->getTrajectory()->getFrameMap().size() > number_of_KFs)
         {
-            number_of_KFs = problem->getTrajectory()->getFrameList().size();
+            number_of_KFs = problem->getTrajectory()->getFrameMap().size();
             std::string report = solver->solve(wolf::SolverManager::ReportVerbosity::BRIEF);
             std::cout << report << std::endl;
             if (number_of_KFs > 5)
