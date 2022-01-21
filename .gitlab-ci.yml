@@ -101,7 +101,7 @@ stages:
   - cd $CI_PROJECT_DIR
   - mkdir -pv build
   - cd build
-  - cmake -DCMAKE_BUILD_TYPE=release -DBUILD_TESTS=ON ..
+  - cmake -DCMAKE_BUILD_TYPE=release -DBUILD_TESTS=ON -DBUILD_DEMOS=ON ..
   - make -j$(nproc)
   - ctest -j$(nproc)
   - make install
