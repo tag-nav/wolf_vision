@@ -19,12 +19,6 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 //--------LICENSE_END--------
-/**
- * \file gtest_factor_epipolar.cpp
- *
- *  Created on: March 31, 2022
- *      \author: mfourmy
- */
 
 
 #include "vision/capture/capture_image.h"
