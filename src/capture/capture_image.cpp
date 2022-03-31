@@ -19,20 +19,26 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 //--------LICENSE_END--------
+/**
+ * \file gtest_factor_epipolar.cpp
+ *
+ *  Created on: March 31, 2022
+ *      \author: mfourmy
+ */
+
+
 #include "vision/capture/capture_image.h"
 
 namespace wolf {
 
-CaptureImage::CaptureImage(const TimeStamp& _ts, SensorCameraPtr _camera_ptr, const cv::Mat& _data_cv) :
+CaptureImage::CaptureImage(const TimeStamp& _ts, SensorCameraPtr _camera_ptr, const cv::Mat& _img) :
     CaptureBase("CaptureImage", _ts, _camera_ptr),
-    frame_(_data_cv),
-    grid_features_(nullptr),
-    keypoints_(KeyPointVector()),
+    img_(_img),
+    keypoints_(std::vector<cv::KeyPoint>()),
     descriptors_(cv::Mat()),
-    matches_from_precedent_(DMatchVector()),
+    matches_from_precedent_(std::vector<cv::DMatch>()),
     matches_normalized_scores_(std::vector<double>()),
-    map_index_to_next_(std::map<int, int>()),
-    global_descriptor_(cv::Mat())
+    map_index_to_next_(std::map<int, int>())
 {
     //
 }
@@ -44,37 +50,14 @@ CaptureImage::~CaptureImage()
 
 const cv::Mat& CaptureImage::getImage() const
 {
-    return frame_.getImage();
+    return img_;
 }
 
-void CaptureImage::setDescriptors(const cv::Mat& _descriptors)
+void CaptureImage::setImage(const cv::Mat& _img)
 {
-    frame_.setDescriptors(_descriptors);
+    // Is assignment enough? Use clone or copyTo instead?
+    img_ = _img;
 }
 
-void CaptureImage::setKeypoints(const std::vector<cv::KeyPoint> &_keypoints)
-{
-    frame_.setKeyPoints(_keypoints);
-}
-
-cv::Mat& CaptureImage::getDescriptors()
-{
-    return frame_.getDescriptors();
-}
-
-std::vector<cv::KeyPoint>& CaptureImage::getKeypoints()
-{
-    return frame_.getKeyPoints();
-}
-
-void CaptureImage::setGlobalDescriptor(const cv::Mat& _global_descriptor)
-{
-    global_descriptor_ = _global_descriptor;
-}
-
-cv::Mat& CaptureImage::getGlobalDescriptor()
-{
-    return global_descriptor_;
-}
 
 } // namespace wolf
