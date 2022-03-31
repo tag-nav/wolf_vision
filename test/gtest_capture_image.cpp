@@ -20,7 +20,7 @@
 //
 //--------LICENSE_END--------
 /**
- * \file gtest_factor_epipolar.cpp
+ * \file gtest_capture_image.cpp
  *
  *  Created on: March 31, 2022
  *      \author: mfourmy
@@ -44,7 +44,6 @@ class CaptureImage_test : public testing::Test
         void SetUp() override
         {
             img_ = cv::Mat::eye(4, 4, CV_64F);
-            object_type_ = "CaptureImage";
         }
 };
 
@@ -55,24 +54,6 @@ TEST_F(CaptureImage_test, type)
     ASSERT_EQ(c->getType(), "CaptureImage");
 }
 
-// TEST_F(CaptureImage_test, getObjectType)
-// {
-//     ObjectDetection det0 = {.measurement = pose_, .detection_score = 1, .meas_cov=cov_, .object_type = "type0"};
-//     ObjectDetection det1 = {.measurement = pose_, .detection_score = 1, .meas_cov=cov_, .object_type = "type1"};
-//     dets_.push_back(det0);
-//     dets_.push_back(det1);
-
-//     CaptureImagePtr c = std::make_shared<CaptureImage>(0, nullptr, dets_);
-
-//     ObjectDetections dets_get = c->getObjectDetections();
-//     std::vector<std::string> types = {"type0", "type1"};
-//     for (int i=0; i<2; i++){
-//         std::string type = types[i];
-//         ObjectDetection det = dets_get[i];
-//         ASSERT_EQ(det.object_type, type);
-//     }
-
-// }
 
 
 int main(int argc, char **argv)
