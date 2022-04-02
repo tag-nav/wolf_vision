@@ -37,7 +37,13 @@
 #include <core/capture/capture_base.h>
 #include "vision/sensor/sensor_camera.h"
 
+
 namespace wolf {
+
+typedef typename std::shared_ptr<cv::KeyPoint> KeyPointPtr;
+typedef typename std::pair<KeyPointPtr,KeyPointPtr> KeyPointPtrPair;
+typedef typename std::vector<KeyPointPtrPair> VectorKeyPointPtrPairs;
+
 
 // Set ClassPtr, ClassConstPtr and ClassWPtr typedefs;
 WOLF_PTR_TYPEDEFS(CaptureImage);
@@ -54,12 +60,15 @@ class CaptureImage : public CaptureBase
         cv::Mat img_;
 
     public:
-        std::vector<cv::KeyPoint>       keypoints_;
-        cv::Mat                         descriptors_;
-        std::vector<cv::DMatch>         matches_from_precedent_;
-        std::vector<double>             matches_normalized_scores_;
-        std::map<int, int>              map_index_to_next_;
-        cv::Mat                         global_descriptor_;
+        // Keypoints actively tracked in the current capture
+        std::vector<cv::KeyPoint> keypoints_;
+
+        // descriptors of the keypoints if necessary. 
+        // number of rows ==  keypoints_.size() if intialized
+        cv::Mat descriptors_;
+
+        // Same size as the actively tracked KeyPoints. Store indices of the origin keypoints still being tracked.
+        VectorKeyPointPtrPairs tracks_origin_;
 
     public:
         CaptureImage(const TimeStamp& _ts, SensorCameraPtr _camera_ptr, const cv::Mat& _data_cv);
@@ -67,12 +76,6 @@ class CaptureImage : public CaptureBase
 
         const cv::Mat& getImage() const;
         void setImage(const cv::Mat& _img);
-
-        const std::vector<cv::KeyPoint>& getKeypoints() const;
-        void setKeypoints(const std::vector<cv::KeyPoint>& _keypoints);
-
-        const cv::Mat& getDescriptors() const;
-        void setDescriptors(const cv::Mat &_descriptors);
 
 };
 

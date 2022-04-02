@@ -28,9 +28,8 @@
 // yaml
 #include <yaml-cpp/yaml.h>
 
-// Vision utils
-#include <vision_utils/vision_utils.h>
-
+// OpenCV includes
+#include <opencv2/core.hpp>
 namespace wolf {
     
 WOLF_PTR_TYPEDEFS(LandmarkHp);

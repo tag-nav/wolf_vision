@@ -22,11 +22,13 @@
 #ifndef LANDMARK_POINT_3d_H
 #define LANDMARK_POINT_3d_H
 
+
+// OpenCV includes
+#include <opencv2/core.hpp>
+
 //Wolf includes
 #include "core/landmark/landmark_base.h"
 
-// Vision Utils includes
-#include <vision_utils/vision_utils.h>
 
 namespace wolf {
 

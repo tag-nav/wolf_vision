@@ -106,15 +106,15 @@ inline void FeaturePointImage::setDescriptor(const cv::Mat& _descriptor)
     descriptor_ = _descriptor;
 }
 
-std::size_t FeaturePointImage::getIndexKeyPoint() const
-{
-    return index_keypoint_;
-}
+// std::size_t FeaturePointImage::getIndexKeyPoint() const
+// {
+//     return index_keypoint_;
+// }
 
-void FeaturePointImage::setIndexKeyPoint(std::size_t _index)
-{
-     index_keypoint_ = _index;
-}
+// void FeaturePointImage::setIndexKeyPoint(std::size_t _index)
+// {
+//      index_keypoint_ = _index;
+// }
 
 
 } // namespace wolf

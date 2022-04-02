@@ -144,62 +144,7 @@ void ProcessorBundleAdjustment::preProcess()
 
         }
 
-
-//        //get points 2d from inlier matches
-//        PointVector pts1, pts2;
-//        for (auto match : capture_image_incoming_->matches_from_precedent_)
-//        {
-//        	pts1.push_back(capture_image_incoming_->keypoints_[match.queryIdx].pt);
-//        	pts2.push_back(capture_image_last_->keypoints_[match.trainIdx].pt);
-//        }
-//
-//        //find Essential Matrix
-//        std::vector<uchar> inliers(pts1.size(),0);
-//
-//        auto camera_mat = std::static_pointer_cast<SensorCamera>(capture_image_last_->getSensor())->getIntrinsicMatrix();
-//        cv::Mat camera_mat_cv;
-//        cv::eigen2cv(camera_mat, camera_mat_cv);
-//
-//        cv::Mat E = cv::findEssentialMat(pts1,
-//        					pts2,
-//							camera_mat_cv,
-//							CV_RANSAC,
-//							0.999,
-//							1.0,
-//							inliers);
-//
-//        //Compute rotation R and translation t from E
-//        cv::Mat R_cv;
-//        cv::Mat t_cv;
-//
-//        cv::recoverPose(E,pts1,pts2, camera_mat_cv, R_cv, t_cv, inliers);
-//
-//        //Convert R and t from OpenCV type to Eigen type and convert Rotation to a quaternion
-//        Eigen::Matrix3d R;
-//        cv::cv2eigen(R_cv, R);
-////        auto q = R2q(R); //Quaternion q
-//
-//        Eigen::Vector3d t; //Translation t
-//        cv::cv2eigen(t_cv,t);
-
-
-
-
-
-
-
-//        cv::Mat img_mat = cv::Mat(capture_image_incoming_->getImage().rows, capture_image_incoming_->getImage().cols, capture_image_incoming_->getImage().type());
-//
-//        cv::drawMatches(capture_image_incoming_->getImage(), 		 capture_image_incoming_->getKeypoints(),
-//        				capture_image_last_->getImage(),     capture_image_last_->getKeypoints(),
-//						capture_image_incoming_->matches_from_precedent_, img_mat);
-//
-//        cv::namedWindow("MATCHES VIEW", cv::WINDOW_NORMAL);
-//        cv::resizeWindow("MATCHES VIEW", 800,600);
-//        cv::imshow("MATCHES VIEW", img_mat);
     }
-
-//    std::cout << "preProcess() done " << std::endl;
 
 }
 
@@ -207,142 +152,6 @@ void ProcessorBundleAdjustment::postProcess()
 {
 
     WOLF_INFO("last ", last_ptr_, "camera ", camera);
-
-    //=====================================Compute prior for the frame===============================================
-//    if (capture_image_last_)
-//	{
-//
-//		std::vector<cv::Point3f> landmark_points;
-//		std::vector<cv::Point2f> image_points;
-//
-//		//get camera information
-//		auto camera_mat = camera->getIntrinsicMatrix();
-//
-//		cv::Mat camera_mat_cv;
-//		cv::eigen2cv(camera_mat, camera_mat_cv);
-//
-//		auto dist_coeffs = camera->getDistortionVector();
-//
-//		Eigen::Vector5d dist;
-//		switch(dist_coeffs.size())
-//		{
-//		case 0:
-//		{
-//			dist << 0,0,0,0,0;
-//			break;
-//		}
-//		case 1:
-//		{
-//			dist << dist_coeffs(0),0,0,0,0;
-//			break;
-//		}
-//		case 2:
-//		{
-//			dist << dist_coeffs(0),dist_coeffs(1),0,0,0;
-//			break;
-//		}
-//		case 3:
-//		{
-//			dist << dist_coeffs(0),dist_coeffs(1),0,0,dist_coeffs(2);
-//			break;
-//		}
-//		default:
-//			dist << 0,0,0,0,0;
-//		}
-//
-//		cv::Mat dist_coeffs_cv;
-//		cv::eigen2cv(dist, dist_coeffs_cv);
-//
-//
-//
-//		//fill points and landmarks list
-//		int debug_counter = 0;
-//
-////		for (auto & feat : capture_image_last_->getFeatureList())
-////		{
-////			for (auto & fact : feat->getFactorList())
-////			{
-////				debug_counter++;
-////				//check the number of factors to the landmark
-////				if (fact->getLandmarkOther()->getConstrainedByList().size() >= 2)
-////				{
-////					//3d points
-////					auto point3d = std::static_pointer_cast<LandmarkHp>(fact->getLandmarkOther())->point();
-////					landmark_points.push_back(cv::Point3f(point3d(0),point3d(1),point3d(2)));
-////					//2d points
-////					auto point2d = feat->getMeasurement();
-////					image_points.push_back(cv::Point2f(point2d(0), point2d(1)));
-////				}
-////			}
-////		}
-//
-//		for (auto & feat : track_matrix_.snapshotAsList(capture_image_last_))
-//		{
-//			debug_counter++;
-//			auto trkId = feat->trackId();
-//			if (lmk_track_map_.count(feat->trackId()))
-//			{
-//				auto lmk_base = lmk_track_map_[trkId];
-////				if (lmk_base->getConstrainedByList().size() >= 2)
-//				{
-//					//3d points
-//					auto point3d = std::static_pointer_cast<LandmarkHp>(lmk_base)->point();
-//					landmark_points.push_back(cv::Point3f(point3d(0),point3d(1),point3d(2)));
-//					//2d points
-//					auto point2d = feat->getMeasurement();
-//					image_points.push_back(cv::Point2f(point2d(0), point2d(1)));
-//				}
-//			}
-//		}
-//
-//		WOLF_INFO("Num lmks in last:", debug_counter,"lmks constrained by >= 2 fctrs: ", landmark_points.size());
-//
-//		//solvePnP
-//		if (landmark_points.size() > 7)
-//		{
-//            WOLF_INFO("before PnP ", tvec, rvec);
-//            WOLF_INFO("before PnP ", last_ptr_->getFrame()->getState().transpose());
-//
-//
-//            cv::solvePnP(landmark_points, image_points, camera_mat_cv, dist_coeffs_cv, rvec, tvec, true);
-//		    WOLF_INFO("Solve PnP Done")
-//
-//		    //Compute and set Robot state
-//		    //q_w_s Camera quaternion
-//		    Eigen::Vector3d rvec_eigen;
-//		    cv::cv2eigen(rvec, rvec_eigen);
-//		    Eigen::Quaternion<double> q_w_s = v2q(rvec_eigen);
-//
-//		    //p_w_s Camera position
-//		    Eigen::Vector3d p_w_s;
-//		    cv::cv2eigen(tvec, p_w_s);
-//
-//		    //Robot pose
-//		    //	Eigen::Vector3d p_w_r = capture_image_last_->getFrame()->getP()->getState();
-//		    //	Eigen::Quaternion<double> q_w_r = Quaterniond(capture_image_last_->getFrame()->getO()->getState().data());
-//
-//		    //Extrinsics (camera in robot reference frame)
-//		    Eigen::Vector3d p_r_s = camera->getP()->getState();
-//		    Eigen::Quaternion<double> q_r_s = Quaterniond(camera->getO()->getState().data());
-//
-//		    //Robot pose compositions
-//		    Eigen::Quaternion<double> q_w_r = q_w_s * q_r_s.conjugate();
-//		    Eigen::Vector3d p_w_r = p_w_s - q_w_r * p_r_s;
-//
-//
-//
-//		    Eigen::Vector7d prior_state;
-//		    prior_state << p_w_r(0), p_w_r(1), p_w_r(2), q_w_r.x(), q_w_r.y(), q_w_r.z(), q_w_r.w();
-//
-//		    last_ptr_->getFrame()->setState(prior_state);
-//
-//            WOLF_INFO("after PnP  ", last_ptr_->getFrame()->getState().transpose());
-//            WOLF_INFO("after PnP  ", tvec, rvec);
-//
-//		}
-//
-//		//=================================================================================================================
-//	}
 
     //delete landmarks
     std::list<LandmarkBasePtr> lmks_to_remove;
@@ -653,13 +462,7 @@ bool ProcessorBundleAdjustment::voteForKeyFrame() const
 	//    // C. Time-based policies
 	    bool vote_time = false;
 	////    vote_time = vote_time || (incoming_ptr_->getTimeStamp()-origin_ptr_->getTimeStamp() > 1.0);
-	//
-	//    if (vote_up)
-	//        WOLF_TRACE("VOTE UP");
-	//    if (vote_down)
-	//        WOLF_TRACE("VOTE DOWN");
-	//    if (vote_time)
-	//        WOLF_TRACE("VOTE TIME");
+
 	    if (vote_down)
 	    	WOLF_INFO("Creating KF. Number of features: ", incoming_ptr_->getFeatureList().size());
 
@@ -686,8 +489,6 @@ LandmarkBasePtr ProcessorBundleAdjustment::emplaceLandmark(FeatureBasePtr _featu
     		(std::static_pointer_cast<SensorCamera>(getSensor()))->getCorrectionVector(),
 			point2d);
 
-
-
     //double distance = params_bundle_adjustment_->distance; // arbitrary value
     double distance = 1;
     Eigen::Vector4d vec_homogeneous_c;
@@ -705,16 +506,7 @@ LandmarkBasePtr ProcessorBundleAdjustment::emplaceLandmark(FeatureBasePtr _featu
                                            * T_r_c
                                            * vec_homogeneous_c;
 
-
-//    std::cout << "Point2d: " << point2d.transpose() << std::endl;
-//    std::cout << "Point3d: " << point3d.transpose() << std::endl;
-//    std::cout << "Hmg_c: " << vec_homogeneous.transpose() << std::endl;
-//    std::cout << "Hmg_w: " << vec_homogeneous_w.transpose() << std::endl;
-    //vec_homogeneous_w = vec_homogeneous;
-
     LandmarkBasePtr lmk_hp_ptr = LandmarkBase::emplace<LandmarkHp>(getProblem()->getMap(), vec_homogeneous_w, getSensor(), feat_point_image_ptr->getDescriptor());
-
-//    std::cout << "LANDMARKS CREATED AND ADDED to MAP: " << getProblem()->getMap()->getLandmarkList().size() << std::endl;
 
     _feature_ptr->setLandmarkId(lmk_hp_ptr->id());
     return lmk_hp_ptr;
@@ -722,51 +514,6 @@ LandmarkBasePtr ProcessorBundleAdjustment::emplaceLandmark(FeatureBasePtr _featu
 
 void ProcessorBundleAdjustment::establishFactors()
 {
-
-//	if (origin_ptr_ == last_ptr_)
-//		return;
-//
-//	TrackMatches matches_origin_inc = track_matrix_.matches(origin_ptr_, last_ptr_);
-//
-//    for (auto const & pair_trkid_pair : matches_origin_inc)
-//    {
-//        size_t trkid = pair_trkid_pair.first;
-//        //if track size is lower than a minimum, don't establish any factor.
-//        if (track_matrix_.trackSize(trkid) < params_bundle_adjustment_->min_track_length_for_factor)
-//        	continue;
-//
-//        FeatureBasePtr feature_origin = pair_trkid_pair.second.first;
-//        FeatureBasePtr feature_last   = pair_trkid_pair.second.second;
-//
-//        if (lmk_track_map_.count(trkid)==0) //if the track doesn't have landmark associated -> we need a map: map[track_id] = landmarkptr
-//        {
-//        	//emplaceLandmark
-//        	LandmarkBasePtr lmk = emplaceLandmark(feature_origin);
-//        	LandmarkHpPtr lmk_hp = std::static_pointer_cast<LandmarkHp>(lmk);
-//
-//        	//add only one Landmark to map: map[track_id] = landmarkptr
-//        	lmk_track_map_[trkid] = lmk;
-//
-//        	//emplace a factor for each feature in the track (only for keyframes)
-//        	Track full_track = track_matrix_.trackAtKeyframes(trkid);
-//        	for (auto it=full_track.begin(); it!=full_track.end(); ++it)
-//        	{
-//        		FactorBase::emplace<FactorPixelHp>(it->second, it->second, lmk_hp, shared_from_this());
-//        	}
-//
-//        }
-//        else
-//        {
-//        	LandmarkBasePtr lmk = lmk_track_map_[trkid];
-//        	LandmarkHpPtr lmk_hp = std::static_pointer_cast<LandmarkHp>(lmk);
-//
-//        	//Create factor
-//        	FactorBase::emplace<FactorPixelHp>(feature_last, feature_last, lmk_hp, shared_from_this());
-//        }
-//
-//    }
-
-
 
 	for (auto & pair_id_ftr : track_matrix_.snapshot(last_ptr_))
 	{

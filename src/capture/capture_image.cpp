@@ -30,9 +30,7 @@ CaptureImage::CaptureImage(const TimeStamp& _ts, SensorCameraPtr _camera_ptr, co
     img_(_img),
     keypoints_(std::vector<cv::KeyPoint>()),
     descriptors_(cv::Mat()),
-    matches_from_precedent_(std::vector<cv::DMatch>()),
-    matches_normalized_scores_(std::vector<double>()),
-    map_index_to_next_(std::map<int, int>())
+    tracks_origin_(VectorKeyPointPtrPairs())
 {
     //
 }

@@ -1,0 +1,4 @@
+algorithm:
+    time tolerance: 0.005
+    voting_active: true
+    

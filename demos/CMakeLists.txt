@@ -12,7 +12,7 @@ else(OpenCV_FOUND)
     message("[WARN] OpenCV support not installed. Minimum 2.4 version required.")
 endif(OpenCV_FOUND)
 
-ADD_EXECUTABLE(demo_processor_bundle_adjustment demo_processor_bundle_adjustment.cpp)
-TARGET_LINK_LIBRARIES(demo_processor_bundle_adjustment ${PLUGIN_NAME} ${OpenCV_LIBS})
+ADD_EXECUTABLE(demo_visual_odometry demo_visual_odometry.cpp)
+TARGET_LINK_LIBRARIES(demo_visual_odometry ${PLUGIN_NAME} ${OpenCV_LIBS})
 
 
