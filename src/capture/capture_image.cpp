@@ -23,7 +23,7 @@
 
 namespace wolf {
 
-CaptureImage::CaptureImage(const TimeStamp& _ts, SensorCameraPtr _camera_ptr, cv::Mat _data_cv) :
+CaptureImage::CaptureImage(const TimeStamp& _ts, SensorCameraPtr _camera_ptr, const cv::Mat& _data_cv) :
     CaptureBase("CaptureImage", _ts, _camera_ptr),
     frame_(_data_cv),
     grid_features_(nullptr),

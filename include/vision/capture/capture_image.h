@@ -57,7 +57,7 @@ class CaptureImage : public CaptureBase
         cv::Mat                         global_descriptor_;
 
     public:
-        CaptureImage(const TimeStamp& _ts, SensorCameraPtr _camera_ptr, cv::Mat _data_cv);
+        CaptureImage(const TimeStamp& _ts, SensorCameraPtr _camera_ptr, const cv::Mat& _data_cv);
         ~CaptureImage() override;
 
         const cv::Mat& getImage() const;
