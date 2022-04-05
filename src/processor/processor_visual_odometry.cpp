@@ -72,11 +72,9 @@ void ProcessorVisualOdometry::preProcess()
 
     // if first image, compute keypoints, add to capture incoming and return
     if (last_ptr_ == nullptr){
-        size_t nb_detect = 100;
+        // size_t nb_detect = 100;
         std::vector<cv::KeyPoint> kps_current;
-        kps_current.reserve(nb_detect);
 
-        // Replace by dedicated datastructure
         detector_->detect(img_incoming, kps_current);
         capture_image_incoming_->addKeyPoints(kps_current);
         
@@ -94,48 +92,73 @@ void ProcessorVisualOdometry::preProcess()
     KeyPointsMap kp_last = capture_image_last_->getKeyPoints();
     KeyPointsMap kp_incoming = kp_last;  // init incoming
 
-    std::cout << "img_last size: " << img_last.size().width << ", " << img_last.size().height << std::endl;
 
-
+    ////////////////////////////////
+    // FEATURE TRACKING ----> CESAR!
     // Update capture Incoming data
     //   - KeyPoints
     //   - tracks wrt. origin and laas
     //   - descriptor
     //   - ...
+    ////////////////////////////////
 
+
+    ////////////////////////////////
+    // FAKE DATA, to replace
+    // Create 1 fake detections each time that should be tracked over time
+    cv::KeyPoint kp0 = cv::KeyPoint(1.0, 2.0, 0.0);
+    WKeyPoint wkp0 = WKeyPoint(kp0);
+    capture_image_incoming_->addKeyPoint(wkp0);
+
+    for (auto it: capture_image_last_->getTracksPrev()){
+        //  it.second
+        size_t id_last_kp = it.second;
+        size_t id_incoming_kp = wkp0.getId();
+        auto tracks_map_li = std::pair<size_t, size_t>(id_last_kp, id_incoming_kp);
+
+        auto temp = capture_image_incoming_->getTracksPrev();  // cannot "insert" here since getTracksPrev is "const"
+        temp.insert(tracks_map_li);
+
+    }
+
+
+    ////////////////////////////////
 
 }
 
 
 unsigned int ProcessorVisualOdometry::processKnown()
 {
+    // reinitilize the bookeeping to communicate info from processKnown to processNew
+    tracks_map_li_matched_.clear();
     // Extend the process track matrix by using information stored in the incomping capture
 
-    // // Get tracks present at the last capture time (should be the most recent snapshot at this moment)
-    // std::list<FeatureBasePtr> tracks_snapshot_last = track_matrix_.snapshotAsList(last_ptr_);
+    // Get tracks present at the last capture time (should be the most recent snapshot at this moment)
+    std::list<FeatureBasePtr> tracks_snapshot_last = track_matrix_.snapshotAsList(last_ptr_);
 
-    // // Loop over the last->incomping correspondances stored in the incoming capture. We can check if there is a correspondance between 
-    // // each last KeyPointPtr adress and one of the track matrix feature KeyPointPtr adress. 
-    // // 2 cases:
-    // //   1) a match exists -> extend the corresponding track in the track matrix
-    // //                     -> a new feature has to be created for incoming
-    // //   2) no match exist -> do nothing here
+    for (auto feature_tracked_last: tracks_snapshot_last){
+        // check if the keypoint in the last capture is in the last->incoming TracksMap stored in the incoming capture
+        FeaturePointImagePtr feat_pi_last = std::dynamic_pointer_cast<FeaturePointImage>(feature_tracked_last);
+        size_t id_feat_last = feat_pi_last->getKeyPoint().getId();  
+        // if this feature id is in the last->incoming tracks of capture incoming, the track is continued
+        // otherwise we store the pair as a newly detected track (for processNew)
+        TracksMap tracks_map_li = capture_image_incoming_->getTracksPrev();
+        if (tracks_map_li.count(id_feat_last)){
+            std::cout << "A corresponding track has been found for id_feat_last " << id_feat_last  << std::endl;
+            auto kp_track_li = tracks_map_li.find(id_feat_last);
+            // create a feature using the corresponding WKeyPoint contained in incoming (hence the "second")
+            auto feat_inco = FeatureBase::emplace<FeaturePointImage>(
+                                                    capture_image_incoming_, 
+                                                    capture_image_incoming_->getKeyPoints().at(kp_track_li->second), 
+                                                    pixel_cov_);
+            track_matrix_.add(feat_pi_last->trackId(), feat_inco);
 
-    // for (auto track_prev_incoming: capture_image_incoming_->getTracksPrev()){
-    //     // Whether a matching track is found or a new track is created, we have to create a Feature and link it to the problem
-    //     // TODO: how should we extract the descriptor sub-mat from the capture?
-    //     FeaturePointImagePtr feat_pi_inco = std::make_shared<FeaturePointImage>(track_prev_incoming.second, cv::Mat(), pixel_cov_);
-    //     feat_pi_inco->link(capture_image_incoming_);
-    //     for (auto feat_last_base: tracks_snapshot_last){
-    //         FeaturePointImagePtr feat_last = std::static_pointer_cast<FeaturePointImage>(feat_last_base);
-    //         // 1) if the keypoint adress match the one in the pair id, then append a new feature to the track
-    //         if (feat_last->getKeyPointPtr() == track_prev_incoming.first){
-    //             // if match, create a new FeaturePointImage and add it to the track
-    //             track_matrix_.add(feat_last->trackId(), feat_pi_inco);
-    //             continue;
-    //         }
-    //     }
-    // }
+            // add tracks_map_li to a vector so that it so that 
+            // Very BAD to have to create a new std pair here -> find a better syntax but that's the idead
+            auto kp_track_li_matched = std::pair<size_t, size_t>(kp_track_li->first, kp_track_li->second);
+            tracks_map_li_matched_.insert(kp_track_li_matched);
+        }
+    }
 
     return 42;
 }
@@ -143,42 +166,23 @@ unsigned int ProcessorVisualOdometry::processKnown()
 
 unsigned int ProcessorVisualOdometry::processNew(const int& _max_features)
 {
+    // We have matched the tracks in the track matrix with the last->incoming tracks 
+    // stored in the TracksMap from getTracksPrev()
+    // Now we need to add new tracks in the track matrix for the NEW tracks.
+    //
+    // use book-keeping done in processKnown:  the TracksMap that have been matched were stored
+    // and here add tracks only for those that have not been matched
 
-
-    // Create new tracks in the track matrix based on newly detected features in last
-
-    // Get tracks present at the last capture time (should be the most recent snapshot at this moment)
-    // std::list<FeatureBasePtr> tracks_snapshot_last = track_matrix_.snapshotAsList(last_ptr_);
-
-    // // Loop over the last->incomping correspondances stored in the incoming capture. We can check if there is a correspondance between 
-    // // each last KeyPointPtr adress and one of the track matrix feature KeyPointPtr adress. 
-    // // 2 cases:
-    // //   1) a match exists -> do nothing here
-    // //   2) no match exist -> create a new track in the track matrix
-    // //                     -> a new feature has to be created for incoming AND for last
-
-    // bool match_found = false;
-    // for (auto track_prev_incoming: capture_image_incoming_->getTracksPrev()){
-    //     // Whether a matching track is found or a new track is created, we have to create a Feature and link it to the problem
-    //     // TODO: how should we extract the descriptor sub-mat from the capture?
-    //     FeaturePointImagePtr feat_pi_inco = std::make_shared<FeaturePointImage>(track_prev_incoming.second, cv::Mat(), pixel_cov_);
-    //     feat_pi_inco->link(capture_image_incoming_);
-    //     for (auto feat_last_base: tracks_snapshot_last){
-    //         FeaturePointImagePtr feat_last = std::static_pointer_cast<FeaturePointImage>(feat_last_base);
-    //         // 1) if the keypoint adress match the one in the pair id, then append a new feature to the track
-    //         if (feat_last->getKeyPointPtr() == track_prev_incoming.first){
-    //             match_found = true;
-    //             continue;
-    //         }
-    //     }
-    //     if (!match_found){
-    //         // 2) create a new last feature, a new track and add the incoming feature to this track
-    //         FeaturePointImagePtr feat_pi_last = std::make_shared<FeaturePointImage>(track_prev_incoming.first, cv::Mat(), pixel_cov_);
-    //         feat_pi_last->link(capture_image_last_);
-    //         track_matrix_.newTrack(feat_pi_inco);
-    //     }
-    //     match_found = false;
-    // }
+    for (auto track_li: capture_image_incoming_->getTracksPrev()){
+        // if track not matched, then create a new track in the track matrix etc.
+        if (!tracks_map_li_matched_.count(track_li.first)){
+            std::cout << "A NEW track is born!" << std::endl;
+            // 2) create a new last feature, a new track and add the incoming feature to this track
+            WKeyPoint kp_last = capture_image_last_->getKeyPoints().at(track_li.first);
+            FeaturePointImagePtr feat_pi_last = FeatureBase::emplace<FeaturePointImage>(capture_image_last_, kp_last, pixel_cov_);
+            track_matrix_.newTrack(feat_pi_last);
+        }
+    }
 
     return 42;
 }
@@ -217,6 +221,7 @@ void ProcessorVisualOdometry::establishFactors()
 
         // 2) create landmark if track is not associated with one and has enough length
         else if(track_matrix_.trackSize(feat->trackId()) >= min_track_length){
+            std::cout << "NEW valid track \\o/" << std::endl;
             LandmarkBasePtr lmk = emplaceLandmark(feat_pi);
             lmk->setId(feat_pi->trackId());
             Track track_kf = track_matrix_.trackAtKeyframes(feat->trackId());

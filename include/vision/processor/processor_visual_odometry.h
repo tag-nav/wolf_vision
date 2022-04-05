@@ -111,7 +111,8 @@ class ProcessorVisualOdometry : public ProcessorTracker
         // camera
         cv::Mat Kcv_;
 
-
+        // bookeeping
+        TracksMap tracks_map_li_matched_;
 
 
     public:
