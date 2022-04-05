@@ -24,6 +24,17 @@
 
 namespace wolf {
 
+/// Constructor from OpenCV measured keypoint
+FeaturePointImage::FeaturePointImage(const WKeyPoint& _keypoint,
+                                     const Eigen::Matrix2d& _meas_covariance) :
+        FeatureBase("FeaturePointImage", Eigen::Vector2d::Zero(), _meas_covariance),
+        kp_(_keypoint),
+        lmk_associated_id_(UINT_MAX)
+{
+    measurement_(0) = double(_keypoint.getCvKeyPoint().pt.x);
+    measurement_(1) = double(_keypoint.getCvKeyPoint().pt.y);
+}
+
 FeaturePointImage::~FeaturePointImage()
 {
     //

@@ -43,6 +43,8 @@
 #include "vision/landmark/landmark_hp.h"
 #include "vision/factor/factor_pixel_hp.h"
 
+// #include "vision/processor/klt_tracking.hpp"
+
 
 
 namespace wolf{
@@ -147,6 +149,11 @@ class ProcessorVisualOdometry : public ProcessorTracker
          */
         void establishFactors() override;
 
+        /**\brief Emplace a landmark corresponding to a track and initialize it with triangulation.
+         *
+         */
+        LandmarkBasePtr emplaceLandmark(FeatureBasePtr _feature_ptr);
+
 
         /** \brief Advance the incoming Capture to become the last.
          *
@@ -163,6 +170,12 @@ class ProcessorVisualOdometry : public ProcessorTracker
         void setParams(const ParamsProcessorVisualOdometryPtr _params);
 
 };
+
+
+
+
+int klt_track(cv::Mat img_prev, cv::Mat img_curr, std::vector<cv::KeyPoint> &kps_prev, std::vector<cv::KeyPoint> &kps_curr,
+           int search_width = 21, int search_height = 21, int pyramid_level = 3, float klt_max_err = 50.);
 
 
 } //namespace wolf

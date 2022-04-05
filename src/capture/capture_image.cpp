@@ -25,12 +25,28 @@
 
 namespace wolf {
 
+
+size_t WKeyPoint::id_count_ = 0;
+
+WKeyPoint::WKeyPoint():
+    id_(id_count_++)
+{
+}
+
+WKeyPoint::WKeyPoint(const cv::KeyPoint& _cv_kp):
+    id_(id_count_++),
+    cv_kp_(_cv_kp)
+{
+}
+
+
 CaptureImage::CaptureImage(const TimeStamp& _ts, SensorCameraPtr _camera_ptr, const cv::Mat& _img) :
     CaptureBase("CaptureImage", _ts, _camera_ptr),
     img_(_img),
-    keypoints_(std::vector<cv::KeyPoint>()),
+    mapkps_(KeyPointsMap()),
     descriptors_(cv::Mat()),
-    tracks_origin_(VectorKeyPointPtrPairs())
+    tracks_origin_(TracksMap()),
+    tracks_prev_(TracksMap())
 {
     //
 }
@@ -51,5 +67,41 @@ void CaptureImage::setImage(const cv::Mat& _img)
     img_ = _img;
 }
 
+
+void CaptureImage::addKeyPoint(const WKeyPoint& _wkp)
+{
+    mapkps_.insert(std::pair<size_t, WKeyPoint>(_wkp.getId(), _wkp));
+}
+
+void CaptureImage::addKeyPoint(const cv::KeyPoint& _cv_kp)
+{
+    WKeyPoint wkp(_cv_kp); 
+    addKeyPoint(wkp);
+}
+
+void CaptureImage::addKeyPoints(const std::vector<WKeyPoint>& _vec_wkp)
+{
+    for (WKeyPoint wkp: _vec_wkp){
+        addKeyPoint(wkp);
+    }
+}
+
+void CaptureImage::addKeyPoints(const std::vector<cv::KeyPoint>& _vec_cv_kp)
+{
+    for (auto cv_kp: _vec_cv_kp){
+        WKeyPoint wkp(cv_kp); 
+        addKeyPoint(cv_kp);
+    }
+}
+
+void CaptureImage::removeKeyPoint(size_t _id)
+{
+    mapkps_.erase(_id);
+}
+
+void CaptureImage::removeKeyPoint(const WKeyPoint& _wkp)
+{
+    mapkps_.erase(_wkp.getId());
+}
 
 } // namespace wolf

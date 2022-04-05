@@ -15,8 +15,8 @@ wolf_add_gtest(gtest_feature_point_image gtest_feature_point_image.cpp)
 target_link_libraries(gtest_feature_point_image ${PLUGIN_NAME})
 
 
-# wolf_add_gtest(gtest_sensor_camera gtest_sensor_camera.cpp)
-# target_link_libraries(gtest_sensor_camera ${PLUGIN_NAME})
+wolf_add_gtest(gtest_sensor_camera gtest_sensor_camera.cpp)
+target_link_libraries(gtest_sensor_camera ${PLUGIN_NAME})
 
 # # FactorTrifocal test
 # wolf_add_gtest(gtest_factor_trifocal gtest_factor_trifocal.cpp)
@@ -30,6 +30,6 @@ target_link_libraries(gtest_feature_point_image ${PLUGIN_NAME})
 # wolf_add_gtest(gtest_processor_bundle_adjustment gtest_processor_bundle_adjustment.cpp)
 # target_link_libraries(gtest_processor_bundle_adjustment ${PLUGIN_NAME})
 
-# # FactorPixelHp test
+# # FactorPixelHp test -> depends on processor_bundle_adjustment.cpp
 # wolf_add_gtest(gtest_factor_pixel_hp gtest_factor_pixel_hp.cpp)
 # target_link_libraries(gtest_factor_pixel_hp ${PLUGIN_NAME})

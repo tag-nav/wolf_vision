@@ -39,20 +39,127 @@ class CaptureImage_test : public testing::Test
 {
     public:
         cv::Mat img_;
-        std::string object_type_;
-        
+
+        cv::KeyPoint cv_kp0_;
+        cv::KeyPoint cv_kp1_;
+        cv::KeyPoint cv_kp2_;
+
+        WKeyPoint wkp0_;
+        WKeyPoint wkp1_;
+        WKeyPoint wkp2_;
+
+
+
         void SetUp() override
         {
-            img_ = cv::Mat::eye(4, 4, CV_64F);
+            // to be sure that the counter start from zero each time a new test is created
+            // not really usefull outside of this test
+            WKeyPoint::resetIdCount();
+            img_ = cv::Mat::eye(4, 4, CV_8UC1);
+
+            cv_kp0_ = cv::KeyPoint(0.0, 0.0, 0);
+            cv_kp1_ = cv::KeyPoint(1.0, 0.0, 0);
+            cv_kp2_ = cv::KeyPoint(2.0, 0.0, 0);
+            wkp0_ = WKeyPoint();
+            wkp0_.setCvKeyPoint(cv_kp0_);
+            wkp1_ = WKeyPoint  (cv_kp1_);
+            wkp2_ = WKeyPoint  (cv_kp2_);
         }
 };
 
-TEST_F(CaptureImage_test, type)
+TEST_F(CaptureImage_test, WKeyPoint_class)
+{
+    // WKeyPoint ids start from 3 since because the default constructor 
+    // is called in the declaration of CaptureImage_test attributes
+    ASSERT_EQ(wkp0_.getId(), 0);
+    ASSERT_EQ(wkp1_.getId(), 1);
+    ASSERT_EQ(wkp2_.getId(), 2);
+
+    ASSERT_EQ(wkp0_.getCvKeyPoint().pt.x, 0.0);
+    ASSERT_EQ(wkp1_.getCvKeyPoint().pt.x, 1.0);
+    ASSERT_EQ(wkp2_.getCvKeyPoint().pt.x, 2.0);
+
+    cv::Mat desc = 3*cv::Mat::eye(4, 4, CV_8UC1);
+    wkp0_.setDescriptor(desc);
+    ASSERT_EQ(wkp0_.getDescriptor().at<uchar>(0,0), 3);
+}
+
+
+TEST_F(CaptureImage_test, capture_image_type)
 {
     CaptureImagePtr c = std::make_shared<CaptureImage>(0, nullptr, img_);
 
     ASSERT_EQ(c->getType(), "CaptureImage");
 }
+
+TEST_F(CaptureImage_test, getter_setters)
+{
+    CaptureImagePtr c = std::make_shared<CaptureImage>(0, nullptr, img_);
+    cv::Mat temp = c->getImage();
+    ASSERT_EQ(temp.at<uchar>(0,0), 1);
+
+    // expected behavior: changing the external image does not change the image
+    // inside the capture as they share the same underlying data array (as "=" operators are used)
+    temp = 3*cv::Mat::eye(4, 4, CV_8UC1);
+    ASSERT_EQ(temp.at<uchar>(0,0), 3);
+
+
+    // MORE TO COME
+}
+
+
+TEST_F(CaptureImage_test, add_remove_key_points)
+{
+    CaptureImagePtr c = std::make_shared<CaptureImage>(0, nullptr, img_);
+    c->addKeyPoint(wkp0_);
+    c->addKeyPoint(wkp1_);
+    c->addKeyPoint(wkp2_);
+
+    ASSERT_EQ(c->getKeyPoints().size(), 3);
+
+    c->removeKeyPoint(wkp0_.getId());
+    ASSERT_EQ(c->getKeyPoints().size(), 2);
+
+    c->removeKeyPoint(wkp1_);
+    ASSERT_EQ(c->getKeyPoints().size(), 1);
+
+    // only wkp2 is left
+    for (auto toto: c->getKeyPoints()){
+        std::cout << toto.first << "  " << toto.second.getId() << std::endl;
+    }
+    ASSERT_EQ(c->getKeyPoints().at(2).getId(), 2);
+    ASSERT_EQ(c->getKeyPoints().at(2).getCvKeyPoint().pt.x, 2.0);
+
+    // create a new WKeyPoint and add it to the keypoint map
+    // the new WKeyPoint ID is therefore 3 as well as its key in the map
+    c->addKeyPoint(cv_kp0_);  
+    ASSERT_EQ(c->getKeyPoints().at(3).getId(), 3);
+    ASSERT_EQ(c->getKeyPoints().at(3).getCvKeyPoint().pt.x, 0.0);
+}
+
+
+TEST_F(CaptureImage_test, add_remove_key_point_vectors)
+{
+    // Same as add_remove_key_points but with the vector argument
+    CaptureImagePtr c = std::make_shared<CaptureImage>(0, nullptr, img_);
+    std::vector<WKeyPoint> wkp_vec = {wkp0_, wkp1_, wkp2_};
+    c->addKeyPoints(wkp_vec);
+    ASSERT_EQ(c->getKeyPoints().size(), 3);
+
+    // adding the same wolf WKeyPoint vector is indepotent 
+    c->addKeyPoints(wkp_vec);
+    ASSERT_EQ(c->getKeyPoints().size(), 3);
+
+    // but adding new cv::KeyPoint will create new WKeyPoint
+    std::vector<WKeyPoint> cv_kp_vec = {cv_kp0_, cv_kp1_, cv_kp2_};
+    c->addKeyPoints(cv_kp_vec);
+    ASSERT_EQ(c->getKeyPoints().size(), 6);
+    // at position 4 is the new WKeyPoint created from cv_kp1_
+    ASSERT_EQ(c->getKeyPoints().at(4).getId(), 4);
+    ASSERT_EQ(c->getKeyPoints().at(4).getCvKeyPoint().pt.x, 1.0);
+}
+
+
 
 
 

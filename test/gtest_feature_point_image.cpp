@@ -33,29 +33,39 @@ using namespace cv;
 class FeaturePointImage_test : public testing::Test
 {
     public:
-        cv::KeyPoint kp_;
+        cv::KeyPoint cv_kp_;
+        WKeyPoint kp_;
         Eigen::Vector2d pix_;
         std::string object_type_;
         Eigen::Matrix2d cov_;
         
         void SetUp() override
         {
-            kp_ = cv::KeyPoint();
-            pix_ << 2.0, 3.0;
-            kp_.pt.x = pix_(0);
-            kp_.pt.y = pix_(1);
+            cv_kp_ = cv::KeyPoint(0.0, 1.0, 0);
+            kp_ = WKeyPoint(cv_kp_);
             cov_ = Eigen::Matrix2d::Identity();
         }
 };
 
 TEST_F(FeaturePointImage_test, constructor)
 {
-    FeaturePointImagePtr f1 = std::make_shared<FeaturePointImage>(pix_, 42, cv::Mat(), cov_);
-    FeaturePointImagePtr f2 = std::make_shared<FeaturePointImage>(kp_, 42, cv::Mat(), cov_);
+    FeaturePointImagePtr f1 = std::make_shared<FeaturePointImage>(kp_, cov_);
     ASSERT_EQ(f1->getType(), "FeaturePointImage");
-    ASSERT_EQ(f2->getType(), "FeaturePointImage");
 }
 
+TEST_F(FeaturePointImage_test, getter_setters)
+{
+    FeaturePointImagePtr f1 = std::make_shared<FeaturePointImage>(kp_, cov_);
+    ASSERT_EQ(f1->getMeasurement()(0), 0.0);
+
+    cv::KeyPoint cv_kp_bis = cv::KeyPoint(2.0, 3.0, 0);
+    WKeyPoint kp_bis(cv_kp_bis);
+    f1->setKeyPoint(kp_bis);
+
+    // setting the keypoint changes the feature measurement as it should
+    ASSERT_EQ(f1->getMeasurement()(0), 2.0);
+
+}
 
 
 int main(int argc, char **argv)

@@ -28,6 +28,7 @@
 
 //Wolf includes
 #include "core/feature/feature_base.h"
+#include "vision/capture/capture_image.h"
 
 
 namespace wolf {
@@ -38,84 +39,31 @@ WOLF_PTR_TYPEDEFS(FeaturePointImage);
 class FeaturePointImage : public FeatureBase
 {
     private:
-        cv::KeyPoint keypoint_; ///< Warning: every write operation to this member needs to write measurement_. See setKeypoint() as an example.
-        std::size_t index_keypoint_;
-        cv::Mat descriptor_;
+        WKeyPoint kp_;
+        
+        // id of the landmark to which the feature is associated (maybe in processor no?) 
+        unsigned int lmk_associated_id_;
 
     public:
-
-        /// Constructor from Eigen measured pixel
-        FeaturePointImage(const Eigen::Vector2d & _measured_pixel,
-                          const std::size_t& _index_keypoint,
-                          const cv::Mat& _descriptor,
-                          const Eigen::Matrix2d& _meas_covariance) :
-                FeatureBase("FeaturePointImage", _measured_pixel, _meas_covariance),
-                keypoint_(_measured_pixel(0), _measured_pixel(1), 1), // Size 1 is a dummy value
-                index_keypoint_(_index_keypoint),
-                descriptor_( _descriptor)
-        {
-            keypoint_.pt.x = measurement_(0);
-            keypoint_.pt.y = measurement_(1);
-        }
-
         /// Constructor from OpenCV measured keypoint
-        FeaturePointImage(const cv::KeyPoint& _keypoint,
-                          const std::size_t& _index_keypoint,
-                          const cv::Mat& _descriptor,
-                          const Eigen::Matrix2d& _meas_covariance) :
-                FeatureBase("FeaturePointImage", Eigen::Vector2d::Zero(), _meas_covariance),
-                keypoint_(_keypoint),
-                index_keypoint_(_index_keypoint),
-                descriptor_(_descriptor)
-        {
-            measurement_(0) = double(_keypoint.pt.x);
-            measurement_(1) = double(_keypoint.pt.y);
-        }
+        FeaturePointImage(const WKeyPoint& _keypoint,
+                          const Eigen::Matrix2d& _meas_covariance);
 
        ~FeaturePointImage() override;
 
-        const cv::KeyPoint& getKeypoint() const;
-        void setKeypoint(const cv::KeyPoint& _kp);
+        const WKeyPoint& getKeyPoint() const {return kp_;}
+        void setKeyPoint(const WKeyPoint& _kp);
 
-        const cv::Mat& getDescriptor() const;
-        void setDescriptor(const cv::Mat& _descriptor);
-
-        std::size_t getIndexKeyPoint() const;
-        void setIndexKeyPoint(std::size_t _index);
+        unsigned int getLandmarkAssociatedId() const {return lmk_associated_id_;}
+        void setLandmarkAssociatedId(unsigned int _lmk_id) {lmk_associated_id_ = _lmk_id;}
 };
 
-inline const cv::KeyPoint& FeaturePointImage::getKeypoint() const
+inline void FeaturePointImage::setKeyPoint(const WKeyPoint& _kp)
 {
-    return keypoint_;
+    kp_ = _kp;
+    measurement_(0) = _kp.getCvKeyPoint().pt.x;
+    measurement_(1) = _kp.getCvKeyPoint().pt.y;
 }
-
-inline void FeaturePointImage::setKeypoint(const cv::KeyPoint& _kp)
-{
-    keypoint_ = _kp;
-    measurement_(0) = _kp.pt.x;
-    measurement_(1) = _kp.pt.y;
-}
-
-inline const cv::Mat& FeaturePointImage::getDescriptor() const
-{
-    return descriptor_;
-}
-
-inline void FeaturePointImage::setDescriptor(const cv::Mat& _descriptor)
-{
-    descriptor_ = _descriptor;
-}
-
-// std::size_t FeaturePointImage::getIndexKeyPoint() const
-// {
-//     return index_keypoint_;
-// }
-
-// void FeaturePointImage::setIndexKeyPoint(std::size_t _index)
-// {
-//      index_keypoint_ = _index;
-// }
-
 
 } // namespace wolf
 

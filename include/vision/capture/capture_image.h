@@ -40,10 +40,37 @@
 
 namespace wolf {
 
-typedef typename std::shared_ptr<cv::KeyPoint> KeyPointPtr;
-typedef typename std::pair<KeyPointPtr,KeyPointPtr> KeyPointPtrPair;
-typedef typename std::vector<KeyPointPtrPair> VectorKeyPointPtrPairs;
+WOLF_PTR_TYPEDEFS(WKeyPoint);
+class WKeyPoint 
+{
+    private:
+        static size_t id_count_;  // class attribute automatically incremented when a new WKeyPoint object is instanciated 
+        size_t id_;
+        cv::KeyPoint cv_kp_;
+        cv::Mat desc_;
+    
+    public:
 
+        WKeyPoint();
+        WKeyPoint(const cv::KeyPoint& _cv_kp);
+
+        size_t getId() const {return id_;}
+        void setId(size_t _id) {id_ = _id;}
+
+        cv::KeyPoint getCvKeyPoint() const {return cv_kp_;}
+        void setCvKeyPoint(cv::KeyPoint _cv_kp) {cv_kp_ = _cv_kp;}
+
+        cv::Mat getDescriptor() const {return desc_;}
+        void setDescriptor(cv::Mat _desc) {desc_ = _desc;}
+
+        // Only used for gtest, should be moved
+        static void resetIdCount() {id_count_ = 0;}
+};
+
+
+
+typedef std::unordered_map<size_t, WKeyPoint> KeyPointsMap;
+typedef std::unordered_map<size_t, size_t> TracksMap;
 
 // Set ClassPtr, ClassConstPtr and ClassWPtr typedefs;
 WOLF_PTR_TYPEDEFS(CaptureImage);
@@ -59,16 +86,18 @@ class CaptureImage : public CaptureBase
     private:
         cv::Mat img_;
 
-    public:
-        // Keypoints actively tracked in the current capture
-        std::vector<cv::KeyPoint> keypoints_;
+        // Keypoints associated to the capture 
+        KeyPointsMap mapkps_;
 
         // descriptors of the keypoints if necessary. 
         // number of rows ==  keypoints_.size() if intialized
         cv::Mat descriptors_;
 
-        // Same size as the actively tracked KeyPoints. Store indices of the origin keypoints still being tracked.
-        VectorKeyPointPtrPairs tracks_origin_;
+        // keeps track from the origin capture (origin->incoming): used for outlier detection
+        TracksMap tracks_origin_;
+
+        // keeps track from the previous capture (last->incoming): by the rest of the processor to populate the tack matrix
+        TracksMap tracks_prev_;
 
     public:
         CaptureImage(const TimeStamp& _ts, SensorCameraPtr _camera_ptr, const cv::Mat& _data_cv);
@@ -76,6 +105,24 @@ class CaptureImage : public CaptureBase
 
         const cv::Mat& getImage() const;
         void setImage(const cv::Mat& _img);
+
+        const KeyPointsMap& getKeyPoints() const {return mapkps_;}
+        void setKeyPoints(const KeyPointsMap& _mapkps){mapkps_ = _mapkps;}
+
+        const TracksMap& getTracksPrev() const {return tracks_prev_;}
+        void setTracksPrev(const TracksMap& _tracks){tracks_prev_ = _tracks;}
+
+        const TracksMap& getTracksOrigin() const {return tracks_origin_;}
+        void setTracksOrigin(const TracksMap& _tracks){tracks_origin_ = _tracks;}
+
+        void addKeyPoint(const WKeyPoint& _wkp);
+        void addKeyPoint(const cv::KeyPoint& _cv_kp);
+
+        void addKeyPoints(const std::vector<WKeyPoint>& _vec_wkp);
+        void addKeyPoints(const std::vector<cv::KeyPoint>& _vec_cv_kp);
+
+        void removeKeyPoint(size_t _kp_id);
+        void removeKeyPoint(const WKeyPoint& _wkp);
 
 };
 
