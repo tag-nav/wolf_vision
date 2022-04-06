@@ -172,10 +172,7 @@ class ProcessorVisualOdometry : public ProcessorTracker
 
 };
 
-
-
-
-int klt_track(cv::Mat img_prev, cv::Mat img_curr, std::vector<cv::KeyPoint> &kps_prev, std::vector<cv::KeyPoint> &kps_curr,
+TracksMap klt_track(cv::Mat img_prev, cv::Mat img_curr, KeyPointsMap &mkps_prev, KeyPointsMap &mkps_curr,
            int search_width = 21, int search_height = 21, int pyramid_level = 3, float klt_max_err = 50.);
 
 

@@ -87,7 +87,7 @@ class CaptureImage : public CaptureBase
         cv::Mat img_;
 
         // Keypoints associated to the capture 
-        KeyPointsMap mapkps_;
+        KeyPointsMap mwkps_;
 
         // descriptors of the keypoints if necessary. 
         // number of rows ==  keypoints_.size() if intialized
@@ -106,8 +106,8 @@ class CaptureImage : public CaptureBase
         const cv::Mat& getImage() const;
         void setImage(const cv::Mat& _img);
 
-        const KeyPointsMap& getKeyPoints() const {return mapkps_;}
-        void setKeyPoints(const KeyPointsMap& _mapkps){mapkps_ = _mapkps;}
+        const KeyPointsMap& getKeyPoints() const {return mwkps_;}
+        void setKeyPoints(const KeyPointsMap& _mwkps){mwkps_ = _mwkps;}
 
         const TracksMap& getTracksPrev() const {return tracks_prev_;}
         void setTracksPrev(const TracksMap& _tracks){tracks_prev_ = _tracks;}

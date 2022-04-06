@@ -90,15 +90,15 @@ void ProcessorVisualOdometry::preProcess()
     capture_image_last_ = std::static_pointer_cast<CaptureImage>(last_ptr_);
     cv::Mat img_last = capture_image_last_->getImage();
 
-    KeyPointsMap kp_last = capture_image_last_->getKeyPoints();
-    KeyPointsMap kp_incoming = kp_last;  // init incoming
+    KeyPointsMap mwkps_last = capture_image_last_->getKeyPoints();
+    KeyPointsMap mwkps_incoming;  // init incoming
 
 
     ////////////////////////////////
-    // FEATURE TRACKING ----> CESAR!
+    // FEATURE TRACKING
     // Update capture Incoming data
     //   - KeyPoints
-    //   - tracks wrt. origin and laas
+    //   - tracks wrt. origin and last
     //   - descriptor
     //   - ...
     ////////////////////////////////
@@ -316,6 +316,74 @@ void ProcessorVisualOdometry::resetDerived()
 void ProcessorVisualOdometry::setParams(const ParamsProcessorVisualOdometryPtr _params)
 {
     params_visual_odometry_ = _params;
+}
+
+TracksMap klt_track(cv::Mat img_prev, cv::Mat img_curr, KeyPointsMap &mwkps_prev, KeyPointsMap &mwkps_curr,
+           int search_width = 21, int search_height = 21, int pyramid_level = 3, float klt_max_err = 50.)
+{
+    TracksMap tracks_prev_curr;
+
+    // Create cv point list for tracking, we initialize optical flow with previous keypoints
+    // We also need a list of indices to build the track map
+    std::vector<cv::Point2f> p2f_prev;
+    std::vector<size_t> indices_prev;
+    for (auto & wkp : mwkps_prev){
+        p2f_prev.push_back(wkp.second.getCvKeyPoint().pt);
+        indices_prev.push_back(wkp.first);
+    }
+    std::vector<cv::Point2f> p2f_curr = p2f_prev;
+
+    // Configure and process KLT optical flow research
+    std::vector<uchar> status;
+    std::vector<float> err;
+    // open cv default: 30 iters, 0.01 fpixels precision
+    cv::TermCriteria crit(cv::TermCriteria::COUNT+cv::TermCriteria::EPS, 30, 0.01);
+
+    // Process one way: previous->current with current init with previous
+    cv::calcOpticalFlowPyrLK(
+            img_prev,
+            img_curr, 
+            p2f_prev,
+            p2f_curr,
+            status, err,
+            {search_width, search_height}, 
+            pyramid_level,
+            crit,
+            (cv::OPTFLOW_USE_INITIAL_FLOW + cv::OPTFLOW_LK_GET_MIN_EIGENVALS));
+    
+    // Process the other way: current->previous
+    std::vector<uchar> status_back;
+    std::vector<float> err_back;
+    cv::calcOpticalFlowPyrLK(
+            img_curr,
+            img_prev, 
+            p2f_curr,
+            p2f_prev,
+            status_back, err_back,
+            {search_width, search_height}, 
+            pyramid_level,
+            crit,
+            (cv::OPTFLOW_USE_INITIAL_FLOW + cv::OPTFLOW_LK_GET_MIN_EIGENVALS));
+    
+    // Delete point if KLT failed
+    for (size_t j = 0; j < status_back.size(); j++) {
+
+        if(!status_back.at(j)  ||  (err_back.at(j) > klt_max_err) ||
+           !status.at(j)  ||  (err.at(j) > klt_max_err)) {
+            continue;
+        }
+
+        // We keep the initial point and add the tracked point
+        WKeyPoint wkp(cv::KeyPoint(p2f_curr.at(j), 1));
+        mwkps_curr[wkp.getId()] = wkp;
+
+        // Update the map
+        tracks_prev_curr[indices_prev.at(j)] = wkp.getId();
+
+        // Other checks? Distance between track points?
+    }
+
+    return tracks_prev_curr;
 }
 
 
