@@ -318,8 +318,7 @@ void ProcessorVisualOdometry::setParams(const ParamsProcessorVisualOdometryPtr _
     params_visual_odometry_ = _params;
 }
 
-TracksMap klt_track(cv::Mat img_prev, cv::Mat img_curr, KeyPointsMap &mwkps_prev, KeyPointsMap &mwkps_curr,
-           int search_width = 21, int search_height = 21, int pyramid_level = 3, float klt_max_err = 50.)
+TracksMap ProcessorVisualOdometry::klt_track(cv::Mat img_prev, cv::Mat img_curr, KeyPointsMap &mwkps_prev, KeyPointsMap &mwkps_curr)
 {
     TracksMap tracks_prev_curr;
 
@@ -336,8 +335,7 @@ TracksMap klt_track(cv::Mat img_prev, cv::Mat img_curr, KeyPointsMap &mwkps_prev
     // Configure and process KLT optical flow research
     std::vector<uchar> status;
     std::vector<float> err;
-    // open cv default: 30 iters, 0.01 fpixels precision
-    cv::TermCriteria crit(cv::TermCriteria::COUNT+cv::TermCriteria::EPS, 30, 0.01);
+
 
     // Process one way: previous->current with current init with previous
     cv::calcOpticalFlowPyrLK(
@@ -346,9 +344,9 @@ TracksMap klt_track(cv::Mat img_prev, cv::Mat img_curr, KeyPointsMap &mwkps_prev
             p2f_prev,
             p2f_curr,
             status, err,
-            {search_width, search_height}, 
-            pyramid_level,
-            crit,
+            {search_width_, search_height_}, 
+            pyramid_level_,
+            crit_,
             (cv::OPTFLOW_USE_INITIAL_FLOW + cv::OPTFLOW_LK_GET_MIN_EIGENVALS));
     
     // Process the other way: current->previous
@@ -360,16 +358,16 @@ TracksMap klt_track(cv::Mat img_prev, cv::Mat img_curr, KeyPointsMap &mwkps_prev
             p2f_curr,
             p2f_prev,
             status_back, err_back,
-            {search_width, search_height}, 
-            pyramid_level,
-            crit,
+            {search_width_, search_height_}, 
+            pyramid_level_,
+            crit_,
             (cv::OPTFLOW_USE_INITIAL_FLOW + cv::OPTFLOW_LK_GET_MIN_EIGENVALS));
     
     // Delete point if KLT failed
     for (size_t j = 0; j < status_back.size(); j++) {
 
-        if(!status_back.at(j)  ||  (err_back.at(j) > klt_max_err) ||
-           !status.at(j)  ||  (err.at(j) > klt_max_err)) {
+        if(!status_back.at(j)  ||  (err_back.at(j) > klt_max_err_) ||
+           !status.at(j)  ||  (err.at(j) > klt_max_err_)) {
             continue;
         }
 

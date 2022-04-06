@@ -167,14 +167,15 @@ class ProcessorVisualOdometry : public ProcessorTracker
          */
         void resetDerived() override;
 
+        /** \brief Implementation of pyramidal KLT
+         */
+        TracksMap klt_track(cv::Mat img_prev, cv::Mat img_curr, KeyPointsMap &mkps_prev, KeyPointsMap &mkps_curr);
+
         void setParams(const ParamsProcessorVisualOdometryPtr _params);
 
         TrackMatrix getTrackMatrix(){return track_matrix_;}
 
 };
-
-TracksMap klt_track(cv::Mat img_prev, cv::Mat img_curr, KeyPointsMap &mkps_prev, KeyPointsMap &mkps_curr,
-           int search_width = 21, int search_height = 21, int pyramid_level = 3, float klt_max_err = 50.);
 
 
 } //namespace wolf
