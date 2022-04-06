@@ -97,6 +97,9 @@ class ProcessorVisualOdometry : public ProcessorTracker
 
         Matrix2d pixel_cov_;
 
+        // detector
+        cv::Ptr<cv::FeatureDetector> detector_;
+
         // A few casted smart pointers
         CaptureImagePtr capture_image_last_;
         CaptureImagePtr capture_image_incoming_;
@@ -105,9 +108,6 @@ class ProcessorVisualOdometry : public ProcessorTracker
 
     private:
         int frame_count_;
-
-        // detector
-        cv::Ptr<cv::FeatureDetector> detector_;
 
         // camera
         cv::Mat Kcv_;

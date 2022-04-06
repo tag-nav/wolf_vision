@@ -43,12 +43,27 @@ using namespace cv;
 
 std::string wolf_vision_root = _WOLF_VISION_ROOT_DIR;
 
+class ProcessorVisualOdometryTest : public ProcessorVisualOdometry
+{
+	public:
+
+		ProcessorVisualOdometryTest(ParamsProcessorVisualOdometryPtr& _params_vo):
+		    ProcessorVisualOdometry(_params_vo)
+	    {
+
+	    }
+
+        cv::Ptr<cv::FeatureDetector> getDetector()
+        {
+            return detector_;
+        }
+};
+
 TEST(ProcessorVisualOdometry, kltTrack)
 {
-    cv::Mat img = cv::imread(wolf_vision_root + "/test/demo_ORB.png", cv::IMREAD_GRAYSCALE);
-
+    cv::Mat img = cv::imread(wolf_vision_root + "/test/markers.jpg", cv::IMREAD_GRAYSCALE);
+    cv::Mat img_flow = cv::imread(wolf_vision_root + "/test/markers.jpg", cv::IMREAD_GRAYSCALE);
     // Create an image with a predefined optical flow
-    cv::Mat img_flow = img; 
     int du = 5;
     int dv = 5;
     for (int x=0; x<img.size().height; x++){
@@ -59,8 +74,37 @@ TEST(ProcessorVisualOdometry, kltTrack)
         }
     }
 
+    // Create a processor
+    ParamsProcessorVisualOdometryPtr params = std::make_shared<ParamsProcessorVisualOdometry>();
+    params->klt_params_.tracker_height_ = 21;
+    params->klt_params_.tracker_width_ = 21;
+    params->klt_params_.nlevels_pyramids_ = 3;
+    params->klt_params_.klt_max_err_ = 1.0;
+    params->klt_params_.crit_ = cv::TermCriteria(cv::TermCriteria::COUNT+cv::TermCriteria::EPS, 30, 0.01);
+
+    ProcessorVisualOdometryTest processor(params);
+    cv::Ptr<cv::FeatureDetector> detector = processor.getDetector();
     
-    ASSERT_TRUE(du=dv);
+    std::vector<cv::KeyPoint> kps;
+    detector->detect(img, kps);
+    cv::Mat img_draw;
+
+
+    // Create WkpMap 
+    KeyPointsMap mwkps, mwkps_flow;
+    for (auto kp : kps){
+        WKeyPoint wkp(kp);
+        mwkps[wkp.getId()] = wkp;
+    }
+    TracksMap tracks_flow = processor.kltTrack(img, img_flow, mwkps, mwkps_flow);
+    Eigen::Vector2d delta(static_cast<float>(du), static_cast<float>(dv));
+    for (auto track : tracks_flow){
+        float du_flow = mwkps[track.first].getCvKeyPoint().pt.x - mwkps_flow[track.second].getCvKeyPoint().pt.x;
+        float dv_flow = mwkps[track.first].getCvKeyPoint().pt.y - mwkps_flow[track.second].getCvKeyPoint().pt.y;
+        Eigen::Vector2d delta_flow(du_flow,dv_flow);
+        ASSERT_MATRIX_APPROX(delta, delta_flow, 0.1);
+    }
+
 }
 
 int main(int argc, char **argv)
