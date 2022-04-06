@@ -89,6 +89,9 @@ int main(int argc, char** argv)
         CaptureImagePtr image = std::make_shared<CaptureImage>(t, sensor_cam, img);
         sensor_cam->process(image);
 
+        // problem->print(3,0,1,1);
+
+
         // // solve only when new KFs are added
         // if (problem->getTrajectory()->getFrameMap().size() > number_of_KFs)
         // {
@@ -104,7 +107,8 @@ int main(int argc, char** argv)
         t += dt;
 
 
-        }
+    }
+    problem->print(3,0,1,1);
 
 
     return 0;

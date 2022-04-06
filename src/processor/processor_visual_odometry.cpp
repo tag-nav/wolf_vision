@@ -47,6 +47,7 @@ ProcessorVisualOdometry::ProcessorVisualOdometry(ParamsProcessorVisualOdometryPt
 
     pixel_cov_ = Eigen::Matrix2d::Identity();
 
+    origin_prev_ = nullptr;
 }
 
 void ProcessorVisualOdometry::configure(SensorBasePtr _sensor)
@@ -61,7 +62,7 @@ void ProcessorVisualOdometry::configure(SensorBasePtr _sensor)
 TracksMap merge_tracks(TracksMap tracks_prev_curr, TracksMap tracks_curr_next){
     TracksMap tracks_prev_next;
     for (auto &match : tracks_prev_curr){
-        if (tracks_curr_next.count(match.second) != 0){
+        if (tracks_curr_next.count(match.second)){
             tracks_prev_next[match.first] = tracks_curr_next[match.second];
         }
     }
@@ -105,6 +106,14 @@ void ProcessorVisualOdometry::preProcess()
     KeyPointsMap mwkps_last = capture_image_last_->getKeyPoints();
     KeyPointsMap mwkps_incoming;  // init incoming
 
+    // If origin has changed (new KF), some book keeping in the origin->incoming tracks
+    if (origin_prev_ != origin_ptr_){
+        // reset the origin->incoming track matrix of capture icoming (not necessary in capture last I think)
+        merge_tracks(capture_image_last_->getTracksPrev(), capture_image_last_->getTracksPrev());
+        capture_image_last_->setTracksOrigin(capture_image_last_->getTracksPrev());
+        origin_prev_ = origin_ptr_;
+    }
+
 
     ////////////////////////////////
     // FEATURE TRACKING
@@ -117,7 +126,6 @@ void ProcessorVisualOdometry::preProcess()
 
     // Tracks between last and incoming
     TracksMap tracks_last_incoming = kltTrack(img_last, img_incoming, mwkps_last, mwkps_incoming);
-    capture_image_incoming_->setTracksPrev(tracks_last_incoming);
 
     // Merge tracks to get tracks_origin_incoming
     TracksMap tracks_origin_last = capture_image_last_->getTracksOrigin();
@@ -129,18 +137,19 @@ void ProcessorVisualOdometry::preProcess()
 
     // Edit tracks prev with only inliers wrt origin
     TracksMap tracks_last_incoming_filtered;
-    for (auto & track_origin_incoming : tracks_origin_incoming){
+    for (auto & tracks_origin_incoming : tracks_origin_incoming){
         for (auto & track_last_incoming : tracks_last_incoming){
-            if (track_origin_incoming.second == track_last_incoming.second){
+            if (tracks_origin_incoming.second == track_last_incoming.second){
                 tracks_last_incoming_filtered[track_last_incoming.first] = track_last_incoming.second;
+                continue;
             }
         }
     }
 
     // Update captures
-    capture_image_incoming_->setTracksPrev(tracks_last_incoming_filtered);
     capture_image_incoming_->addKeyPoints(mwkps_incoming);
-
+    capture_image_incoming_->setTracksPrev(tracks_last_incoming_filtered);
+    capture_image_incoming_->setTracksOrigin(tracks_origin_incoming);
 
     ////////////////////////////////
     // if too few tracks left in incoming
@@ -171,30 +180,40 @@ void ProcessorVisualOdometry::preProcess()
             tracks_last_incoming_filtered[track.first] = track.second;
         }
 
+        //////////////////
+        // !!!!!!!!!!!!!!!
+        // There is a merge missing for tracks_origin_incoming
+        //////////////////
+
         // Update captures
-        capture_image_last_->addKeypoints(mwkps_last_new);
+        capture_image_last_->addKeyPoints(mwkps_last_new);
         capture_image_incoming_->addKeyPoints(mwkps_incoming_new);
         capture_image_incoming_->setTracksPrev(tracks_last_incoming_filtered);
+        capture_image_incoming_->setTracksOrigin(tracks_origin_incoming);  // careful!
     }
 
 
-    ////////////////////////////////
-    // FAKE DATA, to replace
-    // Create 1 fake detections each time that should be tracked over time
-    cv::KeyPoint kp0 = cv::KeyPoint(1.0, 2.0, 0.0);
-    WKeyPoint wkp0 = WKeyPoint(kp0);
-    capture_image_incoming_->addKeyPoint(wkp0);
-
-    size_t id_last_kp = wkp0.getId()-1;  // -1 is a HACK!!
-    size_t id_incoming_kp = wkp0.getId();
-    std::cout << "\nCreate Fake track " << id_last_kp << " -> " << id_incoming_kp << std::endl;
-    auto tracks_map_li = std::pair<size_t, size_t>(id_last_kp, id_incoming_kp);
-
-    auto temp = capture_image_incoming_->getTracksPrev();  // cannot "insert" here since getTracksPrev is "const" -> create temp variable
-    temp.insert(tracks_map_li);
 
 
-    ////////////////////////////////
+
+
+
+    // ////////////////////////////////
+    // // FAKE DATA, to replace
+    // // Create 1 fake detections each time that should be tracked over time
+    // cv::KeyPoint kp0 = cv::KeyPoint(1.0, 2.0, 0.0);
+    // WKeyPoint wkp0 = WKeyPoint(kp0);
+    // capture_image_incoming_->addKeyPoint(wkp0);
+
+    // size_t id_last_kp = wkp0.getId()-1;  // -1 is a HACK!!
+    // size_t id_incoming_kp = wkp0.getId();
+    // std::cout << "\nCreate Fake track " << id_last_kp << " -> " << id_incoming_kp << std::endl;
+    // auto tracks_map_li = std::pair<size_t, size_t>(id_last_kp, id_incoming_kp);
+
+    // auto temp = capture_image_incoming_->getTracksPrev();  // cannot "insert" here since getTracksPrev is "const" -> create temp variable
+    // temp.insert(tracks_map_li);
+
+    // ////////////////////////////////
 
 }
 
