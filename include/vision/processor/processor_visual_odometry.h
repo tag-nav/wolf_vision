@@ -85,6 +85,7 @@ class ProcessorVisualOdometry : public ProcessorTracker
         // A few casted smart pointers
         CaptureImagePtr capture_image_last_;
         CaptureImagePtr capture_image_incoming_;
+        CaptureImagePtr capture_image_origin_;
         SensorCameraPtr sen_cam_;
 
     private:
@@ -106,7 +107,6 @@ class ProcessorVisualOdometry : public ProcessorTracker
         int search_width_;
         int search_height_;
         int pyramid_level_;
-
 
         // camera
         cv::Mat Kcv_;
@@ -167,9 +167,13 @@ class ProcessorVisualOdometry : public ProcessorTracker
          */
         void resetDerived() override;
 
-        /** \brief Implementation of pyramidal KLT
+        /** \brief Implementation of pyramidal KLT with openCV
          */
-        TracksMap klt_track(cv::Mat img_prev, cv::Mat img_curr, KeyPointsMap &mkps_prev, KeyPointsMap &mkps_curr);
+        TracksMap kltTrack(cv::Mat img_prev, cv::Mat img_curr, KeyPointsMap &mwkps_prev, KeyPointsMap &mwkps_curr);
+
+        /** \brief Implementation of 5 point algorithm with openCV, remove outliers from the tracks map
+         */
+        bool computeEssential(KeyPointsMap mwkps_prev, KeyPointsMap mwkps_curr, TracksMap &tracks_prev_curr, cv::Mat &E);
 
         void setParams(const ParamsProcessorVisualOdometryPtr _params);
 

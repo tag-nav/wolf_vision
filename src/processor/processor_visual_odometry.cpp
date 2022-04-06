@@ -58,6 +58,16 @@ void ProcessorVisualOdometry::configure(SensorBasePtr _sensor)
     Kcv_ = cv::Mat(3, 3, CV_32F, K.data());
 }
 
+TracksMap merge_tracks(TracksMap tracks_prev_curr, TracksMap tracks_curr_next){
+    TracksMap tracks_prev_next;
+    for (auto &match : tracks_prev_curr){
+        if (tracks_curr_next.count(match.second) != 0){
+            tracks_prev_next[match.first] = tracks_curr_next[match.second];
+        }
+    }
+    return tracks_prev_next;
+}
+
 void ProcessorVisualOdometry::preProcess()
 {
     // Get Capture
@@ -88,8 +98,10 @@ void ProcessorVisualOdometry::preProcess()
     // TRACKING
     // Proceeed to tracking the previous features
     capture_image_last_ = std::static_pointer_cast<CaptureImage>(last_ptr_);
+    capture_image_origin_ = std::static_pointer_cast<CaptureImage>(origin_ptr_);
     cv::Mat img_last = capture_image_last_->getImage();
 
+    KeyPointsMap mwkps_origin = capture_image_origin_->getKeyPoints();
     KeyPointsMap mwkps_last = capture_image_last_->getKeyPoints();
     KeyPointsMap mwkps_incoming;  // init incoming
 
@@ -103,10 +115,27 @@ void ProcessorVisualOdometry::preProcess()
     //   - ...
     ////////////////////////////////
 
+    // Tracks between last and incoming
+    TracksMap tracks_last_incoming = kltTrack(img_last, img_incoming, mwkps_last, mwkps_incoming);
+    capture_image_incoming_->setTracksPrev(tracks_last_incoming);
+
+    // Merge tracks to get tracks_origin_incoming
+    TracksMap tracks_origin_last = capture_image_last_->getTracksOrigin();
+    TracksMap tracks_origin_incoming = merge_tracks(tracks_origin_last, tracks_last_incoming);
+
+    // Outliers rejection with essential matrix
+    cv::Mat E;
+    computeEssential(mwkps_origin, mwkps_incoming, tracks_origin_incoming, E);
+
+
     ////////////////////////////////
     // if too few tracks left in incoming
     // detect new KeyPoints in last and track them to incoming
     ////////////////////////////////
+    size_t n_tracks = tracks_origin_incoming.size();
+    if (n_tracks < 500){
+        return;
+    }
 
 
     ////////////////////////////////
@@ -190,7 +219,7 @@ unsigned int ProcessorVisualOdometry::processNew(const int& _max_features)
         std::cout << "In incoming, track: " << track_li.first << " -> " << track_li.second << std::endl;
         if (!tracks_map_li_matched_.count(track_li.first)){
             std::cout << "A NEW track is born!" << std::endl;
-            // create a new last feature, a new track and add the incoming feature to this track
+            // 2) create a new last feature, a new track and add the incoming feature to this track
             WKeyPoint kp_last = capture_image_last_->getKeyPoints().at(track_li.first);
             FeaturePointImagePtr feat_pi_last = FeatureBase::emplace<FeaturePointImage>(capture_image_last_, kp_last, pixel_cov_);
             track_matrix_.newTrack(feat_pi_last);
@@ -223,10 +252,8 @@ void ProcessorVisualOdometry::establishFactors()
         for (auto lmk: getProblem()->getMap()->getLandmarkList()){
             if (lmk->id() == feat_pi->trackId()){
                 associated_lmk = lmk;
-                break;
             }
         }
-
         // 1) create a factor between new KF and assocatiated track landmark
         //    HYP: assuming the trackid are the same as the landmark ID -> BAD if other types of landmarks involved
         if (associated_lmk){
@@ -236,18 +263,17 @@ void ProcessorVisualOdometry::establishFactors()
 
         // 2) create landmark if track is not associated with one and has enough length
         else if(track_matrix_.trackSize(feat->trackId()) >= min_track_length){
-            std::cout << "NEW valid track \\o/ -> create a new Landmark" << std::endl;
+            std::cout << "NEW valid track \\o/" << std::endl;
             LandmarkBasePtr lmk = emplaceLandmark(feat_pi);
-            // Associate the track to the landmark
-            // NOT the right way -> should be replaced by book-keeping (in the processor? Feature?)
-            // maybe call feature->setLandmarkId() on all the features of the track?
-            lmk->setId(feat_pi->trackId());  
-            LandmarkHpPtr lmk_hp = std::dynamic_pointer_cast<LandmarkHp>(lmk);
-            for (auto feat_kf: track_matrix_.trackAtKeyframes(feat->trackId())){
+            lmk->setId(feat_pi->trackId());
+            Track track_kf = track_matrix_.trackAtKeyframes(feat->trackId());
+            for (auto feat_kf: track_kf){
+                LandmarkHpPtr lmk_hp = std::dynamic_pointer_cast<LandmarkHp>(lmk);
                 FactorBase::emplace<FactorPixelHp>(feat_kf.second, feat_kf.second, lmk_hp, shared_from_this(), true);
             }
         }
     }
+
 }
 
 LandmarkBasePtr ProcessorVisualOdometry::emplaceLandmark(FeatureBasePtr _feat)
@@ -286,6 +312,7 @@ LandmarkBasePtr ProcessorVisualOdometry::emplaceLandmark(FeatureBasePtr _feat)
                                                         getSensor(), 
                                                         feat_pi->getKeyPoint().getDescriptor());
 
+    // _feat->setLandmarkId(lmk_hp_ptr->id());  // not necessary I think?
     return lmk_hp_ptr;
 }
 
@@ -320,7 +347,7 @@ void ProcessorVisualOdometry::setParams(const ParamsProcessorVisualOdometryPtr _
     params_visual_odometry_ = _params;
 }
 
-TracksMap ProcessorVisualOdometry::klt_track(cv::Mat img_prev, cv::Mat img_curr, KeyPointsMap &mwkps_prev, KeyPointsMap &mwkps_curr)
+TracksMap ProcessorVisualOdometry::kltTrack(cv::Mat img_prev, cv::Mat img_curr, KeyPointsMap &mwkps_prev, KeyPointsMap &mwkps_curr)
 {
     TracksMap tracks_prev_curr;
 
@@ -384,6 +411,35 @@ TracksMap ProcessorVisualOdometry::klt_track(cv::Mat img_prev, cv::Mat img_curr,
     }
 
     return tracks_prev_curr;
+}
+
+bool ProcessorVisualOdometry::computeEssential(KeyPointsMap mwkps_prev, KeyPointsMap mwkps_curr, TracksMap &tracks_prev_curr, cv::Mat &E)
+{
+    // We need to build lists of pt2f for openCV function
+    std::vector<cv::Point2f> p2f_prev, p2f_curr;
+    std::vector<size_t> all_indices;
+    for (auto & track : tracks_prev_curr){
+        all_indices.push_back(track.first);
+        p2f_prev.push_back(mwkps_prev[track.first].getCvKeyPoint().pt);
+        p2f_curr.push_back(mwkps_curr[track.second].getCvKeyPoint().pt);
+    }
+
+    // We need at least five tracks
+    if (p2f_prev.size() < 5) return false;
+
+    float focal_length = Kcv_.at<float>(0, 0);
+    cv::Mat cvMask;
+    cv::Point2f principal_pt(Kcv_.at<float>(0,2), Kcv_.at<float>(1,2));
+    cv::findEssentialMat(p2f_prev, p2f_curr, focal_length, principal_pt, cv::RANSAC,
+                        0.99, 1.0, cvMask);
+    
+    // Let's remove outliers from tracksMap
+    for (size_t k=0; k<all_indices.size(); k++){
+        if (cvMask.at<bool>(k) == 0){
+            tracks_prev_curr.erase(all_indices.at(k));
+        }
+    }
+    return true;
 }
 
 
