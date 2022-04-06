@@ -106,15 +106,6 @@ void ProcessorVisualOdometry::preProcess()
     KeyPointsMap mwkps_last = capture_image_last_->getKeyPoints();
     KeyPointsMap mwkps_incoming;  // init incoming
 
-    // If origin has changed (new KF), some book keeping in the origin->incoming tracks
-    if (origin_prev_ != origin_ptr_){
-        // reset the origin->incoming track matrix of capture icoming (not necessary in capture last I think)
-        merge_tracks(capture_image_last_->getTracksPrev(), capture_image_last_->getTracksPrev());
-        capture_image_last_->setTracksOrigin(capture_image_last_->getTracksPrev());
-        origin_prev_ = origin_ptr_;
-    }
-
-
     ////////////////////////////////
     // FEATURE TRACKING
     // Update capture Incoming data
@@ -190,31 +181,10 @@ void ProcessorVisualOdometry::preProcess()
         capture_image_incoming_->addKeyPoints(mwkps_incoming_new);
         capture_image_incoming_->setTracksPrev(tracks_last_incoming_filtered);
         capture_image_incoming_->setTracksOrigin(tracks_origin_incoming);  // careful!
+
+        // add a flag so that voteForKeyFrame use it to vote for a KeyFrame 
+        capture_image_incoming_->setLastWasRepopulated(true);
     }
-
-
-
-
-
-
-
-    // ////////////////////////////////
-    // // FAKE DATA, to replace
-    // // Create 1 fake detections each time that should be tracked over time
-    // cv::KeyPoint kp0 = cv::KeyPoint(1.0, 2.0, 0.0);
-    // WKeyPoint wkp0 = WKeyPoint(kp0);
-    // capture_image_incoming_->addKeyPoint(wkp0);
-
-    // size_t id_last_kp = wkp0.getId()-1;  // -1 is a HACK!!
-    // size_t id_incoming_kp = wkp0.getId();
-    // std::cout << "\nCreate Fake track " << id_last_kp << " -> " << id_incoming_kp << std::endl;
-    // auto tracks_map_li = std::pair<size_t, size_t>(id_last_kp, id_incoming_kp);
-
-    // auto temp = capture_image_incoming_->getTracksPrev();  // cannot "insert" here since getTracksPrev is "const" -> create temp variable
-    // temp.insert(tracks_map_li);
-
-    // ////////////////////////////////
-
 }
 
 
@@ -259,13 +229,16 @@ unsigned int ProcessorVisualOdometry::processKnown()
 
 unsigned int ProcessorVisualOdometry::processNew(const int& _max_features)
 {
-    ///////////////////////////////////////
-    // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    // problem in the logic for the moment:
-    // this function will
-    ///////////////////////////////////////
-
     std::cout << "processNew" << std::endl;
+
+    // a new keyframe was detected, 
+    // last_ptr_ is going to become origin_ptr and
+    // icoming_ptr_ is going to become last_ptr and
+    // So we need to reset the origin tracks of incoming used in preProcess so that they correspond to the future origin (currently last)  
+    auto capture_image_last = std::dynamic_pointer_cast<CaptureImage>(last_ptr_);
+    auto capture_image_incoming = std::dynamic_pointer_cast<CaptureImage>(incoming_ptr_);
+    capture_image_incoming->setTracksOrigin(capture_image_last->getTracksPrev());
+
     // We have matched the tracks in the track matrix with the last->incoming tracks 
     // stored in the TracksMap from getTracksPrev()
     // Now we need to add new tracks in the track matrix for the NEW tracks.
@@ -383,9 +356,15 @@ void ProcessorVisualOdometry::postProcess()
 
 bool ProcessorVisualOdometry::voteForKeyFrame() const
 {
-    std::cout << "VOTE" << std::endl;
+    // If the last capture was repopulated in preProcess, it means that the number of tracks fell
+    // below a threshold in the current incoming track and that, as a consequence, last capture keypoints
+    // was repopulated. In this case, the processor needs to create a new Keyframe whatever happens.
+    CaptureImagePtr capture_image_incoming = std::dynamic_pointer_cast<CaptureImage>(incoming_ptr_);
+    bool vote = capture_image_incoming->getLastWasRepopulated();
+
     // simple vote based on frame count, should be changed to something that takes into account number of tracks alive, parallax, etc.
-    return ((frame_count_ % 5) == 0);
+    vote = vote || ((frame_count_ % 5) == 0);
+    return vote;
 }
 
 
@@ -426,6 +405,9 @@ TracksMap ProcessorVisualOdometry::kltTrack(cv::Mat img_prev, cv::Mat img_curr, 
 
 
     // Process one way: previous->current with current init with previous
+    std::cout << "search_width_ " << search_width_ << std::endl; 
+    std::cout << "search_height_ " << search_height_ << std::endl; 
+    std::cout << "pyramid_level_ " << pyramid_level_ << std::endl; 
     cv::calcOpticalFlowPyrLK(
             img_prev,
             img_curr, 

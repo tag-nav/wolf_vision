@@ -46,7 +46,8 @@ CaptureImage::CaptureImage(const TimeStamp& _ts, SensorCameraPtr _camera_ptr, co
     mwkps_(KeyPointsMap()),
     descriptors_(cv::Mat()),
     tracks_origin_(TracksMap()),
-    tracks_prev_(TracksMap())
+    tracks_prev_(TracksMap()),
+    last_was_repopulated_(false)
 {
     //
 }
