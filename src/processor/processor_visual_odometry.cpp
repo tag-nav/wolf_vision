@@ -243,7 +243,7 @@ void ProcessorVisualOdometry::establishFactors()
             // maybe call feature->setLandmarkId() on all the features of the track?
             lmk->setId(feat_pi->trackId());  
             LandmarkHpPtr lmk_hp = std::dynamic_pointer_cast<LandmarkHp>(lmk);
-            for (auto feat_kf: track_matrix_.trackAtKeyframes(feat->trackId()){
+            for (auto feat_kf: track_matrix_.trackAtKeyframes(feat->trackId())){
                 FactorBase::emplace<FactorPixelHp>(feat_kf.second, feat_kf.second, lmk_hp, shared_from_this(), true);
             }
         }
