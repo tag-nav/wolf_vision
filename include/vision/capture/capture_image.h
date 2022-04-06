@@ -99,6 +99,8 @@ class CaptureImage : public CaptureBase
         // keeps track from the previous capture (last->incoming): by the rest of the processor to populate the tack matrix
         TracksMap tracks_prev_;
 
+        bool last_was_repopulated_;
+
     public:
         CaptureImage(const TimeStamp& _ts, SensorCameraPtr _camera_ptr, const cv::Mat& _data_cv);
         ~CaptureImage() override;
@@ -114,6 +116,9 @@ class CaptureImage : public CaptureBase
 
         const TracksMap& getTracksOrigin() const {return tracks_origin_;}
         void setTracksOrigin(const TracksMap& _tracks){tracks_origin_ = _tracks;}
+
+        bool getLastWasRepopulated(){return last_was_repopulated_;}
+        void setLastWasRepopulated(bool _repopulated){last_was_repopulated_ = _repopulated;}
 
         void addKeyPoint(const WKeyPoint& _wkp);
         void addKeyPoint(const cv::KeyPoint& _cv_kp);
