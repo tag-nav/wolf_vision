@@ -163,12 +163,13 @@ class ProcessorVisualOdometry : public ProcessorTracker
         void advanceDerived() override;
 
 
-
         /** \brief Reset the tracker using the \b last Capture as the new \b origin.
          */
         void resetDerived() override;
 
         void setParams(const ParamsProcessorVisualOdometryPtr _params);
+
+        TrackMatrix getTrackMatrix(){return track_matrix_;}
 
 };
 
