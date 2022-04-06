@@ -190,7 +190,7 @@ unsigned int ProcessorVisualOdometry::processNew(const int& _max_features)
         std::cout << "In incoming, track: " << track_li.first << " -> " << track_li.second << std::endl;
         if (!tracks_map_li_matched_.count(track_li.first)){
             std::cout << "A NEW track is born!" << std::endl;
-            // 2) create a new last feature, a new track and add the incoming feature to this track
+            // create a new last feature, a new track and add the incoming feature to this track
             WKeyPoint kp_last = capture_image_last_->getKeyPoints().at(track_li.first);
             FeaturePointImagePtr feat_pi_last = FeatureBase::emplace<FeaturePointImage>(capture_image_last_, kp_last, pixel_cov_);
             track_matrix_.newTrack(feat_pi_last);
@@ -223,8 +223,10 @@ void ProcessorVisualOdometry::establishFactors()
         for (auto lmk: getProblem()->getMap()->getLandmarkList()){
             if (lmk->id() == feat_pi->trackId()){
                 associated_lmk = lmk;
+                break;
             }
         }
+
         // 1) create a factor between new KF and assocatiated track landmark
         //    HYP: assuming the trackid are the same as the landmark ID -> BAD if other types of landmarks involved
         if (associated_lmk){
@@ -234,17 +236,18 @@ void ProcessorVisualOdometry::establishFactors()
 
         // 2) create landmark if track is not associated with one and has enough length
         else if(track_matrix_.trackSize(feat->trackId()) >= min_track_length){
-            std::cout << "NEW valid track \\o/" << std::endl;
+            std::cout << "NEW valid track \\o/ -> create a new Landmark" << std::endl;
             LandmarkBasePtr lmk = emplaceLandmark(feat_pi);
-            lmk->setId(feat_pi->trackId());
-            Track track_kf = track_matrix_.trackAtKeyframes(feat->trackId());
-            for (auto feat_kf: track_kf){
-                LandmarkHpPtr lmk_hp = std::dynamic_pointer_cast<LandmarkHp>(lmk);
+            // Associate the track to the landmark
+            // NOT the right way -> should be replaced by book-keeping (in the processor? Feature?)
+            // maybe call feature->setLandmarkId() on all the features of the track?
+            lmk->setId(feat_pi->trackId());  
+            LandmarkHpPtr lmk_hp = std::dynamic_pointer_cast<LandmarkHp>(lmk);
+            for (auto feat_kf: track_matrix_.trackAtKeyframes(feat->trackId()){
                 FactorBase::emplace<FactorPixelHp>(feat_kf.second, feat_kf.second, lmk_hp, shared_from_this(), true);
             }
         }
     }
-
 }
 
 LandmarkBasePtr ProcessorVisualOdometry::emplaceLandmark(FeatureBasePtr _feat)
@@ -283,7 +286,6 @@ LandmarkBasePtr ProcessorVisualOdometry::emplaceLandmark(FeatureBasePtr _feat)
                                                         getSensor(), 
                                                         feat_pi->getKeyPoint().getDescriptor());
 
-    // _feat->setLandmarkId(lmk_hp_ptr->id());  // not necessary I think?
     return lmk_hp_ptr;
 }
 
