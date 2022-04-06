@@ -127,6 +127,20 @@ void ProcessorVisualOdometry::preProcess()
     cv::Mat E;
     computeEssential(mwkps_origin, mwkps_incoming, tracks_origin_incoming, E);
 
+    // Edit tracks prev with only inliers wrt origin
+    TracksMap tracks_last_incoming_filtered;
+    for (auto & track_origin_incoming : tracks_origin_incoming){
+        for (auto & track_last_incoming : tracks_last_incoming){
+            if (track_origin_incoming.second == track_last_incoming.second){
+                tracks_last_incoming_filtered[track_last_incoming.first] = track_last_incoming.second;
+            }
+        }
+    }
+
+    // Update captures
+    capture_image_incoming_->setTracksPrev(tracks_last_incoming_filtered);
+    capture_image_incoming_->addKeyPoints(mwkps_incoming);
+
 
     ////////////////////////////////
     // if too few tracks left in incoming
@@ -134,7 +148,33 @@ void ProcessorVisualOdometry::preProcess()
     ////////////////////////////////
     size_t n_tracks = tracks_origin_incoming.size();
     if (n_tracks < 500){
-        return;
+
+        // Detect new KeyPoints 
+        std::vector<cv::KeyPoint> kps_last_new;
+        detector_->detect(img_last, kps_last_new);
+        
+        // Create a map of wolf KeyPoints to track only the new ones
+        KeyPointsMap mwkps_last_new, mwkps_incoming_new;
+        for (auto & cvkp : kps_last_new){
+            WKeyPoint wkp(cvkp);
+            mwkps_last_new[wkp.getId()] = wkp;
+        }
+
+        TracksMap tracks_last_incoming_new = kltTrack(img_last, img_incoming, mwkps_last_new, mwkps_incoming_new);
+
+        // Outliers rejection with essential matrix
+        cv::Mat E;
+        computeEssential(mwkps_last_new, mwkps_incoming_new, tracks_last_incoming_new, E);
+
+        // Concatenation of old tracks and new tracks
+        for (auto & track: tracks_last_incoming_new){
+            tracks_last_incoming_filtered[track.first] = track.second;
+        }
+
+        // Update captures
+        capture_image_last_->addKeypoints(mwkps_last_new);
+        capture_image_incoming_->addKeyPoints(mwkps_incoming_new);
+        capture_image_incoming_->setTracksPrev(tracks_last_incoming_filtered);
     }
 
 

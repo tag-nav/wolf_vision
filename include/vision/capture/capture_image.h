@@ -120,6 +120,7 @@ class CaptureImage : public CaptureBase
 
         void addKeyPoints(const std::vector<WKeyPoint>& _vec_wkp);
         void addKeyPoints(const std::vector<cv::KeyPoint>& _vec_cv_kp);
+        void addKeyPoints(const KeyPointsMap& _mwkps);
 
         void removeKeyPoint(size_t _kp_id);
         void removeKeyPoint(const WKeyPoint& _wkp);

@@ -94,6 +94,13 @@ void CaptureImage::addKeyPoints(const std::vector<cv::KeyPoint>& _vec_cv_kp)
     }
 }
 
+void CaptureImage::addKeyPoints(const KeyPointsMap& _mwkps)
+{
+    for (auto mwkp: _mwkps){
+        addKeyPoint(mwkp.second);
+    }
+}
+
 void CaptureImage::removeKeyPoint(size_t _id)
 {
     mwkps_.erase(_id);
