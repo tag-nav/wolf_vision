@@ -32,16 +32,6 @@ ProcessorVisualOdometry::ProcessorVisualOdometry(ParamsProcessorVisualOdometryPt
                 params_visual_odometry_(_params_visual_odometry),
                 frame_count_(0)
 {
-    //////////////////
-    
-    // PARAMS KLT tracker
-    tracker_width_ = 21;
-    tracker_height_ = 21;
-    nlevels_pyramids_klt_ = 3;
-    klt_max_err_ = 0.2;
-    crit_ = cv::TermCriteria(cv::TermCriteria::COUNT+cv::TermCriteria::EPS, 30, 0.01);
-    //////////////////
-
     int threshold_fast = 30;
     detector_ = cv::FastFeatureDetector::create(threshold_fast);
 
@@ -248,9 +238,9 @@ unsigned int ProcessorVisualOdometry::processNew(const int& _max_features)
 
     for (std::pair<size_t,size_t> track_li: capture_image_incoming_->getTracksPrev()){
         // if track not matched, then create a new track in the track matrix etc.
-        std::cout << "In incoming, track: " << track_li.first << " -> " << track_li.second << std::endl;
+        // std::cout << "In incoming, track: " << track_li.first << " -> " << track_li.second << std::endl;
         if (!tracks_map_li_matched_.count(track_li.first)){
-            std::cout << "A NEW track is born!" << std::endl;
+            // std::cout << "A NEW track is born!" << std::endl;
             // 2) create a new last feature, a new track and add the incoming feature to this track
             WKeyPoint kp_last = capture_image_last_->getKeyPoints().at(track_li.first);
             FeaturePointImagePtr feat_pi_last = FeatureBase::emplace<FeaturePointImage>(capture_image_last_, kp_last, pixel_cov_);
@@ -403,20 +393,17 @@ TracksMap ProcessorVisualOdometry::kltTrack(cv::Mat img_prev, cv::Mat img_curr, 
     std::vector<uchar> status;
     std::vector<float> err;
 
-
     // Process one way: previous->current with current init with previous
-    std::cout << "search_width_ " << search_width_ << std::endl; 
-    std::cout << "search_height_ " << search_height_ << std::endl; 
-    std::cout << "pyramid_level_ " << pyramid_level_ << std::endl; 
+    KltParams prms = params_visual_odometry_->klt_params_;
     cv::calcOpticalFlowPyrLK(
             img_prev,
             img_curr, 
             p2f_prev,
             p2f_curr,
             status, err,
-            {search_width_, search_height_}, 
-            pyramid_level_,
-            crit_,
+            {prms.tracker_width_, prms.tracker_height_}, 
+            prms.nlevels_pyramids_,
+            prms.crit_,
             (cv::OPTFLOW_USE_INITIAL_FLOW + cv::OPTFLOW_LK_GET_MIN_EIGENVALS));
     
     // Process the other way: current->previous
@@ -428,16 +415,16 @@ TracksMap ProcessorVisualOdometry::kltTrack(cv::Mat img_prev, cv::Mat img_curr, 
             p2f_curr,
             p2f_prev,
             status_back, err_back,
-            {search_width_, search_height_}, 
-            pyramid_level_,
-            crit_,
+            {prms.tracker_width_, prms.tracker_height_}, 
+            prms.nlevels_pyramids_,
+            prms.crit_,
             (cv::OPTFLOW_USE_INITIAL_FLOW + cv::OPTFLOW_LK_GET_MIN_EIGENVALS));
     
     // Delete point if KLT failed
     for (size_t j = 0; j < status_back.size(); j++) {
 
-        if(!status_back.at(j)  ||  (err_back.at(j) > klt_max_err_) ||
-           !status.at(j)  ||  (err.at(j) > klt_max_err_)) {
+        if(!status_back.at(j)  ||  (err_back.at(j) > prms.klt_max_err_) ||
+           !status.at(j)  ||  (err.at(j) > prms.klt_max_err_)) {
             continue;
         }
 

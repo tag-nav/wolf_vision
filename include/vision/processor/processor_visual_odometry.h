@@ -51,12 +51,27 @@ namespace wolf{
 
 WOLF_STRUCT_PTR_TYPEDEFS(ParamsProcessorVisualOdometry);
 
+struct KltParams
+{
+    int tracker_width_;
+    int tracker_height_;
+    double klt_max_err_;
+    int nlevels_pyramids_;
+    cv::TermCriteria crit_;
+};
+
 struct ParamsProcessorVisualOdometry : public ParamsProcessorTracker
 {
-	ParamsProcessorVisualOdometry() = default;
+    KltParams klt_params_;
+
+    ParamsProcessorVisualOdometry() = default;
     ParamsProcessorVisualOdometry(std::string _unique_name, const ParamsServer& _server)
     {
-        //
+        klt_params_.tracker_width_        = _server.getParam<int>(prefix + _unique_name + "/klt_params/tracker_width");
+        klt_params_.tracker_height_       = _server.getParam<int>(prefix + _unique_name + "/klt_params/tracker_height");
+        klt_params_.klt_max_err_          = _server.getParam<double>(prefix + _unique_name + "/klt_params/klt_max_err");
+        klt_params_.nlevels_pyramids_ = _server.getParam<int>(prefix + _unique_name + "/klt_params/nlevels_pyramids");
+        klt_params_.crit_                 = cv::TermCriteria(cv::TermCriteria::COUNT+cv::TermCriteria::EPS, 30, 0.01);  // everybody uses this defaults...
     }
     std::string print() const override
     {
@@ -69,7 +84,7 @@ WOLF_PTR_TYPEDEFS(ProcessorVisualOdometry);
 
 class ProcessorVisualOdometry : public ProcessorTracker
 {
-        public:
+    public:
         ProcessorVisualOdometry(ParamsProcessorVisualOdometryPtr _params_visual_odometry);
         ~ProcessorVisualOdometry() override {};
 
@@ -92,21 +107,7 @@ class ProcessorVisualOdometry : public ProcessorTracker
         int frame_count_;
 
         // detector
-        int npoints_;
-        double scale_factor_;
-        int nlevels_pyramids_;
         cv::Ptr<cv::FeatureDetector> detector_;
-
-        // tracker
-        int tracker_width_;
-        int tracker_height_;
-        double klt_max_err_;
-        int nlevels_pyramids_klt_;
-        cv::TermCriteria crit_;
-
-        int search_width_;
-        int search_height_;
-        int pyramid_level_;
 
         // camera
         cv::Mat Kcv_;

@@ -2,3 +2,8 @@ algorithm:
     time tolerance: 0.005
     voting_active: true
     
+klt_params:
+    tracker_width: 21
+    tracker_height: 21
+    nlevels_pyramids: 3
+    klt_max_err: 0.2
