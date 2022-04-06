@@ -72,6 +72,7 @@ void ProcessorVisualOdometry::preProcess()
 
     // if first image, compute keypoints, add to capture incoming and return
     if (last_ptr_ == nullptr){
+        std::cout << "last_ptr is nullptr, should be the case only once" << std::endl;
         // size_t nb_detect = 100;
         std::vector<cv::KeyPoint> kps_current;
 
@@ -102,6 +103,11 @@ void ProcessorVisualOdometry::preProcess()
     //   - ...
     ////////////////////////////////
 
+    ////////////////////////////////
+    // if too few tracks left in incoming
+    // detect new KeyPoints in last and track them to incoming
+    ////////////////////////////////
+
 
     ////////////////////////////////
     // FAKE DATA, to replace
@@ -110,16 +116,13 @@ void ProcessorVisualOdometry::preProcess()
     WKeyPoint wkp0 = WKeyPoint(kp0);
     capture_image_incoming_->addKeyPoint(wkp0);
 
-    for (auto it: capture_image_last_->getTracksPrev()){
-        //  it.second
-        size_t id_last_kp = it.second;
-        size_t id_incoming_kp = wkp0.getId();
-        auto tracks_map_li = std::pair<size_t, size_t>(id_last_kp, id_incoming_kp);
+    size_t id_last_kp = wkp0.getId()-1;  // -1 is a HACK!!
+    size_t id_incoming_kp = wkp0.getId();
+    std::cout << "\nCreate Fake track " << id_last_kp << " -> " << id_incoming_kp << std::endl;
+    auto tracks_map_li = std::pair<size_t, size_t>(id_last_kp, id_incoming_kp);
 
-        auto temp = capture_image_incoming_->getTracksPrev();  // cannot "insert" here since getTracksPrev is "const"
-        temp.insert(tracks_map_li);
-
-    }
+    auto temp = capture_image_incoming_->getTracksPrev();  // cannot "insert" here since getTracksPrev is "const" -> create temp variable
+    temp.insert(tracks_map_li);
 
 
     ////////////////////////////////
@@ -129,6 +132,7 @@ void ProcessorVisualOdometry::preProcess()
 
 unsigned int ProcessorVisualOdometry::processKnown()
 {
+    std::cout << "processKnown" << std::endl;
     // reinitilize the bookeeping to communicate info from processKnown to processNew
     tracks_map_li_matched_.clear();
     // Extend the process track matrix by using information stored in the incomping capture
@@ -140,6 +144,7 @@ unsigned int ProcessorVisualOdometry::processKnown()
         // check if the keypoint in the last capture is in the last->incoming TracksMap stored in the incoming capture
         FeaturePointImagePtr feat_pi_last = std::dynamic_pointer_cast<FeaturePointImage>(feature_tracked_last);
         size_t id_feat_last = feat_pi_last->getKeyPoint().getId();  
+        std::cout << "id_feat_last: " << id_feat_last << std::endl;
         // if this feature id is in the last->incoming tracks of capture incoming, the track is continued
         // otherwise we store the pair as a newly detected track (for processNew)
         TracksMap tracks_map_li = capture_image_incoming_->getTracksPrev();
@@ -166,15 +171,23 @@ unsigned int ProcessorVisualOdometry::processKnown()
 
 unsigned int ProcessorVisualOdometry::processNew(const int& _max_features)
 {
+    ///////////////////////////////////////
+    // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    // problem in the logic for the moment:
+    // this function will
+    ///////////////////////////////////////
+
+    std::cout << "processNew" << std::endl;
     // We have matched the tracks in the track matrix with the last->incoming tracks 
     // stored in the TracksMap from getTracksPrev()
     // Now we need to add new tracks in the track matrix for the NEW tracks.
     //
-    // use book-keeping done in processKnown:  the TracksMap that have been matched were stored
+    // use book-keeping prepared in processKnown: the TracksMap that have been matched were stored in tracks_map_li_matched_
     // and here add tracks only for those that have not been matched
 
-    for (auto track_li: capture_image_incoming_->getTracksPrev()){
+    for (std::pair<size_t,size_t> track_li: capture_image_incoming_->getTracksPrev()){
         // if track not matched, then create a new track in the track matrix etc.
+        std::cout << "In incoming, track: " << track_li.first << " -> " << track_li.second << std::endl;
         if (!tracks_map_li_matched_.count(track_li.first)){
             std::cout << "A NEW track is born!" << std::endl;
             // 2) create a new last feature, a new track and add the incoming feature to this track
@@ -282,6 +295,7 @@ void ProcessorVisualOdometry::postProcess()
 
 bool ProcessorVisualOdometry::voteForKeyFrame() const
 {
+    std::cout << "VOTE" << std::endl;
     // simple vote based on frame count, should be changed to something that takes into account number of tracks alive, parallax, etc.
     return ((frame_count_ % 5) == 0);
 }
