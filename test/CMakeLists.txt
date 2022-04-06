@@ -18,6 +18,9 @@ target_link_libraries(gtest_feature_point_image ${PLUGIN_NAME})
 wolf_add_gtest(gtest_sensor_camera gtest_sensor_camera.cpp)
 target_link_libraries(gtest_sensor_camera ${PLUGIN_NAME})
 
+wolf_add_gtest(gtest_preprocess gtest_preprocess.cpp)
+target_link_libraries(gtest_preprocess ${PLUGIN_NAME})
+
 # # FactorTrifocal test
 # wolf_add_gtest(gtest_factor_trifocal gtest_factor_trifocal.cpp)
 # target_link_libraries(gtest_factor_trifocal ${PLUGIN_NAME})
