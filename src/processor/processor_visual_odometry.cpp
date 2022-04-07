@@ -137,7 +137,7 @@ void ProcessorVisualOdometry::preProcess()
     // detect new KeyPoints in last and track them to incoming
     ////////////////////////////////
     size_t n_tracks = tracks_origin_incoming.size();
-    if (n_tracks < 500){
+    if (n_tracks < params_visual_odometry_->min_thresh_tracks_){
 
         // Detect new KeyPoints 
         std::vector<cv::KeyPoint> kps_last_new;

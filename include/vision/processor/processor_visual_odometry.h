@@ -70,6 +70,7 @@ struct ParamsProcessorVisualOdometry : public ParamsProcessorTracker
 {
     KltParams klt_params_;
     FastParams fast_params_;
+    unsigned int min_thresh_tracks_;
 
     ParamsProcessorVisualOdometry() = default;
     ParamsProcessorVisualOdometry(std::string _unique_name, const ParamsServer& _server)
@@ -83,11 +84,19 @@ struct ParamsProcessorVisualOdometry : public ParamsProcessorTracker
         fast_params_.threshold_fast_     = _server.getParam<int>(prefix + _unique_name + "/fast_params/threshold_fast");  // everybody uses this defaults...
         fast_params_.non_max_suppresion_ = _server.getParam<bool>(prefix + _unique_name + "/fast_params/non_max_suppresion");  // everybody uses this defaults...
 
+        min_thresh_tracks_ = _server.getParam<unsigned int>(prefix + _unique_name + "/min_thresh_tracks");  // everybody uses this defaults...
+
     }
     std::string print() const override
     {
-
-        return "Hello! TODO";
+        return ParamsProcessorTracker::print()                                                         + "\n"
+            + "klt_params_.tracker_width_: "       + std::to_string(klt_params_.tracker_width_)        + "\n"
+            + "klt_params_.tracker_height_: "      + std::to_string(klt_params_.tracker_height_)       + "\n"
+            + "klt_params_.klt_max_err_: "         + std::to_string(klt_params_.klt_max_err_)          + "\n"
+            + "klt_params_.nlevels_pyramids_: "    + std::to_string(klt_params_.nlevels_pyramids_)     + "\n"
+            + "fast_params_.threshold_fast_    : " + std::to_string(fast_params_.threshold_fast_)      + "\n"
+            + "fast_params_.non_max_suppresion_: " + std::to_string(fast_params_.non_max_suppresion_)  + "\n"
+            + "min_thresh_tracks_: "               + std::to_string(min_thresh_tracks_)                + "\n";  
     }
 };
 

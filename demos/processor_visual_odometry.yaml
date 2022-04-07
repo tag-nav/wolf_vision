@@ -11,3 +11,5 @@ klt_params:
 fast_params:
     threshold_fast: 30
     non_max_suppresion: true
+
+min_thresh_tracks: 500
