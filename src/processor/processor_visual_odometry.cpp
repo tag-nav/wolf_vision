@@ -27,13 +27,13 @@
 
 namespace wolf{
 
-ProcessorVisualOdometry::ProcessorVisualOdometry(ParamsProcessorVisualOdometryPtr _params_visual_odometry) :
-                ProcessorTracker("ProcessorVisualOdometry", "PO", 3, _params_visual_odometry),
-                params_visual_odometry_(_params_visual_odometry),
+ProcessorVisualOdometry::ProcessorVisualOdometry(ParamsProcessorVisualOdometryPtr _params_vo) :
+                ProcessorTracker("ProcessorVisualOdometry", "PO", 3, _params_vo),
+                params_visual_odometry_(_params_vo),
                 frame_count_(0)
 {
-    int threshold_fast = 30;
-    detector_ = cv::FastFeatureDetector::create(threshold_fast);
+    detector_ = cv::FastFeatureDetector::create(_params_vo->fast_params_.threshold_fast_, 
+                                                _params_vo->fast_params_.non_max_suppresion_);
 
     pixel_cov_ = Eigen::Matrix2d::Identity();
 

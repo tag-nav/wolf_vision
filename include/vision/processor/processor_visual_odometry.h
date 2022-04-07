@@ -60,9 +60,16 @@ struct KltParams
     cv::TermCriteria crit_;
 };
 
+struct FastParams
+{
+    int threshold_fast_;
+    bool non_max_suppresion_;
+};
+
 struct ParamsProcessorVisualOdometry : public ParamsProcessorTracker
 {
     KltParams klt_params_;
+    FastParams fast_params_;
 
     ParamsProcessorVisualOdometry() = default;
     ParamsProcessorVisualOdometry(std::string _unique_name, const ParamsServer& _server)
@@ -70,8 +77,12 @@ struct ParamsProcessorVisualOdometry : public ParamsProcessorTracker
         klt_params_.tracker_width_        = _server.getParam<int>(prefix + _unique_name + "/klt_params/tracker_width");
         klt_params_.tracker_height_       = _server.getParam<int>(prefix + _unique_name + "/klt_params/tracker_height");
         klt_params_.klt_max_err_          = _server.getParam<double>(prefix + _unique_name + "/klt_params/klt_max_err");
-        klt_params_.nlevels_pyramids_ = _server.getParam<int>(prefix + _unique_name + "/klt_params/nlevels_pyramids");
+        klt_params_.nlevels_pyramids_     = _server.getParam<int>(prefix + _unique_name + "/klt_params/nlevels_pyramids");
         klt_params_.crit_                 = cv::TermCriteria(cv::TermCriteria::COUNT+cv::TermCriteria::EPS, 30, 0.01);  // everybody uses this defaults...
+
+        fast_params_.threshold_fast_     = _server.getParam<int>(prefix + _unique_name + "/fast_params/threshold_fast");  // everybody uses this defaults...
+        fast_params_.non_max_suppresion_ = _server.getParam<bool>(prefix + _unique_name + "/fast_params/non_max_suppresion");  // everybody uses this defaults...
+
     }
     std::string print() const override
     {
