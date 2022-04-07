@@ -81,6 +81,8 @@ TEST(ProcessorVisualOdometry, kltTrack)
     params->klt_params_.nlevels_pyramids_ = 3;
     params->klt_params_.klt_max_err_ = 1.0;
     params->klt_params_.crit_ = cv::TermCriteria(cv::TermCriteria::COUNT+cv::TermCriteria::EPS, 30, 0.01);
+    params->fast_params_.threshold_fast_ = 30;
+    params->fast_params_.non_max_suppresion_ = true;
 
     ProcessorVisualOdometryTest processor(params);
     cv::Ptr<cv::FeatureDetector> detector = processor.getDetector();
