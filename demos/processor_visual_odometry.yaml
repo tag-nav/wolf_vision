@@ -7,3 +7,9 @@ klt_params:
     tracker_height: 21
     nlevels_pyramids: 3
     klt_max_err: 0.2
+
+fast_params:
+    threshold_fast: 30
+    non_max_suppresion: true
+
+min_thresh_tracks: 500
