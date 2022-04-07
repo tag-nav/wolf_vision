@@ -58,8 +58,7 @@ class CaptureImage_test : public testing::Test
             cv_kp0_ = cv::KeyPoint(0.0, 0.0, 0);
             cv_kp1_ = cv::KeyPoint(1.0, 0.0, 0);
             cv_kp2_ = cv::KeyPoint(2.0, 0.0, 0);
-            wkp0_ = WKeyPoint();
-            wkp0_.setCvKeyPoint(cv_kp0_);
+            wkp0_ = WKeyPoint(cv_kp0_);
             wkp1_ = WKeyPoint  (cv_kp1_);
             wkp2_ = WKeyPoint  (cv_kp2_);
         }
@@ -77,6 +76,9 @@ TEST_F(CaptureImage_test, WKeyPoint_class)
     ASSERT_EQ(wkp1_.getCvKeyPoint().pt.x, 1.0);
     ASSERT_EQ(wkp2_.getCvKeyPoint().pt.x, 2.0);
 
+    wkp0_.setCvKeyPoint(cv_kp1_);
+    ASSERT_EQ(wkp0_.getCvKeyPoint().pt.x, 1.0);
+
     cv::Mat desc = 3*cv::Mat::eye(4, 4, CV_8UC1);
     wkp0_.setDescriptor(desc);
     ASSERT_EQ(wkp0_.getDescriptor().at<uchar>(0,0), 3);
@@ -90,7 +92,7 @@ TEST_F(CaptureImage_test, capture_image_type)
     ASSERT_EQ(c->getType(), "CaptureImage");
 }
 
-TEST_F(CaptureImage_test, getter_setters)
+TEST_F(CaptureImage_test, getter_setters_img)
 {
     CaptureImagePtr c = std::make_shared<CaptureImage>(0, nullptr, img_);
     cv::Mat temp = c->getImage();
@@ -101,8 +103,9 @@ TEST_F(CaptureImage_test, getter_setters)
     temp = 3*cv::Mat::eye(4, 4, CV_8UC1);
     ASSERT_EQ(temp.at<uchar>(0,0), 3);
 
-
-    // MORE TO COME
+    cv::Mat temp2 = 6*cv::Mat::eye(4, 4, CV_8UC1);
+    c->setImage(temp2);
+    ASSERT_EQ(c->getImage().at<uchar>(0,0), 6);
 }
 
 
@@ -131,7 +134,25 @@ TEST_F(CaptureImage_test, add_remove_key_points)
     c->addKeyPoint(cv_kp0_);  
     ASSERT_EQ(c->getKeyPoints().at(4).getId(), 4);
     ASSERT_EQ(c->getKeyPoints().at(4).getCvKeyPoint().pt.x, 0.0);
+
+
 }
+
+TEST_F(CaptureImage_test, add_remove_key_points_using_map)
+{
+    CaptureImagePtr c = std::make_shared<CaptureImage>(0, nullptr, img_);
+    // Now using a KeyPointsMap
+    KeyPointsMap mapwkps;
+    mapwkps.insert(std::pair<size_t, WKeyPoint>(wkp0_.getId(), wkp0_));
+    mapwkps.insert(std::pair<size_t, WKeyPoint>(wkp1_.getId(), wkp1_));
+    mapwkps.insert(std::pair<size_t, WKeyPoint>(wkp2_.getId(), wkp2_));
+
+    c->addKeyPoints(mapwkps);
+    ASSERT_EQ(c->getKeyPoints().size(), 3);
+    ASSERT_EQ(c->getKeyPoints().at(3).getId(), 3);
+}
+
+
 
 
 TEST_F(CaptureImage_test, add_remove_key_point_vectors)
