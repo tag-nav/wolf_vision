@@ -48,8 +48,6 @@ class CaptureImage_test : public testing::Test
         WKeyPoint wkp1_;
         WKeyPoint wkp2_;
 
-
-
         void SetUp() override
         {
             // to be sure that the counter start from zero each time a new test is created
@@ -71,9 +69,9 @@ TEST_F(CaptureImage_test, WKeyPoint_class)
 {
     // WKeyPoint ids start from 3 since because the default constructor 
     // is called in the declaration of CaptureImage_test attributes
-    ASSERT_EQ(wkp0_.getId(), 0);
-    ASSERT_EQ(wkp1_.getId(), 1);
-    ASSERT_EQ(wkp2_.getId(), 2);
+    ASSERT_EQ(wkp0_.getId(), 1);
+    ASSERT_EQ(wkp1_.getId(), 2);
+    ASSERT_EQ(wkp2_.getId(), 3);
 
     ASSERT_EQ(wkp0_.getCvKeyPoint().pt.x, 0.0);
     ASSERT_EQ(wkp1_.getCvKeyPoint().pt.x, 1.0);
@@ -124,17 +122,15 @@ TEST_F(CaptureImage_test, add_remove_key_points)
     ASSERT_EQ(c->getKeyPoints().size(), 1);
 
     // only wkp2 is left
-    for (auto toto: c->getKeyPoints()){
-        std::cout << toto.first << "  " << toto.second.getId() << std::endl;
-    }
-    ASSERT_EQ(c->getKeyPoints().at(2).getId(), 2);
-    ASSERT_EQ(c->getKeyPoints().at(2).getCvKeyPoint().pt.x, 2.0);
+
+    ASSERT_EQ(c->getKeyPoints().at(3).getId(), 3);
+    ASSERT_EQ(c->getKeyPoints().at(3).getCvKeyPoint().pt.x, 2.0);
 
     // create a new WKeyPoint and add it to the keypoint map
     // the new WKeyPoint ID is therefore 3 as well as its key in the map
     c->addKeyPoint(cv_kp0_);  
-    ASSERT_EQ(c->getKeyPoints().at(3).getId(), 3);
-    ASSERT_EQ(c->getKeyPoints().at(3).getCvKeyPoint().pt.x, 0.0);
+    ASSERT_EQ(c->getKeyPoints().at(4).getId(), 4);
+    ASSERT_EQ(c->getKeyPoints().at(4).getCvKeyPoint().pt.x, 0.0);
 }
 
 
@@ -155,8 +151,8 @@ TEST_F(CaptureImage_test, add_remove_key_point_vectors)
     c->addKeyPoints(cv_kp_vec);
     ASSERT_EQ(c->getKeyPoints().size(), 6);
     // at position 4 is the new WKeyPoint created from cv_kp1_
-    ASSERT_EQ(c->getKeyPoints().at(4).getId(), 4);
-    ASSERT_EQ(c->getKeyPoints().at(4).getCvKeyPoint().pt.x, 1.0);
+    ASSERT_EQ(c->getKeyPoints().at(5).getId(), 5);
+    ASSERT_EQ(c->getKeyPoints().at(5).getCvKeyPoint().pt.x, 1.0);
 }
 
 

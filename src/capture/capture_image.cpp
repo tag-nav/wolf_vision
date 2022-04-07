@@ -29,12 +29,12 @@ namespace wolf {
 size_t WKeyPoint::id_count_ = 0;
 
 WKeyPoint::WKeyPoint():
-    id_(id_count_++)
+    id_(++id_count_)
 {
 }
 
 WKeyPoint::WKeyPoint(const cv::KeyPoint& _cv_kp):
-    id_(id_count_++),
+    id_(++id_count_),
     cv_kp_(_cv_kp)
 {
 }
