@@ -30,6 +30,7 @@
 #include <core/utils/utils_gtest.h>
 #include <core/sensor/sensor_base.h>
 #include <opencv2/imgcodecs.hpp>
+#include "core/yaml/parser_yaml.h"
 
 #include "vision/processor/processor_visual_odometry.h"
 #include "vision/sensor/sensor_camera.h"
@@ -57,6 +58,11 @@ class ProcessorVisualOdometryTest : public ProcessorVisualOdometry
         {
             return detector_;
         }
+
+        TrackMatrix getTrackMatrix()
+		{
+			return track_matrix_;
+		}
 
         void setCaptureLast(CaptureImagePtr capture_image_last){
             last_ptr_ = capture_image_last;
@@ -201,6 +207,50 @@ TEST(ProcessorVisualOdometry, preProcess)
     // Check if 80% of tracks between frames
     float track_ratio = capture_image_incoming->getTracksPrev().size() / capture_image_incoming->getKeyPoints().size();
     ASSERT_TRUE(track_ratio > 0.8);
+
+}
+
+TEST(ProcessorVisualOdometry, process)
+{
+    // Config file to parse. Here is where all the problem is defined:
+    std::string wolf_vision_root = _WOLF_VISION_ROOT_DIR;
+    std::string config_file = "demos/gtest_visual_odometry.yaml";
+
+    // parse file into params server: each param will be retrievable from this params server:
+    ParserYaml parser       = ParserYaml(config_file, wolf_vision_root);
+    ParamsServer server     = ParamsServer(parser.getParams());
+    // Wolf problem: automatically build the left branch of the wolf tree from the contents of the params server:
+    ProblemPtr problem      = Problem::autoSetup(server);
+
+    SensorCameraPtr cam_ptr = std::dynamic_pointer_cast<SensorCamera>(problem->getSensor("sen cam"));
+    ProcessorVisualOdometryPtr proc_vo;
+    for (auto proc : problem->getSensor("sen cam")->getProcessorList()){
+        proc_vo = std::dynamic_pointer_cast<ProcessorVisualOdometry>(proc);
+    }
+    
+    // Successive images
+    cv::Mat img_0 = cv::imread(wolf_vision_root + "/test/demo_gazebo_x00cm_y00cm.jpg", cv::IMREAD_GRAYSCALE);
+    cv::Mat img_1 = cv::imread(wolf_vision_root + "/test/demo_gazebo_x00cm_y-10cm.jpg", cv::IMREAD_GRAYSCALE);
+    cv::Mat img_2 = cv::imread(wolf_vision_root + "/test/demo_gazebo_x00cm_y-20cm.jpg", cv::IMREAD_GRAYSCALE);
+
+
+    // ----------------------------------------
+    // TIME 0 : Let's process the first capture
+    // ----------------------------------------
+    
+    TimeStamp t0(0.0);
+    CaptureImagePtr capture_image_0 = std::make_shared<CaptureImage>(t0, cam_ptr, img_0);
+    capture_image_0->process();
+    problem->print(4,0,1,0);
+
+    // ----------------------------------------
+    // TIME 1 : Second image
+    // ----------------------------------------
+    
+    TimeStamp t1(0.1);
+    CaptureImagePtr capture_image_1 = std::make_shared<CaptureImage>(t1, cam_ptr, img_1);
+    capture_image_1->process();
+    std::cout << proc_vo->getTrackMatrix().numTracks() << std::endl;
 
 }
 
