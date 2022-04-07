@@ -108,7 +108,7 @@ class CaptureImage : public CaptureBase
         const cv::Mat& getImage() const;
         void setImage(const cv::Mat& _img);
 
-        const KeyPointsMap& getKeyPoints() const {return mwkps_;}
+        const KeyPointsMap getKeyPoints() const {return mwkps_;}
         void setKeyPoints(const KeyPointsMap& _mwkps){mwkps_ = _mwkps;}
 
         const TracksMap& getTracksPrev() const {return tracks_prev_;}

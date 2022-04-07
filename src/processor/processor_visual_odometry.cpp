@@ -79,7 +79,14 @@ void ProcessorVisualOdometry::preProcess()
 
         detector_->detect(img_incoming, kps_current);
         capture_image_incoming_->addKeyPoints(kps_current);
-        
+
+        // We init origin with this one
+        TracksMap tracks_init;
+        for (auto mwkp : capture_image_incoming_->getKeyPoints()){
+            tracks_init[mwkp.first] = mwkp.first;
+        }
+        capture_image_incoming_->setTracksOrigin(tracks_init);
+        capture_image_incoming_->setTracksPrev(tracks_init);
         return;
     }
 
@@ -137,7 +144,7 @@ void ProcessorVisualOdometry::preProcess()
     // detect new KeyPoints in last and track them to incoming
     ////////////////////////////////
     size_t n_tracks = tracks_origin_incoming.size();
-    if (n_tracks < 500){
+    if (n_tracks < 50){  // EDIT THIS PARAMETER
 
         // Detect new KeyPoints 
         std::vector<cv::KeyPoint> kps_last_new;

@@ -57,6 +57,21 @@ class ProcessorVisualOdometryTest : public ProcessorVisualOdometry
         {
             return detector_;
         }
+
+        void setCaptureLast(CaptureImagePtr capture_image_last){
+            last_ptr_ = capture_image_last;
+            capture_image_last_ = capture_image_last;
+        }
+
+        void setCaptureIncoming(CaptureImagePtr capture_image_incoming){
+            incoming_ptr_ = capture_image_incoming;
+            capture_image_incoming_ = capture_image_incoming;
+        }
+
+        void setCaptureOrigin(CaptureImagePtr capture_image_origin){
+            origin_ptr_ = capture_image_origin;
+            capture_image_origin_ = capture_image_origin;
+        }
 };
 
 TEST(ProcessorVisualOdometry, kltTrack)
@@ -70,6 +85,8 @@ TEST(ProcessorVisualOdometry, kltTrack)
         for (int y=0; y<img.size().width; y++){
             if (x+du < img.size().height && y+dv<img.size().width){
                 img_flow.at<uchar>(x,y) = img.at<uchar>(x+du,y+dv);
+            } else {
+                img_flow.at<uchar>(x,y) = 255;
             }
         }
     }
@@ -87,7 +104,6 @@ TEST(ProcessorVisualOdometry, kltTrack)
     
     std::vector<cv::KeyPoint> kps;
     detector->detect(img, kps);
-    cv::Mat img_draw;
 
 
     // Create WkpMap 
@@ -104,6 +120,83 @@ TEST(ProcessorVisualOdometry, kltTrack)
         Eigen::Vector2d delta_flow(du_flow,dv_flow);
         ASSERT_MATRIX_APPROX(delta, delta_flow, 0.1);
     }
+
+}
+
+TEST(ProcessorVisualOdometry, preProcess)
+{
+    // Create an image pair
+    cv::Mat img_0 = cv::imread(wolf_vision_root + "/test/demo_gazebo_x00cm_y00cm.jpg", cv::IMREAD_GRAYSCALE);
+    cv::Mat img_1 = cv::imread(wolf_vision_root + "/test/demo_gazebo_x00cm_y-20cm.jpg", cv::IMREAD_GRAYSCALE);
+
+    // Create a processor
+    ParamsProcessorVisualOdometryPtr params = std::make_shared<ParamsProcessorVisualOdometry>();
+    params->klt_params_.tracker_height_ = 21;
+    params->klt_params_.tracker_width_ = 21;
+    params->klt_params_.nlevels_pyramids_ = 3;
+    params->klt_params_.klt_max_err_ = 1.0;
+    params->klt_params_.crit_ = cv::TermCriteria(cv::TermCriteria::COUNT+cv::TermCriteria::EPS, 30, 0.01);
+    ProcessorVisualOdometryTest processor(params);
+
+
+    // Install camera
+    ParamsSensorCameraPtr intr = std::make_shared<ParamsSensorCamera>();
+    intr->pinhole_model_raw = Eigen::Vector4d(640, 480, 640, 640);
+    intr->width  = 1280;
+    intr->height = 960;
+    SensorCameraPtr cam_ptr = std::make_shared<SensorCamera>((Eigen::Vector7d() << 0,0,0,  0,0,0,1).finished(), intr);
+    processor.configure(cam_ptr);
+
+    // ----------------------------------------
+    // TIME 0 : Let's process the first capture
+    // ----------------------------------------
+
+    TimeStamp t0(0.0);
+
+    // Create Capture
+    CaptureImagePtr capture_image_incoming = std::make_shared<CaptureImage>(t0, cam_ptr, img_0);
+    processor.setCaptureIncoming(capture_image_incoming);
+
+    // PreProcess
+    processor.preProcess();
+
+    // Kps visu
+    cv::Mat img_draw;
+    std::vector<cv::KeyPoint> kps;
+    for (auto mwkp : capture_image_incoming->getKeyPoints()){
+        kps.push_back(mwkp.second.getCvKeyPoint());
+    }
+    cv::drawKeypoints(img_0, kps, img_draw);
+    cv::imshow( "KeyPoints t = 0", img_draw);
+    cv::waitKey(0);
+
+    // ----------------------------------------
+    // TIME 1 : Let's process the other one
+    // ----------------------------------------
+
+    TimeStamp t1(0.0);
+
+    // Edit captures
+    CaptureImagePtr capture_image_last = capture_image_incoming;
+    capture_image_incoming = std::make_shared<CaptureImage>(t1, cam_ptr, img_1);
+    processor.setCaptureIncoming(capture_image_incoming);
+    processor.setCaptureLast(capture_image_last);
+    processor.setCaptureOrigin(capture_image_last);
+
+    processor.preProcess();
+
+    // Kps visu
+    kps.clear();
+    for (auto mwkp : capture_image_incoming->getKeyPoints()){
+        kps.push_back(mwkp.second.getCvKeyPoint());
+    }
+    cv::drawKeypoints(img_1, kps, img_draw);
+    cv::imshow( "KeyPoints t = 1", img_draw);
+    cv::waitKey(0);
+
+    // Check if 80% of tracks between frames
+    float track_ratio = capture_image_incoming->getTracksPrev().size() / capture_image_incoming->getKeyPoints().size();
+    ASSERT_TRUE(track_ratio > 0.8);
 
 }
 
