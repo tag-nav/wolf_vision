@@ -421,7 +421,7 @@ TracksMap ProcessorVisualOdometry::kltTrack(cv::Mat img_prev, cv::Mat img_curr, 
             (cv::OPTFLOW_USE_INITIAL_FLOW + cv::OPTFLOW_LK_GET_MIN_EIGENVALS));
     
     // Delete point if KLT failed
-    for (size_t j = 0; j < status_back.size(); j++) {
+    for (size_t j = 0; j < status.size(); j++) {
 
         if(!status_back.at(j)  ||  (err_back.at(j) > prms.klt_max_err_) ||
            !status.at(j)  ||  (err.at(j) > prms.klt_max_err_)) {
