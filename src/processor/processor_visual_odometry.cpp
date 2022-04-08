@@ -47,9 +47,7 @@ void ProcessorVisualOdometry::configure(SensorBasePtr _sensor)
     Kcv_ = (cv::Mat_<float>(3,3) << K(0,0), 0, K(0,2),
                0, K(1,1), K(1,2),
                0, 0, 1);
-
     // Get pixel noise covariance from sensor
-    // pixel_cov_ = sen_cam_->getNoiseCov();
     Eigen::Vector2d std_pix; std_pix << params_visual_odometry_->std_pix_, params_visual_odometry_->std_pix_;
     pixel_cov_ = std_pix.array().square().matrix().asDiagonal();
 }

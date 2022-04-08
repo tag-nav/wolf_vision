@@ -108,7 +108,7 @@ int main(int argc, char** argv)
 
 
     }
-    problem->print(3,0,1,1);
+    // problem->print(3,0,1,1);
 
 
     return 0;
