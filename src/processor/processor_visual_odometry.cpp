@@ -35,8 +35,6 @@ ProcessorVisualOdometry::ProcessorVisualOdometry(ParamsProcessorVisualOdometryPt
     detector_ = cv::FastFeatureDetector::create(_params_vo->fast_params_.threshold_fast_, 
                                                 _params_vo->fast_params_.non_max_suppresion_);
 
-    pixel_cov_ = Eigen::Matrix2d::Identity();
-
     origin_prev_ = nullptr;
 }
 
@@ -47,6 +45,9 @@ void ProcessorVisualOdometry::configure(SensorBasePtr _sensor)
     Eigen::Matrix3d K = sen_cam_->getIntrinsicMatrix();
     
     Kcv_ = cv::Mat(3, 3, CV_32F, K.data());
+
+    // Get pixel noise covariance from sensor
+    pixel_cov_ = sen_cam_->getNoiseCov();
 }
 
 TracksMap merge_tracks(TracksMap tracks_prev_curr, TracksMap tracks_curr_next){
@@ -194,7 +195,7 @@ unsigned int ProcessorVisualOdometry::processKnown()
 {
     // reinitilize the bookeeping to communicate info from processKnown to processNew
     tracks_map_li_matched_.clear();
-    // Extend the process track matrix by using information stored in the incomping capture
+    // Extend the process track matrix by using information stored in the incoming capture
 
     // Get tracks present at the last capture time (should be the most recent snapshot at this moment)
     std::list<FeatureBasePtr> tracks_snapshot_last = track_matrix_.snapshotAsList(last_ptr_);
@@ -467,8 +468,14 @@ bool ProcessorVisualOdometry::computeEssential(KeyPointsMap _mwkps_prev, KeyPoin
     float focal_length = Kcv_.at<float>(0, 0);
     cv::Mat cvMask;
     cv::Point2f principal_pt(Kcv_.at<float>(0,2), Kcv_.at<float>(1,2));
-    _E = cv::findEssentialMat(p2f_prev, p2f_curr, focal_length, principal_pt, cv::RANSAC,
-                        0.99, 1.0, cvMask);
+    _E = cv::findEssentialMat(p2f_prev,
+                              p2f_curr,
+                              focal_length,
+                              principal_pt,
+                              cv::RANSAC,
+                              0.99,
+                              1.0,
+                              cvMask);
     
     // Let's remove outliers from tracksMap
     for (size_t k=0; k<all_indices.size(); k++){
