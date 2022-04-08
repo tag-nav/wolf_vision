@@ -35,8 +35,6 @@ ProcessorVisualOdometry::ProcessorVisualOdometry(ParamsProcessorVisualOdometryPt
     detector_ = cv::FastFeatureDetector::create(_params_vo->fast_params_.threshold_fast_, 
                                                 _params_vo->fast_params_.non_max_suppresion_);
 
-    pixel_cov_ = Eigen::Matrix2d::Identity();
-
     origin_prev_ = nullptr;
 }
 
@@ -46,9 +44,18 @@ void ProcessorVisualOdometry::configure(SensorBasePtr _sensor)
 	sen_cam_ = std::static_pointer_cast<SensorCamera>(_sensor);
     Eigen::Matrix3d K = sen_cam_->getIntrinsicMatrix();
     
+<<<<<<< HEAD
     Kcv_ = (cv::Mat_<float>(3,3) << K(0,0), 0, K(0,2),
                0, K(1,1), K(1,2),
                0, 0, 1);
+=======
+    Kcv_ = cv::Mat(3, 3, CV_32F, K.data());
+
+    // Get pixel noise covariance from sensor
+    // pixel_cov_ = sen_cam_->getNoiseCov();
+    Eigen::Vector2d std_pix; std_pix << params_visual_odometry_->std_pix_, params_visual_odometry_->std_pix_;
+    pixel_cov_ = std_pix.array().square().matrix().asDiagonal();
+>>>>>>> 4650976377e6c4e1f33d45f522f50d4bff7766c0
 }
 
 TracksMap merge_tracks(TracksMap tracks_prev_curr, TracksMap tracks_curr_next){
@@ -68,23 +75,26 @@ void ProcessorVisualOdometry::preProcess()
     assert(capture_image_incoming_ != nullptr && ("Capture type mismatch. Processor " + getName() + " can only process captures of type CaptureImage").c_str());
 
     cv::Mat img_incoming = capture_image_incoming_->getImage();
-    // std::cout << "img_incoming size: " << img_incoming.size().width << ", " << img_incoming.size().height << std::endl;
 
     // Time to PREPreprocess the image if necessary: greyscale if BGR, CLAHE etc...
     // once preprocessing is done, replace the original image (?)
 
     // if first image, compute keypoints, add to capture incoming and return
     if (last_ptr_ == nullptr){
-        // std::cout << "last_ptr is nullptr, should be the case only once" << std::endl;
-        // size_t nb_detect = 100;
         std::vector<cv::KeyPoint> kps_current;
 
         detector_->detect(img_incoming, kps_current);
         capture_image_incoming_->addKeyPoints(kps_current);
 
-        // We init origin with this one
+        // Select a limited number of these keypoints and initialise
+        // the tracks data structure with a "dummy track" where the keypoint 
+        // is pointing to itself
         TracksMap tracks_init;
+        unsigned int count_new_tracks = 0;
         for (auto mwkp : capture_image_incoming_->getKeyPoints()){
+            if (count_new_tracks >= params_visual_odometry_->max_nb_tracks_){
+                break;
+            }
             tracks_init[mwkp.first] = mwkp.first;
         }
         capture_image_incoming_->setTracksOrigin(tracks_init);
@@ -191,10 +201,9 @@ void ProcessorVisualOdometry::preProcess()
 
 unsigned int ProcessorVisualOdometry::processKnown()
 {
-    // std::cout << "processKnown" << std::endl;
     // reinitilize the bookeeping to communicate info from processKnown to processNew
     tracks_map_li_matched_.clear();
-    // Extend the process track matrix by using information stored in the incomping capture
+    // Extend the process track matrix by using information stored in the incoming capture
 
     // Get tracks present at the last capture time (should be the most recent snapshot at this moment)
     std::list<FeatureBasePtr> tracks_snapshot_last = track_matrix_.snapshotAsList(last_ptr_);
@@ -203,7 +212,7 @@ unsigned int ProcessorVisualOdometry::processKnown()
         // check if the keypoint in the last capture is in the last->incoming TracksMap stored in the incoming capture
         FeaturePointImagePtr feat_pi_last = std::dynamic_pointer_cast<FeaturePointImage>(feature_tracked_last);
         size_t id_feat_last = feat_pi_last->getKeyPoint().getId();  
-        // std::cout << "id_feat_last: " << id_feat_last << std::endl;
+
         // if this feature id is in the last->incoming tracks of capture incoming, the track is continued
         // otherwise we store the pair as a newly detected track (for processNew)
         TracksMap tracks_map_li = capture_image_incoming_->getTracksPrev();
@@ -224,17 +233,17 @@ unsigned int ProcessorVisualOdometry::processKnown()
         }
     }
 
-    return 42;
+    // return number of successful tracks until incoming
+    return tracks_map_li_matched_.size();
 }
 
 
 unsigned int ProcessorVisualOdometry::processNew(const int& _max_features)
 {
-    // std::cout << "processNew" << std::endl;
 
-    // a new keyframe was detected, 
+    // A new keyframe was detected:
     // last_ptr_ is going to become origin_ptr and
-    // icoming_ptr_ is going to become last_ptr and
+    // icoming_ptr_ is going to become last_ptr
     // So we need to reset the origin tracks of incoming used in preProcess so that they correspond to the future origin (currently last)  
     capture_image_incoming_->setTracksOrigin(capture_image_incoming_->getTracksPrev());
 
@@ -242,25 +251,25 @@ unsigned int ProcessorVisualOdometry::processNew(const int& _max_features)
     // stored in the TracksMap from getTracksPrev()
     // Now we need to add new tracks in the track matrix for the NEW tracks.
     //
-    // use book-keeping prepared in processKnown: the TracksMap that have been matched were stored in tracks_map_li_matched_
+    // Use book-keeping prepared in processKnown: the TracksMap that have been matched were stored in tracks_map_li_matched_
     // and here add tracks only for those that have not been matched
 
+    unsigned int counter_new_tracks = 0;
     for (std::pair<size_t,size_t> track_li: capture_image_incoming_->getTracksPrev()){
         // if track not matched, then create a new track in the track matrix etc.
-        // std::cout << "In incoming, track: " << track_li.first << " -> " << track_li.second << std::endl;
         if (!tracks_map_li_matched_.count(track_li.first)){
-            // std::cout << "A NEW track is born!" << std::endl;
-            // 2) create a new last feature, a new track using this last feature and add the incoming feature to this track
+            // create a new last feature, a new track using this last feature and add the incoming feature to this track
             WKeyPoint kp_last = capture_image_last_->getKeyPoints().at(track_li.first);
             WKeyPoint kp_inco = capture_image_incoming_->getKeyPoints().at(track_li.second);
             FeaturePointImagePtr feat_pi_last = FeatureBase::emplace<FeaturePointImage>(capture_image_last_, kp_last, pixel_cov_);
             FeaturePointImagePtr feat_pi_inco = FeatureBase::emplace<FeaturePointImage>(capture_image_incoming_, kp_inco, pixel_cov_);
             track_matrix_.newTrack(feat_pi_last);
             track_matrix_.add(feat_pi_last->trackId(), feat_pi_inco);
+            counter_new_tracks++;
         }
     }
 
-    return 42;
+    return counter_new_tracks;
 }
 
 
