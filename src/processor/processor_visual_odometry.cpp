@@ -143,8 +143,8 @@ void ProcessorVisualOdometry::preProcess()
     // if too few tracks left in incoming
     // detect new KeyPoints in last and track them to incoming
     ////////////////////////////////
-    size_t n_tracks = tracks_origin_incoming.size();
-    if (n_tracks < params_visual_odometry_->min_thresh_tracks_){
+    size_t n_tracks_origin = tracks_origin_incoming.size();
+    if (n_tracks_origin < params_visual_odometry_->min_nb_tracks_){
 
         // Detect new KeyPoints 
         std::vector<cv::KeyPoint> kps_last_new;
@@ -166,9 +166,13 @@ void ProcessorVisualOdometry::preProcess()
 
         // Concatenation of old tracks and new tracks
         // Only keep tracks until it reaches a max nb of tracks
-        // size_t max_nb_tracks = 200;
+        unsigned int count_new_tracks = 0;
         for (auto & track: tracks_last_incoming_new){
+            if ((n_tracks_origin + count_new_tracks) >= params_visual_odometry_->max_nb_tracks_){
+                break;
+            }
             tracks_last_incoming_filtered[track.first] = track.second;
+            count_new_tracks++;
         }
 
         //////////////////

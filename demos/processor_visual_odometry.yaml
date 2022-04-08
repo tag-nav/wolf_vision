@@ -12,4 +12,5 @@ fast_params:
     threshold_fast: 30
     non_max_suppresion: true
 
-min_thresh_tracks: 500
+min_min_tracks: 200
+min_max_tracks: 400
