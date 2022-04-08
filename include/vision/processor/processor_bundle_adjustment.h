@@ -59,7 +59,7 @@ struct ParamsProcessorBundleAdjustment : public ParamsProcessorTrackerFeature
 	int min_response_new_feature;
 
 	double pixel_noise_std; ///< std noise of the pixel
-	int min_track_length_for_factor; ///< Minimum track length of a matched feature to create a factor
+	int min_track_length_for_landmark_for_factor; ///< Minimum track length of a matched feature to create a factor
 
 	ParamsProcessorBundleAdjustment() = default;
 
