@@ -38,7 +38,7 @@ config:
       name:               "sen cam"
       extrinsic: 
         pose:             [0,0,0, 0,0,0,1]
-      follow:             "demos/camera_gazebo.yaml"         # config parameters in this file
+      follow:             "test/camera_gazebo.yaml"         # config parameters in this file
 
   processors:
     
@@ -46,5 +46,5 @@ config:
       plugin:             "vision"
       name:               "prc vo"
       sensor_name:        "sen cam"                                    # attach processor to this sensor
-      follow:             "demos/processor_visual_odometry.yaml"        # config parameters in this file
+      follow:             "test/processor_visual_odometry_gtest.yaml"        # config parameters in this file
     

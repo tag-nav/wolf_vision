@@ -29,8 +29,9 @@
 #include <string>
 #include <core/utils/utils_gtest.h>
 #include <core/sensor/sensor_base.h>
+#include <core/yaml/parser_yaml.h>
 #include <opencv2/imgcodecs.hpp>
-#include "core/yaml/parser_yaml.h"
+
 
 #include "vision/processor/processor_visual_odometry.h"
 #include "vision/sensor/sensor_camera.h"
@@ -208,13 +209,16 @@ TEST(ProcessorVisualOdometry, preProcess)
     float track_ratio = capture_image_incoming->getTracksPrev().size() / capture_image_incoming->getKeyPoints().size();
     ASSERT_TRUE(track_ratio > 0.8);
 
+    // Check if tracks_prev and tracks_origin are similar
+    ASSERT_EQ(capture_image_incoming->getTracksPrev().size(), capture_image_incoming->getTracksOrigin().size());
+
 }
 
 TEST(ProcessorVisualOdometry, process)
 {
     // Config file to parse. Here is where all the problem is defined:
     std::string wolf_vision_root = _WOLF_VISION_ROOT_DIR;
-    std::string config_file = "demos/gtest_visual_odometry.yaml";
+    std::string config_file = "test/gtest_visual_odometry.yaml";
 
     // parse file into params server: each param will be retrievable from this params server:
     ParserYaml parser       = ParserYaml(config_file, wolf_vision_root);
@@ -222,10 +226,11 @@ TEST(ProcessorVisualOdometry, process)
     // Wolf problem: automatically build the left branch of the wolf tree from the contents of the params server:
     ProblemPtr problem      = Problem::autoSetup(server);
 
+    // Get sensor and processor
     SensorCameraPtr cam_ptr = std::dynamic_pointer_cast<SensorCamera>(problem->getSensor("sen cam"));
-    ProcessorVisualOdometryPtr proc_vo;
+    ProcessorVisualOdometryPtr proc_vo_ptr;
     for (auto proc : problem->getSensor("sen cam")->getProcessorList()){
-        proc_vo = std::dynamic_pointer_cast<ProcessorVisualOdometry>(proc);
+        proc_vo_ptr = std::dynamic_pointer_cast<ProcessorVisualOdometry>(proc);
     }
     
     // Successive images
@@ -243,6 +248,9 @@ TEST(ProcessorVisualOdometry, process)
     capture_image_0->process();
     problem->print(4,0,1,0);
 
+    ASSERT_EQ(proc_vo_ptr->getTrackMatrix().numTracks(), 0);
+	ASSERT_EQ(problem->getMap()->getLandmarkList().size(), 0);
+
     // ----------------------------------------
     // TIME 1 : Second image
     // ----------------------------------------
@@ -250,7 +258,12 @@ TEST(ProcessorVisualOdometry, process)
     TimeStamp t1(0.1);
     CaptureImagePtr capture_image_1 = std::make_shared<CaptureImage>(t1, cam_ptr, img_1);
     capture_image_1->process();
-    std::cout << proc_vo->getTrackMatrix().numTracks() << std::endl;
+
+    ASSERT_EQ(proc_vo_ptr->getTrackMatrix().numTracks(),capture_image_1->getTracksPrev().size());
+
+    for (auto track : proc_vo_ptr->getTrackMatrix().getTracks()){
+        std::cout << track.second.size() << std::endl;
+    }
 
 }
 
