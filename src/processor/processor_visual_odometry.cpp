@@ -409,7 +409,7 @@ TracksMap ProcessorVisualOdometry::kltTrack(cv::Mat _img_prev, cv::Mat _img_curr
     std::vector<float> err;
 
     // Process one way: previous->current with current init with previous
-    KltParams prms = params_visual_odometry_->klt_params_;
+    ParamsProcessorVisualOdometry::KltParams prms = params_visual_odometry_->klt_params_;
     cv::calcOpticalFlowPyrLK(
             _img_prev,
             _img_curr, 

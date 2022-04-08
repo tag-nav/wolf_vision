@@ -51,23 +51,23 @@ namespace wolf{
 
 WOLF_STRUCT_PTR_TYPEDEFS(ParamsProcessorVisualOdometry);
 
-struct KltParams
-{
-    int tracker_width_;
-    int tracker_height_;
-    double klt_max_err_;
-    int nlevels_pyramids_;
-    cv::TermCriteria crit_;
-};
-
-struct FastParams
-{
-    int threshold_fast_;
-    bool non_max_suppresion_;
-};
-
 struct ParamsProcessorVisualOdometry : public ParamsProcessorTracker
 {
+    struct KltParams
+    {
+        int tracker_width_;
+        int tracker_height_;
+        double klt_max_err_;
+        int nlevels_pyramids_;
+        cv::TermCriteria crit_;
+    };
+
+    struct FastParams
+    {
+        int threshold_fast_;
+        bool non_max_suppresion_;
+    };
+
     double std_pix_;
     KltParams klt_params_;
     FastParams fast_params_;
