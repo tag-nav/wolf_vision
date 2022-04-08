@@ -248,7 +248,7 @@ unsigned int ProcessorVisualOdometry::processNew(const int& _max_features)
         // if track not matched, then create a new track in the track matrix etc.
         // std::cout << "In incoming, track: " << track_li.first << " -> " << track_li.second << std::endl;
         if (!tracks_map_li_matched_.count(track_li.first)){
-            std::cout << "A NEW track is born!" << std::endl;
+            // std::cout << "A NEW track is born!" << std::endl;
             // 2) create a new last feature, a new track and add the incoming feature to this track
             WKeyPoint kp_last = capture_image_last_->getKeyPoints().at(track_li.first);
             FeaturePointImagePtr feat_pi_last = FeatureBase::emplace<FeaturePointImage>(capture_image_last_, kp_last, pixel_cov_);
