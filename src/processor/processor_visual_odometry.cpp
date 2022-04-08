@@ -232,9 +232,7 @@ unsigned int ProcessorVisualOdometry::processNew(const int& _max_features)
     // last_ptr_ is going to become origin_ptr and
     // icoming_ptr_ is going to become last_ptr and
     // So we need to reset the origin tracks of incoming used in preProcess so that they correspond to the future origin (currently last)  
-    auto capture_image_last = std::dynamic_pointer_cast<CaptureImage>(last_ptr_);
-    auto capture_image_incoming = std::dynamic_pointer_cast<CaptureImage>(incoming_ptr_);
-    capture_image_incoming->setTracksOrigin(capture_image_last->getTracksPrev());
+    capture_image_incoming_->setTracksOrigin(capture_image_incoming_->getTracksPrev());
 
     // We have matched the tracks in the track matrix with the last->incoming tracks 
     // stored in the TracksMap from getTracksPrev()
@@ -247,7 +245,7 @@ unsigned int ProcessorVisualOdometry::processNew(const int& _max_features)
         // if track not matched, then create a new track in the track matrix etc.
         // std::cout << "In incoming, track: " << track_li.first << " -> " << track_li.second << std::endl;
         if (!tracks_map_li_matched_.count(track_li.first)){
-            // std::cout << "A NEW track is born!" << std::endl;
+            std::cout << "A NEW track is born!" << std::endl;
             // 2) create a new last feature, a new track and add the incoming feature to this track
             WKeyPoint kp_last = capture_image_last_->getKeyPoints().at(track_li.first);
             FeaturePointImagePtr feat_pi_last = FeatureBase::emplace<FeaturePointImage>(capture_image_last_, kp_last, pixel_cov_);
@@ -358,9 +356,11 @@ bool ProcessorVisualOdometry::voteForKeyFrame() const
     // was repopulated. In this case, the processor needs to create a new Keyframe whatever happens.
     CaptureImagePtr capture_image_incoming = std::dynamic_pointer_cast<CaptureImage>(incoming_ptr_);
     bool vote = capture_image_incoming->getLastWasRepopulated();
+    std::cout << "REPOP" << vote << std::endl;
 
     // simple vote based on frame count, should be changed to something that takes into account number of tracks alive, parallax, etc.
     vote = vote || ((frame_count_ % 5) == 0);
+    std::cout << "FRAME_COUNT" << vote << std::endl;
     return vote;
 }
 
@@ -382,7 +382,7 @@ void ProcessorVisualOdometry::setParams(const ParamsProcessorVisualOdometryPtr _
     params_visual_odometry_ = _params;
 }
 
-TracksMap ProcessorVisualOdometry::kltTrack(cv::Mat img_prev, cv::Mat img_curr, KeyPointsMap &mwkps_prev, KeyPointsMap &mwkps_curr)
+TracksMap ProcessorVisualOdometry::kltTrack(cv::Mat _img_prev, cv::Mat _img_curr, KeyPointsMap &_mwkps_prev, KeyPointsMap &_mwkps_curr)
 {
     TracksMap tracks_prev_curr;
 
@@ -390,7 +390,7 @@ TracksMap ProcessorVisualOdometry::kltTrack(cv::Mat img_prev, cv::Mat img_curr, 
     // We also need a list of indices to build the track map
     std::vector<cv::Point2f> p2f_prev;
     std::vector<size_t> indices_prev;
-    for (auto & wkp : mwkps_prev){
+    for (auto & wkp : _mwkps_prev){
         p2f_prev.push_back(wkp.second.getCvKeyPoint().pt);
         indices_prev.push_back(wkp.first);
     }
@@ -403,8 +403,8 @@ TracksMap ProcessorVisualOdometry::kltTrack(cv::Mat img_prev, cv::Mat img_curr, 
     // Process one way: previous->current with current init with previous
     KltParams prms = params_visual_odometry_->klt_params_;
     cv::calcOpticalFlowPyrLK(
-            img_prev,
-            img_curr, 
+            _img_prev,
+            _img_curr, 
             p2f_prev,
             p2f_curr,
             status, err,
@@ -417,8 +417,8 @@ TracksMap ProcessorVisualOdometry::kltTrack(cv::Mat img_prev, cv::Mat img_curr, 
     std::vector<uchar> status_back;
     std::vector<float> err_back;
     cv::calcOpticalFlowPyrLK(
-            img_curr,
-            img_prev, 
+            _img_curr,
+            _img_prev, 
             p2f_curr,
             p2f_prev,
             status_back, err_back,
@@ -437,7 +437,7 @@ TracksMap ProcessorVisualOdometry::kltTrack(cv::Mat img_prev, cv::Mat img_curr, 
 
         // We keep the initial point and add the tracked point
         WKeyPoint wkp(cv::KeyPoint(p2f_curr.at(j), 1));
-        mwkps_curr[wkp.getId()] = wkp;
+        _mwkps_curr[wkp.getId()] = wkp;
 
         // Update the map
         tracks_prev_curr[indices_prev.at(j)] = wkp.getId();
@@ -448,15 +448,15 @@ TracksMap ProcessorVisualOdometry::kltTrack(cv::Mat img_prev, cv::Mat img_curr, 
     return tracks_prev_curr;
 }
 
-bool ProcessorVisualOdometry::computeEssential(KeyPointsMap mwkps_prev, KeyPointsMap mwkps_curr, TracksMap &tracks_prev_curr, cv::Mat &E)
+bool ProcessorVisualOdometry::computeEssential(KeyPointsMap _mwkps_prev, KeyPointsMap _mwkps_curr, TracksMap &_tracks_prev_curr, cv::Mat &_E)
 {
     // We need to build lists of pt2f for openCV function
     std::vector<cv::Point2f> p2f_prev, p2f_curr;
     std::vector<size_t> all_indices;
-    for (auto & track : tracks_prev_curr){
+    for (auto & track : _tracks_prev_curr){
         all_indices.push_back(track.first);
-        p2f_prev.push_back(mwkps_prev[track.first].getCvKeyPoint().pt);
-        p2f_curr.push_back(mwkps_curr[track.second].getCvKeyPoint().pt);
+        p2f_prev.push_back(_mwkps_prev[track.first].getCvKeyPoint().pt);
+        p2f_curr.push_back(_mwkps_curr[track.second].getCvKeyPoint().pt);
     }
 
     // We need at least five tracks
@@ -465,13 +465,13 @@ bool ProcessorVisualOdometry::computeEssential(KeyPointsMap mwkps_prev, KeyPoint
     float focal_length = Kcv_.at<float>(0, 0);
     cv::Mat cvMask;
     cv::Point2f principal_pt(Kcv_.at<float>(0,2), Kcv_.at<float>(1,2));
-    cv::findEssentialMat(p2f_prev, p2f_curr, focal_length, principal_pt, cv::RANSAC,
+    _E = cv::findEssentialMat(p2f_prev, p2f_curr, focal_length, principal_pt, cv::RANSAC,
                         0.99, 1.0, cvMask);
     
     // Let's remove outliers from tracksMap
     for (size_t k=0; k<all_indices.size(); k++){
         if (cvMask.at<bool>(k) == 0){
-            tracks_prev_curr.erase(all_indices.at(k));
+            _tracks_prev_curr.erase(all_indices.at(k));
         }
     }
     return true;

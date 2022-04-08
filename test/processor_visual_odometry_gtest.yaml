@@ -13,3 +13,4 @@ fast_params:
     non_max_suppresion: true
 
 min_thresh_tracks: 50
+max_new_features: 1000
