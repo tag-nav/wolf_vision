@@ -14,3 +14,4 @@ fast_params:
 
 min_nb_tracks: 200
 max_nb_tracks: 400
+min_track_length_for_landmark: 4

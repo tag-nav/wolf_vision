@@ -67,14 +67,14 @@ void ProcessorVisualOdometry::preProcess()
     assert(capture_image_incoming_ != nullptr && ("Capture type mismatch. Processor " + getName() + " can only process captures of type CaptureImage").c_str());
 
     cv::Mat img_incoming = capture_image_incoming_->getImage();
-    std::cout << "img_incoming size: " << img_incoming.size().width << ", " << img_incoming.size().height << std::endl;
+    // std::cout << "img_incoming size: " << img_incoming.size().width << ", " << img_incoming.size().height << std::endl;
 
     // Time to PREPreprocess the image if necessary: greyscale if BGR, CLAHE etc...
     // once preprocessing is done, replace the original image (?)
 
     // if first image, compute keypoints, add to capture incoming and return
     if (last_ptr_ == nullptr){
-        std::cout << "last_ptr is nullptr, should be the case only once" << std::endl;
+        // std::cout << "last_ptr is nullptr, should be the case only once" << std::endl;
         // size_t nb_detect = 100;
         std::vector<cv::KeyPoint> kps_current;
 
@@ -176,11 +176,6 @@ void ProcessorVisualOdometry::preProcess()
             count_new_tracks++;
         }
 
-        //////////////////
-        // !!!!!!!!!!!!!!!
-        // There is a merge missing for tracks_origin_incoming
-        //////////////////
-
         // Update captures
         capture_image_last_->addKeyPoints(mwkps_last_new);
         capture_image_incoming_->addKeyPoints(mwkps_incoming_new);
@@ -195,7 +190,7 @@ void ProcessorVisualOdometry::preProcess()
 
 unsigned int ProcessorVisualOdometry::processKnown()
 {
-    std::cout << "processKnown" << std::endl;
+    // std::cout << "processKnown" << std::endl;
     // reinitilize the bookeeping to communicate info from processKnown to processNew
     tracks_map_li_matched_.clear();
     // Extend the process track matrix by using information stored in the incoming capture
@@ -207,13 +202,13 @@ unsigned int ProcessorVisualOdometry::processKnown()
         // check if the keypoint in the last capture is in the last->incoming TracksMap stored in the incoming capture
         FeaturePointImagePtr feat_pi_last = std::dynamic_pointer_cast<FeaturePointImage>(feature_tracked_last);
         size_t id_feat_last = feat_pi_last->getKeyPoint().getId();  
-        std::cout << "id_feat_last: " << id_feat_last << std::endl;
+        // std::cout << "id_feat_last: " << id_feat_last << std::endl;
 
         // if this feature id is in the last->incoming tracks of capture incoming, the track is continued
         // otherwise we store the pair as a newly detected track (for processNew)
         TracksMap tracks_map_li = capture_image_incoming_->getTracksPrev();
         if (tracks_map_li.count(id_feat_last)){
-            std::cout << "A corresponding track has been found for id_feat_last " << id_feat_last  << std::endl;
+            // std::cout << "A corresponding track has been found for id_feat_last " << id_feat_last  << std::endl;
             auto kp_track_li = tracks_map_li.find(id_feat_last);
             // create a feature using the corresponding WKeyPoint contained in incoming (hence the "second")
             auto feat_inco = FeatureBase::emplace<FeaturePointImage>(
@@ -235,7 +230,7 @@ unsigned int ProcessorVisualOdometry::processKnown()
 
 unsigned int ProcessorVisualOdometry::processNew(const int& _max_features)
 {
-    std::cout << "processNew" << std::endl;
+    // std::cout << "processNew" << std::endl;
 
     // a new keyframe was detected, 
     // last_ptr_ is going to become origin_ptr and
@@ -255,10 +250,13 @@ unsigned int ProcessorVisualOdometry::processNew(const int& _max_features)
         // std::cout << "In incoming, track: " << track_li.first << " -> " << track_li.second << std::endl;
         if (!tracks_map_li_matched_.count(track_li.first)){
             // std::cout << "A NEW track is born!" << std::endl;
-            // 2) create a new last feature, a new track and add the incoming feature to this track
+            // 2) create a new last feature, a new track using this last feature and add the incoming feature to this track
             WKeyPoint kp_last = capture_image_last_->getKeyPoints().at(track_li.first);
+            WKeyPoint kp_inco = capture_image_incoming_->getKeyPoints().at(track_li.second);
             FeaturePointImagePtr feat_pi_last = FeatureBase::emplace<FeaturePointImage>(capture_image_last_, kp_last, pixel_cov_);
+            FeaturePointImagePtr feat_pi_inco = FeatureBase::emplace<FeaturePointImage>(capture_image_incoming_, kp_inco, pixel_cov_);
             track_matrix_.newTrack(feat_pi_last);
+            track_matrix_.add(feat_pi_last->trackId(), feat_pi_inco);
         }
     }
 
@@ -278,7 +276,6 @@ void ProcessorVisualOdometry::establishFactors()
     //        using triangulation as a prior, using previous KF current estimates. Create a KF-Lmk factor for all these KFs. 
     //        For bookkeeping, define the landmark id as the track id.
 
-    int min_track_length = 5;  // minimum track length for it to be considered a valid track
     std::list<FeatureBasePtr> tracks_snapshot_last = track_matrix_.snapshotAsList(last_ptr_);
     for (auto feat: tracks_snapshot_last){
         auto feat_pi = std::static_pointer_cast<FeaturePointImage>(feat);
@@ -290,6 +287,7 @@ void ProcessorVisualOdometry::establishFactors()
                 associated_lmk = lmk;
             }
         }
+
         // 1) create a factor between new KF and assocatiated track landmark
         //    HYP: assuming the trackid are the same as the landmark ID -> BAD if other types of landmarks involved
         if (associated_lmk){
@@ -298,8 +296,8 @@ void ProcessorVisualOdometry::establishFactors()
         }
 
         // 2) create landmark if track is not associated with one and has enough length
-        else if(track_matrix_.trackSize(feat->trackId()) >= min_track_length){
-            std::cout << "NEW valid track \\o/" << std::endl;
+        else if(track_matrix_.trackSize(feat->trackId()) >= params_visual_odometry_->min_track_length_for_landmark_){
+            // std::cout << "NEW valid track \\o/" << std::endl;
             LandmarkBasePtr lmk = emplaceLandmark(feat_pi);
             lmk->setId(feat_pi->trackId());
             Track track_kf = track_matrix_.trackAtKeyframes(feat->trackId());
@@ -365,11 +363,9 @@ bool ProcessorVisualOdometry::voteForKeyFrame() const
     // was repopulated. In this case, the processor needs to create a new Keyframe whatever happens.
     CaptureImagePtr capture_image_incoming = std::dynamic_pointer_cast<CaptureImage>(incoming_ptr_);
     bool vote = capture_image_incoming->getLastWasRepopulated();
-    std::cout << "REPOP" << vote << std::endl;
 
     // simple vote based on frame count, should be changed to something that takes into account number of tracks alive, parallax, etc.
     vote = vote || ((frame_count_ % 5) == 0);
-    std::cout << "FRAME_COUNT" << vote << std::endl;
     return vote;
 }
 
