@@ -175,11 +175,6 @@ void ProcessorVisualOdometry::preProcess()
             count_new_tracks++;
         }
 
-        //////////////////
-        // !!!!!!!!!!!!!!!
-        // There is a merge missing for tracks_origin_incoming
-        //////////////////
-
         // Update captures
         capture_image_last_->addKeyPoints(mwkps_last_new);
         capture_image_incoming_->addKeyPoints(mwkps_incoming_new);
