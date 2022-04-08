@@ -363,11 +363,9 @@ bool ProcessorVisualOdometry::voteForKeyFrame() const
     // was repopulated. In this case, the processor needs to create a new Keyframe whatever happens.
     CaptureImagePtr capture_image_incoming = std::dynamic_pointer_cast<CaptureImage>(incoming_ptr_);
     bool vote = capture_image_incoming->getLastWasRepopulated();
-    std::cout << "REPOP" << vote << std::endl;
 
     // simple vote based on frame count, should be changed to something that takes into account number of tracks alive, parallax, etc.
     vote = vote || ((frame_count_ % 5) == 0);
-    std::cout << "FRAME_COUNT" << vote << std::endl;
     return vote;
 }
 

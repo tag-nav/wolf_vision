@@ -263,6 +263,19 @@ TEST(ProcessorVisualOdometry, process)
     // Check if tracks_prev and tracks_origin are similar
     ASSERT_EQ(capture_image_1->getTracksPrev().size(), capture_image_1->getTracksOrigin().size());
 
+    // ----------------------------------------
+    // TIME 3 : Third image
+    // ----------------------------------------
+
+    TimeStamp t2(0.1);
+    CaptureImagePtr capture_image_2 = std::make_shared<CaptureImage>(t2, cam_ptr, img_2);
+    capture_image_2->process();
+
+    for (auto track : proc_vo_ptr->getTrackMatrix().getTracks()){
+        std::cout << track.second.size() << std::endl;
+    }
+
+
 }
 
 int main(int argc, char **argv)
