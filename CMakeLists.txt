@@ -157,8 +157,6 @@ SET(SRCS_SENSOR
 src/sensor/sensor_camera.cpp
   )
 SET(SRCS_YAML
-src/yaml/processor_visual_odometry_yaml.cpp
-
 )
 
 # create the shared library
