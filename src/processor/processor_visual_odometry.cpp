@@ -44,18 +44,14 @@ void ProcessorVisualOdometry::configure(SensorBasePtr _sensor)
 	sen_cam_ = std::static_pointer_cast<SensorCamera>(_sensor);
     Eigen::Matrix3d K = sen_cam_->getIntrinsicMatrix();
     
-<<<<<<< HEAD
     Kcv_ = (cv::Mat_<float>(3,3) << K(0,0), 0, K(0,2),
                0, K(1,1), K(1,2),
                0, 0, 1);
-=======
-    Kcv_ = cv::Mat(3, 3, CV_32F, K.data());
 
     // Get pixel noise covariance from sensor
     // pixel_cov_ = sen_cam_->getNoiseCov();
     Eigen::Vector2d std_pix; std_pix << params_visual_odometry_->std_pix_, params_visual_odometry_->std_pix_;
     pixel_cov_ = std_pix.array().square().matrix().asDiagonal();
->>>>>>> 4650976377e6c4e1f33d45f522f50d4bff7766c0
 }
 
 TracksMap merge_tracks(TracksMap tracks_prev_curr, TracksMap tracks_curr_next){
