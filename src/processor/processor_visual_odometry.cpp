@@ -52,7 +52,7 @@ void ProcessorVisualOdometry::configure(SensorBasePtr _sensor)
     pixel_cov_ = std_pix.array().square().matrix().asDiagonal();
 }
 
-TracksMap merge_tracks(TracksMap tracks_prev_curr, TracksMap tracks_curr_next){
+TracksMap ProcessorVisualOdometry::mergeTracks(TracksMap tracks_prev_curr, TracksMap tracks_curr_next){
     TracksMap tracks_prev_next;
     for (auto &match : tracks_prev_curr){
         if (tracks_curr_next.count(match.second)){
@@ -123,7 +123,7 @@ void ProcessorVisualOdometry::preProcess()
 
     // Merge tracks to get tracks_origin_incoming
     TracksMap tracks_origin_last = capture_image_last_->getTracksOrigin();
-    TracksMap tracks_origin_incoming = merge_tracks(tracks_origin_last, tracks_last_incoming);
+    TracksMap tracks_origin_incoming = mergeTracks(tracks_origin_last, tracks_last_incoming);
 
     // Outliers rejection with essential matrix
     cv::Mat E;

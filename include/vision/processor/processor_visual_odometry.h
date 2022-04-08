@@ -206,6 +206,10 @@ class ProcessorVisualOdometry : public ProcessorTracker
          */
         bool filterWithEssential(KeyPointsMap mwkps_prev, KeyPointsMap mwkps_curr, TracksMap &tracks_prev_curr, cv::Mat &E);
 
+        /** \brief Tool to merge tracks 
+         */
+        static TracksMap mergeTracks(TracksMap tracks_prev_curr, TracksMap tracks_curr_next);
+
         void setParams(const ParamsProcessorVisualOdometryPtr _params);
 
         TrackMatrix getTrackMatrix(){return track_matrix_;}
