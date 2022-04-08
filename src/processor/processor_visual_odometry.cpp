@@ -226,7 +226,8 @@ unsigned int ProcessorVisualOdometry::processKnown()
         }
     }
 
-    return 42;
+    // return number of successful tracks until incoming
+    return tracks_map_li_matched_.size();
 }
 
 
@@ -246,6 +247,7 @@ unsigned int ProcessorVisualOdometry::processNew(const int& _max_features)
     // Use book-keeping prepared in processKnown: the TracksMap that have been matched were stored in tracks_map_li_matched_
     // and here add tracks only for those that have not been matched
 
+    unsigned int counter_new_tracks = 0;
     for (std::pair<size_t,size_t> track_li: capture_image_incoming_->getTracksPrev()){
         // if track not matched, then create a new track in the track matrix etc.
         if (!tracks_map_li_matched_.count(track_li.first)){
@@ -256,10 +258,11 @@ unsigned int ProcessorVisualOdometry::processNew(const int& _max_features)
             FeaturePointImagePtr feat_pi_inco = FeatureBase::emplace<FeaturePointImage>(capture_image_incoming_, kp_inco, pixel_cov_);
             track_matrix_.newTrack(feat_pi_last);
             track_matrix_.add(feat_pi_last->trackId(), feat_pi_inco);
+            counter_new_tracks++;
         }
     }
 
-    return 42;
+    return counter_new_tracks;
 }
 
 
