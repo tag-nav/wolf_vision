@@ -79,7 +79,14 @@ void ProcessorVisualOdometry::preProcess()
 
         detector_->detect(img_incoming, kps_current);
         capture_image_incoming_->addKeyPoints(kps_current);
-        
+
+        // We init origin with this one
+        TracksMap tracks_init;
+        for (auto mwkp : capture_image_incoming_->getKeyPoints()){
+            tracks_init[mwkp.first] = mwkp.first;
+        }
+        capture_image_incoming_->setTracksOrigin(tracks_init);
+        capture_image_incoming_->setTracksPrev(tracks_init);
         return;
     }
 
