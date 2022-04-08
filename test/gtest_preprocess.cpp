@@ -260,10 +260,8 @@ TEST(ProcessorVisualOdometry, process)
     capture_image_1->process();
 
     ASSERT_EQ(proc_vo_ptr->getTrackMatrix().numTracks(),capture_image_1->getTracksPrev().size());
-
-    for (auto track : proc_vo_ptr->getTrackMatrix().getTracks()){
-        std::cout << track.second.size() << std::endl;
-    }
+    // Check if tracks_prev and tracks_origin are similar
+    ASSERT_EQ(capture_image_1->getTracksPrev().size(), capture_image_1->getTracksOrigin().size());
 
 }
 
