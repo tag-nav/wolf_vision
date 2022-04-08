@@ -46,7 +46,9 @@ void ProcessorVisualOdometry::configure(SensorBasePtr _sensor)
 	sen_cam_ = std::static_pointer_cast<SensorCamera>(_sensor);
     Eigen::Matrix3d K = sen_cam_->getIntrinsicMatrix();
     
-    Kcv_ = cv::Mat(3, 3, CV_32F, K.data());
+    Kcv_ = (cv::Mat_<float>(3,3) << K(0,0), 0, K(0,2),
+               0, K(1,1), K(1,2),
+               0, 0, 1);
 }
 
 TracksMap merge_tracks(TracksMap tracks_prev_curr, TracksMap tracks_curr_next){
@@ -121,7 +123,7 @@ void ProcessorVisualOdometry::preProcess()
 
     // Outliers rejection with essential matrix
     cv::Mat E;
-    computeEssential(mwkps_origin, mwkps_incoming, tracks_origin_incoming, E);
+    filterWithEssential(mwkps_origin, mwkps_incoming, tracks_origin_incoming, E);
 
     // Edit tracks prev with only inliers wrt origin
     TracksMap tracks_last_incoming_filtered;
@@ -162,7 +164,7 @@ void ProcessorVisualOdometry::preProcess()
         // Outliers rejection with essential matrix
         // tracks that are not geometrically consistent are removed from tracks_last_incoming_new 
         cv::Mat E;
-        computeEssential(mwkps_last_new, mwkps_incoming_new, tracks_last_incoming_new, E);
+        filterWithEssential(mwkps_last_new, mwkps_incoming_new, tracks_last_incoming_new, E);
 
         // Concatenation of old tracks and new tracks
         // Only keep tracks until it reaches a max nb of tracks
@@ -451,7 +453,7 @@ TracksMap ProcessorVisualOdometry::kltTrack(cv::Mat _img_prev, cv::Mat _img_curr
     return tracks_prev_curr;
 }
 
-bool ProcessorVisualOdometry::computeEssential(KeyPointsMap _mwkps_prev, KeyPointsMap _mwkps_curr, TracksMap &_tracks_prev_curr, cv::Mat &_E)
+bool ProcessorVisualOdometry::filterWithEssential(KeyPointsMap _mwkps_prev, KeyPointsMap _mwkps_curr, TracksMap &_tracks_prev_curr, cv::Mat &_E)
 {
     // We need to build lists of pt2f for openCV function
     std::vector<cv::Point2f> p2f_prev, p2f_curr;
@@ -465,11 +467,14 @@ bool ProcessorVisualOdometry::computeEssential(KeyPointsMap _mwkps_prev, KeyPoin
     // We need at least five tracks
     if (p2f_prev.size() < 5) return false;
 
-    float focal_length = Kcv_.at<float>(0, 0);
     cv::Mat cvMask;
-    cv::Point2f principal_pt(Kcv_.at<float>(0,2), Kcv_.at<float>(1,2));
-    _E = cv::findEssentialMat(p2f_prev, p2f_curr, focal_length, principal_pt, cv::RANSAC,
-                        0.99, 1.0, cvMask);
+    _E = cv::findEssentialMat(p2f_prev, 
+                            p2f_curr, 
+                            Kcv_, 
+                            cv::RANSAC,
+                            0.99,
+                            1.0,
+                            cvMask);
     
     // Let's remove outliers from tracksMap
     for (size_t k=0; k<all_indices.size(); k++){

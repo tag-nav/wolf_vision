@@ -13,4 +13,5 @@ fast_params:
     non_max_suppresion: true
 
 min_nb_tracks: 50
-max_nb_tracks: 40000000000
+max_nb_tracks: 100
+min_track_length_for_landmark: 10

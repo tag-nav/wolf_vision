@@ -185,7 +185,7 @@ TEST(ProcessorVisualOdometry, preProcess)
     // TIME 1 : Let's process the other one
     // ----------------------------------------
 
-    TimeStamp t1(0.0);
+    TimeStamp t1(0.1);
 
     // Edit captures
     CaptureImagePtr capture_image_last = capture_image_incoming;
@@ -206,7 +206,9 @@ TEST(ProcessorVisualOdometry, preProcess)
     cv::waitKey(0);
 
     // Check if 80% of tracks between frames
-    float track_ratio = capture_image_incoming->getTracksPrev().size() / capture_image_incoming->getKeyPoints().size();
+    float track_ratio = static_cast<float>(capture_image_incoming->getTracksPrev().size()) / 
+                        static_cast<float>(capture_image_incoming->getKeyPoints().size());
+    std::cout << "TRACK RATIO " << track_ratio << std::endl;
     ASSERT_TRUE(track_ratio > 0.8);
 
     // Check if tracks_prev and tracks_origin are similar
@@ -267,15 +269,11 @@ TEST(ProcessorVisualOdometry, process)
     // TIME 3 : Third image
     // ----------------------------------------
 
-    TimeStamp t2(0.1);
+    TimeStamp t2(0.2);
     CaptureImagePtr capture_image_2 = std::make_shared<CaptureImage>(t2, cam_ptr, img_2);
     capture_image_2->process();
 
-    for (auto track : proc_vo_ptr->getTrackMatrix().getTracks()){
-        std::cout << track.second.size() << std::endl;
-    }
-
-
+    ASSERT_EQ(proc_vo_ptr->getTrackMatrix().numTracks(),capture_image_2->getTracksOrigin().size());
 }
 
 int main(int argc, char **argv)

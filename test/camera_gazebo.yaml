@@ -4,7 +4,9 @@ camera_name: gazebo
 camera_matrix:
   rows: 3
   cols: 3
-  data: [640, 0, 0, 0, 640, 0, 640, 480, 1]
+  data: [640, 0.000000, 640, 
+         0.000000, 640, 480, 
+         0.000000, 0.000000, 1.000000]
 distortion_model: none
 distortion_coefficients:
   rows: 1

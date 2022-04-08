@@ -199,9 +199,9 @@ class ProcessorVisualOdometry : public ProcessorTracker
          */
         TracksMap kltTrack(cv::Mat img_prev, cv::Mat img_curr, KeyPointsMap &mwkps_prev, KeyPointsMap &mwkps_curr);
 
-        /** \brief Implementation of 5 point algorithm with openCV, remove outliers from the tracks map
+        /** \brief Remove outliers from the tracks map with a RANSAC 5-points algorithm implemented on openCV
          */
-        bool computeEssential(KeyPointsMap mwkps_prev, KeyPointsMap mwkps_curr, TracksMap &tracks_prev_curr, cv::Mat &E);
+        bool filterWithEssential(KeyPointsMap mwkps_prev, KeyPointsMap mwkps_curr, TracksMap &tracks_prev_curr, cv::Mat &E);
 
         void setParams(const ParamsProcessorVisualOdometryPtr _params);
 
