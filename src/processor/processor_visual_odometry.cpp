@@ -47,7 +47,8 @@ void ProcessorVisualOdometry::configure(SensorBasePtr _sensor)
     Kcv_ = cv::Mat(3, 3, CV_32F, K.data());
 
     // Get pixel noise covariance from sensor
-    pixel_cov_ = sen_cam_->getNoiseCov();
+    // pixel_cov_ = sen_cam_->getNoiseCov();
+    pixel_cov_ = Eigen::Matrix2d::Identity();
 }
 
 TracksMap merge_tracks(TracksMap tracks_prev_curr, TracksMap tracks_curr_next){
