@@ -253,10 +253,13 @@ unsigned int ProcessorVisualOdometry::processNew(const int& _max_features)
         // std::cout << "In incoming, track: " << track_li.first << " -> " << track_li.second << std::endl;
         if (!tracks_map_li_matched_.count(track_li.first)){
             // std::cout << "A NEW track is born!" << std::endl;
-            // 2) create a new last feature, a new track and add the incoming feature to this track
+            // 2) create a new last feature, a new track using this last feature and add the incoming feature to this track
             WKeyPoint kp_last = capture_image_last_->getKeyPoints().at(track_li.first);
+            WKeyPoint kp_inco = capture_image_incoming_->getKeyPoints().at(track_li.second);
             FeaturePointImagePtr feat_pi_last = FeatureBase::emplace<FeaturePointImage>(capture_image_last_, kp_last, pixel_cov_);
+            FeaturePointImagePtr feat_pi_inco = FeatureBase::emplace<FeaturePointImage>(capture_image_incoming_, kp_inco, pixel_cov_);
             track_matrix_.newTrack(feat_pi_last);
+            track_matrix_.add(feat_pi_last->trackId(), feat_pi_inco);
         }
     }
 
