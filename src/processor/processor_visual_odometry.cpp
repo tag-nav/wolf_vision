@@ -153,10 +153,13 @@ void ProcessorVisualOdometry::preProcess()
         TracksMap tracks_last_incoming_new = kltTrack(img_last, img_incoming, mwkps_last_new, mwkps_incoming_new);
 
         // Outliers rejection with essential matrix
+        // tracks that are not geometrically consistent are removed from tracks_last_incoming_new 
         cv::Mat E;
         computeEssential(mwkps_last_new, mwkps_incoming_new, tracks_last_incoming_new, E);
 
         // Concatenation of old tracks and new tracks
+        // Only keep tracks until it reaches a max nb of tracks
+        // size_t max_nb_tracks = 200;
         for (auto & track: tracks_last_incoming_new){
             tracks_last_incoming_filtered[track.first] = track.second;
         }
