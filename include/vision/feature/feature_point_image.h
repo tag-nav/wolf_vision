@@ -41,9 +41,6 @@ class FeaturePointImage : public FeatureBase
     private:
         WKeyPoint kp_;
         
-        // id of the landmark to which the feature is associated (maybe in processor no?) 
-        unsigned int lmk_associated_id_;
-
     public:
         /// Constructor from OpenCV measured keypoint
         FeaturePointImage(const WKeyPoint& _keypoint,
@@ -53,9 +50,6 @@ class FeaturePointImage : public FeatureBase
 
         const WKeyPoint& getKeyPoint() const {return kp_;}
         void setKeyPoint(const WKeyPoint& _kp);
-
-        unsigned int getLandmarkAssociatedId() const {return lmk_associated_id_;}
-        void setLandmarkAssociatedId(unsigned int _lmk_id) {lmk_associated_id_ = _lmk_id;}
 };
 
 inline void FeaturePointImage::setKeyPoint(const WKeyPoint& _kp)
