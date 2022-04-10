@@ -90,7 +90,7 @@ void CaptureImage::addKeyPoints(const std::vector<WKeyPoint>& _vec_wkp)
 void CaptureImage::addKeyPoints(const std::vector<cv::KeyPoint>& _vec_cv_kp)
 {
     for (auto cv_kp: _vec_cv_kp){
-        WKeyPoint wkp(cv_kp); 
+//        WKeyPoint wkp(cv_kp);
         addKeyPoint(cv_kp);
     }
 }
