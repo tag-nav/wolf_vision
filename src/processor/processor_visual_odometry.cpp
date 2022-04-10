@@ -353,7 +353,11 @@ LandmarkBasePtr ProcessorVisualOdometry::emplaceLandmark(FeatureBasePtr _feat)
                                                         getSensor(), 
                                                         feat_pi->getKeyPoint().getDescriptor());
 
-    // _feat->setLandmarkId(lmk_hp_ptr->id());  // not necessary I think?
+    // Set all IDs equal to track ID
+    size_t track_id = _feat->trackId();
+    lmk_hp_ptr->setId(track_id);
+    _feat->setLandmarkId(track_id);
+
     return lmk_hp_ptr;
 }
 
