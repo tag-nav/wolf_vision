@@ -79,25 +79,24 @@ void ProcessorVisualOdometry::preProcess()
 
     // if first image, compute keypoints, add to capture incoming and return
     if (last_ptr_ == nullptr){
-        std::vector<cv::KeyPoint> kps_current;
 
+        // detect FAST keypoints
+        std::vector<cv::KeyPoint> kps_current;
         detector_->detect(img_incoming, kps_current);
+
+        // Select a limited number of these keypoints
+        cv::KeyPointsFilter::retainBest(kps_current, params_visual_odometry_->max_nb_tracks_);
         capture_image_incoming_->addKeyPoints(kps_current);
 
-        // Select a limited number of these keypoints and initialise
-        // the tracks data structure with a "dummy track" where the keypoint 
+        // Initialize the tracks data structure with a "dummy track" where the keypoint
         // is pointing to itself
         TracksMap tracks_init;
-        unsigned int count_new_tracks = 0;
         for (auto mwkp : capture_image_incoming_->getKeyPoints()){
-            if (count_new_tracks >= params_visual_odometry_->max_nb_tracks_){
-                break;
-            }
             tracks_init[mwkp.first] = mwkp.first;
-            count_new_tracks++;
         }
         capture_image_incoming_->setTracksOrigin(tracks_init);
         capture_image_incoming_->setTracksPrev(tracks_init);
+
         return;
     }
 
