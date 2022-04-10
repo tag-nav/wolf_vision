@@ -394,7 +394,7 @@ void ProcessorVisualOdometry::setParams(const ParamsProcessorVisualOdometryPtr _
     params_visual_odometry_ = _params;
 }
 
-TracksMap ProcessorVisualOdometry::kltTrack(cv::Mat _img_prev, cv::Mat _img_curr, KeyPointsMap &_mwkps_prev, KeyPointsMap &_mwkps_curr)
+TracksMap ProcessorVisualOdometry::kltTrack(const cv::Mat _img_prev, const cv::Mat _img_curr, const KeyPointsMap &_mwkps_prev, KeyPointsMap &_mwkps_curr)
 {
     TracksMap tracks_prev_curr;
 
@@ -430,15 +430,15 @@ TracksMap ProcessorVisualOdometry::kltTrack(cv::Mat _img_prev, cv::Mat _img_curr
     std::vector<float> err_back;
     cv::calcOpticalFlowPyrLK(
             _img_curr,
-            _img_prev, 
+            _img_prev,
             p2f_curr,
             p2f_prev,
             status_back, err_back,
-            {prms.tracker_width_, prms.tracker_height_}, 
+            {prms.tracker_width_, prms.tracker_height_},
             prms.nlevels_pyramids_,
             prms.crit_,
             (cv::OPTFLOW_USE_INITIAL_FLOW + cv::OPTFLOW_LK_GET_MIN_EIGENVALS));
-    
+
     // Delete point if KLT failed
     for (size_t j = 0; j < status.size(); j++) {
 
@@ -460,7 +460,7 @@ TracksMap ProcessorVisualOdometry::kltTrack(cv::Mat _img_prev, cv::Mat _img_curr
     return tracks_prev_curr;
 }
 
-bool ProcessorVisualOdometry::filterWithEssential(KeyPointsMap _mwkps_prev, KeyPointsMap _mwkps_curr, TracksMap &_tracks_prev_curr, cv::Mat &_E)
+bool ProcessorVisualOdometry::filterWithEssential(const KeyPointsMap _mwkps_prev, const KeyPointsMap _mwkps_curr, TracksMap &_tracks_prev_curr, cv::Mat &_E)
 {
     // We need to build lists of pt2f for openCV function
     std::vector<cv::Point2f> p2f_prev, p2f_curr;

@@ -200,11 +200,11 @@ class ProcessorVisualOdometry : public ProcessorTracker
 
         /** \brief Implementation of pyramidal KLT with openCV
          */
-        TracksMap kltTrack(cv::Mat img_prev, cv::Mat img_curr, KeyPointsMap &mwkps_prev, KeyPointsMap &mwkps_curr);
+        TracksMap kltTrack(const cv::Mat img_prev, const cv::Mat img_curr, const KeyPointsMap &mwkps_prev, KeyPointsMap &mwkps_curr);
 
         /** \brief Remove outliers from the tracks map with a RANSAC 5-points algorithm implemented on openCV
          */
-        bool filterWithEssential(KeyPointsMap mwkps_prev, KeyPointsMap mwkps_curr, TracksMap &tracks_prev_curr, cv::Mat &E);
+        bool filterWithEssential(const KeyPointsMap mwkps_prev, const KeyPointsMap mwkps_curr, TracksMap &tracks_prev_curr, cv::Mat &E);
 
         /** \brief Tool to merge tracks 
          */
