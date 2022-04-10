@@ -46,10 +46,10 @@ class FactorPixelHp : public FactorAutodiff<FactorPixelHp, 2, 3, 4, 3, 4, 4>
     public:
 
         FactorPixelHp(const FeatureBasePtr&   _ftr_ptr,
-                      const LandmarkHpPtr&   _landmark_ptr,
+                      const LandmarkHpPtr&    _landmark_ptr,
                       const ProcessorBasePtr& _processor_ptr,
-                      bool              _apply_loss_function,
-                      FactorStatus  _status = FAC_ACTIVE);
+                      bool                    _apply_loss_function,
+                      FactorStatus            _status = FAC_ACTIVE);
 
         ~FactorPixelHp() override = default;
 
