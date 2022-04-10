@@ -39,7 +39,7 @@ ProcessorVisualOdometry::ProcessorVisualOdometry(ParamsProcessorVisualOdometryPt
 
     // Processor stuff
 
-    // Get pixel noise covariance from sensor
+    // Set pixel noise covariance
     Eigen::Vector2d std_pix; std_pix << params_visual_odometry_->std_pix_, params_visual_odometry_->std_pix_;
     pixel_cov_ = std_pix.array().square().matrix().asDiagonal();
 
@@ -94,6 +94,7 @@ void ProcessorVisualOdometry::preProcess()
                 break;
             }
             tracks_init[mwkp.first] = mwkp.first;
+            count_new_tracks++;
         }
         capture_image_incoming_->setTracksOrigin(tracks_init);
         capture_image_incoming_->setTracksPrev(tracks_init);
@@ -109,8 +110,8 @@ void ProcessorVisualOdometry::preProcess()
     capture_image_origin_ = std::static_pointer_cast<CaptureImage>(origin_ptr_);
     cv::Mat img_last = capture_image_last_->getImage();
 
-    KeyPointsMap mwkps_origin = capture_image_origin_->getKeyPoints();
-    KeyPointsMap mwkps_last = capture_image_last_->getKeyPoints();
+    KeyPointsMap mwkps_origin   = capture_image_origin_ ->getKeyPoints();
+    KeyPointsMap mwkps_last     = capture_image_last_   ->getKeyPoints();
     KeyPointsMap mwkps_incoming;  // init incoming
 
     ////////////////////////////////
