@@ -32,10 +32,17 @@ ProcessorVisualOdometry::ProcessorVisualOdometry(ParamsProcessorVisualOdometryPt
                 params_visual_odometry_(_params_vo),
                 frame_count_(0)
 {
+ // Preprocessor stuff
     detector_ = cv::FastFeatureDetector::create(_params_vo->fast_params_.threshold_fast_, 
                                                 _params_vo->fast_params_.non_max_suppresion_);
-
     origin_prev_ = nullptr;
+
+    // Processor stuff
+
+    // Get pixel noise covariance from sensor
+    Eigen::Vector2d std_pix; std_pix << params_visual_odometry_->std_pix_, params_visual_odometry_->std_pix_;
+    pixel_cov_ = std_pix.array().square().matrix().asDiagonal();
+
 }
 
 void ProcessorVisualOdometry::configure(SensorBasePtr _sensor)
