@@ -29,7 +29,6 @@ namespace wolf {
 
 /* Landmark - Homogeneous Point*/
 LandmarkHp::LandmarkHp(Eigen::Vector4d _position_homogeneous,
-						 SensorBasePtr _sensor,
                          cv::Mat _2d_descriptor) :
     LandmarkBase("LandmarkHp", std::make_shared<StateHomogeneous3d>(_position_homogeneous)),
     cv_descriptor_(_2d_descriptor.clone())
@@ -69,7 +68,7 @@ LandmarkBasePtr LandmarkHp::create(const YAML::Node& _node)
     std::vector<int>    v           = _node["descriptor"]   .as< std::vector<int> >();
     cv::Mat desc(v);
 
-    LandmarkBasePtr lmk = std::make_shared<LandmarkHp>(pos_homog, nullptr, desc);
+    LandmarkBasePtr lmk = std::make_shared<LandmarkHp>(pos_homog, desc);
     lmk->setId(id);
     return lmk;
 }

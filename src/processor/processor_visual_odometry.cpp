@@ -350,7 +350,6 @@ LandmarkBasePtr ProcessorVisualOdometry::emplaceLandmark(FeatureBasePtr _feat)
 
     auto lmk_hp_ptr = LandmarkBase::emplace<LandmarkHp>(getProblem()->getMap(), 
                                                         vec_homogeneous_w, 
-                                                        getSensor(), 
                                                         feat_pi->getKeyPoint().getDescriptor());
 
     // Set all IDs equal to track ID
