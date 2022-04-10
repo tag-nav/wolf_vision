@@ -467,8 +467,8 @@ bool ProcessorVisualOdometry::filterWithEssential(const KeyPointsMap _mwkps_prev
     std::vector<size_t> all_indices;
     for (auto & track : _tracks_prev_curr){
         all_indices.push_back(track.first);
-        p2f_prev.push_back(_mwkps_prev[track.first].getCvKeyPoint().pt);
-        p2f_curr.push_back(_mwkps_curr[track.second].getCvKeyPoint().pt);
+        p2f_prev.push_back(_mwkps_prev.at(track.first).getCvKeyPoint().pt);
+        p2f_curr.push_back(_mwkps_curr.at(track.second).getCvKeyPoint().pt);
     }
 
     // We need at least five tracks
