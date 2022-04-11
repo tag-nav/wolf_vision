@@ -71,6 +71,7 @@ struct ParamsProcessorVisualOdometry : public ParamsProcessorTracker
     double std_pix_;
     KltParams klt_params_;
     FastParams fast_params_;
+    unsigned int max_new_detections_;
     unsigned int min_nb_tracks_;
     unsigned int max_nb_tracks_;
     unsigned int min_track_length_for_landmark_;
@@ -89,6 +90,7 @@ struct ParamsProcessorVisualOdometry : public ParamsProcessorTracker
         fast_params_.threshold_fast_     = _server.getParam<int>( prefix + _unique_name + "/fast_params/threshold_fast");
         fast_params_.non_max_suppresion_ = _server.getParam<bool>(prefix + _unique_name + "/fast_params/non_max_suppresion");
 
+        max_new_detections_ = _server.getParam<unsigned int>(prefix + _unique_name + "/max_new_detections");
         min_nb_tracks_ = _server.getParam<unsigned int>(prefix + _unique_name + "/min_nb_tracks");
         max_nb_tracks_ = _server.getParam<unsigned int>(prefix + _unique_name + "/max_nb_tracks");
         min_track_length_for_landmark_ = _server.getParam<unsigned int>(prefix + _unique_name + "/min_track_length_for_landmark");

@@ -85,9 +85,9 @@ void ProcessorVisualOdometry::preProcess()
         // the tracks data structure with a "dummy track" where the keypoint 
         // is pointing to itself
         TracksMap tracks_init;
-        unsigned int count_new_tracks = 0;
+        unsigned int count_new_keypoints = 0;
         for (auto mwkp : capture_image_incoming_->getKeyPoints()){
-            if (count_new_tracks >= params_visual_odometry_->max_nb_tracks_){
+            if (count_new_keypoints >= params_visual_odometry_->max_new_detections_){
                 break;
             }
             tracks_init[mwkp.first] = mwkp.first;
