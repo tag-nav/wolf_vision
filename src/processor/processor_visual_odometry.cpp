@@ -32,10 +32,17 @@ ProcessorVisualOdometry::ProcessorVisualOdometry(ParamsProcessorVisualOdometryPt
                 params_visual_odometry_(_params_vo),
                 frame_count_(0)
 {
+    // Preprocessor stuff
     detector_ = cv::FastFeatureDetector::create(_params_vo->fast_params_.threshold_fast_, 
                                                 _params_vo->fast_params_.non_max_suppresion_);
-
     origin_prev_ = nullptr;
+
+    // Processor stuff
+
+    // Set pixel noise covariance
+    Eigen::Vector2d std_pix; std_pix << params_visual_odometry_->std_pix_, params_visual_odometry_->std_pix_;
+    pixel_cov_ = std_pix.array().square().matrix().asDiagonal();
+
 }
 
 void ProcessorVisualOdometry::configure(SensorBasePtr _sensor)
@@ -47,13 +54,9 @@ void ProcessorVisualOdometry::configure(SensorBasePtr _sensor)
     Kcv_ = (cv::Mat_<float>(3,3) << K(0,0), 0, K(0,2),
                0, K(1,1), K(1,2),
                0, 0, 1);
-    
-    // Get pixel noise covariance from sensor
-    Eigen::Vector2d std_pix; std_pix << params_visual_odometry_->std_pix_, params_visual_odometry_->std_pix_;
-    pixel_cov_ = std_pix.array().square().matrix().asDiagonal();
 }
 
-TracksMap merge_tracks(TracksMap tracks_prev_curr, TracksMap tracks_curr_next){
+TracksMap ProcessorVisualOdometry::mergeTracks(TracksMap tracks_prev_curr, TracksMap tracks_curr_next){
     TracksMap tracks_prev_next;
     for (auto &match : tracks_prev_curr){
         if (tracks_curr_next.count(match.second)){
@@ -76,13 +79,16 @@ void ProcessorVisualOdometry::preProcess()
 
     // if first image, compute keypoints, add to capture incoming and return
     if (last_ptr_ == nullptr){
-        std::vector<cv::KeyPoint> kps_current;
 
+        // detect FAST keypoints
+        std::vector<cv::KeyPoint> kps_current;
         detector_->detect(img_incoming, kps_current);
+
+        // Select a limited number of these keypoints
+        cv::KeyPointsFilter::retainBest(kps_current, params_visual_odometry_->max_nb_tracks_);
         capture_image_incoming_->addKeyPoints(kps_current);
 
-        // Select a limited number of these keypoints and initialise
-        // the tracks data structure with a "dummy track" where the keypoint 
+        // Initialize the tracks data structure with a "dummy track" where the keypoint
         // is pointing to itself
         TracksMap tracks_init;
         unsigned int count_new_keypoints = 0;
@@ -94,6 +100,7 @@ void ProcessorVisualOdometry::preProcess()
         }
         capture_image_incoming_->setTracksOrigin(tracks_init);
         capture_image_incoming_->setTracksPrev(tracks_init);
+
         return;
     }
 
@@ -106,8 +113,8 @@ void ProcessorVisualOdometry::preProcess()
     capture_image_origin_ = std::static_pointer_cast<CaptureImage>(origin_ptr_);
     cv::Mat img_last = capture_image_last_->getImage();
 
-    KeyPointsMap mwkps_origin = capture_image_origin_->getKeyPoints();
-    KeyPointsMap mwkps_last = capture_image_last_->getKeyPoints();
+    KeyPointsMap mwkps_origin   = capture_image_origin_ ->getKeyPoints();
+    KeyPointsMap mwkps_last     = capture_image_last_   ->getKeyPoints();
     KeyPointsMap mwkps_incoming;  // init incoming
 
     ////////////////////////////////
@@ -124,7 +131,7 @@ void ProcessorVisualOdometry::preProcess()
 
     // Merge tracks to get tracks_origin_incoming
     TracksMap tracks_origin_last = capture_image_last_->getTracksOrigin();
-    TracksMap tracks_origin_incoming = merge_tracks(tracks_origin_last, tracks_last_incoming);
+    TracksMap tracks_origin_incoming = mergeTracks(tracks_origin_last, tracks_last_incoming);
 
     // Outliers rejection with essential matrix
     cv::Mat E;
@@ -347,10 +354,13 @@ LandmarkBasePtr ProcessorVisualOdometry::emplaceLandmark(FeatureBasePtr _feat)
 
     auto lmk_hp_ptr = LandmarkBase::emplace<LandmarkHp>(getProblem()->getMap(), 
                                                         vec_homogeneous_w, 
-                                                        getSensor(), 
                                                         feat_pi->getKeyPoint().getDescriptor());
 
-    // _feat->setLandmarkId(lmk_hp_ptr->id());  // not necessary I think?
+    // Set all IDs equal to track ID
+    size_t track_id = _feat->trackId();
+    lmk_hp_ptr->setId(track_id);
+    _feat->setLandmarkId(track_id);
+
     return lmk_hp_ptr;
 }
 
@@ -391,7 +401,7 @@ void ProcessorVisualOdometry::setParams(const ParamsProcessorVisualOdometryPtr _
     params_visual_odometry_ = _params;
 }
 
-TracksMap ProcessorVisualOdometry::kltTrack(cv::Mat _img_prev, cv::Mat _img_curr, KeyPointsMap &_mwkps_prev, KeyPointsMap &_mwkps_curr)
+TracksMap ProcessorVisualOdometry::kltTrack(const cv::Mat _img_prev, const cv::Mat _img_curr, const KeyPointsMap &_mwkps_prev, KeyPointsMap &_mwkps_curr)
 {
     TracksMap tracks_prev_curr;
 
@@ -410,7 +420,7 @@ TracksMap ProcessorVisualOdometry::kltTrack(cv::Mat _img_prev, cv::Mat _img_curr
     std::vector<float> err;
 
     // Process one way: previous->current with current init with previous
-    KltParams prms = params_visual_odometry_->klt_params_;
+    ParamsProcessorVisualOdometry::KltParams prms = params_visual_odometry_->klt_params_;
     cv::calcOpticalFlowPyrLK(
             _img_prev,
             _img_curr, 
@@ -427,15 +437,15 @@ TracksMap ProcessorVisualOdometry::kltTrack(cv::Mat _img_prev, cv::Mat _img_curr
     std::vector<float> err_back;
     cv::calcOpticalFlowPyrLK(
             _img_curr,
-            _img_prev, 
+            _img_prev,
             p2f_curr,
             p2f_prev,
             status_back, err_back,
-            {prms.tracker_width_, prms.tracker_height_}, 
+            {prms.tracker_width_, prms.tracker_height_},
             prms.nlevels_pyramids_,
             prms.crit_,
             (cv::OPTFLOW_USE_INITIAL_FLOW + cv::OPTFLOW_LK_GET_MIN_EIGENVALS));
-    
+
     // Delete point if KLT failed
     for (size_t j = 0; j < status.size(); j++) {
 
@@ -457,15 +467,15 @@ TracksMap ProcessorVisualOdometry::kltTrack(cv::Mat _img_prev, cv::Mat _img_curr
     return tracks_prev_curr;
 }
 
-bool ProcessorVisualOdometry::filterWithEssential(KeyPointsMap _mwkps_prev, KeyPointsMap _mwkps_curr, TracksMap &_tracks_prev_curr, cv::Mat &_E)
+bool ProcessorVisualOdometry::filterWithEssential(const KeyPointsMap _mwkps_prev, const KeyPointsMap _mwkps_curr, TracksMap &_tracks_prev_curr, cv::Mat &_E)
 {
     // We need to build lists of pt2f for openCV function
     std::vector<cv::Point2f> p2f_prev, p2f_curr;
     std::vector<size_t> all_indices;
     for (auto & track : _tracks_prev_curr){
         all_indices.push_back(track.first);
-        p2f_prev.push_back(_mwkps_prev[track.first].getCvKeyPoint().pt);
-        p2f_curr.push_back(_mwkps_curr[track.second].getCvKeyPoint().pt);
+        p2f_prev.push_back(_mwkps_prev.at(track.first).getCvKeyPoint().pt);
+        p2f_curr.push_back(_mwkps_curr.at(track.second).getCvKeyPoint().pt);
     }
 
     // We need at least five tracks

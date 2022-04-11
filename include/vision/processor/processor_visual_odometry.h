@@ -51,23 +51,23 @@ namespace wolf{
 
 WOLF_STRUCT_PTR_TYPEDEFS(ParamsProcessorVisualOdometry);
 
-struct KltParams
-{
-    int tracker_width_;
-    int tracker_height_;
-    double klt_max_err_;
-    int nlevels_pyramids_;
-    cv::TermCriteria crit_;
-};
-
-struct FastParams
-{
-    int threshold_fast_;
-    bool non_max_suppresion_;
-};
-
 struct ParamsProcessorVisualOdometry : public ParamsProcessorTracker
 {
+    struct KltParams
+    {
+        int tracker_width_;
+        int tracker_height_;
+        double klt_max_err_;
+        int nlevels_pyramids_;
+        cv::TermCriteria crit_;
+    };
+
+    struct FastParams
+    {
+        int threshold_fast_;
+        bool non_max_suppresion_;
+    };
+
     double std_pix_;
     KltParams klt_params_;
     FastParams fast_params_;
@@ -202,11 +202,15 @@ class ProcessorVisualOdometry : public ProcessorTracker
 
         /** \brief Implementation of pyramidal KLT with openCV
          */
-        TracksMap kltTrack(cv::Mat img_prev, cv::Mat img_curr, KeyPointsMap &mwkps_prev, KeyPointsMap &mwkps_curr);
+        TracksMap kltTrack(const cv::Mat img_prev, const cv::Mat img_curr, const KeyPointsMap &mwkps_prev, KeyPointsMap &mwkps_curr);
 
         /** \brief Remove outliers from the tracks map with a RANSAC 5-points algorithm implemented on openCV
          */
-        bool filterWithEssential(KeyPointsMap mwkps_prev, KeyPointsMap mwkps_curr, TracksMap &tracks_prev_curr, cv::Mat &E);
+        bool filterWithEssential(const KeyPointsMap mwkps_prev, const KeyPointsMap mwkps_curr, TracksMap &tracks_prev_curr, cv::Mat &E);
+
+        /** \brief Tool to merge tracks 
+         */
+        static TracksMap mergeTracks(TracksMap tracks_prev_curr, TracksMap tracks_curr_next);
 
         void setParams(const ParamsProcessorVisualOdometryPtr _params);
 

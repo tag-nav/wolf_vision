@@ -143,10 +143,13 @@ TEST(ProcessorVisualOdometry, preProcess)
     params->klt_params_.tracker_height_ = 21;
     params->klt_params_.tracker_width_ = 21;
     params->klt_params_.nlevels_pyramids_ = 3;
-    params->klt_params_.klt_max_err_ = 1.0;
+    params->klt_params_.klt_max_err_ = 0.2;
     params->klt_params_.crit_ = cv::TermCriteria(cv::TermCriteria::COUNT+cv::TermCriteria::EPS, 30, 0.01);
     params->fast_params_.threshold_fast_ = 20;
     params->fast_params_.non_max_suppresion_ = true;
+    params->min_nb_tracks_ = 50;
+    params->max_nb_tracks_ = 400;
+    params->min_track_length_for_landmark_ = 4;
     ProcessorVisualOdometryTest processor(params);
 
 
@@ -177,9 +180,9 @@ TEST(ProcessorVisualOdometry, preProcess)
     for (auto mwkp : capture_image_incoming->getKeyPoints()){
         kps.push_back(mwkp.second.getCvKeyPoint());
     }
-    cv::drawKeypoints(img_0, kps, img_draw);
-    cv::imshow( "KeyPoints t = 0", img_draw);
-    cv::waitKey(0);
+    // cv::drawKeypoints(img_0, kps, img_draw);
+    // cv::imshow( "KeyPoints t = 0", img_draw);
+    // cv::waitKey(0);
 
     // ----------------------------------------
     // TIME 1 : Let's process the other one
@@ -201,14 +204,13 @@ TEST(ProcessorVisualOdometry, preProcess)
     for (auto mwkp : capture_image_incoming->getKeyPoints()){
         kps.push_back(mwkp.second.getCvKeyPoint());
     }
-    cv::drawKeypoints(img_1, kps, img_draw);
-    cv::imshow( "KeyPoints t = 1", img_draw);
-    cv::waitKey(0);
+    // cv::drawKeypoints(img_1, kps, img_draw);
+    // cv::imshow( "KeyPoints t = 1", img_draw);
+    // cv::waitKey(0);
 
     // Check if 80% of tracks between frames
     float track_ratio = static_cast<float>(capture_image_incoming->getTracksPrev().size()) / 
                         static_cast<float>(capture_image_incoming->getKeyPoints().size());
-    std::cout << "TRACK RATIO " << track_ratio << std::endl;
     ASSERT_TRUE(track_ratio > 0.8);
 
     // Check if tracks_prev and tracks_origin are similar

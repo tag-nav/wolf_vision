@@ -42,7 +42,7 @@ class LandmarkHp : public LandmarkBase
 
 
     public:
-        LandmarkHp(Eigen::Vector4d _position_homogeneous, SensorBasePtr _sensor_, cv::Mat _2d_descriptor);
+        LandmarkHp(Eigen::Vector4d _position_homogeneous, cv::Mat _2d_descriptor);
 
         ~LandmarkHp() override;
 

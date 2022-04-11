@@ -46,10 +46,10 @@ class FactorPixelHp : public FactorAutodiff<FactorPixelHp, 2, 3, 4, 3, 4, 4>
     public:
 
         FactorPixelHp(const FeatureBasePtr&   _ftr_ptr,
-                      const LandmarkHpPtr&   _landmark_ptr,
+                      const LandmarkHpPtr&    _landmark_ptr,
                       const ProcessorBasePtr& _processor_ptr,
-                      bool              _apply_loss_function,
-                      FactorStatus  _status = FAC_ACTIVE);
+                      bool                    _apply_loss_function,
+                      FactorStatus            _status = FAC_ACTIVE);
 
         ~FactorPixelHp() override = default;
 
@@ -94,26 +94,28 @@ inline FactorPixelHp::FactorPixelHp(const FeatureBasePtr&   _ftr_ptr,
                                                         _landmark_ptr->getP()),
         intrinsic_(_ftr_ptr->getCapture()->getSensor()->getIntrinsic()->getState())
 {
-//	std::cout << "FactorPixelHp::Constructor\n";
-    // obtain some intrinsics from provided sensor
     distortion_ = (std::static_pointer_cast<SensorCamera>(_ftr_ptr->getCapture()->getSensor()))->getDistortionVector();
 }
 
 inline Eigen::VectorXd FactorPixelHp::expectation() const
 {
-    FrameBasePtr frm = getFeature()->getCapture()->getFrame();
-    SensorBasePtr sen  = getFeature()->getCapture()->getSensor();
-    LandmarkBasePtr lmk      = getLandmarkOther();
+    FrameBasePtr    frm = getFeature()->getCapture()->getFrame();
+    SensorBasePtr   sen = getFeature()->getCapture()->getSensor();
+    LandmarkBasePtr lmk = getLandmarkOther();
 
-    const Eigen::MatrixXd frame_pos = frm->getP()->getState();
-    const Eigen::MatrixXd frame_ori = frm->getO()->getState();
-    const Eigen::MatrixXd sensor_pos  = sen ->getP()->getState();
-    const Eigen::MatrixXd sensor_ori  = sen ->getO()->getState();
-    const Eigen::MatrixXd lmk_pos_hmg       = lmk        ->getP()->getState();
+    const Eigen::MatrixXd frame_pos     = frm->getP()->getState();
+    const Eigen::MatrixXd frame_ori     = frm->getO()->getState();
+    const Eigen::MatrixXd sensor_pos    = sen->getP()->getState();
+    const Eigen::MatrixXd sensor_ori    = sen->getO()->getState();
+    const Eigen::MatrixXd lmk_pos_hmg   = lmk->getP()->getState();
 
     Eigen::Vector2d exp;
-    expectation(frame_pos.data(), frame_ori.data(), sensor_pos.data(), sensor_ori.data(),
-    			lmk_pos_hmg.data(), exp.data());
+    expectation(frame_pos.data(),
+                frame_ori.data(),
+                sensor_pos.data(),
+                sensor_ori.data(),
+    			lmk_pos_hmg.data(),
+    			exp.data());
 
     return exp;
 }
@@ -145,8 +147,7 @@ inline void FactorPixelHp::expectation(const T* const _frame_p,
 
     // hmg point in current camera frame C
     Eigen::Map<const Eigen::Matrix<T, 4, 1> > landmark_hmg(_lmk_hmg);
-    Eigen::Matrix<T, 4, 1> landmark_hmg_c = T_r_c .inverse(Eigen::Isometry)
-                                           * T_w_r .inverse(Eigen::Isometry)
+    Eigen::Matrix<T, 4, 1> landmark_hmg_c = (T_w_r * T_r_c).inverse(Eigen::Isometry)
                                            * landmark_hmg;
 
     //std::cout << "p_w_r = \n\t" << _frame_p[0] << "\n\t" << _frame_p[1] << "\n\t" << _frame_p[2] << "\n";
@@ -169,8 +170,6 @@ inline void FactorPixelHp::expectation(const T* const _frame_p,
     Eigen::Map<Eigen::Matrix<T, 2, 1> > expectation(_expectation);
     expectation = pinhole::projectPoint(intrinsic, distortion, v_dir/rho);
 
-//    std::cout << "expectation = \n\t" << expectation(0) << "\n\t" << expectation(1) << "\n";
-
 }
 
 template<typename T>
@@ -185,12 +184,10 @@ inline bool FactorPixelHp::operator ()(const T* const _frame_p,
     Eigen::Matrix<T, 2, 1> expected;
     expectation(_frame_p, _frame_o, _sensor_p, _sensor_o, _lmk_hmg, expected.data());
 
-    // measured
-    Eigen::Matrix<T, 2, 1> measured = getMeasurement().cast<T>();
-
     // residual
     Eigen::Map<Eigen::Matrix<T, 2, 1> > residuals(_residuals);
-    residuals = getMeasurementSquareRootInformationUpper().cast<T>() * (expected - measured);
+    residuals = getMeasurementSquareRootInformationUpper().cast<T>() * (expected - getMeasurement());
+
     return true;
 }
 
