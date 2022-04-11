@@ -423,9 +423,9 @@ TracksMap ProcessorVisualOdometry::kltTrack(const cv::Mat _img_prev, const cv::M
             p2f_prev,
             p2f_curr,
             status, err,
-            {prms.tracker_width_, prms.tracker_height_}, 
+            {prms.patch_width_, prms.patch_height_}, 
             prms.nlevels_pyramids_,
-            prms.crit_,
+            prms.criteria_,
             (cv::OPTFLOW_USE_INITIAL_FLOW + cv::OPTFLOW_LK_GET_MIN_EIGENVALS));
     
     // Process the other way: current->previous
@@ -437,9 +437,9 @@ TracksMap ProcessorVisualOdometry::kltTrack(const cv::Mat _img_prev, const cv::M
             p2f_curr,
             p2f_prev,
             status_back, err_back,
-            {prms.tracker_width_, prms.tracker_height_},
+            {prms.patch_width_, prms.patch_height_},
             prms.nlevels_pyramids_,
-            prms.crit_,
+            prms.criteria_,
             (cv::OPTFLOW_USE_INITIAL_FLOW + cv::OPTFLOW_LK_GET_MIN_EIGENVALS));
 
     // Delete point if KLT failed
