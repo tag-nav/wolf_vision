@@ -147,7 +147,7 @@ TEST(ProcessorVisualOdometry, preProcess)
     params->klt_params_.criteria_ = cv::TermCriteria(cv::TermCriteria::COUNT+cv::TermCriteria::EPS, 30, 0.01);
     params->fast_params_.threshold_fast_ = 20;
     params->fast_params_.non_max_suppresion_ = true;
-    params->min_nb_tracks_ = 50;
+    params->min_features_for_keyframe = 50;
     params->max_nb_tracks_ = 400;
     params->min_track_length_for_landmark_ = 4;
     ProcessorVisualOdometryTest processor(params);

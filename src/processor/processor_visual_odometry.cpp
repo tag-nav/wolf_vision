@@ -86,7 +86,7 @@ void ProcessorVisualOdometry::preProcess()
         detector_->detect(img_incoming, kps_current);
 
         // Select a limited number of these keypoints
-        cv::KeyPointsFilter::retainBest(kps_current, params_visual_odometry_->max_new_detections_);
+        cv::KeyPointsFilter::retainBest(kps_current, params_visual_odometry_->max_new_features);
         capture_image_incoming_->addKeyPoints(kps_current);
 
         // Initialize the tracks data structure with a "dummy track" where the keypoint is pointing to itself
@@ -157,13 +157,13 @@ void ProcessorVisualOdometry::preProcess()
     // detect new KeyPoints in last and track them to incoming
     ////////////////////////////////
     size_t n_tracks_origin = tracks_origin_incoming.size();
-    if (n_tracks_origin < params_visual_odometry_->min_nb_tracks_){
+    if (n_tracks_origin < params_visual_odometry_->min_features_for_keyframe){
         std::cout << "  Too Few Tracks" << std::endl;
 
         // Detect new KeyPoints 
         std::vector<cv::KeyPoint> kps_last_new;
         detector_->detect(img_last, kps_last_new);
-        cv::KeyPointsFilter::retainBest(kps_last_new, params_visual_odometry_->max_new_detections_);
+        cv::KeyPointsFilter::retainBest(kps_last_new, params_visual_odometry_->max_new_features);
         
         // Create a map of wolf KeyPoints to track only the new ones
         KeyPointsMap mwkps_last_new, mwkps_incoming_new;
@@ -181,6 +181,8 @@ void ProcessorVisualOdometry::preProcess()
 
         // Concatenation of old tracks and new tracks
         // Only keep tracks until it reaches a max nb of tracks
+        // TODO: the strategy for keeping the best new tracks is dumb
+        //    -> should be improved for a better spatial repartition
         unsigned int count_new_tracks = 0;
         for (auto & track: tracks_last_incoming_new){
             if ((n_tracks_origin + count_new_tracks) >= params_visual_odometry_->max_nb_tracks_){
