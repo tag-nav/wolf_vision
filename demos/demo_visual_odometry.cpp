@@ -75,7 +75,7 @@ int main(int argc, char** argv)
 
 
     // for (size_t k=0; k < fn.size(); ++k)
-    for (size_t k=0; k < 100; ++k)
+    for (size_t k=0; k < 20; ++k)
     {
         cv::Mat img = cv::imread(fn[k], cv::IMREAD_GRAYSCALE);
 

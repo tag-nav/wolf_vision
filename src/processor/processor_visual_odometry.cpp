@@ -158,6 +158,7 @@ void ProcessorVisualOdometry::preProcess()
     ////////////////////////////////
     size_t n_tracks_origin = tracks_origin_incoming.size();
     if (n_tracks_origin < params_visual_odometry_->min_nb_tracks_){
+        std::cout << "  Too Few Tracks" << std::endl;
 
         // Detect new KeyPoints 
         std::vector<cv::KeyPoint> kps_last_new;
@@ -388,7 +389,8 @@ bool ProcessorVisualOdometry::voteForKeyFrame() const
     bool vote = capture_image_incoming->getLastWasRepopulated();
 
     // simple vote based on frame count, should be changed to something that takes into account number of tracks alive, parallax, etc.
-    vote = vote || ((frame_count_ % 5) == 0);
+    // vote = vote || ((frame_count_ % 5) == 0);
+    std::cout << "vote " << vote << std::endl;
     return vote;
 }
 
