@@ -2,18 +2,18 @@ config:
 
   problem:
   
-    dimension:            3               
+    dimension:            3               # space is 3d
     frame_structure:      "PO"            # keyframes have position and orientation
   
     prior:
       mode:               "factor"
       $state:
-        P: [0,0]
-        O: [0]
+        P: [0,0,0]
+        O: [0,0,0,1]
       $sigma:
-        P: [0.31, 0.31]
-        O: [0.31]
-      time_tolerance:     0.05
+        P: [0.001, 0.001, 0.001]
+        O: [0.31, 0.31, 0.31]
+      time_tolerance:     0.005
 
     tree_manager:
       type: "none"

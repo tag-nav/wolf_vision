@@ -1,7 +1,16 @@
-algorithm:
-    time tolerance: 0.005
-    voting_active: true
+# ProcessorBase and ProcessorTracker    parameters
+time_tolerance: 0.005
 
+keyframe_vote:
+    voting_active: true
+    min_features_for_keyframe: 42  # not used
+
+apply_loss_function: true
+
+# ProcessorTracker
+max_new_features: 42  # not used
+
+# ProcessorBase parameters
 klt_params:
     patch_width: 15
     patch_height: 15
