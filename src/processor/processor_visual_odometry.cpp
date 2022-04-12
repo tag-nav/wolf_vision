@@ -97,6 +97,9 @@ void ProcessorVisualOdometry::preProcess()
         capture_image_incoming_->setTracksOrigin(tracks_init);
         capture_image_incoming_->setTracksPrev(tracks_init);
 
+        auto dt_preprocess = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - t1).count();
+        std::cout << "dt_preprocess (ms): " << dt_preprocess << std::endl;
+
         return;
     }
 
