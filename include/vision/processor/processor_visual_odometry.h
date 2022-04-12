@@ -55,11 +55,11 @@ struct ParamsProcessorVisualOdometry : public ParamsProcessorTracker
 {
     struct KltParams
     {
-        int tracker_width_;
-        int tracker_height_;
+        int patch_width_;
+        int patch_height_;
         double klt_max_err_;
         int nlevels_pyramids_;
-        cv::TermCriteria crit_;
+        cv::TermCriteria criteria_;
     };
 
     struct FastParams
@@ -81,11 +81,11 @@ struct ParamsProcessorVisualOdometry : public ParamsProcessorTracker
     {
         std_pix_ = _server.getParam<int>(prefix + _unique_name + "/std_pix");
 
-        klt_params_.tracker_width_        = _server.getParam<int>(prefix + _unique_name + "/klt_params/tracker_width");
-        klt_params_.tracker_height_       = _server.getParam<int>(prefix + _unique_name + "/klt_params/tracker_height");
+        klt_params_.patch_width_        = _server.getParam<int>(prefix + _unique_name + "/klt_params/patch_width");
+        klt_params_.patch_height_       = _server.getParam<int>(prefix + _unique_name + "/klt_params/patch_height");
         klt_params_.klt_max_err_          = _server.getParam<double>(prefix + _unique_name + "/klt_params/klt_max_err");
         klt_params_.nlevels_pyramids_     = _server.getParam<int>(prefix + _unique_name + "/klt_params/nlevels_pyramids");
-        klt_params_.crit_                 = cv::TermCriteria(cv::TermCriteria::COUNT+cv::TermCriteria::EPS, 30, 0.01);  // everybody uses this defaults...
+        klt_params_.criteria_                 = cv::TermCriteria(cv::TermCriteria::COUNT+cv::TermCriteria::EPS, 30, 0.01);  // everybody uses this defaults...
 
         fast_params_.threshold_fast_     = _server.getParam<int>( prefix + _unique_name + "/fast_params/threshold_fast");
         fast_params_.non_max_suppresion_ = _server.getParam<bool>(prefix + _unique_name + "/fast_params/non_max_suppresion");
@@ -99,8 +99,8 @@ struct ParamsProcessorVisualOdometry : public ParamsProcessorTracker
     std::string print() const override
     {
         return ParamsProcessorTracker::print()                                                         + "\n"
-            + "klt_params_.tracker_width_: "       + std::to_string(klt_params_.tracker_width_)        + "\n"
-            + "klt_params_.tracker_height_: "      + std::to_string(klt_params_.tracker_height_)       + "\n"
+            + "klt_params_.tracker_width_: "       + std::to_string(klt_params_.patch_width_)        + "\n"
+            + "klt_params_.tracker_height_: "      + std::to_string(klt_params_.patch_height_)       + "\n"
             + "klt_params_.klt_max_err_: "         + std::to_string(klt_params_.klt_max_err_)          + "\n"
             + "klt_params_.nlevels_pyramids_: "    + std::to_string(klt_params_.nlevels_pyramids_)     + "\n"
             + "fast_params_.threshold_fast_    : " + std::to_string(fast_params_.threshold_fast_)      + "\n"

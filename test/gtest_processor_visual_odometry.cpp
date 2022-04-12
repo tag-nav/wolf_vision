@@ -100,11 +100,11 @@ TEST(ProcessorVisualOdometry, kltTrack)
 
     // Create a processor
     ParamsProcessorVisualOdometryPtr params = std::make_shared<ParamsProcessorVisualOdometry>();
-    params->klt_params_.tracker_height_ = 21;
-    params->klt_params_.tracker_width_ = 21;
+    params->klt_params_.patch_height_ = 21;
+    params->klt_params_.patch_width_ = 21;
     params->klt_params_.nlevels_pyramids_ = 3;
     params->klt_params_.klt_max_err_ = 1.0;
-    params->klt_params_.crit_ = cv::TermCriteria(cv::TermCriteria::COUNT+cv::TermCriteria::EPS, 30, 0.01);
+    params->klt_params_.criteria_ = cv::TermCriteria(cv::TermCriteria::COUNT+cv::TermCriteria::EPS, 30, 0.01);
     params->fast_params_.threshold_fast_ = 30;
     params->fast_params_.non_max_suppresion_ = true;
 
@@ -140,11 +140,11 @@ TEST(ProcessorVisualOdometry, preProcess)
 
     // Create a processor
     ParamsProcessorVisualOdometryPtr params = std::make_shared<ParamsProcessorVisualOdometry>();
-    params->klt_params_.tracker_height_ = 21;
-    params->klt_params_.tracker_width_ = 21;
+    params->klt_params_.patch_height_ = 21;
+    params->klt_params_.patch_width_ = 21;
     params->klt_params_.nlevels_pyramids_ = 3;
     params->klt_params_.klt_max_err_ = 0.2;
-    params->klt_params_.crit_ = cv::TermCriteria(cv::TermCriteria::COUNT+cv::TermCriteria::EPS, 30, 0.01);
+    params->klt_params_.criteria_ = cv::TermCriteria(cv::TermCriteria::COUNT+cv::TermCriteria::EPS, 30, 0.01);
     params->fast_params_.threshold_fast_ = 20;
     params->fast_params_.non_max_suppresion_ = true;
     params->min_nb_tracks_ = 50;
