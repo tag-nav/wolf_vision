@@ -2,19 +2,21 @@ algorithm:
     time tolerance: 0.005
     voting_active: true
 
-std_pix: 1.0    
-
 klt_params:
-    tracker_width: 21
-    tracker_height: 21
+    patch_width: 15
+    patch_height: 15
     nlevels_pyramids: 3
-    klt_max_err: 0.2
+    klt_max_err: 0.3
 
 fast_params:
-    threshold_fast: 30
+    threshold_fast: 50
     non_max_suppresion: true
 
-max_new_detections: 500
-min_nb_tracks: 200
-max_nb_tracks: 400
-min_track_length_for_landmark: 4
+min_nb_tracks: 100
+max_nb_tracks: 200
+
+std_pix: 1
+
+min_track_length_for_landmark: 3
+
+max_new_detections: 100
