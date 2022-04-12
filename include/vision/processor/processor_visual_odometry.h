@@ -145,7 +145,6 @@ class ProcessorVisualOdometry : public ProcessorTracker
 
         // bookeeping
         TracksMap tracks_map_li_matched_;
-        CaptureBasePtr origin_prev_;
 
 
     public:

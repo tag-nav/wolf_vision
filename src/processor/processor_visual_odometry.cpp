@@ -24,6 +24,8 @@
 //standard
 #include "vision/processor/processor_visual_odometry.h"
 
+#include <chrono>
+#include <ctime>
 
 namespace wolf{
 
@@ -35,10 +37,8 @@ ProcessorVisualOdometry::ProcessorVisualOdometry(ParamsProcessorVisualOdometryPt
     // Preprocessor stuff
     detector_ = cv::FastFeatureDetector::create(_params_vo->fast_params_.threshold_fast_, 
                                                 _params_vo->fast_params_.non_max_suppresion_);
-    origin_prev_ = nullptr;
-
+    
     // Processor stuff
-
     // Set pixel noise covariance
     Eigen::Vector2d std_pix; std_pix << params_visual_odometry_->std_pix_, params_visual_odometry_->std_pix_;
     pixel_cov_ = std_pix.array().square().matrix().asDiagonal();
@@ -68,9 +68,10 @@ TracksMap ProcessorVisualOdometry::mergeTracks(TracksMap tracks_prev_curr, Track
 
 void ProcessorVisualOdometry::preProcess()
 {
+    auto t1 = std::chrono::system_clock::now();
+    
     // Get Capture
     capture_image_incoming_ = std::static_pointer_cast<CaptureImage>(incoming_ptr_);
-    assert(capture_image_incoming_ != nullptr && ("Capture type mismatch. Processor " + getName() + " can only process captures of type CaptureImage").c_str());
 
     cv::Mat img_incoming = capture_image_incoming_->getImage();
 
@@ -85,17 +86,12 @@ void ProcessorVisualOdometry::preProcess()
         detector_->detect(img_incoming, kps_current);
 
         // Select a limited number of these keypoints
-        cv::KeyPointsFilter::retainBest(kps_current, params_visual_odometry_->max_nb_tracks_);
+        cv::KeyPointsFilter::retainBest(kps_current, params_visual_odometry_->max_new_detections_);
         capture_image_incoming_->addKeyPoints(kps_current);
 
-        // Initialize the tracks data structure with a "dummy track" where the keypoint
-        // is pointing to itself
+        // Initialize the tracks data structure with a "dummy track" where the keypoint is pointing to itself
         TracksMap tracks_init;
-        unsigned int count_new_keypoints = 0;
         for (auto mwkp : capture_image_incoming_->getKeyPoints()){
-            if (count_new_keypoints >= params_visual_odometry_->max_new_detections_){
-                break;
-            }
             tracks_init[mwkp.first] = mwkp.first;
         }
         capture_image_incoming_->setTracksOrigin(tracks_init);
@@ -163,6 +159,7 @@ void ProcessorVisualOdometry::preProcess()
         // Detect new KeyPoints 
         std::vector<cv::KeyPoint> kps_last_new;
         detector_->detect(img_last, kps_last_new);
+        cv::KeyPointsFilter::retainBest(kps_last_new, params_visual_odometry_->max_new_detections_);
         
         // Create a map of wolf KeyPoints to track only the new ones
         KeyPointsMap mwkps_last_new, mwkps_incoming_new;
@@ -198,13 +195,16 @@ void ProcessorVisualOdometry::preProcess()
         // add a flag so that voteForKeyFrame use it to vote for a KeyFrame 
         capture_image_incoming_->setLastWasRepopulated(true);
     }
+
+    auto dt_preprocess = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - t1).count();
+    std::cout << "dt_preprocess (ms): " << dt_preprocess << std::endl;
+
 }
 
 
 unsigned int ProcessorVisualOdometry::processKnown()
 {
-    // reinitilize the bookeeping to communicate info from processKnown to processNew
-    tracks_map_li_matched_.clear();
+    auto t1 = std::chrono::system_clock::now();
     // Extend the process track matrix by using information stored in the incoming capture
 
     // Get tracks present at the last capture time (should be the most recent snapshot at this moment)
@@ -234,6 +234,8 @@ unsigned int ProcessorVisualOdometry::processKnown()
             tracks_map_li_matched_.insert(kp_track_li_matched);
         }
     }
+    auto dt_processKnown = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - t1).count();
+    std::cout << "dt_processKnown (ms): " << dt_processKnown << std::endl;
 
     // return number of successful tracks until incoming
     return tracks_map_li_matched_.size();
@@ -242,6 +244,7 @@ unsigned int ProcessorVisualOdometry::processKnown()
 
 unsigned int ProcessorVisualOdometry::processNew(const int& _max_features)
 {
+    auto t1 = std::chrono::system_clock::now();
 
     // A new keyframe was detected:
     // last_ptr_ is going to become origin_ptr and
@@ -270,6 +273,9 @@ unsigned int ProcessorVisualOdometry::processNew(const int& _max_features)
             counter_new_tracks++;
         }
     }
+
+    auto dt_processNew = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - t1).count();
+    std::cout << "dt_processNew (ms): " << dt_processNew << std::endl;
 
     return counter_new_tracks;
 }
@@ -386,12 +392,14 @@ bool ProcessorVisualOdometry::voteForKeyFrame() const
 
 void ProcessorVisualOdometry::advanceDerived()
 {
-    // TODO
+    // reinitilize the bookeeping to communicate info from processKnown to processNew
+    tracks_map_li_matched_.clear();
 }
 
 void ProcessorVisualOdometry::resetDerived()
 {
-    // TODO
+    // reinitilize the bookeeping to communicate info from processKnown to processNew
+    tracks_map_li_matched_.clear();
 }
 
 
