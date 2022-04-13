@@ -125,11 +125,16 @@ void ProcessorVisualOdometry::preProcess()
     //   - ...
     ////////////////////////////////
 
-    // Tracks between last and incoming
+    // TracksMap between last and incoming
+    // Input: ID of Wkp in last. Output: ID of the tracked Wkp in incoming.
     TracksMap tracks_last_incoming = kltTrack(img_last, img_incoming, mwkps_last, mwkps_incoming);
 
-    // Merge tracks to get tracks_origin_incoming
+    // TracksMap between origin and last
+    // Input: ID of Wkp in origin. Output: ID of the tracked Wkp in last.
     TracksMap tracks_origin_last = capture_image_last_->getTracksOrigin();
+
+    // Merge tracks to get TracksMap between origin and incoming
+    // Input: ID of Wkp in origin. Output: ID of the tracked Wkp in incoming.
     TracksMap tracks_origin_incoming = mergeTracks(tracks_origin_last, tracks_last_incoming);
 
     // Outliers rejection with essential matrix
