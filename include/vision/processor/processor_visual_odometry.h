@@ -209,7 +209,7 @@ class ProcessorVisualOdometry : public ProcessorTracker
 
         void setParams(const ParamsProcessorVisualOdometryPtr _params);
 
-        TrackMatrix getTrackMatrix(){return track_matrix_;}
+        const TrackMatrix& getTrackMatrix() const {return track_matrix_;}
 
 };
 
