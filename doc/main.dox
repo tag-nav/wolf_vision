@@ -1,0 +1,29 @@
+// EDIT CAPS TEXTS
+/*! \mainpage WOLF
+    
+    WOLF (Windowed Localization Frames) is a C++ framework for state estimation based on factor graphs.
+    
+    This is the Doxygen documentation of the  **WOLF core**  library.
+    
+    If you are looking for one of the following:
+    
+    - full documentation
+    - installation instructions
+    - access to the repositories
+    - WOLF plugins
+    - ROS packages
+     
+    please visit the main WOLF page at http://www.iri.upc.edu/wolf.
+    
+    WOLF is copyright 2015--2022
+    
+    - Joan Solà
+    - Joan Vallvé
+    - Joaquim Casals, 
+    - Jérémie Deray,
+    - Médéric Fourmy, 
+    - Dinesh Atchuthan, 
+    - Andreu Corominas-Murtra
+    
+    at IRI-CSIC-UPC.
+*/
