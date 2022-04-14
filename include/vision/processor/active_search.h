@@ -109,7 +109,7 @@ namespace wolf{
  * {
  *   obs->project();
  *   if (obs->isVisible())
- *     grid.hiCell(obs->expectation.x());   // add only visible landmarks
+ *     grid.hitCell(obs->pixel());   // add only visible landmarks
  * }
  *
  * // Then we process the selected observations
