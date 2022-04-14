@@ -143,7 +143,7 @@ class ActiveSearchGrid {
         /**
          * \brief Void constructor
          *
-         * Calling this constructor requires the use of setParameters() to configure.
+         * Calling this constructor requires the use of setup() to configure.
          */
         ActiveSearchGrid();
 
@@ -153,12 +153,13 @@ class ActiveSearchGrid {
          * \param _img_size_v vertical image size.
          * \param _n_cells_h horizontal number of cells per image width.
          * \param _n_cells_v vertical number of cells per image height.
-         * \param _separation minimum separation between existing and new points.
          * \param _margin minimum separation to the edge of the image
+         * \param _separation minimum separation between existing and new points.
          */
         ActiveSearchGrid(const int & _img_size_h, const int & _img_size_v,
-        		const int & _n_cells_h, const int & _n_cells_v,
-				const int & _margin = 0, const int & _separation = 0);
+                         const int & _n_cells_h,  const int & _n_cells_v,
+                         const int & _margin = 0,
+                         const int & _separation = 0);
 
         /**
          * \brief Function to set the parameters of the active search grid
@@ -166,12 +167,13 @@ class ActiveSearchGrid {
          * \param _img_size_v vertical image size.
          * \param _n_cells_h horizontal number of cells per image width.
          * \param _n_cells_v vertical number of cells per image height.
-         * \param _separation minimum separation between existing and new points.
          * \param _margin minimum separation to the edge of the image
+         * \param _separation minimum separation between existing and new points.
          */
         void setup(const int & _img_size_h, const int & _img_size_v,
-                           const int & _n_cells_h, const int & _n_cells_v,
-                           const int & _margin = 0, const int & _separation = 0);
+                   const int & _n_cells_h,  const int & _n_cells_v,
+                   const int & _margin = 0,
+                   const int & _separation = 0);
 
         /**
          * \brief Re-set the image size
@@ -203,7 +205,7 @@ class ActiveSearchGrid {
 
         /**
          * \brief Add a projected pixel to the grid.
-         * \param _pix the pixel to add as an Eigen 2-vector with any Scalar type.
+         * \param _pix the pixel to add as an Eigen 2-vector with any Scalar type (can be a non-integer).
          */
         template<typename Scalar>
         void hitCell(const Eigen::Matrix<Scalar, 2, 1>& _pix);
@@ -275,21 +277,12 @@ inline void ActiveSearchGrid::hitCell(const cv::KeyPoint& _pix)
     hitCell(_pix.pt.x, _pix.pt.y);
 }
 
-/**
- * \brief Add a projected pixel to the grid.
- * \param _pix the pixel to add as an Eigen 2-vector.
- */
 template<typename Scalar>
 inline void ActiveSearchGrid::hitCell(const Eigen::Matrix<Scalar, 2, 1>& _pix)
 {
     hitCell(_pix(0), _pix(1));
 }
 
-/**
- * \brief Add a projected pixel to the grid.
- * \param _x the x-coordinate of the pixel to add.
- * \param _y the y-coordinate of the pixel to add.
- */
 template<typename Scalar>
 inline void ActiveSearchGrid::hitCell(const Scalar _x, const Scalar _y)
 {
@@ -303,9 +296,6 @@ inline void ActiveSearchGrid::hitCell(const Scalar _x, const Scalar _y)
     projections_count_(cell(0), cell(1))++;
 }
 
-/**
- * Get cell corresponding to pixel
- */
 template<typename Scalar>
 inline Eigen::Vector2i ActiveSearchGrid::coords2cell(const Scalar _x, const Scalar _y)
 {
@@ -317,47 +307,8 @@ inline Eigen::Vector2i ActiveSearchGrid::coords2cell(const Scalar _x, const Scal
 
 inline Eigen::Vector2i ActiveSearchGrid::cellCenter(const Eigen::Vector2i& _cell)
 {
-    return cellOrigin(_cell) + cell_size_ / 2;
+    return cellOrigin(_cell) + cell_size_ / 2; // beware these are all integers, so the result is truncated to the smaller integer
 }
-
-//#if 0
-//		/**
-//		 * Class for active search algorithms.
-//		 * \ingroup rtslam
-//		 */
-//		class ActiveSearch {
-//			public:
-//				vecb visibleObs;
-//				vecb selectedObs;
-
-//				/**
-//				 * Project all landmarks to the sensor space.
-//				 *
-//				 * This function also computes visibility and information gain
-//				 * for each observation.
-//				 * The result is a map of visible observations,
-//				 * ordered from least to most expected information gain.
-//				 *
-//				 * \param senPtr pointer to the sensor under consideration.
-//				 * \return a map of all observations that are visible from the sensor, ordered according to the information gain.
-//				 */
-//				std::map<double, observation_ptr_t> projectAll(const sensor_ptr_t & senPtr, Size & numVis);
-
-//				/**
-//				 * Predict observed appearance.
-//				 * This function predicts the appearance of the perceived landmark.
-//				 * It does so by computing the appearance of the landmark descriptor from the current sensor position.
-//				 * The result of this operation is an updated observation.
-//				 * \param obsPtr a pointer to the observation.
-//				 */
-//				void predictApp(const observation_ptr_t & obsPtr);
-
-//				/**
-//				 * Scan search region for match.
-//				 */
-//				void scanObs(const observation_ptr_t & obsPtr, const image::ConvexRoi & roi);
-//		};
-//#endif
 
 }
 
