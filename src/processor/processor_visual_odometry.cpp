@@ -221,6 +221,7 @@ unsigned int ProcessorVisualOdometry::processKnown()
     // Get tracks present at the last capture time (should be the most recent snapshot at this moment)
     std::list<FeatureBasePtr> tracks_snapshot_last = track_matrix_.snapshotAsList(last_ptr_);
 
+    TracksMap tracks_map_li = capture_image_incoming_->getTracksPrev();
     for (auto feature_tracked_last: tracks_snapshot_last){
         // check if the keypoint in the last capture is in the last->incoming TracksMap stored in the incoming capture
         FeaturePointImagePtr feat_pi_last = std::dynamic_pointer_cast<FeaturePointImage>(feature_tracked_last);
@@ -230,7 +231,7 @@ unsigned int ProcessorVisualOdometry::processKnown()
         // otherwise we store the pair as a newly detected track (for processNew)
         TracksMap tracks_map_li = capture_image_incoming_->getTracksPrev();
         if (tracks_map_li.count(id_feat_last)){
-            // std::cout << "A corresponding track has been found for id_feat_last " << id_feat_last  << std::endl;
+            // WOLF_TRACE("A corresponding track has been found for id_feat_last ", id_feat_last );
             auto kp_track_li = tracks_map_li.find(id_feat_last);
             // create a feature using the corresponding WKeyPoint contained in incoming (hence the "second")
             auto feat_inco = FeatureBase::emplace<FeaturePointImage>(
