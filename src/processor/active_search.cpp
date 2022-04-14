@@ -25,7 +25,7 @@
  * \author jsola, dinesh
  */
 
-#include "active_search.h"
+#include "vision/processor/active_search.h"
 
 #include <iostream>
 
