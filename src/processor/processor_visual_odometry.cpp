@@ -165,7 +165,7 @@ void ProcessorVisualOdometry::preProcess()
     WOLF_TRACE("# of tracks: ", n_tracks_origin, "; min # of tracks: ", params_visual_odometry_->min_features_for_keyframe);
     if (n_tracks_origin < params_visual_odometry_->min_features_for_keyframe){
 
-        WOLF_TRACE( "  Too Few Tracks" );
+        WOLF_TRACE( "Too Few Tracks" );
 
         // Detect new KeyPoints 
         std::vector<cv::KeyPoint> kps_last_new;
