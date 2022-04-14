@@ -49,9 +49,9 @@ namespace wolf{
          * behavior in landmark initialization.
          *
          * The grid defines a set of cells in the image.
-         * The idea is to count the number of projected landmarks per grid cell,
+         * The idea is to count the number of projected landmarks, or active tracks, per grid cell,
          * and use one randomly chosen cell that is empty
-         * for feature detection and landmark initialization.
+         * for feature detection and landmark or track initialization.
          * This guarantees that the system will automatically populate all the
          * regions of the image.
          *
@@ -63,7 +63,7 @@ namespace wolf{
          * This class implements a few interesting features:
          * - The grid can be randomly re-positioned at each frame to avoid dead zones at the cell edges.
          * - Only the inner cells are activated for feature detection to avoid reaching the image edges.
-         * - The region of interest (ROI) associated with a particular cell is shrinked with a parametrizable amount
+         * - The region of interest (ROI) associated with a particular cell is shrunk with a parameterizable amount
          *   to guarantee a minimum 'separation' between existing and new features.
          * - The region of interest is ensured to lie at a distance from the image boundaries, defined by the parameter 'margin'.
          *
