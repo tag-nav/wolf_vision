@@ -57,8 +57,8 @@ namespace wolf{
          *
          * The feature density can be controlled by adjusting the grid's number of cells.  Important notes:
          * - Typically, use grids of 5x5 to 18x12 cells.
-         * - The number of divisions in Horizontal and Vertical dimensions must be an integer divisor of the respective image dimensions
          * - Try to make reasonably square cells.
+         * - The final cell sizes are always integers, even if the H and V number of cells are not an exact divisors of the image size.
          *
          * This class implements a few interesting features:
          * - The grid can be randomly re-positioned at each frame to avoid dead zones at the cell edges.
