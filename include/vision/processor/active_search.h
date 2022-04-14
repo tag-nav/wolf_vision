@@ -118,9 +118,15 @@ namespace wolf{
          *   obs.process();                           // process observation
          *
          * // Now we go to initialization
-         * grid.pickRoi(roi);                          // roi is now region of interest
-         * if (detectFeature(roi))                    // detect inside ROI
-         *   initLandmark();                          // initialize only if successful detection
+         * num_new_detections = 0;
+         * while(num_new_detections < max_detections)
+         *   grid.pickRoi(roi);                         // roi is now region of interest
+         *   if (detectFeature(roi))                    // detect inside ROI
+         *     initLandmark();                          // initialize only if successful detection
+         *     num_new_detections++;
+         *   else
+         *     blockCell(roi)
+         *
          * \endcode
          *
          */
