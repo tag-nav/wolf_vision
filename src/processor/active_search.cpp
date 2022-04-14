@@ -31,7 +31,6 @@
 
 namespace wolf{
 
-// CLASS ActiveSearchGrid
 ActiveSearchGrid::ActiveSearchGrid() : separation_(0), margin_(0) {}
 
 ActiveSearchGrid::ActiveSearchGrid(const int & _img_size_h, const int & _img_size_v, const int & _n_cells_h,
@@ -70,7 +69,6 @@ void ActiveSearchGrid::resizeImage(unsigned int _img_size_h, unsigned int _img_s
 }
 
 
-// Functions to fill in cells
 bool ActiveSearchGrid::pickEmptyCell(Eigen::Vector2i & _cell) {
     int k = 0;
     Eigen::Vector2i cell0;
@@ -95,9 +93,6 @@ bool ActiveSearchGrid::pickEmptyCell(Eigen::Vector2i & _cell) {
         return false;
 }
 
-/*
- * Get cell origin (exact pixel)
- */
 Eigen::Vector2i ActiveSearchGrid::cellOrigin(const Eigen::Vector2i & _cell) {
     Eigen::Vector2i cell0;
     cell0(0) = offset_(0) + cell_size_(0) * _cell(0);
@@ -139,43 +134,5 @@ void ActiveSearchGrid::blockCell(const cv::Rect & _roi)
     projections_count_(cell(0), cell(1)) = -1;
 }
 
-/*
-#if 0
-        ////////////////////////////////////////////////////////
-        //    ACTIVE SEARCH ALGORITHMS
-        ////////////////////////////////////////////////////////
-
-        map<double, observation_ptr_t> ActiveSearch::projectAll(const sensor_ptr_t & senPtr, Size & numVis) {
-            map<double, observation_ptr_t> visObs;
-            for (SensorAbstract::DataManagerList::iterator dmaIter = senPtr->dataManagerList().begin(); dmaIter!=senPtr->dataManagerList().end(); dmaIter++ )
-              {
-                data_manager_ptr_t dmaPtr = *dmaIter;
-                for (DataManagerAbstract::ObservationList::iterator obsIter = dmaPtr->observationList().begin(); obsIter
-                   != dmaPtr->observationList().end(); obsIter++) {
-                  observation_ptr_t obsPtr = *obsIter;
-                  obsPtr->project();
-                  obsPtr->predictVisibility();
-                  if (obsPtr->isVisible()) {
-                obsPtr->predictInfoGain();
-                visObs[obsPtr->expectation.infoGain] = obsPtr; // this automatically sorts the observations ! ;-)
-                  }
-                }
-              }
-            return visObs;
-        }
-
-        void ActiveSearch::predictApp(const observation_ptr_t & obsPtr) {
-
-            // Get landmark descriptor
-            landmark_ptr_t lmkPtr = obsPtr->landmarkPtr();
-
-            // Get the sensor's current global pose
-            vec7 senPose = obsPtr->sensorPtr()->globalPose();
-        }
-
-        void ActiveSearch::scanObs(const observation_ptr_t & obsPtr, const image::ConvexRoi & roi) {
-        }
-#endif
-*/
 
 }

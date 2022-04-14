@@ -40,96 +40,96 @@
 
 namespace wolf{
 
-        /**
-         * \brief Active search tesselation grid.
-         *
-         * \author jsola, dinesh
-         *
-         * This class implements a tesselation grid for achieving active search
-         * behavior in landmark initialization.
-         *
-         * The grid defines a set of cells in the image.
-         * The idea is to count the number of projected landmarks, or active tracks, per grid cell,
-         * and use one randomly chosen cell that is empty
-         * for feature detection and landmark or track initialization.
-         * This guarantees that the system will automatically populate all the
-         * regions of the image.
-         *
-         * The feature density can be controlled by adjusting the grid's number of cells.  Important notes:
-         * - Typically, use grids of 5x5 to 18x12 cells.
-         * - Try to make reasonably square cells.
-         * - The final cell sizes are always integers, even if the H and V number of cells are not an exact divisors of the image size.
-         *
-         * This class implements a few interesting features:
-         * - The grid can be randomly re-positioned at each frame to avoid dead zones at the cell edges.
-         * - Only the inner cells are activated for feature detection to avoid reaching the image edges.
-         * - The region of interest (ROI) associated with a particular cell is shrunk with a parameterizable amount
-         *   to guarantee a minimum 'separation' between existing and new features.
-         * - The region of interest is ensured to lie at a distance from the image boundaries, defined by the parameter 'margin'.
-         *
-         * The blue and green grids in the figure below represent the grid
-         * at two different offsets, corresponding to two different frames.
-         *
-         *   \image html tesselationGrid.png "The tesselation grid used for active feature detection and initialization"
-         *
-         * This second figure shows a typical situation that we use to explain the basic mechanism.
-         *
-         *   \image html tesselationExample.png "A typical configuration of the tesselation grid"
-         *
-         * Observe the figure and use the following facts as an operation guide:
-         * - The grid is offset by a fraction of a cell size.
-         *     - use renew() at each frame to clear the grid and set a new offset.
-         * - Projected landmarks are represented by red dots.
-         *     - After projection, use hitCell() to add a new dot to the grid.
-         * - Cells with projected landmarks inside are 'occupied'.
-         * - Only the inner cells (thick blue rectangle) are considered for Region of Interest (ROI) extraction.
-         * - One cell is chosen randomly among those that are empty.
-         *     - Use pickRoi() to obtain an empty ROI for initialization.
-         * - The ROI is smaller than the cell to guarantee a minimum feature separation.
-         *     - Use the optional 'separation' parameter at construction time to control this separation.
-         * - A new feature is to be be searched inside this ROI.
-         * - If there is no feature found in this ROI, call blockCell() function to avoid searching in this area again.
-         * - If you need to search more than one feature per frame, proceed like this:
-         *     - Call pickRoi().
-         *     - Try to detect a Feature in ROI.
-         *     - If successful detection
-         *         - add the detected pixel with hitCell().
-         *     - Else
-         *         - block the cell with blockCell().
-         *     - Repeat these steps for each feature to be searched.
-         *
-         * We include here a schematic active-search pseudo-code algorithm to illustrate its operation:
-         * \code
-         * // Init necessary objects
-         * ActiveSearch activeSearch;
-         * ActiveSearchGrid grid(640, 480, 4, 4, 10); // Construction with 10 pixels separation.
-         *
-         * // We start projecting everybody
-         * for (obs = begin(); obs != end(); obs++)   // loop observations
-         * {
-         *   obs->project();
-         *   if (obs->isVisible())
-         *     grid.hiCell(obs->expectation.x());   // add only visible landmarks
-         * }
-         *
-         * // Then we process the selected observations
-         * activeSearch.selectObs();                  // select interesting features
-         * for (activeSearch.selectedObs);            // loop selected obs
-         *   obs.process();                           // process observation
-         *
-         * // Now we go to initialization
-         * num_new_detections = 0;
-         * while(num_new_detections < max_detections)
-         *   grid.pickRoi(roi);                         // roi is now region of interest
-         *   if (detectFeature(roi))                    // detect inside ROI
-         *     initLandmark();                          // initialize only if successful detection
-         *     num_new_detections++;
-         *   else
-         *     blockCell(roi)
-         *
-         * \endcode
-         *
-         */
+/**
+ * \brief Active search tesselation grid.
+ *
+ * \author jsola, dinesh
+ *
+ * This class implements a tesselation grid for achieving active search
+ * behavior in landmark initialization.
+ *
+ * The grid defines a set of cells in the image.
+ * The idea is to count the number of projected landmarks, or active tracks, per grid cell,
+ * and use one randomly chosen cell that is empty
+ * for feature detection and landmark or track initialization.
+ * This guarantees that the system will automatically populate all the
+ * regions of the image.
+ *
+ * The feature density can be controlled by adjusting the grid's number of cells.  Important notes:
+ * - Typically, use grids of 5x5 to 18x12 cells.
+ * - Try to make reasonably square cells.
+ * - The final cell sizes are always integers, even if the H and V number of cells are not an exact divisors of the image size.
+ *
+ * This class implements a few interesting features:
+ * - The grid can be randomly re-positioned at each frame to avoid dead zones at the cell edges.
+ * - Only the inner cells are activated for feature detection to avoid reaching the image edges.
+ * - The region of interest (ROI) associated with a particular cell is shrunk with a parameterizable amount
+ *   to guarantee a minimum 'separation' between existing and new features.
+ * - The region of interest is ensured to lie at a distance from the image boundaries, defined by the parameter 'margin'.
+ *
+ * The blue and green grids in the figure below represent the grid
+ * at two different offsets, corresponding to two different frames.
+ *
+ *   \image html tesselationGrid.png "The tesselation grid used for active feature detection and initialization"
+ *
+ * This second figure shows a typical situation that we use to explain the basic mechanism.
+ *
+ *   \image html tesselationExample.png "A typical configuration of the tesselation grid"
+ *
+ * Observe the figure and use the following facts as an operation guide:
+ * - The grid is offset by a fraction of a cell size.
+ *     - use renew() at each frame to clear the grid and set a new offset.
+ * - Projected landmarks are represented by red dots.
+ *     - After projection, use hitCell() to add a new dot to the grid.
+ * - Cells with projected landmarks inside are 'occupied'.
+ * - Only the inner cells (thick blue rectangle) are considered for Region of Interest (ROI) extraction.
+ * - One cell is chosen randomly among those that are empty.
+ *     - Use pickRoi() to obtain an empty ROI for initialization.
+ * - The ROI is smaller than the cell to guarantee a minimum feature separation.
+ *     - Use the optional 'separation' parameter at construction time to control this separation.
+ * - A new feature is to be be searched inside this ROI.
+ * - If there is no feature found in this ROI, call blockCell() function to avoid searching in this area again.
+ * - If you need to search more than one feature per frame, proceed like this:
+ *     - Call pickRoi().
+ *     - Try to detect a Feature in ROI.
+ *     - If successful detection
+ *         - add the detected pixel with hitCell().
+ *     - Else
+ *         - block the cell with blockCell().
+ *     - Repeat these steps for each feature to be searched.
+ *
+ * We include here a schematic active-search pseudo-code algorithm to illustrate its operation:
+ * \code
+ * // Init necessary objects
+ * ActiveSearch activeSearch;
+ * ActiveSearchGrid grid(640, 480, 4, 4, 10); // Construction with 10 pixels separation.
+ *
+ * // We start projecting everybody
+ * for (obs = begin(); obs != end(); obs++)   // loop observations
+ * {
+ *   obs->project();
+ *   if (obs->isVisible())
+ *     grid.hiCell(obs->expectation.x());   // add only visible landmarks
+ * }
+ *
+ * // Then we process the selected observations
+ * activeSearch.selectObs();                  // select interesting features
+ * for (activeSearch.selectedObs);            // loop selected obs
+ *   obs.process();                           // process observation
+ *
+ * // Now we go to initialization
+ * num_new_detections = 0;
+ * while(num_new_detections < max_detections)
+ *   grid.pickRoi(roi);                         // roi is now region of interest
+ *   if (detectFeature(roi))                    // detect inside ROI
+ *     initLandmark();                          // initialize only if successful detection
+ *     num_new_detections++;
+ *   else
+ *     blockCell(roi)
+ *
+ * \endcode
+ *
+ */
 class ActiveSearchGrid {
 
     private:
