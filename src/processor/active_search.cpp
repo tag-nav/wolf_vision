@@ -131,7 +131,12 @@ void ActiveSearchGrid::blockCell(const cv::Rect & _roi)
     pix(0) = _roi.x+_roi.width/2;
     pix(1) = _roi.y+_roi.height/2;
     Eigen::Vector2i cell = coords2cell(pix(0), pix(1));
-    projections_count_(cell(0), cell(1)) = -1;
+    blockCell(cell);
+}
+
+void ActiveSearchGrid::blockCell(const cv::Rect & _cell)
+{
+    projections_count_(_cell(0), _cell(1)) = -1;
 }
 
 

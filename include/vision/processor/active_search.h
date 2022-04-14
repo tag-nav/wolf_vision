@@ -236,6 +236,13 @@ class ActiveSearchGrid {
          */
         void blockCell(const cv::Rect & _roi);
 
+        /**
+         * \brief Call this after pickRoi if no point was found in the roi
+         * in order to avoid searching again in it.
+         * \param _cell the cell where nothing was found
+         */
+        void blockCell(const Vector2i & _cell);
+
 
     private:
         /**
