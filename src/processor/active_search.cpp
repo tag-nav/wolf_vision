@@ -76,7 +76,8 @@ bool ActiveSearchGrid::pickEmptyCell(Eigen::Vector2i & _cell) {
         for (int j = 1; j < grid_size_(1) - 1; j++) {
             cell0(0) = i;
             cell0(1) = j;
-            if (projections_count_(i, j) == 0) {
+            if (projections_count_(i, j) == 0) // cell in empty AND not blocked
+            {
                 empty_cells_tile_tmp_(0,k) = i; //may be done in a better way
                 empty_cells_tile_tmp_(1,k) = j;
                 k++;
@@ -125,6 +126,11 @@ bool ActiveSearchGrid::pickRoi(cv::Rect & _roi) {
         return false;
 }
 
+void ActiveSearchGrid::blockCell(const cv::Rect & _cell)
+{
+    projections_count_(_cell(0), _cell(1)) = -1;
+}
+
 void ActiveSearchGrid::blockCell(const cv::Rect & _roi)
 {
     Eigen::Vector2i pix;
@@ -134,9 +140,9 @@ void ActiveSearchGrid::blockCell(const cv::Rect & _roi)
     blockCell(cell);
 }
 
-void ActiveSearchGrid::blockCell(const cv::Rect & _cell)
+bool ActiveSearchGrid::isCellBlocked (const Eigen::Vector2i& _cell)
 {
-    projections_count_(_cell(0), _cell(1)) = -1;
+    return projections_count_(_cell(0), _cell(1)) < 0;
 }
 
 

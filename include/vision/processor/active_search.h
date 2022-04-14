@@ -203,6 +203,7 @@ class ActiveSearchGrid {
 
         /**
          * \brief Add a projected pixel to the grid.
+         * If the cell is blocked, unblock and add.
          * \param _x the x-coordinate of the pixel to add.
          * \param _y the y-coordinate of the pixel to add.
          */
@@ -211,6 +212,7 @@ class ActiveSearchGrid {
 
         /**
          * \brief Add a projected pixel to the grid.
+         * If the cell is blocked, unblock and add.
          * \param _pix the pixel to add as an Eigen 2-vector with any Scalar type (can be a non-integer).
          */
         template<typename Scalar>
@@ -218,6 +220,7 @@ class ActiveSearchGrid {
 
         /**
          * \brief Add a projected pixel to the grid.
+         * If the cell is blocked, unblock and add.
          * \param _pix the pixel to add as a cv::KeyPoint.
          */
         void hitCell(const cv::KeyPoint& _pix);
@@ -230,18 +233,17 @@ class ActiveSearchGrid {
         bool pickRoi(cv::Rect & _roi);
 
         /**
+         * \brief Block a cell known to be empty in order to avoid searching again in it.
+         * \param _cell the cell where nothing was found
+         */
+        void blockCell(const Eigen::Vector2i & _cell);
+
+        /**
          * \brief Call this after pickRoi if no point was found in the roi
          * in order to avoid searching again in it.
          * \param _roi the ROI where nothing was found
          */
         void blockCell(const cv::Rect & _roi);
-
-        /**
-         * \brief Call this after pickRoi if no point was found in the roi
-         * in order to avoid searching again in it.
-         * \param _cell the cell where nothing was found
-         */
-        void blockCell(const Vector2i & _cell);
 
 
     private:
@@ -270,6 +272,12 @@ class ActiveSearchGrid {
          * \brief Get the region of interest, reduced by a margin.
          */
         void cell2roi(const Eigen::Vector2i & _cell, cv::Rect& _roi);
+
+        /**
+         * \brief True if the cell is blocked
+         * \param _cell the queried cell
+         */
+        bool isCellBlocked(const Eigen::Vector2i& _cell);
 
 };
 
@@ -303,8 +311,8 @@ inline void ActiveSearchGrid::hitCell(const Scalar _x, const Scalar _y)
     if (cell(0) < 0 || cell(1) < 0 || cell(0) >= grid_size_(0) || cell(1) >= grid_size_(1))
         return;
 
-    if (projections_count_(cell(0), cell(1)) == -1)
-        projections_count_(cell(0), cell(1)) = 0;
+    if (isCellBlocked(cell))
+        projections_count_(cell(0), cell(1)) = 0; // unblock cell: it becomes empty
 
     projections_count_(cell(0), cell(1))++;
 }
