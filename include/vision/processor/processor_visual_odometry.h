@@ -113,7 +113,7 @@ class ProcessorVisualOdometry : public ProcessorTracker
 {
     public:
         ProcessorVisualOdometry(ParamsProcessorVisualOdometryPtr _params_visual_odometry);
-        ~ProcessorVisualOdometry() override {};
+        virtual ~ProcessorVisualOdometry() override {};
 
         WOLF_PROCESSOR_CREATE(ProcessorVisualOdometry, ParamsProcessorVisualOdometry);
 
@@ -145,13 +145,16 @@ class ProcessorVisualOdometry : public ProcessorTracker
 
     public:
 
+        /**
+         * \brief Get params from sensor to finish processor setup
+         */
         void configure(SensorBasePtr _sensor) override;
 
-        /** Pre-process incoming Capture, see ProcessorTracker
+        /** \brief Pre-process incoming Capture, see ProcessorTracker
          */
         void preProcess() override;
 
-        /** Post-process, see ProcessorTracker
+        /** \brief Post-process, see ProcessorTracker
          */
         virtual void postProcess() override;
 
@@ -159,7 +162,8 @@ class ProcessorVisualOdometry : public ProcessorTracker
          */
         bool voteForKeyFrame() const override;
 
-        /** \brief Tracker function
+        /**
+         * \brief Tracker function
          * \return The number of successful tracks.
          *
          * see ProcessorTracker
@@ -167,19 +171,23 @@ class ProcessorVisualOdometry : public ProcessorTracker
         unsigned int processKnown() override;
 
 
-        /** \brief Process new Features or Landmarks
-         *
+        /**
+         * \brief Process new Features
+         * \param _max_features the maximum number of new feature tracks
+         * \return the number of new tracks
          */
         unsigned int processNew(const int& _max_features) override;
 
 
-        /**\brief Creates and adds factors from last_ to origin_
-         *
+        /**
+         * \brief Creates and adds factors from last_ to origin_
          */
         void establishFactors() override;
 
-        /**\brief Emplace a landmark corresponding to a track and initialize it with triangulation.
-         *
+        /**
+         * \brief Emplace a landmark corresponding to a track and initialize it with triangulation.
+         * \param _feature_ptr a pointer to the feature used to create the new landmark
+         * \return a pointer to the created landmark
          */
         LandmarkBasePtr emplaceLandmark(FeatureBasePtr _feature_ptr);
 
@@ -195,7 +203,13 @@ class ProcessorVisualOdometry : public ProcessorTracker
          */
         void resetDerived() override;
 
-        /** \brief Implementation of pyramidal KLT with openCV
+        /**
+         * \brief Implementation of pyramidal KLT with openCV
+         * \param img_prev previous image
+         * \param img_curr current image
+         * \param mwkps_prev keypoints in previous image
+         * \param mwkps_curr keypoints in current image, those tracked from the previous image
+         * \return a map with track associations
          */
         TracksMap kltTrack(const cv::Mat img_prev, const cv::Mat img_curr, const KeyPointsMap &mwkps_prev, KeyPointsMap &mwkps_curr);
 
