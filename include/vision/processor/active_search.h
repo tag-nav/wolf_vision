@@ -34,9 +34,10 @@ namespace wolf{
          * This guarantees that the system will automatically populate all the
          * regions of the image.
          *
-         * The feature density can be controlled by
-         * adjusting the grid's number of cells.
-         * Typically, use grids of 5x5 to 18x12 cells. Try to make reasonably square cells.
+         * The feature density can be controlled by adjusting the grid's number of cells.  Important notes:
+         * - Typically, use grids of 5x5 to 18x12 cells.
+         * - The number of divisions in Horizontal and Vertical dimensions must be an integer divisor of the respective image dimensions
+         * - Try to make reasonably square cells.
          *
          * This class implements a few interesting features:
          * - The grid can be randomly re-positioned at each frame to avoid dead zones at the cell edges.
