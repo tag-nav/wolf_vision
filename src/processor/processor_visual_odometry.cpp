@@ -128,6 +128,7 @@ void ProcessorVisualOdometry::preProcess()
     // TracksMap between last and incoming
     // Input: ID of Wkp in last. Output: ID of the tracked Wkp in incoming.
     TracksMap tracks_last_incoming = kltTrack(img_last, img_incoming, mwkps_last, mwkps_incoming);
+    WOLF_INFO( "Tracked " , mwkps_incoming.size(), " keypoints..." );
 
     // TracksMap between origin and last
     // Input: ID of Wkp in origin. Output: ID of the tracked Wkp in last.
@@ -136,6 +137,7 @@ void ProcessorVisualOdometry::preProcess()
     // Merge tracks to get TracksMap between origin and incoming
     // Input: ID of Wkp in origin. Output: ID of the tracked Wkp in incoming.
     TracksMap tracks_origin_incoming = mergeTracks(tracks_origin_last, tracks_last_incoming);
+    WOLF_INFO( "Merged " , tracks_last_incoming.size(), " tracks..." );
 
     // Outliers rejection with essential matrix
     cv::Mat E;
@@ -151,6 +153,7 @@ void ProcessorVisualOdometry::preProcess()
             }
         }
     }
+    WOLF_INFO( "Retained " , tracks_last_incoming_filtered.size(), " inliers..." );
 
     // Update captures
     capture_image_incoming_->addKeyPoints(mwkps_incoming);
@@ -170,8 +173,11 @@ void ProcessorVisualOdometry::preProcess()
         // Detect new KeyPoints 
         std::vector<cv::KeyPoint> kps_last_new;
         detector_->detect(img_last, kps_last_new);
-        cv::KeyPointsFilter::retainBest(kps_last_new, params_visual_odometry_->max_new_features);
         WOLF_INFO("Detected ", kps_last_new.size(), " raw keypoints");
+        cv::KeyPointsFilter::retainBest(kps_last_new, params_visual_odometry_->max_new_features);
+        WOLF_INFO("Retained ", kps_last_new.size(), " raw keypoints");
+
+
         
         // Create a map of wolf KeyPoints to track only the new ones
         KeyPointsMap mwkps_last_new, mwkps_incoming_new;
@@ -179,15 +185,16 @@ void ProcessorVisualOdometry::preProcess()
             WKeyPoint wkp(cvkp);
             mwkps_last_new[wkp.getId()] = wkp;
         }
-        WOLF_INFO("Found ", mwkps_last_new.size(), " new keypoints in last");
+        WOLF_INFO("Found ", mwkps_last_new.size(), " keypoints in last that are new");
 
         TracksMap tracks_last_incoming_new = kltTrack(img_last, img_incoming, mwkps_last_new, mwkps_incoming_new);
+        WOLF_INFO("Tracked ", mwkps_incoming_new.size(), " new keypoints to incoming");
 
         // Outliers rejection with essential matrix
-        // tracks that are not geometrically consistent are removed from tracks_last_incoming_new 
-        cv::Mat E;
+        // tracks that are not geometrically consistent are removed from tracks_last_incoming_new
+//        cv::Mat E;
         filterWithEssential(mwkps_last_new, mwkps_incoming_new, tracks_last_incoming_new, E);
-        WOLF_INFO("Tracked ", mwkps_incoming_new.size(), " new keypoints to incoming");
+        WOLF_INFO("Retained ", mwkps_incoming_new.size(), " inliers");
 
         // Concatenation of old tracks and new tracks
         // Only keep tracks until it reaches a max nb of tracks
