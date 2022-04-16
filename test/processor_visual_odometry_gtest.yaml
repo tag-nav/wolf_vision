@@ -21,7 +21,14 @@ fast_params:
     threshold_fast: 50
     # Avoids getting multiple keypoints at the same place
     non_max_suppresion: true
-
+    # number of cells used by the active search grid data structure
+    active_search_grid_nb_h: 8  # horizontal
+    active_search_grid_nb_v: 8  # vertical
+    # minimum margin of the region of interest from the edges of the image 
+    active_search_margin: 10
+    # reduce the size of each region of interest by n pixels to prevent keypoints from being too close
+    active_search_separation: 10
+    
 # Lucas Kanade tracking parameters
 klt_params:
     patch_width: 15

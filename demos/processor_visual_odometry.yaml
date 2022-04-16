@@ -4,7 +4,7 @@ keyframe_vote:
     voting_active: true
     # Trigger a new keyframe creation as well as detection of new keypoints in last frame
     # when the track number goes below min_features_for_keyframe in incoming
-    min_features_for_keyframe: 10
+    min_features_for_keyframe: 20
 
 # Use a robust cost function
 apply_loss_function: true
@@ -18,9 +18,16 @@ max_new_features: 100
 fast_params:
     # Threshold on the keypoint pixel intensity (in uchar [0-255]) 
     # the higher, the more selective the detector is
-    threshold_fast: 50
+    threshold_fast: 30
     # Avoids getting multiple keypoints at the same place
     non_max_suppresion: true
+    # number of cells used by the active search grid data structure
+    active_search_grid_nb_h: 8  # horizontal
+    active_search_grid_nb_v: 8  # vertical
+    # minimum margin of the region of interest from the edges of the image 
+    active_search_margin: 10
+    # reduce the size of each region of interest by n pixels to prevent keypoints from being too close
+    active_search_separation: 10
 
 # Lucas Kanade tracking parameters
 klt_params:
@@ -30,7 +37,7 @@ klt_params:
     klt_max_err: 0.3
 
 # Keep the number of tracks below 
-max_nb_tracks: 20
+max_nb_tracks: 100
 
 # standard deviation of the pixel reprojection factor 
 std_pix: 1

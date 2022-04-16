@@ -54,6 +54,14 @@ void ProcessorVisualOdometry::configure(SensorBasePtr _sensor)
     Kcv_ = (cv::Mat_<float>(3,3) << K(0,0), 0, K(0,2),
                0, K(1,1), K(1,2),
                0, 0, 1);
+
+    
+    // Tessalation of the image
+    cell_grid_ = ActiveSearchGrid(sen_cam_->getImgWidth(), sen_cam_->getImgHeight(),
+                                  params_visual_odometry_->fast_params_.active_search_grid_nb_h_, 
+                                  params_visual_odometry_->fast_params_.active_search_grid_nb_v_,
+                                  params_visual_odometry_->fast_params_.active_search_margin_, 
+                                  params_visual_odometry_->fast_params_.active_search_separation_);
 }
 
 TracksMap ProcessorVisualOdometry::mergeTracks(TracksMap tracks_prev_curr, TracksMap tracks_curr_next){
@@ -81,13 +89,44 @@ void ProcessorVisualOdometry::preProcess()
     // if first image, compute keypoints, add to capture incoming and return
     if (last_ptr_ == nullptr){
 
-        // detect FAST keypoints
-        std::vector<cv::KeyPoint> kps_current;
-        detector_->detect(img_incoming, kps_current);
+        // detect FAST keypoints on the whole 
+
+        // std::vector<cv::KeyPoint> kps_current;
+        // detector_->detect(img_incoming, kps_current);
+
+        // We add all the detected KeyPoints to the cell, knowing that they are all empty at this point
+        for (int i=0; i < params_visual_odometry_->fast_params_.active_search_grid_nb_h_; i++){
+            for (int j=0; j < params_visual_odometry_->fast_params_.active_search_grid_nb_v_; j++){
+                cv::Rect rect_roi;
+                WOLF_INFO(i, j)
+                Eigen::Vector2i cell_index; cell_index << i,j;
+                cell_grid_.cell2roi(cell_index, rect_roi);
+
+                // some cells are not inside of the image (borders + padding), if not pass
+                bool is_inside = (rect_roi & cv::Rect(0, 0, img_incoming.cols, img_incoming.rows)) == rect_roi;
+                if (!is_inside){
+                    continue;
+                }
+                cv::Mat img_roi(img_incoming, rect_roi);  // no data copy -> no overhead
+                std::vector<cv::KeyPoint> kps_roi;
+                detector_->detect(img_roi, kps_roi);
+
+                if (kps_roi.size() > 0){
+                    // retain only the best image in each region of interest
+                    cv::KeyPointsFilter::retainBest(kps_roi, 1);
+                    // Keypoints are detected in the local coordinates of the region of interest
+                    // -> translate to the full image corner coordinate system
+                    kps_roi.at(0).pt.x = kps_roi.at(0).pt.x + rect_roi.x;
+                    kps_roi.at(0).pt.y = kps_roi.at(0).pt.y + rect_roi.y;
+                    // WOLF_TRACE("kps_roi first: ", kps_roi.at(0).pt.x, " ", kps_roi.at(0).pt.y)
+                    capture_image_incoming_->addKeyPoints(kps_roi);
+                }
+            }
+        }
 
         // Select a limited number of these keypoints
-        cv::KeyPointsFilter::retainBest(kps_current, params_visual_odometry_->max_new_features);
-        capture_image_incoming_->addKeyPoints(kps_current);
+        // cv::KeyPointsFilter::retainBest(kps_current, params_visual_odometry_->max_new_features);
+        // capture_image_incoming_->addKeyPoints(kps_current);
 
         // Initialize the tracks data structure with a "dummy track" where the keypoint is pointing to itself
         TracksMap tracks_init;
@@ -157,6 +196,9 @@ void ProcessorVisualOdometry::preProcess()
     capture_image_incoming_->setTracksPrev(tracks_last_incoming_filtered);
     capture_image_incoming_->setTracksOrigin(tracks_origin_incoming);
 
+
+    // Add valid 
+
     ////////////////////////////////
     // if too few tracks left in incoming
     // detect new KeyPoints in last and track them to incoming
@@ -167,10 +209,48 @@ void ProcessorVisualOdometry::preProcess()
 
         WOLF_TRACE( "  Too Few Tracks" );
 
+        // Erase all keypoints previously added to the cell grid
+        cell_grid_.renew();
+
+        // Add last Keypoints that still form valid tracks between last and incoming
+        for (auto track: tracks_last_incoming_filtered){
+            size_t last_kp_id = track.first;
+            cell_grid_.hitCell(capture_image_last_->getKeyPoints().at(last_kp_id).getCvKeyPoint());
+        }
+
+
         // Detect new KeyPoints 
         std::vector<cv::KeyPoint> kps_last_new;
-        detector_->detect(img_last, kps_last_new);
-        cv::KeyPointsFilter::retainBest(kps_last_new, params_visual_odometry_->max_new_features);
+        
+        // Detect in the whole image and retain N best: BAD because cannot control the repartition of KeyPoints
+        // detector_->detect(img_last, kps_last_new);
+        // cv::KeyPointsFilter::retainBest(kps_last_new, params_visual_odometry_->max_new_features);
+
+        // Instead, use the grid to detect new keypoints in empty cells
+        // We try a bunch of time to add keypoints to randomly selected empty regions of interest
+        for (int i=0; i < 50; i++){
+            cv::Rect rect_roi;
+            bool is_empty = cell_grid_.pickRoi(rect_roi);
+            WOLF_TRACE("rect_roi: ", rect_roi)
+            if (!is_empty){
+                break;
+            }
+            cv::Mat img_roi(img_incoming, rect_roi);  // no data copy -> no overhead
+            std::vector<cv::KeyPoint> kps_roi;
+            detector_->detect(img_roi, kps_roi);
+            if (kps_roi.size() > 0){
+                // retain only the best image in each region of interest
+                cv::KeyPointsFilter::retainBest(kps_roi, 1);
+                // Keypoints are detected in the local coordinates of the region of interest
+                // -> translate to the full image corner coordinate system
+                kps_roi.at(0).pt.x = kps_roi.at(0).pt.x + rect_roi.x;
+                kps_roi.at(0).pt.y = kps_roi.at(0).pt.y + rect_roi.y;
+                kps_last_new.push_back(kps_roi.at(0));
+                WOLF_TRACE(kps_roi.at(0).pt.x, " ", kps_roi.at(0).pt.y)
+            }
+        }
+
+
         WOLF_TRACE("Detected ", kps_last_new.size(), " new raw keypoints");
         
         // Create a map of wolf KeyPoints to track only the new ones

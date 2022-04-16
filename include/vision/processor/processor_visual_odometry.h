@@ -42,8 +42,7 @@
 #include "vision/feature/feature_point_image.h"
 #include "vision/landmark/landmark_hp.h"
 #include "vision/factor/factor_pixel_hp.h"
-
-// #include "vision/processor/klt_tracking.hpp"
+#include "vision/processor/active_search.h"
 
 
 
@@ -66,6 +65,10 @@ struct ParamsProcessorVisualOdometry : public ParamsProcessorTracker
     {
         int threshold_fast_;
         bool non_max_suppresion_;
+        unsigned int active_search_grid_nb_h_;
+        unsigned int active_search_grid_nb_v_;
+        unsigned int active_search_margin_;
+        unsigned int active_search_separation_;
     };
 
     double std_pix_;
@@ -88,6 +91,10 @@ struct ParamsProcessorVisualOdometry : public ParamsProcessorTracker
 
         fast_params_.threshold_fast_     = _server.getParam<int>( prefix + _unique_name + "/fast_params/threshold_fast");
         fast_params_.non_max_suppresion_ = _server.getParam<bool>(prefix + _unique_name + "/fast_params/non_max_suppresion");
+        fast_params_.active_search_grid_nb_h_  = _server.getParam<unsigned int>(prefix + _unique_name + "/fast_params/active_search_grid_nb_h");
+        fast_params_.active_search_grid_nb_v_  = _server.getParam<unsigned int>(prefix + _unique_name + "/fast_params/active_search_grid_nb_v");
+        fast_params_.active_search_margin_     = _server.getParam<unsigned int>(prefix + _unique_name + "/fast_params/active_search_margin");
+        fast_params_.active_search_separation_ = _server.getParam<unsigned int>(prefix + _unique_name + "/fast_params/active_search_separation");
 
         max_nb_tracks_ = _server.getParam<unsigned int>(prefix + _unique_name + "/max_nb_tracks");
         min_track_length_for_landmark_ = _server.getParam<unsigned int>(prefix + _unique_name + "/min_track_length_for_landmark");
@@ -95,15 +102,19 @@ struct ParamsProcessorVisualOdometry : public ParamsProcessorTracker
     }
     std::string print() const override
     {
-        return ParamsProcessorTracker::print()                                                         + "\n"
-            + "klt_params_.tracker_width_: "       + std::to_string(klt_params_.patch_width_)          + "\n"
-            + "klt_params_.tracker_height_: "      + std::to_string(klt_params_.patch_height_)         + "\n"
-            + "klt_params_.klt_max_err_: "         + std::to_string(klt_params_.klt_max_err_)          + "\n"
-            + "klt_params_.nlevels_pyramids_: "    + std::to_string(klt_params_.nlevels_pyramids_)     + "\n"
-            + "fast_params_.threshold_fast_    : " + std::to_string(fast_params_.threshold_fast_)      + "\n"
-            + "fast_params_.non_max_suppresion_: " + std::to_string(fast_params_.non_max_suppresion_)  + "\n"
-            + "max_nb_tracks_: "                   + std::to_string(max_nb_tracks_)                    + "\n"
-            + "min_track_length_for_landmark_: "   + std::to_string(min_track_length_for_landmark_)    + "\n";
+        return ParamsProcessorTracker::print()                                                                   + "\n"
+            + "klt_params_.tracker_width_:       " + std::to_string(klt_params_.patch_width_)                    + "\n"
+            + "klt_params_.tracker_height_:      " + std::to_string(klt_params_.patch_height_)                   + "\n"
+            + "klt_params_.klt_max_err_:         " + std::to_string(klt_params_.klt_max_err_)                    + "\n"
+            + "klt_params_.nlevels_pyramids_:    " + std::to_string(klt_params_.nlevels_pyramids_)               + "\n"
+            + "fast_params_.threshold_fast_:     " + std::to_string(fast_params_.threshold_fast_)                + "\n"
+            + "fast_params_.non_max_suppresion_: " + std::to_string(fast_params_.non_max_suppresion_)            + "\n"
+            + "fast_params_.active_search_grid_nb_h_:  " + std::to_string(fast_params_.active_search_grid_nb_h_) + "\n"
+            + "fast_params_.active_search_grid_nb_v_:  " + std::to_string(fast_params_.active_search_grid_nb_v_) + "\n"
+            + "fast_params_.active_search_margin_:     " + std::to_string(fast_params_.active_search_grid_nb_v_) + "\n"
+            + "fast_params_.active_search_separation_: " + std::to_string(fast_params_.active_search_grid_nb_v_) + "\n"
+            + "max_nb_tracks_:                   " + std::to_string(max_nb_tracks_)                              + "\n"
+            + "min_track_length_for_landmark_:   " + std::to_string(min_track_length_for_landmark_)              + "\n";
     }
 };
 
@@ -132,6 +143,8 @@ class ProcessorVisualOdometry : public ProcessorTracker
         CaptureImagePtr capture_image_incoming_;
         CaptureImagePtr capture_image_origin_;
         SensorCameraPtr sen_cam_;
+
+        ActiveSearchGrid cell_grid_;
 
     private:
         int frame_count_;
