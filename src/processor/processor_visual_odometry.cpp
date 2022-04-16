@@ -97,18 +97,12 @@ void ProcessorVisualOdometry::preProcess()
         // detector_->detect(img_incoming, kps_current);
 
         // We add all the detected KeyPoints to the cell, knowing that they are all empty at this point
-        for (int i=0; i < params_visual_odometry_->grid_params_.nbr_cells_h_; i++){
-            for (int j=0; j < params_visual_odometry_->grid_params_.nbr_cells_v_; j++){
+        for (int i=1; i < params_visual_odometry_->grid_params_.nbr_cells_h_-1; i++){
+            for (int j=1; j < params_visual_odometry_->grid_params_.nbr_cells_v_-1; j++){
                 cv::Rect rect_roi;
-                WOLF_INFO(i, j)
                 Eigen::Vector2i cell_index; cell_index << i,j;
                 cell_grid_.cell2roi(cell_index, rect_roi);
 
-                // some cells are not inside of the image (borders + padding), if not pass
-                bool is_inside = (rect_roi & cv::Rect(0, 0, img_incoming.cols, img_incoming.rows)) == rect_roi;
-                if (!is_inside){
-                    continue;
-                }
                 cv::Mat img_roi(img_incoming, rect_roi);  // no data copy -> no overhead
                 std::vector<cv::KeyPoint> kps_roi;
                 detector_->detect(img_roi, kps_roi);
@@ -120,14 +114,13 @@ void ProcessorVisualOdometry::preProcess()
                     // -> translate to the full image corner coordinate system
                     kps_roi.at(0).pt.x = kps_roi.at(0).pt.x + rect_roi.x;
                     kps_roi.at(0).pt.y = kps_roi.at(0).pt.y + rect_roi.y;
-                    // WOLF_TRACE("kps_roi first: ", kps_roi.at(0).pt.x, " ", kps_roi.at(0).pt.y)
                     capture_image_incoming_->addKeyPoints(kps_roi);
                 }
             }
         }
 
         // Select a limited number of these keypoints
-        // cv::KeyPointsFilter::retainBest(kps_current, params_visual_odometry_->max_new_features);
+        // retainBest(kps_current, params_visual_odometry_->max_new_features);
         // capture_image_incoming_->addKeyPoints(kps_current);
 
         // Initialize the tracks data structure with a "dummy track" where the keypoint is pointing to itself
@@ -230,7 +223,7 @@ void ProcessorVisualOdometry::preProcess()
         
         // Detect in the whole image and retain N best: BAD because cannot control the repartition of KeyPoints
         // detector_->detect(img_last, kps_last_new);
-        // cv::KeyPointsFilter::retainBest(kps_last_new, params_visual_odometry_->max_new_features);
+        // retainBest(kps_last_new, params_visual_odometry_->max_new_features);
 
         // Instead, use the grid to detect new keypoints in empty cells
         // We try a bunch of time to add keypoints to randomly selected empty regions of interest
@@ -246,7 +239,7 @@ void ProcessorVisualOdometry::preProcess()
             detector_->detect(img_roi, kps_roi);
             if (kps_roi.size() > 0){
                 // retain only the best image in each region of interest
-                cv::KeyPointsFilter::retainBest(kps_roi, 1);
+                retainBest(kps_roi, 1);
                 // Keypoints are detected in the local coordinates of the region of interest
                 // -> translate to the full image corner coordinate system
                 kps_roi.at(0).pt.x = kps_roi.at(0).pt.x + rect_roi.x;
@@ -634,7 +627,7 @@ bool ProcessorVisualOdometry::filterWithEssential(const KeyPointsMap _mwkps_prev
     return true;
 }
 
-VisualOdometry::retainBest(std::vector<cv::KeyPoint> &_keypoints, int n)
+void ProcessorVisualOdometry::retainBest(std::vector<cv::KeyPoint> &_keypoints, int n)
 {
     if (_keypoints.size() > n) {
         if (n == 0) {
@@ -646,6 +639,7 @@ VisualOdometry::retainBest(std::vector<cv::KeyPoint> &_keypoints, int n)
         _keypoints.resize(n);
     }
 }
+
 } //namespace wolf
 
 // Register in the FactoryProcessor
