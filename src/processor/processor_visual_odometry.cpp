@@ -91,20 +91,16 @@ void ProcessorVisualOdometry::preProcess()
     // if first image, compute keypoints, add to capture incoming and return
     if (last_ptr_ == nullptr){
 
-        // detect FAST keypoints on the whole 
-
-        // std::vector<cv::KeyPoint> kps_current;
-        // detector_->detect(img_incoming, kps_current);
-
-        // We add all the detected KeyPoints to the cell, knowing that they are all empty at this point
+        // detect one FAST keypoint in each cell of the grid
+        cv::Rect rect_roi;
+        Eigen::Vector2i cell_index;
+        std::vector<cv::KeyPoint> kps_roi;
         for (int i=1; i < params_visual_odometry_->grid_params_.nbr_cells_h_-1; i++){
             for (int j=1; j < params_visual_odometry_->grid_params_.nbr_cells_v_-1; j++){
-                cv::Rect rect_roi;
-                Eigen::Vector2i cell_index; cell_index << i,j;
+                cell_index << i,j;
                 cell_grid_.cell2roi(cell_index, rect_roi);
 
                 cv::Mat img_roi(img_incoming, rect_roi);  // no data copy -> no overhead
-                std::vector<cv::KeyPoint> kps_roi;
                 detector_->detect(img_roi, kps_roi);
 
                 if (kps_roi.size() > 0){
@@ -118,10 +114,6 @@ void ProcessorVisualOdometry::preProcess()
                 }
             }
         }
-
-        // Select a limited number of these keypoints
-        // retainBest(kps_current, params_visual_odometry_->max_new_features);
-        // capture_image_incoming_->addKeyPoints(kps_current);
 
         // Initialize the tracks data structure with a "dummy track" where the keypoint is pointing to itself
         TracksMap tracks_init;
@@ -142,9 +134,9 @@ void ProcessorVisualOdometry::preProcess()
     ////////////////////////
     // TRACKING
     // Proceeed to tracking the previous features
-    capture_image_last_ = std::static_pointer_cast<CaptureImage>(last_ptr_);
-    capture_image_origin_ = std::static_pointer_cast<CaptureImage>(origin_ptr_);
-    cv::Mat img_last = capture_image_last_->getImage();
+    capture_image_last_     = std::static_pointer_cast<CaptureImage>(last_ptr_);
+    capture_image_origin_   = std::static_pointer_cast<CaptureImage>(origin_ptr_);
+    cv::Mat img_last        = capture_image_last_->getImage();
 
     KeyPointsMap mwkps_origin   = capture_image_origin_ ->getKeyPoints();
     KeyPointsMap mwkps_last     = capture_image_last_   ->getKeyPoints();
@@ -159,10 +151,12 @@ void ProcessorVisualOdometry::preProcess()
     //   - ...
     ////////////////////////////////
 
+    WOLF_INFO( "Tracking " , mwkps_last.size(), " keypoints in last" );
+
     // TracksMap between last and incoming
     // Input: ID of Wkp in last. Output: ID of the tracked Wkp in incoming.
-    WOLF_INFO( "Tracking " , mwkps_last.size(), " keypoints in last" );
     TracksMap tracks_last_incoming = kltTrack(img_last, img_incoming, mwkps_last, mwkps_incoming);
+
     WOLF_INFO( "Tracked " , mwkps_incoming.size(), " keypoints to incoming" );
 
     // TracksMap between origin and last
@@ -172,6 +166,7 @@ void ProcessorVisualOdometry::preProcess()
     // Merge tracks to get TracksMap between origin and incoming
     // Input: ID of Wkp in origin. Output: ID of the tracked Wkp in incoming.
     TracksMap tracks_origin_incoming = mergeTracks(tracks_origin_last, tracks_last_incoming);
+
     WOLF_INFO( "Merged " , tracks_last_incoming.size(), " tracks..." );
 
     // Outliers rejection with essential matrix
@@ -208,7 +203,9 @@ void ProcessorVisualOdometry::preProcess()
     // detect new KeyPoints in last and track them to incoming
     ////////////////////////////////
     size_t n_tracks_origin = tracks_origin_incoming.size();
+
     WOLF_INFO("# of tracks: ", n_tracks_origin, "; min # of tracks: ", params_visual_odometry_->min_features_for_keyframe);
+
     if (n_tracks_origin < params_visual_odometry_->min_features_for_keyframe){
 
         WOLF_INFO( "Too Few Tracks. Detecting more keypoints..." );
@@ -274,12 +271,13 @@ void ProcessorVisualOdometry::preProcess()
         WOLF_INFO("Found ", mwkps_last_new.size(), " keypoints in last that are new");
 
         TracksMap tracks_last_incoming_new = kltTrack(img_last, img_incoming, mwkps_last_new, mwkps_incoming_new);
+
         WOLF_INFO("Tracked ", mwkps_incoming_new.size(), " new keypoints to incoming");
 
         // Outliers rejection with essential matrix
         // tracks that are not geometrically consistent are removed from tracks_last_incoming_new
-//        cv::Mat E;
         filterWithEssential(mwkps_last_new, mwkps_incoming_new, tracks_last_incoming_new, E);
+
         WOLF_INFO("Retained ", mwkps_incoming_new.size(), " inliers");
 
         // Concatenation of old tracks and new tracks
@@ -289,6 +287,7 @@ void ProcessorVisualOdometry::preProcess()
         for (auto & track: tracks_last_incoming_new){
             tracks_last_incoming_filtered[track.first] = track.second;
         }
+
         WOLF_INFO("New total : ", n_tracks_origin, " + ", mwkps_incoming_new.size(), " = ", tracks_last_incoming_filtered.size(), " tracks");
 
         // Update captures
@@ -302,8 +301,10 @@ void ProcessorVisualOdometry::preProcess()
     }
 
     auto dt_preprocess = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - t1).count();
+
     WOLF_INFO( "dt_preprocess (ms): " , dt_preprocess );
 
+    return;
 }
 
 
