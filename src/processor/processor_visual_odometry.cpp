@@ -180,9 +180,9 @@ void ProcessorVisualOdometry::preProcess()
 
     // Edit tracks prev with only inliers wrt origin
     TracksMap tracks_last_incoming_filtered;
-    for (auto & tracks_origin_incoming : tracks_origin_incoming){
+    for (auto & track_origin_incoming : tracks_origin_incoming){
         for (auto & track_last_incoming : tracks_last_incoming){
-            if (tracks_origin_incoming.second == track_last_incoming.second){
+            if (track_origin_incoming.second == track_last_incoming.second){
                 tracks_last_incoming_filtered[track_last_incoming.first] = track_last_incoming.second;
                 continue;
             }
