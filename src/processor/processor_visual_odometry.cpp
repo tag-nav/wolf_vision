@@ -418,20 +418,32 @@ void ProcessorVisualOdometry::establishFactors()
 
         // 1) create a factor between new KF and assocatiated track landmark
         //    HYP: assuming the trackid are the same as the landmark ID -> BAD if other types of landmarks involved
-        if (associated_lmk){
+        if (associated_lmk)
+        {
             LandmarkHpPtr associated_lmk_hp = std::dynamic_pointer_cast<LandmarkHp>(associated_lmk);
-            FactorBase::emplace<FactorPixelHp>(feat_pi, feat_pi, associated_lmk_hp, shared_from_this(), true);
+            FactorBase::emplace<FactorPixelHp>(feat_pi,
+                                               feat_pi,
+                                               associated_lmk_hp,
+                                               shared_from_this(),
+                                               params_visual_odometry_->apply_loss_function);
         }
 
         // 2) create landmark if track is not associated with one and has enough length
-        else if(track_matrix_.trackSize(feat->trackId()) >= params_visual_odometry_->min_track_length_for_landmark_){
+        else if(track_matrix_.trackSize(feat->trackId()) >= params_visual_odometry_->min_track_length_for_landmark_)
+        {
             // std::cout << "NEW valid track \\o/" << std::endl;
             LandmarkBasePtr lmk = emplaceLandmark(feat_pi);
             lmk->setId(feat_pi->trackId());
+
+            // Add factors from all KFs of this track to the new lmk
             Track track_kf = track_matrix_.trackAtKeyframes(feat->trackId());
-            for (auto feat_kf: track_kf){
+            for (auto feat_kf: track_kf)
+            {
                 LandmarkHpPtr lmk_hp = std::dynamic_pointer_cast<LandmarkHp>(lmk);
-                FactorBase::emplace<FactorPixelHp>(feat_kf.second, feat_kf.second, lmk_hp, shared_from_this(), true);
+                FactorBase::emplace<FactorPixelHp>(feat_kf.second,
+                                                   feat_kf.second,
+                                                   lmk_hp, shared_from_this(),
+                                                   params_visual_odometry_->apply_loss_function);
             }
         }
     }
