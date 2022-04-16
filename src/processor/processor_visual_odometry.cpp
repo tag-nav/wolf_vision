@@ -76,6 +76,7 @@ TracksMap ProcessorVisualOdometry::mergeTracks(TracksMap tracks_prev_curr, Track
 
 void ProcessorVisualOdometry::preProcess()
 {
+
     auto t1 = std::chrono::system_clock::now();
     
     // Get Capture
@@ -137,7 +138,7 @@ void ProcessorVisualOdometry::preProcess()
         capture_image_incoming_->setTracksPrev(tracks_init);
 
         auto dt_preprocess = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - t1).count();
-        std::cout << "dt_preprocess (ms): " << dt_preprocess << std::endl;
+        WOLF_INFO( "dt_preprocess (ms): " , dt_preprocess );
 
         return;
     }
@@ -166,7 +167,9 @@ void ProcessorVisualOdometry::preProcess()
 
     // TracksMap between last and incoming
     // Input: ID of Wkp in last. Output: ID of the tracked Wkp in incoming.
+    WOLF_INFO( "Tracking " , mwkps_last.size(), " keypoints in last" );
     TracksMap tracks_last_incoming = kltTrack(img_last, img_incoming, mwkps_last, mwkps_incoming);
+    WOLF_INFO( "Tracked " , mwkps_incoming.size(), " keypoints to incoming" );
 
     // TracksMap between origin and last
     // Input: ID of Wkp in origin. Output: ID of the tracked Wkp in last.
@@ -175,6 +178,7 @@ void ProcessorVisualOdometry::preProcess()
     // Merge tracks to get TracksMap between origin and incoming
     // Input: ID of Wkp in origin. Output: ID of the tracked Wkp in incoming.
     TracksMap tracks_origin_incoming = mergeTracks(tracks_origin_last, tracks_last_incoming);
+    WOLF_INFO( "Merged " , tracks_last_incoming.size(), " tracks..." );
 
     // Outliers rejection with essential matrix
     cv::Mat E;
@@ -190,6 +194,7 @@ void ProcessorVisualOdometry::preProcess()
             }
         }
     }
+    WOLF_INFO( "Retained " , tracks_last_incoming_filtered.size(), " inliers..." );
 
     // Update captures
     capture_image_incoming_->addKeyPoints(mwkps_incoming);
@@ -204,10 +209,10 @@ void ProcessorVisualOdometry::preProcess()
     // detect new KeyPoints in last and track them to incoming
     ////////////////////////////////
     size_t n_tracks_origin = tracks_origin_incoming.size();
-    WOLF_TRACE("# of tracks: ", n_tracks_origin, "; min # of tracks: ", params_visual_odometry_->min_features_for_keyframe);
+    WOLF_INFO("# of tracks: ", n_tracks_origin, "; min # of tracks: ", params_visual_odometry_->min_features_for_keyframe);
     if (n_tracks_origin < params_visual_odometry_->min_features_for_keyframe){
 
-        WOLF_TRACE( "  Too Few Tracks" );
+        WOLF_INFO( "Too Few Tracks. Detecting more keypoints..." );
 
         // Erase all keypoints previously added to the cell grid
         cell_grid_.renew();
@@ -250,7 +255,6 @@ void ProcessorVisualOdometry::preProcess()
             }
         }
 
-
         WOLF_TRACE("Detected ", kps_last_new.size(), " new raw keypoints");
         
         // Create a map of wolf KeyPoints to track only the new ones
@@ -259,15 +263,16 @@ void ProcessorVisualOdometry::preProcess()
             WKeyPoint wkp(cvkp);
             mwkps_last_new[wkp.getId()] = wkp;
         }
-        WOLF_TRACE("Found ", mwkps_last_new.size(), " new keypoints");
+        WOLF_INFO("Found ", mwkps_last_new.size(), " keypoints in last that are new");
 
         TracksMap tracks_last_incoming_new = kltTrack(img_last, img_incoming, mwkps_last_new, mwkps_incoming_new);
+        WOLF_INFO("Tracked ", mwkps_incoming_new.size(), " new keypoints to incoming");
 
         // Outliers rejection with essential matrix
-        // tracks that are not geometrically consistent are removed from tracks_last_incoming_new 
-        cv::Mat E;
+        // tracks that are not geometrically consistent are removed from tracks_last_incoming_new
+//        cv::Mat E;
         filterWithEssential(mwkps_last_new, mwkps_incoming_new, tracks_last_incoming_new, E);
-        WOLF_TRACE("Tracked ", mwkps_incoming_new.size(), " new keypoints");
+        WOLF_INFO("Retained ", mwkps_incoming_new.size(), " inliers");
 
         // Concatenation of old tracks and new tracks
         // Only keep tracks until it reaches a max nb of tracks
@@ -281,7 +286,7 @@ void ProcessorVisualOdometry::preProcess()
             tracks_last_incoming_filtered[track.first] = track.second;
             count_new_tracks++;
         }
-        WOLF_TRACE("New total : ", tracks_last_incoming_filtered.size(), " tracks");
+        WOLF_INFO("New total : ", n_tracks_origin, " + ", mwkps_incoming_new.size(), " = ", tracks_last_incoming_filtered.size(), " tracks");
 
         // Update captures
         capture_image_last_->addKeyPoints(mwkps_last_new);
@@ -301,6 +306,7 @@ void ProcessorVisualOdometry::preProcess()
 
 unsigned int ProcessorVisualOdometry::processKnown()
 {
+
     auto t1 = std::chrono::system_clock::now();
     // Extend the process track matrix by using information stored in the incoming capture
 
@@ -317,7 +323,7 @@ unsigned int ProcessorVisualOdometry::processKnown()
         // otherwise we store the pair as a newly detected track (for processNew)
         TracksMap tracks_map_li = capture_image_incoming_->getTracksPrev();
         if (tracks_map_li.count(id_feat_last)){
-            // WOLF_TRACE("A corresponding track has been found for id_feat_last ", id_feat_last );
+            // WOLF_INFO("A corresponding track has been found for id_feat_last ", id_feat_last );
             auto kp_track_li = tracks_map_li.find(id_feat_last);
             // create a feature using the corresponding WKeyPoint contained in incoming (hence the "second")
             auto feat_inco = FeatureBase::emplace<FeaturePointImage>(
@@ -333,7 +339,7 @@ unsigned int ProcessorVisualOdometry::processKnown()
         }
     }
     auto dt_processKnown = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - t1).count();
-    std::cout << "dt_processKnown (ms): " << dt_processKnown << std::endl;
+    WOLF_INFO( "dt_processKnown (ms): " , dt_processKnown );
 
     // return number of successful tracks until incoming
     return tracks_map_li_matched_.size();
@@ -373,7 +379,7 @@ unsigned int ProcessorVisualOdometry::processNew(const int& _max_features)
     }
 
     auto dt_processNew = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - t1).count();
-    std::cout << "dt_processNew (ms): " << dt_processNew << std::endl;
+    WOLF_INFO( "dt_processNew (ms): " , dt_processNew );
 
     return counter_new_tracks;
 }
@@ -392,12 +398,21 @@ void ProcessorVisualOdometry::establishFactors()
     //        For bookkeeping, define the landmark id as the track id.
 
     std::list<FeatureBasePtr> tracks_snapshot_last = track_matrix_.snapshotAsList(last_ptr_);
-    for (auto feat: tracks_snapshot_last){
+
+    if(tracks_snapshot_last.empty())
+    {
+        WOLF_WARN("Trying to establish factors but no features exist in last Capture!");
+        return;
+    }
+
+    for (auto feat: tracks_snapshot_last)
+    {
         auto feat_pi = std::static_pointer_cast<FeaturePointImage>(feat);
 
         // verify if a landmark is associated to this track (BAD implementation)
         LandmarkBasePtr associated_lmk = nullptr;
-        for (auto lmk: getProblem()->getMap()->getLandmarkList()){
+        for (auto lmk: getProblem()->getMap()->getLandmarkList())
+        {
             if (lmk->id() == feat_pi->trackId()){
                 associated_lmk = lmk;
             }
@@ -423,6 +438,7 @@ void ProcessorVisualOdometry::establishFactors()
         }
     }
 
+    return;
 }
 
 LandmarkBasePtr ProcessorVisualOdometry::emplaceLandmark(FeatureBasePtr _feat)
@@ -476,6 +492,7 @@ void ProcessorVisualOdometry::postProcess()
 
 bool ProcessorVisualOdometry::voteForKeyFrame() const
 {
+
     // If the last capture was repopulated in preProcess, it means that the number of tracks fell
     // below a threshold in the current incoming track and that, as a consequence, last capture keypoints
     // was repopulated. In this case, the processor needs to create a new Keyframe whatever happens.
@@ -488,6 +505,7 @@ bool ProcessorVisualOdometry::voteForKeyFrame() const
     vote = vote || incoming_ptr_->getFeatureList().size() < params_visual_odometry_->min_features_for_keyframe;
 
     std::cout << "vote " << vote << std::endl;
+
     return vote;
 }
 
@@ -513,6 +531,8 @@ void ProcessorVisualOdometry::setParams(const ParamsProcessorVisualOdometryPtr _
 
 TracksMap ProcessorVisualOdometry::kltTrack(const cv::Mat _img_prev, const cv::Mat _img_curr, const KeyPointsMap &_mwkps_prev, KeyPointsMap &_mwkps_curr)
 {
+    if (_mwkps_prev.empty()) return TracksMap();
+
     TracksMap tracks_prev_curr;
 
     // Create cv point list for tracking, we initialize optical flow with previous keypoints
@@ -528,6 +548,8 @@ TracksMap ProcessorVisualOdometry::kltTrack(const cv::Mat _img_prev, const cv::M
     // Configure and process KLT optical flow research
     std::vector<uchar> status;
     std::vector<float> err;
+
+
 
     // Process one way: previous->current with current init with previous
     ParamsProcessorVisualOdometry::KltParams prms = params_visual_odometry_->klt_params_;
@@ -579,6 +601,7 @@ TracksMap ProcessorVisualOdometry::kltTrack(const cv::Mat _img_prev, const cv::M
 
 bool ProcessorVisualOdometry::filterWithEssential(const KeyPointsMap _mwkps_prev, const KeyPointsMap _mwkps_curr, TracksMap &_tracks_prev_curr, cv::Mat &_E)
 {
+
     // We need to build lists of pt2f for openCV function
     std::vector<cv::Point2f> p2f_prev, p2f_curr;
     std::vector<size_t> all_indices;
@@ -606,6 +629,7 @@ bool ProcessorVisualOdometry::filterWithEssential(const KeyPointsMap _mwkps_prev
             _tracks_prev_curr.erase(all_indices.at(k));
         }
     }
+
     return true;
 }
 
