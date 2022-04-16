@@ -284,13 +284,8 @@ void ProcessorVisualOdometry::preProcess()
         // Only keep tracks until it reaches a max nb of tracks
         // TODO: the strategy for keeping the best new tracks is dumb
         //    -> should be improved for a better spatial repartition
-//        unsigned int count_new_tracks = 0;
         for (auto & track: tracks_last_incoming_new){
-//            if ((n_tracks_origin + count_new_tracks) >= params_visual_odometry_->max_nb_tracks_){
-//                break;
-//            }
             tracks_last_incoming_filtered[track.first] = track.second;
-//            count_new_tracks++;
         }
         WOLF_INFO("New total : ", n_tracks_origin, " + ", mwkps_incoming_new.size(), " = ", tracks_last_incoming_filtered.size(), " tracks");
 
