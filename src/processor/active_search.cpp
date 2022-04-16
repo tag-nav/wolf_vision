@@ -126,7 +126,7 @@ bool ActiveSearchGrid::pickRoi(cv::Rect & _roi) {
         return false;
 }
 
-void ActiveSearchGrid::blockCell(const cv::Rect & _cell)
+void ActiveSearchGrid::blockCell(const Eigen::Vector2i & _cell)
 {
     projections_count_(_cell(0), _cell(1)) = -1;
 }

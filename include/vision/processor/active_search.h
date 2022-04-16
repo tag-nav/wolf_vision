@@ -245,8 +245,6 @@ class ActiveSearchGrid {
          */
         void blockCell(const cv::Rect & _roi);
 
-        Eigen::Vector2i getGridSize() {return grid_size_;}
-
         /**
          * \brief Get the region of interest, reduced by a margin.
          */
@@ -273,11 +271,6 @@ class ActiveSearchGrid {
          * \brief Get one random empty cell
          */
         bool pickEmptyCell(Eigen::Vector2i & _cell);
-
-        /**
-         * \brief Get the region of interest, reduced by a margin.
-         */
-        void cell2roi(const Eigen::Vector2i & _cell, cv::Rect& _roi);
 
         /**
          * \brief True if the cell is blocked
