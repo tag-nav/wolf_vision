@@ -65,15 +65,20 @@ struct ParamsProcessorVisualOdometry : public ParamsProcessorTracker
     {
         int threshold_fast_;
         bool non_max_suppresion_;
-        unsigned int active_search_grid_nb_h_;
-        unsigned int active_search_grid_nb_v_;
-        unsigned int active_search_margin_;
-        unsigned int active_search_separation_;
+    };
+
+    struct GridParams
+    {
+        unsigned int nbr_cells_h_;
+        unsigned int nbr_cells_v_;
+        unsigned int margin_;
+        unsigned int separation_;
     };
 
     double std_pix_;
     KltParams klt_params_;
     FastParams fast_params_;
+    GridParams grid_params_;
     unsigned int max_nb_tracks_;
     unsigned int min_track_length_for_landmark_;
 
@@ -91,10 +96,11 @@ struct ParamsProcessorVisualOdometry : public ParamsProcessorTracker
 
         fast_params_.threshold_fast_     = _server.getParam<int>( prefix + _unique_name + "/fast_params/threshold_fast");
         fast_params_.non_max_suppresion_ = _server.getParam<bool>(prefix + _unique_name + "/fast_params/non_max_suppresion");
-        fast_params_.active_search_grid_nb_h_  = _server.getParam<unsigned int>(prefix + _unique_name + "/fast_params/active_search_grid_nb_h");
-        fast_params_.active_search_grid_nb_v_  = _server.getParam<unsigned int>(prefix + _unique_name + "/fast_params/active_search_grid_nb_v");
-        fast_params_.active_search_margin_     = _server.getParam<unsigned int>(prefix + _unique_name + "/fast_params/active_search_margin");
-        fast_params_.active_search_separation_ = _server.getParam<unsigned int>(prefix + _unique_name + "/fast_params/active_search_separation");
+
+        grid_params_.nbr_cells_h_   = _server.getParam<unsigned int>(prefix + _unique_name + "/grid_params/nbr_cells_h");
+        grid_params_.nbr_cells_v_   = _server.getParam<unsigned int>(prefix + _unique_name + "/grid_params/nbr_cells_v");
+        grid_params_.margin_        = _server.getParam<unsigned int>(prefix + _unique_name + "/grid_params/margin");
+        grid_params_.separation_    = _server.getParam<unsigned int>(prefix + _unique_name + "/grid_params/separation");
 
         max_nb_tracks_ = _server.getParam<unsigned int>(prefix + _unique_name + "/max_nb_tracks");
         min_track_length_for_landmark_ = _server.getParam<unsigned int>(prefix + _unique_name + "/min_track_length_for_landmark");
@@ -109,10 +115,10 @@ struct ParamsProcessorVisualOdometry : public ParamsProcessorTracker
             + "klt_params_.nlevels_pyramids_:    " + std::to_string(klt_params_.nlevels_pyramids_)               + "\n"
             + "fast_params_.threshold_fast_:     " + std::to_string(fast_params_.threshold_fast_)                + "\n"
             + "fast_params_.non_max_suppresion_: " + std::to_string(fast_params_.non_max_suppresion_)            + "\n"
-            + "fast_params_.active_search_grid_nb_h_:  " + std::to_string(fast_params_.active_search_grid_nb_h_) + "\n"
-            + "fast_params_.active_search_grid_nb_v_:  " + std::to_string(fast_params_.active_search_grid_nb_v_) + "\n"
-            + "fast_params_.active_search_margin_:     " + std::to_string(fast_params_.active_search_grid_nb_v_) + "\n"
-            + "fast_params_.active_search_separation_: " + std::to_string(fast_params_.active_search_grid_nb_v_) + "\n"
+            + "grid_params_.nbr_cells_h_:        " + std::to_string(grid_params_.nbr_cells_h_)                   + "\n"
+            + "grid_params_.nbr_cells_v_:        " + std::to_string(grid_params_.nbr_cells_v_)                   + "\n"
+            + "grid_params_.margin_:             " + std::to_string(grid_params_.margin_)                        + "\n"
+            + "grid_params_.separation_:         " + std::to_string(grid_params_.separation_)                    + "\n"
             + "max_nb_tracks_:                   " + std::to_string(max_nb_tracks_)                              + "\n"
             + "min_track_length_for_landmark_:   " + std::to_string(min_track_length_for_landmark_)              + "\n";
     }

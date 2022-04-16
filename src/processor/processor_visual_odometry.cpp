@@ -58,10 +58,10 @@ void ProcessorVisualOdometry::configure(SensorBasePtr _sensor)
     
     // Tessalation of the image
     cell_grid_ = ActiveSearchGrid(sen_cam_->getImgWidth(), sen_cam_->getImgHeight(),
-                                  params_visual_odometry_->fast_params_.active_search_grid_nb_h_, 
-                                  params_visual_odometry_->fast_params_.active_search_grid_nb_v_,
-                                  params_visual_odometry_->fast_params_.active_search_margin_, 
-                                  params_visual_odometry_->fast_params_.active_search_separation_);
+                                  params_visual_odometry_->grid_params_.nbr_cells_h_,
+                                  params_visual_odometry_->grid_params_.nbr_cells_v_,
+                                  params_visual_odometry_->grid_params_.margin_,
+                                  params_visual_odometry_->grid_params_.separation_);
 }
 
 TracksMap ProcessorVisualOdometry::mergeTracks(TracksMap tracks_prev_curr, TracksMap tracks_curr_next){
@@ -96,8 +96,8 @@ void ProcessorVisualOdometry::preProcess()
         // detector_->detect(img_incoming, kps_current);
 
         // We add all the detected KeyPoints to the cell, knowing that they are all empty at this point
-        for (int i=0; i < params_visual_odometry_->fast_params_.active_search_grid_nb_h_; i++){
-            for (int j=0; j < params_visual_odometry_->fast_params_.active_search_grid_nb_v_; j++){
+        for (int i=0; i < params_visual_odometry_->grid_params_.nbr_cells_h_; i++){
+            for (int j=0; j < params_visual_odometry_->grid_params_.nbr_cells_v_; j++){
                 cv::Rect rect_roi;
                 WOLF_INFO(i, j)
                 Eigen::Vector2i cell_index; cell_index << i,j;
@@ -279,13 +279,13 @@ void ProcessorVisualOdometry::preProcess()
         // Only keep tracks until it reaches a max nb of tracks
         // TODO: the strategy for keeping the best new tracks is dumb
         //    -> should be improved for a better spatial repartition
-        unsigned int count_new_tracks = 0;
+//        unsigned int count_new_tracks = 0;
         for (auto & track: tracks_last_incoming_new){
-            if ((n_tracks_origin + count_new_tracks) >= params_visual_odometry_->max_nb_tracks_){
-                break;
-            }
+//            if ((n_tracks_origin + count_new_tracks) >= params_visual_odometry_->max_nb_tracks_){
+//                break;
+//            }
             tracks_last_incoming_filtered[track.first] = track.second;
-            count_new_tracks++;
+//            count_new_tracks++;
         }
         WOLF_INFO("New total : ", n_tracks_origin, " + ", mwkps_incoming_new.size(), " = ", tracks_last_incoming_filtered.size(), " tracks");
 
