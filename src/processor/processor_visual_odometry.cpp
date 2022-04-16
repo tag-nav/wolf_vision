@@ -115,7 +115,7 @@ void ProcessorVisualOdometry::preProcess()
 
                 if (kps_roi.size() > 0){
                     // retain only the best image in each region of interest
-                    cv::KeyPointsFilter::retainBest(kps_roi, 1);
+                    retainBest(kps_roi, 1);
                     // Keypoints are detected in the local coordinates of the region of interest
                     // -> translate to the full image corner coordinate system
                     kps_roi.at(0).pt.x = kps_roi.at(0).pt.x + rect_roi.x;
