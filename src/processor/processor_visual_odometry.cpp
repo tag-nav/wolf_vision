@@ -36,7 +36,8 @@ ProcessorVisualOdometry::ProcessorVisualOdometry(ParamsProcessorVisualOdometryPt
 {
     // Preprocessor stuff
     detector_ = cv::FastFeatureDetector::create(_params_vo->fast_params_.threshold_fast_, 
-                                                _params_vo->fast_params_.non_max_suppresion_);
+                                                _params_vo->fast_params_.non_max_suppresion_,
+                                                cv::FastFeatureDetector::TYPE_7_12); // TYPE_5_8, TYPE_7_12, TYPE_9_16
     
     // Processor stuff
     // Set pixel noise covariance
