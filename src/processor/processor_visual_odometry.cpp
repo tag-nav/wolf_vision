@@ -190,13 +190,18 @@ void ProcessorVisualOdometry::preProcess()
     }
     WOLF_INFO( "Retained " , tracks_last_incoming_filtered.size(), " inliers..." );
 
+    // Remove from mwkps_incoming all the keypoints that have not been tracked
+    // TODO: there might be a faster way than creating a new map from scratch?
+    KeyPointsMap mwkps_incoming_fitered;
+    for (auto track : tracks_last_incoming_filtered)
+        mwkps_incoming_fitered[track.second] = mwkps_incoming[track.second];
+
     // Update captures
-    capture_image_incoming_->addKeyPoints(mwkps_incoming);
+    capture_image_incoming_->addKeyPoints(mwkps_incoming_fitered);
     capture_image_incoming_->setTracksPrev(tracks_last_incoming_filtered);
     capture_image_incoming_->setTracksOrigin(tracks_origin_incoming);
 
 
-    // Add valid 
 
     ////////////////////////////////
     // if too few tracks left in incoming
