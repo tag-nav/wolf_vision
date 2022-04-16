@@ -239,7 +239,6 @@ void ProcessorVisualOdometry::preProcess()
             bool is_empty = cell_grid_.pickRoi(rect_roi);
             WOLF_TRACE("rect_roi: ", rect_roi)
             if (!is_empty){
-                cell_grid_.blockCell(rect_roi);
                 break;
             }
             cv::Mat img_roi(img_incoming, rect_roi);  // no data copy -> no overhead
@@ -254,6 +253,11 @@ void ProcessorVisualOdometry::preProcess()
                 kps_roi.at(0).pt.y = kps_roi.at(0).pt.y + rect_roi.y;
                 kps_last_new.push_back(kps_roi.at(0));
                 WOLF_TRACE(kps_roi.at(0).pt.x, " ", kps_roi.at(0).pt.y)
+                cell_grid_.hitCell(kps_roi.at(0));
+            }
+            else
+            {
+                cell_grid_.blockCell(rect_roi);
             }
         }
 
