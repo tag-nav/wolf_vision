@@ -244,8 +244,10 @@ class ProcessorVisualOdometry : public ProcessorTracker
 
         const TrackMatrix& getTrackMatrix() const {return track_matrix_;}
 
-};
+    private:
+        void retainBest(std::vector<cv::KeyPoint> &_keypoints, int n);
 
+};
 
 } //namespace wolf
 

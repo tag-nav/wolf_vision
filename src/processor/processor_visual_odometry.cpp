@@ -634,7 +634,18 @@ bool ProcessorVisualOdometry::filterWithEssential(const KeyPointsMap _mwkps_prev
     return true;
 }
 
-
+VisualOdometry::retainBest(std::vector<cv::KeyPoint> &_keypoints, int n)
+{
+    if (_keypoints.size() > n) {
+        if (n == 0) {
+            _keypoints.clear();
+            return;
+        }
+        std::nth_element(_keypoints.begin(), _keypoints.begin() + n, _keypoints.end(),
+            [](cv::KeyPoint& a, cv::KeyPoint& b) { return a.response > b.response; });
+        _keypoints.resize(n);
+    }
+}
 } //namespace wolf
 
 // Register in the FactoryProcessor
