@@ -229,27 +229,31 @@ void ProcessorVisualOdometry::preProcess()
         // We try a bunch of time to add keypoints to randomly selected empty regions of interest
         for (int i=0; i < params_visual_odometry_->max_new_features; i++){
             cv::Rect rect_roi;
+
             bool is_empty = cell_grid_.pickRoi(rect_roi);
-            WOLF_TRACE("rect_roi: ", rect_roi)
-            if (!is_empty){
+            if (!is_empty) // no empty cells!
+            {
                 break;
             }
             cv::Mat img_roi(img_incoming, rect_roi);  // no data copy -> no overhead
             std::vector<cv::KeyPoint> kps_roi;
             detector_->detect(img_roi, kps_roi);
             if (kps_roi.size() > 0){
-                // retain only the best image in each region of interest
+                // retain only the best keypoint in each region of interest
                 retainBest(kps_roi, 1);
+
+                // update grid with this detection
+                cell_grid_.hitCell(kps_roi.at(0));
+
                 // Keypoints are detected in the local coordinates of the region of interest
                 // -> translate to the full image corner coordinate system
                 kps_roi.at(0).pt.x = kps_roi.at(0).pt.x + rect_roi.x;
                 kps_roi.at(0).pt.y = kps_roi.at(0).pt.y + rect_roi.y;
                 kps_last_new.push_back(kps_roi.at(0));
-                WOLF_TRACE(kps_roi.at(0).pt.x, " ", kps_roi.at(0).pt.y)
-                cell_grid_.hitCell(kps_roi.at(0));
             }
             else
             {
+                // block this grid's cell so that it is not reused for detection
                 cell_grid_.blockCell(rect_roi);
             }
         }
