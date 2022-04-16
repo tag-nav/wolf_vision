@@ -233,11 +233,12 @@ void ProcessorVisualOdometry::preProcess()
 
         // Instead, use the grid to detect new keypoints in empty cells
         // We try a bunch of time to add keypoints to randomly selected empty regions of interest
-        for (int i=0; i < 50; i++){
+        for (int i=0; i < params_visual_odometry_->max_new_features; i++){
             cv::Rect rect_roi;
             bool is_empty = cell_grid_.pickRoi(rect_roi);
             WOLF_TRACE("rect_roi: ", rect_roi)
             if (!is_empty){
+                cell_grid_.blockCell(rect_roi);
                 break;
             }
             cv::Mat img_roi(img_incoming, rect_roi);  // no data copy -> no overhead
