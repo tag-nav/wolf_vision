@@ -498,6 +498,19 @@ LandmarkBasePtr ProcessorVisualOdometry::emplaceLandmark(FeatureBasePtr _feat)
 void ProcessorVisualOdometry::postProcess()
 {
     frame_count_ ++;
+
+    // delete tracks with no keyframes
+    for (auto track_it = track_matrix_.getTracks().begin(); track_it != track_matrix_.getTracks().end(); /* do not increment iterator yet... */)
+    {
+        auto track_id = track_it->first;
+        if (track_matrix_.trackAtKeyframes(track_id).empty())
+        {
+            ++track_it;                      // ... increment iterator **before** erasing the element!!!
+            track_matrix_.remove(track_id);
+        }
+        else
+            ++track_it;
+    }
 }
 
 bool ProcessorVisualOdometry::voteForKeyFrame() const
