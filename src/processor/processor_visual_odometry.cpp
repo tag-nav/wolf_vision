@@ -258,7 +258,7 @@ void ProcessorVisualOdometry::preProcess()
             }
         }
 
-        WOLF_TRACE("Detected ", kps_last_new.size(), " new raw keypoints");
+        WOLF_INFO("Detected ", kps_last_new.size(), " new raw keypoints");
         
         // Create a map of wolf KeyPoints to track only the new ones
         KeyPointsMap mwkps_last_new, mwkps_incoming_new;
