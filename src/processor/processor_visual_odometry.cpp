@@ -299,6 +299,14 @@ void ProcessorVisualOdometry::preProcess()
 
     auto dt_preprocess = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - t1).count();
 
+    // print a bar with the number of active tracks in incoming
+    std::string s;
+    for (int i = 0; i<capture_image_incoming_->getKeyPoints().size(); i++)
+    {
+       s += "#";
+    }
+    WOLF_INFO("TRACKS: ", s);
+
     WOLF_INFO( "dt_preprocess (ms): " , dt_preprocess );
 
     return;
@@ -514,6 +522,9 @@ void ProcessorVisualOdometry::postProcess()
         else
             ++track_it;
     }
+
+    // print a blank line
+    WOLF_INFO("");
 }
 
 bool ProcessorVisualOdometry::voteForKeyFrame() const
@@ -529,8 +540,6 @@ bool ProcessorVisualOdometry::voteForKeyFrame() const
     // vote = vote || ((frame_count_ % 5) == 0);
 
     vote = vote || incoming_ptr_->getFeatureList().size() < params_visual_odometry_->min_features_for_keyframe;
-
-    std::cout << "vote " << vote << std::endl;
 
     return vote;
 }
