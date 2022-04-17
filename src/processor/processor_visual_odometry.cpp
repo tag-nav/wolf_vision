@@ -110,7 +110,7 @@ void ProcessorVisualOdometry::preProcess()
                     // -> translate to the full image corner coordinate system
                     kps_roi.at(0).pt.x = kps_roi.at(0).pt.x + rect_roi.x;
                     kps_roi.at(0).pt.y = kps_roi.at(0).pt.y + rect_roi.y;
-                    capture_image_incoming_->addKeyPoints(kps_roi);
+                    capture_image_incoming_->addKeyPoint(kps_roi.at(0));
                 }
             }
         }
