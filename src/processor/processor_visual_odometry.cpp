@@ -234,7 +234,7 @@ void ProcessorVisualOdometry::preProcess()
             {
                 break;
             }
-            cv::Mat img_roi(img_incoming, rect_roi);  // no data copy -> no overhead
+            cv::Mat img_roi(img_last, rect_roi);  // no data copy -> no overhead
             std::vector<cv::KeyPoint> kps_roi;
             detector_->detect(img_roi, kps_roi);
             if (kps_roi.size() > 0){
