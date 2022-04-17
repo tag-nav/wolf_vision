@@ -114,6 +114,7 @@ void ProcessorVisualOdometry::preProcess()
                 }
             }
         }
+        WOLF_INFO( "Initially detected " , capture_image_incoming_->getKeyPoints().size(), " keypoints in incoming" );
 
         // Initialize the tracks data structure with a "dummy track" where the keypoint is pointing to itself
         TracksMap tracks_init;
@@ -122,6 +123,14 @@ void ProcessorVisualOdometry::preProcess()
         }
         capture_image_incoming_->setTracksOrigin(tracks_init);
         capture_image_incoming_->setTracksPrev(tracks_init);
+
+        // print a bar with the number of active tracks in incoming
+        std::string s;
+        for (int i = 0; i<capture_image_incoming_->getKeyPoints().size(); i++)
+        {
+           s += "#";
+        }
+        WOLF_INFO("TRACKS: ", s);
 
         auto dt_preprocess = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - t1).count();
         WOLF_INFO( "dt_preprocess (ms): " , dt_preprocess );
@@ -220,12 +229,8 @@ void ProcessorVisualOdometry::preProcess()
         // Detect new KeyPoints 
         std::vector<cv::KeyPoint> kps_last_new;
         
-        // Detect in the whole image and retain N best: BAD because cannot control the repartition of KeyPoints
-        // detector_->detect(img_last, kps_last_new);
-        // retainBest(kps_last_new, params_visual_odometry_->max_new_features);
-
-        // Instead, use the grid to detect new keypoints in empty cells
-        // We try a bunch of time to add keypoints to randomly selected empty regions of interest
+        // Use the grid to detect new keypoints in empty cells
+        // We try a bunch of times to add keypoints to randomly selected empty regions of interest
         for (int i=0; i < params_visual_odometry_->max_new_features; i++){
             cv::Rect rect_roi;
 
