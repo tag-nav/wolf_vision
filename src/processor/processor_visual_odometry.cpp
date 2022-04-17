@@ -174,22 +174,19 @@ void ProcessorVisualOdometry::preProcess()
     filterWithEssential(mwkps_origin, mwkps_incoming, tracks_origin_incoming, E);
 
     // Edit tracks prev with only inliers wrt origin
+    // and remove also from mwkps_incoming all the keypoints that have not been tracked
     TracksMap tracks_last_incoming_filtered;
+    KeyPointsMap mwkps_incoming_fitered;
     for (auto & track_origin_incoming : tracks_origin_incoming){
         for (auto & track_last_incoming : tracks_last_incoming){
             if (track_origin_incoming.second == track_last_incoming.second){
                 tracks_last_incoming_filtered[track_last_incoming.first] = track_last_incoming.second;
+                mwkps_incoming_fitered[track_last_incoming.second] = mwkps_incoming[track_last_incoming.second];
                 continue;
             }
         }
     }
-    WOLF_INFO( "Retained " , tracks_last_incoming_filtered.size(), " inliers..." );
-
-    // Remove from mwkps_incoming all the keypoints that have not been tracked
-    // TODO: there might be a faster way than creating a new map from scratch?
-    KeyPointsMap mwkps_incoming_fitered;
-    for (auto track : tracks_last_incoming_filtered)
-        mwkps_incoming_fitered[track.second] = mwkps_incoming[track.second];
+    WOLF_INFO( "Retained " , mwkps_incoming_fitered.size(), " inliers..." );
 
     // Update captures
     capture_image_incoming_->addKeyPoints(mwkps_incoming_fitered);
