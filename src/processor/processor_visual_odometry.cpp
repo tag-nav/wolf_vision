@@ -65,11 +65,11 @@ void ProcessorVisualOdometry::configure(SensorBasePtr _sensor)
                                   params_visual_odometry_->grid_params_.separation_);
 }
 
-TracksMap ProcessorVisualOdometry::mergeTracks(TracksMap tracks_prev_curr, TracksMap tracks_curr_next){
+TracksMap ProcessorVisualOdometry::mergeTracks(const TracksMap& tracks_prev_curr, const TracksMap& tracks_curr_next){
     TracksMap tracks_prev_next;
     for (auto &match : tracks_prev_curr){
         if (tracks_curr_next.count(match.second)){
-            tracks_prev_next[match.first] = tracks_curr_next[match.second];
+            tracks_prev_next[match.first] = tracks_curr_next.at(match.second);
         }
     }
     return tracks_prev_next;
@@ -190,7 +190,7 @@ void ProcessorVisualOdometry::preProcess()
         for (auto & track_last_incoming : tracks_last_incoming){
             if (track_origin_incoming.second == track_last_incoming.second){
                 tracks_last_incoming_filtered[track_last_incoming.first] = track_last_incoming.second;
-                mwkps_incoming_fitered[track_last_incoming.second] = mwkps_incoming[track_last_incoming.second];
+                mwkps_incoming_fitered[track_last_incoming.second] = mwkps_incoming.at(track_last_incoming.second);
                 continue;
             }
         }

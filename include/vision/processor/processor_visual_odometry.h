@@ -238,7 +238,7 @@ class ProcessorVisualOdometry : public ProcessorTracker
 
         /** \brief Tool to merge tracks 
          */
-        static TracksMap mergeTracks(TracksMap tracks_prev_curr, TracksMap tracks_curr_next);
+        static TracksMap mergeTracks(const TracksMap& tracks_prev_curr, const TracksMap& tracks_curr_next);
 
         void setParams(const ParamsProcessorVisualOdometryPtr _params);
 
