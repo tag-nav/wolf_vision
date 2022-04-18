@@ -298,6 +298,13 @@ void ProcessorVisualOdometry::preProcess()
         capture_image_incoming_->setTracksPrev(tracks_last_incoming_filtered);
         capture_image_incoming_->setTracksOrigin(tracks_origin_incoming);  // careful!
 
+        // Let's see all these tracks:
+        for (auto track: tracks_last_incoming_filtered){
+            auto kp_last = capture_image_last_->getKeyPoints().at(track.first);
+            auto kp_inco = capture_image_incoming_->getKeyPoints().at(track.second);
+            WOLF_TRACE("Track from: ", kp_last.getCvKeyPoint().pt, " to ", kp_inco.getCvKeyPoint().pt)
+        }
+
         // add a flag so that voteForKeyFrame use it to vote for a KeyFrame 
         capture_image_incoming_->setLastWasRepopulated(true);
     }
