@@ -246,14 +246,14 @@ void ProcessorVisualOdometry::preProcess()
                 // retain only the best keypoint in each region of interest
                 retainBest(kps_roi, 1);
 
-                // update grid with this detection
-                cell_grid_.hitCell(kps_roi.at(0));
-
                 // Keypoints are detected in the local coordinates of the region of interest
                 // -> translate to the full image corner coordinate system
                 kps_roi.at(0).pt.x = kps_roi.at(0).pt.x + rect_roi.x;
                 kps_roi.at(0).pt.y = kps_roi.at(0).pt.y + rect_roi.y;
                 kps_last_new.push_back(kps_roi.at(0));
+
+                // update grid with this detection
+                cell_grid_.hitCell(kps_roi.at(0));
             }
             else
             {
@@ -298,12 +298,12 @@ void ProcessorVisualOdometry::preProcess()
         capture_image_incoming_->setTracksPrev(tracks_last_incoming_filtered);
         capture_image_incoming_->setTracksOrigin(tracks_origin_incoming);  // careful!
 
-        // Let's see all these tracks:
-        for (auto track: tracks_last_incoming_filtered){
-            auto kp_last = capture_image_last_->getKeyPoints().at(track.first);
-            auto kp_inco = capture_image_incoming_->getKeyPoints().at(track.second);
-            WOLF_TRACE("Track from: ", kp_last.getCvKeyPoint().pt, " to ", kp_inco.getCvKeyPoint().pt)
-        }
+//        // Let's see all these tracks:
+//        for (auto track: tracks_last_incoming_filtered){
+//            auto kp_last = capture_image_last_->getKeyPoints().at(track.first);
+//            auto kp_inco = capture_image_incoming_->getKeyPoints().at(track.second);
+//            WOLF_TRACE("Track from: ", kp_last.getCvKeyPoint().pt, " to ", kp_inco.getCvKeyPoint().pt)
+//        }
 
         // add a flag so that voteForKeyFrame use it to vote for a KeyFrame 
         capture_image_incoming_->setLastWasRepopulated(true);
