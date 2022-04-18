@@ -132,150 +132,191 @@ TEST(ProcessorVisualOdometry, kltTrack)
 
 }
 
-TEST(ProcessorVisualOdometry, preProcess)
+//TEST(ProcessorVisualOdometry, preProcess)
+//{
+//    // Create an image pair
+//    cv::Mat img_0 = cv::imread(wolf_vision_root + "/test/demo_gazebo_x00cm_y00cm.jpg", cv::IMREAD_GRAYSCALE);
+//    cv::Mat img_1 = cv::imread(wolf_vision_root + "/test/demo_gazebo_x00cm_y-20cm.jpg", cv::IMREAD_GRAYSCALE);
+//
+//    // Create a processor
+//    ParamsProcessorVisualOdometryPtr params = std::make_shared<ParamsProcessorVisualOdometry>();
+//    params->klt_params_.patch_height_ = 21;
+//    params->klt_params_.patch_width_ = 21;
+//    params->klt_params_.nlevels_pyramids_ = 3;
+//    params->klt_params_.klt_max_err_ = 0.2;
+//    params->klt_params_.criteria_ = cv::TermCriteria(cv::TermCriteria::COUNT+cv::TermCriteria::EPS, 30, 0.01);
+//    params->fast_params_.threshold_fast_ = 20;
+//    params->fast_params_.non_max_suppresion_ = true;
+//    params->min_features_for_keyframe = 50;
+//    params->max_nb_tracks_ = 400;
+//    params->min_track_length_for_landmark_ = 4;
+//    ProcessorVisualOdometryTest processor(params);
+//
+//
+//    // Install camera
+//    ParamsSensorCameraPtr intr = std::make_shared<ParamsSensorCamera>();
+//    intr->pinhole_model_raw = Eigen::Vector4d(640, 480, 640, 640);
+//    intr->width  = 1280;
+//    intr->height = 960;
+//    SensorCameraPtr cam_ptr = std::make_shared<SensorCamera>((Eigen::Vector7d() << 0,0,0,  0,0,0,1).finished(), intr);
+//    processor.configure(cam_ptr);
+//
+//    // ----------------------------------------
+//    // TIME 0 : Let's process the first capture
+//    // ----------------------------------------
+//
+//    TimeStamp t0(0.0);
+//
+//    // Create Capture
+//    CaptureImagePtr capture_image_incoming = std::make_shared<CaptureImage>(t0, cam_ptr, img_0);
+//    processor.setCaptureIncoming(capture_image_incoming);
+//
+//    // PreProcess
+//    processor.preProcess();
+//
+//    // Kps visu
+//    cv::Mat img_draw;
+//    std::vector<cv::KeyPoint> kps;
+//    for (auto mwkp : capture_image_incoming->getKeyPoints()){
+//        kps.push_back(mwkp.second.getCvKeyPoint());
+//    }
+//    // cv::drawKeypoints(img_0, kps, img_draw);
+//    // cv::imshow( "KeyPoints t = 0", img_draw);
+//    // cv::waitKey(0);
+//
+//    // ----------------------------------------
+//    // TIME 1 : Let's process the other one
+//    // ----------------------------------------
+//
+//    TimeStamp t1(0.1);
+//
+//    // Edit captures
+//    CaptureImagePtr capture_image_last = capture_image_incoming;
+//    capture_image_incoming = std::make_shared<CaptureImage>(t1, cam_ptr, img_1);
+//    processor.setCaptureIncoming(capture_image_incoming);
+//    processor.setCaptureLast(capture_image_last);
+//    processor.setCaptureOrigin(capture_image_last);
+//
+//    processor.preProcess();
+//
+//    // Kps visu
+//    kps.clear();
+//    for (auto mwkp : capture_image_incoming->getKeyPoints()){
+//        kps.push_back(mwkp.second.getCvKeyPoint());
+//    }
+//    // cv::drawKeypoints(img_1, kps, img_draw);
+//    // cv::imshow( "KeyPoints t = 1", img_draw);
+//    // cv::waitKey(0);
+//
+//    // Check if 80% of tracks between frames
+//    float track_ratio = static_cast<float>(capture_image_incoming->getTracksPrev().size()) /
+//                        static_cast<float>(capture_image_incoming->getKeyPoints().size());
+//    ASSERT_TRUE(track_ratio > 0.8);
+//
+//    // Check if tracks_prev and tracks_origin are similar
+//    ASSERT_EQ(capture_image_incoming->getTracksPrev().size(), capture_image_incoming->getTracksOrigin().size());
+//
+//}
+//
+//TEST(ProcessorVisualOdometry, process)
+//{
+//    // Config file to parse. Here is where all the problem is defined:
+//    std::string wolf_vision_root = _WOLF_VISION_ROOT_DIR;
+//    std::string config_file = "test/gtest_visual_odometry.yaml";
+//
+//    // parse file into params server: each param will be retrievable from this params server:
+//    ParserYaml parser       = ParserYaml(config_file, wolf_vision_root);
+//    ParamsServer server     = ParamsServer(parser.getParams());
+//    // Wolf problem: automatically build the left branch of the wolf tree from the contents of the params server:
+//    ProblemPtr problem      = Problem::autoSetup(server);
+//
+//    // Get sensor and processor
+//    SensorCameraPtr cam_ptr = std::dynamic_pointer_cast<SensorCamera>(problem->getSensor("sen cam"));
+//    ProcessorVisualOdometryPtr proc_vo_ptr;
+//    for (auto proc : problem->getSensor("sen cam")->getProcessorList()){
+//        proc_vo_ptr = std::dynamic_pointer_cast<ProcessorVisualOdometry>(proc);
+//    }
+//
+//    // Successive images
+//    cv::Mat img_0 = cv::imread(wolf_vision_root + "/test/demo_gazebo_x00cm_y00cm.jpg", cv::IMREAD_GRAYSCALE);
+//    cv::Mat img_1 = cv::imread(wolf_vision_root + "/test/demo_gazebo_x00cm_y-10cm.jpg", cv::IMREAD_GRAYSCALE);
+//    cv::Mat img_2 = cv::imread(wolf_vision_root + "/test/demo_gazebo_x00cm_y-20cm.jpg", cv::IMREAD_GRAYSCALE);
+//
+//
+//    // ----------------------------------------
+//    // TIME 0 : Let's process the first capture
+//    // ----------------------------------------
+//
+//    TimeStamp t0(0.0);
+//    CaptureImagePtr capture_image_0 = std::make_shared<CaptureImage>(t0, cam_ptr, img_0);
+//    capture_image_0->process();
+//    problem->print(4,0,1,0);
+//
+//    ASSERT_EQ(proc_vo_ptr->getTrackMatrix().numTracks(), 0);
+//	ASSERT_EQ(problem->getMap()->getLandmarkList().size(), 0);
+//
+//    // ----------------------------------------
+//    // TIME 1 : Second image
+//    // ----------------------------------------
+//
+//    TimeStamp t1(0.1);
+//    CaptureImagePtr capture_image_1 = std::make_shared<CaptureImage>(t1, cam_ptr, img_1);
+//    capture_image_1->process();
+//
+//    ASSERT_EQ(proc_vo_ptr->getTrackMatrix().numTracks(),capture_image_1->getTracksPrev().size());
+//    // Check if tracks_prev and tracks_origin are similar
+//    ASSERT_EQ(capture_image_1->getTracksPrev().size(), capture_image_1->getTracksOrigin().size());
+//
+//    // ----------------------------------------
+//    // TIME 3 : Third image
+//    // ----------------------------------------
+//
+//    TimeStamp t2(0.2);
+//    CaptureImagePtr capture_image_2 = std::make_shared<CaptureImage>(t2, cam_ptr, img_2);
+//    capture_image_2->process();
+//
+//    ASSERT_EQ(proc_vo_ptr->getTrackMatrix().numTracks(),capture_image_2->getTracksOrigin().size());
+//}
+
+TEST(ProcessorVisualOdometry, mergeTracks)
 {
-    // Create an image pair
-    cv::Mat img_0 = cv::imread(wolf_vision_root + "/test/demo_gazebo_x00cm_y00cm.jpg", cv::IMREAD_GRAYSCALE);
-    cv::Mat img_1 = cv::imread(wolf_vision_root + "/test/demo_gazebo_x00cm_y-20cm.jpg", cv::IMREAD_GRAYSCALE);
+    TracksMap tracks_orig_last, tracks_orig_inco, tracks_last_inco;
 
-    // Create a processor
-    ParamsProcessorVisualOdometryPtr params = std::make_shared<ParamsProcessorVisualOdometry>();
-    params->klt_params_.patch_height_ = 21;
-    params->klt_params_.patch_width_ = 21;
-    params->klt_params_.nlevels_pyramids_ = 3;
-    params->klt_params_.klt_max_err_ = 0.2;
-    params->klt_params_.criteria_ = cv::TermCriteria(cv::TermCriteria::COUNT+cv::TermCriteria::EPS, 30, 0.01);
-    params->fast_params_.threshold_fast_ = 20;
-    params->fast_params_.non_max_suppresion_ = true;
-    params->min_features_for_keyframe = 50;
-    params->max_nb_tracks_ = 400;
-    params->min_track_length_for_landmark_ = 4;
-    ProcessorVisualOdometryTest processor(params);
+    /* tested tracks:
+     * O - L - I
+     * ---------
+     * 1 - 2 - x
+     * 3 - 4 - 5
+     * 6 - 7 - 8
+     * 9 - 10 - x
+     * x - 11 - 12
+     * x - 13 - x
+     * x - x - 14
+     * 15 - x - 16
+     */
+    tracks_orig_last[1] = 2;
+    tracks_orig_last[3] = 4;
+    tracks_orig_last[6] = 7;
+    tracks_orig_last[9] = 10;
 
+    tracks_last_inco[4] = 5;
+    tracks_last_inco[7] = 8;
+    tracks_last_inco[11] = 12;
 
-    // Install camera
-    ParamsSensorCameraPtr intr = std::make_shared<ParamsSensorCamera>();
-    intr->pinhole_model_raw = Eigen::Vector4d(640, 480, 640, 640);
-    intr->width  = 1280;
-    intr->height = 960;
-    SensorCameraPtr cam_ptr = std::make_shared<SensorCamera>((Eigen::Vector7d() << 0,0,0,  0,0,0,1).finished(), intr);
-    processor.configure(cam_ptr);
+    tracks_orig_inco = ProcessorVisualOdometry::mergeTracks(tracks_orig_last, tracks_last_inco);
 
-    // ----------------------------------------
-    // TIME 0 : Let's process the first capture
-    // ----------------------------------------
+    // correct tracks
+    ASSERT_EQ(tracks_orig_inco.size(), 2);
+    ASSERT_EQ(tracks_orig_inco[3], 5);
+    ASSERT_EQ(tracks_orig_inco[6], 8);
 
-    TimeStamp t0(0.0);
+    // tracks that should not be there
+    ASSERT_EQ(tracks_orig_inco.count(1), 0);
+    ASSERT_EQ(tracks_orig_inco.count(9), 0);
+    ASSERT_EQ(tracks_orig_inco.count(15), 0);
+    ASSERT_EQ(tracks_orig_inco.count(11), 0);
+    ASSERT_EQ(tracks_orig_inco.count(13), 0);
 
-    // Create Capture
-    CaptureImagePtr capture_image_incoming = std::make_shared<CaptureImage>(t0, cam_ptr, img_0);
-    processor.setCaptureIncoming(capture_image_incoming);
-
-    // PreProcess
-    processor.preProcess();
-
-    // Kps visu
-    cv::Mat img_draw;
-    std::vector<cv::KeyPoint> kps;
-    for (auto mwkp : capture_image_incoming->getKeyPoints()){
-        kps.push_back(mwkp.second.getCvKeyPoint());
-    }
-    // cv::drawKeypoints(img_0, kps, img_draw);
-    // cv::imshow( "KeyPoints t = 0", img_draw);
-    // cv::waitKey(0);
-
-    // ----------------------------------------
-    // TIME 1 : Let's process the other one
-    // ----------------------------------------
-
-    TimeStamp t1(0.1);
-
-    // Edit captures
-    CaptureImagePtr capture_image_last = capture_image_incoming;
-    capture_image_incoming = std::make_shared<CaptureImage>(t1, cam_ptr, img_1);
-    processor.setCaptureIncoming(capture_image_incoming);
-    processor.setCaptureLast(capture_image_last);
-    processor.setCaptureOrigin(capture_image_last);
-
-    processor.preProcess();
-
-    // Kps visu
-    kps.clear();
-    for (auto mwkp : capture_image_incoming->getKeyPoints()){
-        kps.push_back(mwkp.second.getCvKeyPoint());
-    }
-    // cv::drawKeypoints(img_1, kps, img_draw);
-    // cv::imshow( "KeyPoints t = 1", img_draw);
-    // cv::waitKey(0);
-
-    // Check if 80% of tracks between frames
-    float track_ratio = static_cast<float>(capture_image_incoming->getTracksPrev().size()) / 
-                        static_cast<float>(capture_image_incoming->getKeyPoints().size());
-    ASSERT_TRUE(track_ratio > 0.8);
-
-    // Check if tracks_prev and tracks_origin are similar
-    ASSERT_EQ(capture_image_incoming->getTracksPrev().size(), capture_image_incoming->getTracksOrigin().size());
-
-}
-
-TEST(ProcessorVisualOdometry, process)
-{
-    // Config file to parse. Here is where all the problem is defined:
-    std::string wolf_vision_root = _WOLF_VISION_ROOT_DIR;
-    std::string config_file = "test/gtest_visual_odometry.yaml";
-
-    // parse file into params server: each param will be retrievable from this params server:
-    ParserYaml parser       = ParserYaml(config_file, wolf_vision_root);
-    ParamsServer server     = ParamsServer(parser.getParams());
-    // Wolf problem: automatically build the left branch of the wolf tree from the contents of the params server:
-    ProblemPtr problem      = Problem::autoSetup(server);
-
-    // Get sensor and processor
-    SensorCameraPtr cam_ptr = std::dynamic_pointer_cast<SensorCamera>(problem->getSensor("sen cam"));
-    ProcessorVisualOdometryPtr proc_vo_ptr;
-    for (auto proc : problem->getSensor("sen cam")->getProcessorList()){
-        proc_vo_ptr = std::dynamic_pointer_cast<ProcessorVisualOdometry>(proc);
-    }
-    
-    // Successive images
-    cv::Mat img_0 = cv::imread(wolf_vision_root + "/test/demo_gazebo_x00cm_y00cm.jpg", cv::IMREAD_GRAYSCALE);
-    cv::Mat img_1 = cv::imread(wolf_vision_root + "/test/demo_gazebo_x00cm_y-10cm.jpg", cv::IMREAD_GRAYSCALE);
-    cv::Mat img_2 = cv::imread(wolf_vision_root + "/test/demo_gazebo_x00cm_y-20cm.jpg", cv::IMREAD_GRAYSCALE);
-
-
-    // ----------------------------------------
-    // TIME 0 : Let's process the first capture
-    // ----------------------------------------
-    
-    TimeStamp t0(0.0);
-    CaptureImagePtr capture_image_0 = std::make_shared<CaptureImage>(t0, cam_ptr, img_0);
-    capture_image_0->process();
-    problem->print(4,0,1,0);
-
-    ASSERT_EQ(proc_vo_ptr->getTrackMatrix().numTracks(), 0);
-	ASSERT_EQ(problem->getMap()->getLandmarkList().size(), 0);
-
-    // ----------------------------------------
-    // TIME 1 : Second image
-    // ----------------------------------------
-    
-    TimeStamp t1(0.1);
-    CaptureImagePtr capture_image_1 = std::make_shared<CaptureImage>(t1, cam_ptr, img_1);
-    capture_image_1->process();
-
-    ASSERT_EQ(proc_vo_ptr->getTrackMatrix().numTracks(),capture_image_1->getTracksPrev().size());
-    // Check if tracks_prev and tracks_origin are similar
-    ASSERT_EQ(capture_image_1->getTracksPrev().size(), capture_image_1->getTracksOrigin().size());
-
-    // ----------------------------------------
-    // TIME 3 : Third image
-    // ----------------------------------------
-
-    TimeStamp t2(0.2);
-    CaptureImagePtr capture_image_2 = std::make_shared<CaptureImage>(t2, cam_ptr, img_2);
-    capture_image_2->process();
-
-    ASSERT_EQ(proc_vo_ptr->getTrackMatrix().numTracks(),capture_image_2->getTracksOrigin().size());
 }
 
 int main(int argc, char **argv)
