@@ -36,6 +36,23 @@ klt_params:
     nlevels_pyramids: 3
     klt_max_err: 0.3
 
+# tesselation grid    
+grid_params:
+    # number of cells used by the active search grid data structure
+    nbr_cells_h: 6  # horizontal
+    nbr_cells_v: 5  # vertical
+    # minimum margin of the region of interest from the edges of the image 
+    margin: 10
+    # reduce the size of each region of interest by n pixels to prevent keypoints from being too close
+    separation: 10
+
+ransac_params:
+    # specifies a desirable level of confidence (probability) that the estimated matrix is correct
+    ransac_prob: 0.99
+    # maximum distance from a point to an epipolar line in pixels, beyond which the point 
+    # is considered an outlier and is not used for computing the final fundamental matrix
+    ransac_thresh: 1
+
 # Keep the number of tracks below 
 max_nb_tracks: 100
 

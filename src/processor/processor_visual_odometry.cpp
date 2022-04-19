@@ -644,6 +644,7 @@ TracksMap ProcessorVisualOdometry::kltTrack(const cv::Mat _img_prev, const cv::M
 
 bool ProcessorVisualOdometry::filterWithEssential(const KeyPointsMap _mwkps_prev, const KeyPointsMap _mwkps_curr, TracksMap &_tracks_prev_curr, cv::Mat &_E)
 {
+    ParamsProcessorVisualOdometry::RansacParams prms = params_visual_odometry_->ransac_params_;
 
     // We need to build lists of pt2f for openCV function
     std::vector<cv::Point2f> p2f_prev, p2f_curr;
@@ -659,12 +660,12 @@ bool ProcessorVisualOdometry::filterWithEssential(const KeyPointsMap _mwkps_prev
 
     cv::Mat cvMask;
     _E = cv::findEssentialMat(p2f_prev, 
-                            p2f_curr, 
-                            Kcv_, 
-                            cv::RANSAC,
-                            0.999,
-                            1.0,
-                            cvMask);
+                              p2f_curr, 
+                              Kcv_, 
+                              cv::RANSAC,
+                              prms.ransac_prob_,
+                              prms.ransac_thresh_,
+                              cvMask);
     
     // Let's remove outliers from tracksMap
     for (size_t k=0; k<all_indices.size(); k++){

@@ -52,6 +52,12 @@ WOLF_STRUCT_PTR_TYPEDEFS(ParamsProcessorVisualOdometry);
 
 struct ParamsProcessorVisualOdometry : public ParamsProcessorTracker
 {
+    struct RansacParams
+    {
+        double ransac_prob_;
+        double ransac_thresh_;
+    };
+
     struct KltParams
     {
         int patch_width_;
@@ -76,6 +82,7 @@ struct ParamsProcessorVisualOdometry : public ParamsProcessorTracker
     };
 
     double std_pix_;
+    RansacParams ransac_params_;
     KltParams klt_params_;
     FastParams fast_params_;
     GridParams grid_params_;
@@ -87,6 +94,9 @@ struct ParamsProcessorVisualOdometry : public ParamsProcessorTracker
         ParamsProcessorTracker(_unique_name, _server)
     {
         std_pix_ = _server.getParam<int>(prefix + _unique_name + "/std_pix");
+
+        ransac_params_.ransac_prob_   = _server.getParam<double>(prefix + _unique_name + "/ransac_params/ransac_prob");
+        ransac_params_.ransac_thresh_ = _server.getParam<double>(prefix + _unique_name + "/ransac_params/ransac_thresh");
 
         klt_params_.patch_width_        = _server.getParam<int>(prefix + _unique_name + "/klt_params/patch_width");
         klt_params_.patch_height_       = _server.getParam<int>(prefix + _unique_name + "/klt_params/patch_height");
@@ -109,6 +119,8 @@ struct ParamsProcessorVisualOdometry : public ParamsProcessorTracker
     std::string print() const override
     {
         return ParamsProcessorTracker::print()                                                                   + "\n"
+            + "ransac_params_.ransac_prob_:      " + std::to_string(ransac_params_.ransac_prob_)                 + "\n"
+            + "ransac_params_.ransac_thresh_:    " + std::to_string(ransac_params_.ransac_thresh_)               + "\n"
             + "klt_params_.tracker_width_:       " + std::to_string(klt_params_.patch_width_)                    + "\n"
             + "klt_params_.tracker_height_:      " + std::to_string(klt_params_.patch_height_)                   + "\n"
             + "klt_params_.klt_max_err_:         " + std::to_string(klt_params_.klt_max_err_)                    + "\n"

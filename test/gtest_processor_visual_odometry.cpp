@@ -32,6 +32,7 @@
 #include <core/yaml/parser_yaml.h>
 #include <opencv2/imgcodecs.hpp>
 
+#include "core/math/rotations.h"
 
 #include "vision/processor/processor_visual_odometry.h"
 #include "vision/sensor/sensor_camera.h"
@@ -343,6 +344,8 @@ TEST(ProcessorVisualOdometry, filterWithEssential)
     params->grid_params_.nbr_cells_h_ = 8;
     params->grid_params_.nbr_cells_v_ = 8;
     params->grid_params_.separation_ = 10;
+    params->ransac_params_.ransac_prob_ = 0.999;  // 0.99 makes the gtest fail -> missing one point
+    params->ransac_params_.ransac_thresh_ = 1.0;
     ProcessorVisualOdometryTest processor(params);
 
     // Install camera
@@ -375,10 +378,10 @@ TEST(ProcessorVisualOdometry, filterWithEssential)
 
     // Set the transformation between the two views
     Eigen::Vector3f t(0.1, 0.1, 0.0);
-    Eigen::Matrix3f R;
-    R << 0.7, -0.7, 0.0,
-         0.7, 0.7, 0.0,
-         0.0, 0.0, 1.0;
+    // Eigen::Vector3f euler(0.0, 0.0, 0.0);  // degenerate case!
+    Eigen::Vector3f euler(0.2, 0.1, 0.3);
+    Eigen::Matrix3f R = e2R(euler);
+    
 
     // Project pixels in the current view
     mwkps_curr.insert(std::pair<size_t, WKeyPoint>(0, WKeyPoint(cv::KeyPoint(project(K,R*X1_prev + t), 1))));
