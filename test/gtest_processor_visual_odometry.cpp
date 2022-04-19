@@ -319,6 +319,98 @@ TEST(ProcessorVisualOdometry, mergeTracks)
 
 }
 
+cv::Point2f project(Eigen::Matrix3f K, Eigen::Vector3f p){
+        Eigen::Vector3f ph = K * p;
+        ph = ph / ph(2,0);
+        return cv::Point2f(ph(0), ph(1));
+}
+
+TEST(ProcessorVisualOdometry, filterWithEssential)
+{
+    KeyPointsMap mwkps_prev, mwkps_curr;
+    TracksMap tracks_prev_curr;
+    cv::Mat E;
+
+    // Create a simple camera model
+    Eigen::Matrix3f K;
+    K << 100, 0, 240,
+         0, 100, 240,
+         0, 0, 1;
+    
+    // Create a processor
+    ParamsProcessorVisualOdometryPtr params = std::make_shared<ParamsProcessorVisualOdometry>();
+    params->grid_params_.margin_ = 10;
+    params->grid_params_.nbr_cells_h_ = 8;
+    params->grid_params_.nbr_cells_v_ = 8;
+    params->grid_params_.separation_ = 10;
+    ProcessorVisualOdometryTest processor(params);
+
+    // Install camera
+    ParamsSensorCameraPtr intr = std::make_shared<ParamsSensorCamera>();
+    intr->pinhole_model_raw = Eigen::Vector4d(100, 100, 240, 240);
+    intr->width  = 480;
+    intr->height = 480;
+    SensorCameraPtr cam_ptr = std::make_shared<SensorCamera>((Eigen::Vector7d() << 0,0,0,  0,0,0,1).finished(), intr);
+    processor.configure(cam_ptr);
+
+    // Set 3D points on the previous view
+    Eigen::Vector3f X1_prev(1.0, 1.0, 2.0);
+    Eigen::Vector3f X2_prev(-1.0, -1.0, 2.0);
+    Eigen::Vector3f X3_prev(-0.75, -0.75, 3.0);
+    Eigen::Vector3f X4_prev(-0.75, 0.75, 2.5);
+    Eigen::Vector3f X5_prev(0.75, -0.75, 2.0);
+    Eigen::Vector3f X6_prev(0.0, 1.0, 2.0);
+    Eigen::Vector3f X7_prev(0.1, -1.0, 3.0);
+    Eigen::Vector3f X8_prev(0.75, 0.75, 2.0);
+
+    // Project pixels in the previous view
+    mwkps_prev.insert(std::pair<size_t, WKeyPoint>(0, WKeyPoint(cv::KeyPoint(project(K,X1_prev), 1))));
+    mwkps_prev.insert(std::pair<size_t, WKeyPoint>(1, WKeyPoint(cv::KeyPoint(project(K,X2_prev), 1))));
+    mwkps_prev.insert(std::pair<size_t, WKeyPoint>(2, WKeyPoint(cv::KeyPoint(project(K,X3_prev), 1))));
+    mwkps_prev.insert(std::pair<size_t, WKeyPoint>(3, WKeyPoint(cv::KeyPoint(project(K,X4_prev), 1))));
+    mwkps_prev.insert(std::pair<size_t, WKeyPoint>(4, WKeyPoint(cv::KeyPoint(project(K,X5_prev), 1))));
+    mwkps_prev.insert(std::pair<size_t, WKeyPoint>(5, WKeyPoint(cv::KeyPoint(project(K,X6_prev), 1))));
+    mwkps_prev.insert(std::pair<size_t, WKeyPoint>(6, WKeyPoint(cv::KeyPoint(project(K,X7_prev), 1))));
+    mwkps_prev.insert(std::pair<size_t, WKeyPoint>(7, WKeyPoint(cv::KeyPoint(project(K,X8_prev), 1))));
+
+    // Set the transformation between the two views
+    Eigen::Vector3f t(0.1, 0.1, 0.0);
+    Eigen::Matrix3f R;
+    R << 0.7, -0.7, 0.0,
+         0.7, 0.7, 0.0,
+         0.0, 0.0, 1.0;
+
+    // Project pixels in the current view
+    mwkps_curr.insert(std::pair<size_t, WKeyPoint>(0, WKeyPoint(cv::KeyPoint(project(K,R*X1_prev + t), 1))));
+    mwkps_curr.insert(std::pair<size_t, WKeyPoint>(1, WKeyPoint(cv::KeyPoint(project(K,R*X2_prev + t), 1))));
+    mwkps_curr.insert(std::pair<size_t, WKeyPoint>(2, WKeyPoint(cv::KeyPoint(project(K,R*X3_prev + t), 1))));
+    mwkps_curr.insert(std::pair<size_t, WKeyPoint>(3, WKeyPoint(cv::KeyPoint(project(K,R*X4_prev + t), 1))));
+    mwkps_curr.insert(std::pair<size_t, WKeyPoint>(4, WKeyPoint(cv::KeyPoint(project(K,R*X5_prev + t), 1))));
+    mwkps_curr.insert(std::pair<size_t, WKeyPoint>(5, WKeyPoint(cv::KeyPoint(project(K,R*X6_prev + t), 1))));
+    mwkps_curr.insert(std::pair<size_t, WKeyPoint>(6, WKeyPoint(cv::KeyPoint(project(K,R*X7_prev + t), 1))));
+    mwkps_curr.insert(std::pair<size_t, WKeyPoint>(7, WKeyPoint(cv::KeyPoint(project(K,R*X8_prev + t), 1))));  
+
+    // Build the tracksMap
+    for (size_t i=0; i<mwkps_curr.size(); ++i)
+    {
+        tracks_prev_curr.insert(std::pair<size_t, size_t>(i,i));
+    }
+
+    // Let's try FilterWithEssential, all points here are inliers
+    processor.filterWithEssential(mwkps_prev, mwkps_curr, tracks_prev_curr, E);
+    ASSERT_EQ(tracks_prev_curr.size(), mwkps_curr.size());
+
+    // We had here an outlier: a keyPoint that doesn't move
+    mwkps_prev.insert(std::pair<size_t, WKeyPoint>(8, WKeyPoint(cv::KeyPoint(cv::Point2f(120,140), 1))));
+    mwkps_curr.insert(std::pair<size_t, WKeyPoint>(8, WKeyPoint(cv::KeyPoint(cv::Point2f(120,140), 1))));
+    tracks_prev_curr.insert(std::pair<size_t, size_t>(8,8)); 
+
+    // point at 8 must be discarded
+    processor.filterWithEssential(mwkps_prev, mwkps_curr, tracks_prev_curr, E);
+    ASSERT_EQ(tracks_prev_curr.count(8), 0);
+
+}
+
 int main(int argc, char **argv)
 {
   testing::InitGoogleTest(&argc, argv);
