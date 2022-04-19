@@ -533,8 +533,6 @@ void ProcessorVisualOdometry::postProcess()
             ++track_it;
     }
 
-    // print a blank line
-    WOLF_INFO("");
 }
 
 bool ProcessorVisualOdometry::voteForKeyFrame() const
