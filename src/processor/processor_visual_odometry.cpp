@@ -166,7 +166,7 @@ void ProcessorVisualOdometry::preProcess()
     // Input: ID of Wkp in last. Output: ID of the tracked Wkp in incoming.
     TracksMap tracks_last_incoming = kltTrack(img_last, img_incoming, mwkps_last, mwkps_incoming);
 
-    WOLF_INFO( "Tracked " , mwkps_incoming.size(), " keypoints to incoming" );
+//    WOLF_INFO( "Tracked " , mwkps_incoming.size(), " keypoints to incoming" );
 
     // TracksMap between origin and last
     // Input: ID of Wkp in origin. Output: ID of the tracked Wkp in last.
@@ -176,7 +176,7 @@ void ProcessorVisualOdometry::preProcess()
     // Input: ID of Wkp in origin. Output: ID of the tracked Wkp in incoming.
     TracksMap tracks_origin_incoming = mergeTracks(tracks_origin_last, tracks_last_incoming);
 
-    WOLF_INFO( "Merged " , tracks_last_incoming.size(), " tracks..." );
+//    WOLF_INFO( "Merged " , tracks_last_incoming.size(), " tracks..." );
 
     // Outliers rejection with essential matrix
     cv::Mat E;
@@ -195,7 +195,7 @@ void ProcessorVisualOdometry::preProcess()
             }
         }
     }
-    WOLF_INFO( "Retained " , mwkps_incoming_fitered.size(), " inliers..." );
+    WOLF_INFO( "Tracked " , mwkps_incoming_fitered.size(), " inliers in incoming" );
 
     // Update captures
     capture_image_incoming_->addKeyPoints(mwkps_incoming_fitered);
@@ -210,11 +210,12 @@ void ProcessorVisualOdometry::preProcess()
     ////////////////////////////////
     size_t n_tracks_origin = tracks_origin_incoming.size();
 
-    WOLF_INFO("# of tracks: ", n_tracks_origin, "; min # of tracks: ", params_visual_odometry_->min_features_for_keyframe);
+//    WOLF_INFO("# of tracks: ", n_tracks_origin, "; min # of tracks: ", params_visual_odometry_->min_features_for_keyframe);
 
-    if (n_tracks_origin < params_visual_odometry_->min_features_for_keyframe){
+    if (n_tracks_origin < params_visual_odometry_->min_features_for_keyframe)
+    {
 
-        WOLF_INFO( "Too Few Tracks. Detecting more keypoints..." );
+//        WOLF_INFO( "Too Few Tracks. Detecting more keypoints in last" );
 
         // Erase all keypoints previously added to the cell grid
         cell_grid_.renew();
@@ -262,7 +263,7 @@ void ProcessorVisualOdometry::preProcess()
             }
         }
 
-        WOLF_INFO("Detected ", kps_last_new.size(), " new raw keypoints");
+//        WOLF_INFO("Detected ", kps_last_new.size(), " new raw keypoints");
         
         // Create a map of wolf KeyPoints to track only the new ones
         KeyPointsMap mwkps_last_new, mwkps_incoming_new;
@@ -270,17 +271,17 @@ void ProcessorVisualOdometry::preProcess()
             WKeyPoint wkp(cvkp);
             mwkps_last_new[wkp.getId()] = wkp;
         }
-        WOLF_INFO("Found ", mwkps_last_new.size(), " keypoints in last that are new");
+        WOLF_INFO("Detected ", mwkps_last_new.size(), " new keypoints in last");
 
         TracksMap tracks_last_incoming_new = kltTrack(img_last, img_incoming, mwkps_last_new, mwkps_incoming_new);
 
-        WOLF_INFO("Tracked ", mwkps_incoming_new.size(), " new keypoints to incoming");
+//        WOLF_INFO("Tracked ", mwkps_incoming_new.size(), " new keypoints to incoming");
 
         // Outliers rejection with essential matrix
         // tracks that are not geometrically consistent are removed from tracks_last_incoming_new
         filterWithEssential(mwkps_last_new, mwkps_incoming_new, tracks_last_incoming_new, E);
 
-        WOLF_INFO("Retained ", mwkps_incoming_new.size(), " inliers");
+        WOLF_INFO("Tracked ", mwkps_incoming_new.size(), " inliers in incoming");
 
         // Concatenation of old tracks and new tracks
         // Only keep tracks until it reaches a max nb of tracks
@@ -298,15 +299,12 @@ void ProcessorVisualOdometry::preProcess()
         capture_image_incoming_->setTracksPrev(tracks_last_incoming_filtered);
         capture_image_incoming_->setTracksOrigin(tracks_origin_incoming);  // careful!
 
-//        // Let's see all these tracks:
-//        for (auto track: tracks_last_incoming_filtered){
-//            auto kp_last = capture_image_last_->getKeyPoints().at(track.first);
-//            auto kp_inco = capture_image_incoming_->getKeyPoints().at(track.second);
-//            WOLF_TRACE("Track from: ", kp_last.getCvKeyPoint().pt, " to ", kp_inco.getCvKeyPoint().pt)
-//        }
-
         // add a flag so that voteForKeyFrame use it to vote for a KeyFrame 
         capture_image_incoming_->setLastWasRepopulated(true);
+    }
+    else
+    {
+        WOLF_INFO("\n\n");
     }
 
     auto dt_preprocess = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - t1).count();
