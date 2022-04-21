@@ -81,7 +81,6 @@ struct ParamsProcessorVisualOdometry : public ParamsProcessorTracker
         unsigned int separation_;
     };
 
-    double std_pix_;
     RansacParams ransac_params_;
     KltParams klt_params_;
     FastParams fast_params_;
@@ -93,8 +92,6 @@ struct ParamsProcessorVisualOdometry : public ParamsProcessorTracker
     ParamsProcessorVisualOdometry(std::string _unique_name, const ParamsServer& _server):
         ParamsProcessorTracker(_unique_name, _server)
     {
-        std_pix_ = _server.getParam<int>(prefix + _unique_name + "/std_pix");
-
         ransac_params_.ransac_prob_   = _server.getParam<double>(prefix + _unique_name + "/ransac_params/ransac_prob");
         ransac_params_.ransac_thresh_ = _server.getParam<double>(prefix + _unique_name + "/ransac_params/ransac_thresh");
 

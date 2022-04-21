@@ -23,8 +23,8 @@
 #include "vision/sensor/sensor_camera.h"
 #include "vision/math/pinhole_tools.h"
 
-#include "core/state_block/state_block.h"
-#include "core/state_block/state_quaternion.h"
+#include <core/state_block/state_block.h>
+#include <core/state_block/state_quaternion.h>
 
 namespace wolf
 {
@@ -43,6 +43,7 @@ SensorCamera::SensorCamera(const Eigen::VectorXd& _extrinsics, const ParamsSenso
                 pinhole_model_rectified_(_intrinsics.pinhole_model_rectified), //
                 using_raw_(true)
 {
+    setNoiseStd(_intrinsics.noise_std);
     assert(_extrinsics.size() == 7 && "Wrong intrinsics vector size. Should be 7 for 3d");
     useRawImages();
     pinhole::computeCorrectionModel(getIntrinsic()->getState(), distortion_, correction_);

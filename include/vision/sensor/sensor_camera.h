@@ -23,8 +23,8 @@
 #define SENSOR_CAMERA_H
 
 //wolf includes
-#include "core/sensor/sensor_base.h"
-#include "core/utils/params_server.h"
+#include <core/sensor/sensor_base.h>
+#include <core/utils/params_server.h>
 
 namespace wolf
 {
@@ -39,10 +39,8 @@ struct ParamsSensorCamera : public ParamsSensorBase
         Eigen::Vector4d pinhole_model_raw;      ///< k = [u_0, v_0, alpha_u, alpha_v]  vector of pinhole intrinsic parameters
         Eigen::Vector4d pinhole_model_rectified;///< k = [u_0, v_0, alpha_u, alpha_v]  vector of pinhole intrinsic parameters
         Eigen::VectorXd distortion;             ///< d = [d_1, d_2, d_3, ...] radial distortion coefficients
-    ParamsSensorCamera()
-    {
-        //DEFINED FOR COMPATIBILITY PURPOSES. TO BE REMOVED IN THE FUTURE.
-    }
+    ParamsSensorCamera() = default;
+
     ParamsSensorCamera(std::string _unique_name, const ParamsServer& _server):
         ParamsSensorBase(_unique_name,  _server)
     {

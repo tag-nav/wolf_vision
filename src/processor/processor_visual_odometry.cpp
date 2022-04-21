@@ -38,12 +38,6 @@ ProcessorVisualOdometry::ProcessorVisualOdometry(ParamsProcessorVisualOdometryPt
     detector_ = cv::FastFeatureDetector::create(_params_vo->fast_params_.threshold_fast_, 
                                                 _params_vo->fast_params_.non_max_suppresion_,
                                                 cv::FastFeatureDetector::TYPE_9_16); // TYPE_5_8, TYPE_7_12, TYPE_9_16
-    
-    // Processor stuff
-    // Set pixel noise covariance
-    Eigen::Vector2d std_pix; std_pix << params_visual_odometry_->std_pix_, params_visual_odometry_->std_pix_;
-    pixel_cov_ = std_pix.array().square().matrix().asDiagonal();
-
 }
 
 void ProcessorVisualOdometry::configure(SensorBasePtr _sensor)
@@ -63,6 +57,8 @@ void ProcessorVisualOdometry::configure(SensorBasePtr _sensor)
                                   params_visual_odometry_->grid_params_.nbr_cells_v_,
                                   params_visual_odometry_->grid_params_.margin_,
                                   params_visual_odometry_->grid_params_.separation_);
+
+    pixel_cov_ = sen_cam_->getNoiseCov();
 }
 
 TracksMap ProcessorVisualOdometry::mergeTracks(const TracksMap& tracks_prev_curr, const TracksMap& tracks_curr_next){
@@ -301,10 +297,6 @@ void ProcessorVisualOdometry::preProcess()
 
         // add a flag so that voteForKeyFrame use it to vote for a KeyFrame 
         capture_image_incoming_->setLastWasRepopulated(true);
-    }
-    else
-    {
-        WOLF_INFO("\n\n");
     }
 
     auto dt_preprocess = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - t1).count();
