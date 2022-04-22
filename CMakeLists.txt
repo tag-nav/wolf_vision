@@ -159,6 +159,7 @@ SET(SRCS_SENSOR
 src/sensor/sensor_camera.cpp
   )
 SET(SRCS_YAML
+src/yaml/sensor_camera_yaml.cpp
 )
 
 # create the shared library
