@@ -48,7 +48,7 @@ grid_params:
 
 ransac_params:
     # specifies a desirable level of confidence (probability) that the estimated matrix is correct
-    ransac_prob: 0.99
+    ransac_prob: 0.999
     # maximum distance from a point to an epipolar line in pixels, beyond which the point 
     # is considered an outlier and is not used for computing the final fundamental matrix
     ransac_thresh: 1
