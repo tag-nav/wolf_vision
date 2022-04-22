@@ -218,7 +218,7 @@ void ProcessorVisualOdometry::preProcess()
         // And create a filtered map for last keypoints
         KeyPointsMap mwkps_last_filtered;
         for (auto track: tracks_last_incoming_filtered){
-            mwkps_last_filtered.at(track.first) = mwkps_last.at(track.first);
+            mwkps_last_filtered[track.first] = mwkps_last[track.first];
             size_t last_kp_id = track.first;
             cell_grid_.hitCell(capture_image_last_->getKeyPoints().at(last_kp_id).getCvKeyPoint());
         }
