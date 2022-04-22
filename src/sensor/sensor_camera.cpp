@@ -71,6 +71,13 @@ Eigen::Matrix3d SensorCamera::setIntrinsicMatrix(Eigen::Vector4d _pinhole_model)
     K.row(2) << 0, 0, 1;
     return K;
 }
+
+Eigen::Vector3f SensorCamera::computeRay(Eigen::Vector2f _pix)
+{
+    Eigen::Vector3f ray;
+    ray = K_.cast<float>().inverse() * Eigen::Vector3f(_pix.x(), _pix.y(), 1);
+    return ray; 
+}
 } // namespace wolf
 
 // Register in the FactorySensor

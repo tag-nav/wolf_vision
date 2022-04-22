@@ -120,6 +120,7 @@ class SensorCamera : public SensorBase
         bool useRawImages();
         bool useRectifiedImages();
 
+        Eigen::Vector3f computeRay(Eigen::Vector2f _pix);
 
         int getImgWidth(){return img_width_;}
         int getImgHeight(){return img_height_;}
