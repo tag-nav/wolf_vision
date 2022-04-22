@@ -60,8 +60,8 @@ class WKeyPoint
         cv::KeyPoint getCvKeyPoint() const {return cv_kp_;}
         void setCvKeyPoint(cv::KeyPoint _cv_kp) {cv_kp_ = _cv_kp;}
 
-        Eigen::Vector2f getEigenKeyPoint() const {return Eigen::Vector2f(cv_kp_.pt.x, cv_kp_.pt.y);}
-        cv::Point2f getCvPoint() const {return cv_kp_.pt;}
+        Eigen::Vector2d getEigenKeyPoint() const {return Eigen::Vector2d(cv_kp_.pt.x, cv_kp_.pt.y);}
+        cv::Point2d getCvPoint() const {return cv_kp_.pt;}
 
         cv::Mat getDescriptor() const {return desc_;}
         void setDescriptor(cv::Mat _desc) {desc_ = _desc;}

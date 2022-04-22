@@ -646,27 +646,27 @@ bool ProcessorVisualOdometry::filterWithEssential(const KeyPointsMap _mwkps_prev
 {
     ParamsProcessorVisualOdometry::RansacParams prms = params_visual_odometry_->ransac_params_;
 
-    // We need to build lists of pt2f for openCV function
-    std::vector<cv::Point2f> p2f_prev, p2f_curr;
+    // We need to build lists of pt2d for openCV function
+    std::vector<cv::Point2d> p2d_prev, p2d_curr;
     std::vector<size_t> all_indices;
     for (auto & track : _tracks_prev_curr){
         all_indices.push_back(track.first);
-        Eigen::Vector3f ray_prev = sen_cam_->computeRay(_mwkps_prev.at(track.first).getEigenKeyPoint());
-        Eigen::Vector3f ray_curr = sen_cam_->computeRay(_mwkps_curr.at(track.second).getEigenKeyPoint());
-        p2f_prev.push_back(cv::Point2f(ray_prev.x() / ray_prev.z(), ray_prev.y() / ray_prev.z()));
-        p2f_curr.push_back(cv::Point2f(ray_curr.x() / ray_curr.z(), ray_curr.y() / ray_curr.z()));
+        Eigen::Vector2d ray_prev = pinhole::depixellizePoint(sen_cam_->getPinholeModel(), _mwkps_prev.at(track.first).getEigenKeyPoint());
+        Eigen::Vector2d ray_curr = pinhole::depixellizePoint(sen_cam_->getPinholeModel(), _mwkps_curr.at(track.second).getEigenKeyPoint());
+        p2d_prev.push_back(cv::Point2d(ray_prev.x(), ray_prev.y()));
+        p2d_curr.push_back(cv::Point2d(ray_curr.x(), ray_curr.y()));
     }
 
     // We need at least five tracks
-    if (p2f_prev.size() < 5) return false;
+    if (p2d_prev.size() < 5) return false;
 
     cv::Mat cvMask;
     cv::Mat K = cv::Mat::eye(3,3,CV_32F);
-    float focal = (sen_cam_->getIntrinsicMatrix()(0,0) +
+    double focal = (sen_cam_->getIntrinsicMatrix()(0,0) +
                    sen_cam_->getIntrinsicMatrix()(1,1)) / 2;
 
-    _E = cv::findEssentialMat(p2f_prev, 
-                              p2f_curr, 
+    _E = cv::findEssentialMat(p2d_prev, 
+                              p2d_curr, 
                               Kcv_, 
                               cv::RANSAC,
                               prms.ransac_prob_,

@@ -115,12 +115,11 @@ class SensorCamera : public SensorBase
         Eigen::VectorXd getDistortionVector()   { return distortion_; }
         Eigen::VectorXd getCorrectionVector()   { return correction_; }
         Eigen::Matrix3d getIntrinsicMatrix()    { return K_; }
+        Eigen::Vector4d getPinholeModel()       { return pinhole_model_raw_; }
 
         bool isUsingRawImages() { return using_raw_; }
         bool useRawImages();
         bool useRectifiedImages();
-
-        Eigen::Vector3f computeRay(Eigen::Vector2f _pix);
 
         int getImgWidth(){return img_width_;}
         int getImgHeight(){return img_height_;}

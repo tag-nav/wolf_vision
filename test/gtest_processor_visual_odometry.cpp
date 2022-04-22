@@ -404,8 +404,8 @@ TEST(ProcessorVisualOdometry, filterWithEssential)
     ASSERT_EQ(tracks_prev_curr.size(), mwkps_curr.size());
 
     // We had here an outlier: a keyPoint that doesn't move
-    mwkps_prev.insert(std::pair<size_t, WKeyPoint>(8, WKeyPoint(cv::KeyPoint(cv::Point2f(120,140), 1))));
-    mwkps_curr.insert(std::pair<size_t, WKeyPoint>(8, WKeyPoint(cv::KeyPoint(cv::Point2f(120,140), 1))));
+    mwkps_prev.insert(std::pair<size_t, WKeyPoint>(8, WKeyPoint(cv::KeyPoint(cv::Point2d(120,140), 1))));
+    mwkps_curr.insert(std::pair<size_t, WKeyPoint>(8, WKeyPoint(cv::KeyPoint(cv::Point2d(120,140), 1))));
     tracks_prev_curr.insert(std::pair<size_t, size_t>(8,8)); 
 
     // point at 8 must be discarded
