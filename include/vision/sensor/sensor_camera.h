@@ -34,8 +34,9 @@ WOLF_STRUCT_PTR_TYPEDEFS(ParamsSensorCamera);
  */
 struct ParamsSensorCamera : public ParamsSensorBase
 {
-        unsigned int width;                     ///< Image width in pixels
-        unsigned int height;                    ///< Image height in pixels
+        unsigned int    width;                  ///< Image width in pixels
+        unsigned int    height;                 ///< Image height in pixels
+        bool            using_raw;              ///< Use raw images?
         Eigen::Vector4d pinhole_model_raw;      ///< k = [u_0, v_0, alpha_u, alpha_v]  vector of pinhole intrinsic parameters
         Eigen::Vector4d pinhole_model_rectified;///< k = [u_0, v_0, alpha_u, alpha_v]  vector of pinhole intrinsic parameters
         Eigen::VectorXd distortion;             ///< d = [d_1, d_2, d_3, ...] radial distortion coefficients
@@ -46,11 +47,12 @@ struct ParamsSensorCamera : public ParamsSensorBase
     ParamsSensorCamera(std::string _unique_name, const ParamsServer& _server):
         ParamsSensorBase(_unique_name,  _server)
     {
-        width                   = _server.getParam<unsigned int>(prefix + _unique_name       + "/width");
-        height                  = _server.getParam<unsigned int>(prefix + _unique_name       + "/height");
-        VectorXd distortion     = _server.getParam<Eigen::VectorXd>(prefix + _unique_name + "/distortion_coefficients/data");
-        VectorXd intrinsic      = _server.getParam<Eigen::VectorXd>(prefix + _unique_name + "/camera_matrix/data");
-        VectorXd projection     = _server.getParam<Eigen::VectorXd>(prefix + _unique_name + "/projection_matrix/data");
+        width               = _server.getParam<unsigned int>(prefix + _unique_name       + "/width");
+        height              = _server.getParam<unsigned int>(prefix + _unique_name       + "/height");
+        using_raw           = _server.getParam<bool>        (prefix + _unique_name       + "/using_raw");
+        VectorXd distortion = _server.getParam<Eigen::VectorXd>(prefix + _unique_name + "/distortion_coefficients/data");
+        VectorXd intrinsic  = _server.getParam<Eigen::VectorXd>(prefix + _unique_name + "/camera_matrix/data");
+        VectorXd projection = _server.getParam<Eigen::VectorXd>(prefix + _unique_name + "/projection_matrix/data");
 
         pinhole_model_raw[0] = intrinsic[2];
         pinhole_model_raw[1] = intrinsic[5];
@@ -89,9 +91,10 @@ struct ParamsSensorCamera : public ParamsSensorBase
     }
     std::string print() const override
     {
-        return ParamsSensorBase::print()                                             + "\n"
+        return ParamsSensorBase::print()                                                    + "\n"
             + "width: "         + std::to_string(width)                                     + "\n"
             + "height: "        + std::to_string(height)                                    + "\n"
+            + "using_raw: "     + std::to_string(using_raw)                                 + "\n"
             + "pinhole: "       + converter<std::string>::convert(pinhole_model_raw)        + "\n"
             + "pinhole rect.: " + converter<std::string>::convert(pinhole_model_rectified)  + "\n"
             + "distortion: "    + converter<std::string>::convert(distortion)               + "\n";
@@ -115,16 +118,16 @@ class SensorCamera : public SensorBase
         Eigen::VectorXd getDistortionVector()   { return distortion_; }
         Eigen::VectorXd getCorrectionVector()   { return correction_; }
         Eigen::Matrix3d getIntrinsicMatrix()    { return K_; }
-        Eigen::Vector4d getPinholeModel()       { return pinhole_model_raw_; }
+        Eigen::Vector4d getPinholeModel()       { if (using_raw_) return pinhole_model_raw_; else return pinhole_model_rectified_;}
 
         bool isUsingRawImages() { return using_raw_; }
         bool useRawImages();
         bool useRectifiedImages();
 
-        int getImgWidth(){return img_width_;}
-        int getImgHeight(){return img_height_;}
-        void setImgWidth(int _w){img_width_ = _w;}
-        void setImgHeight(int _h){img_height_ = _h;}
+        int getImgWidth()           {return img_width_;}
+        int getImgHeight()          {return img_height_;}
+        void setImgWidth(int _w)    {img_width_ = _w;}
+        void setImgHeight(int _h)   {img_height_ = _h;}
 
     private:
         int img_width_;
