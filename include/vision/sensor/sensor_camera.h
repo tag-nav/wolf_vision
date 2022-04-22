@@ -50,7 +50,7 @@ struct ParamsSensorCamera : public ParamsSensorBase
         width               = _server.getParam<unsigned int>(prefix + _unique_name       + "/width");
         height              = _server.getParam<unsigned int>(prefix + _unique_name       + "/height");
         using_raw           = _server.getParam<bool>        (prefix + _unique_name       + "/using_raw");
-        VectorXd distortion = _server.getParam<Eigen::VectorXd>(prefix + _unique_name + "/distortion_coefficients/data");
+        VectorXd distort    = _server.getParam<Eigen::VectorXd>(prefix + _unique_name + "/distortion_coefficients/data");
         VectorXd intrinsic  = _server.getParam<Eigen::VectorXd>(prefix + _unique_name + "/camera_matrix/data");
         VectorXd projection = _server.getParam<Eigen::VectorXd>(prefix + _unique_name + "/projection_matrix/data");
 
@@ -64,29 +64,29 @@ struct ParamsSensorCamera : public ParamsSensorBase
         pinhole_model_rectified[2] = projection[0];
         pinhole_model_rectified[3] = projection[5];
 
-        assert (distortion.size() == 5 && "Distortion size must be size 5!");
+        assert (distort.size() == 5 && "Distortion size must be size 5!");
 
-        WOLF_WARN_COND( distortion(2) != 0 || distortion(3) != 0 , "Wolf does not handle tangential distortion. Please consider re-calibrating without tangential distortion!");
+        WOLF_WARN_COND( distort(2) != 0 || distort(3) != 0 , "Wolf does not handle tangential distortion. Please consider re-calibrating without tangential distortion!");
 
-        if (distortion(4) == 0)
-            if (distortion(1) == 0)
-                if (distortion(0) == 0)
+        if (distort(4) == 0)
+            if (distort(1) == 0)
+                if (distort(0) == 0)
                     distortion.resize(0);
                 else
                 {
                     distortion.resize(1);
-                    distortion = distortion.head<1>();
+                    distortion = distort.head<1>();
                 }
             else
             {
                 distortion.resize(2);
-                distortion = distortion.head<2>();
+                distortion = distort.head<2>();
             }
         else
         {
             distortion.resize(3);
-            distortion.head<2>() = distortion.head<2>();
-            distortion.tail<1>() = distortion.tail<1>();
+            distortion.head<2>() = distort.head<2>();
+            distortion.tail<1>() = distort.tail<1>();
         }
     }
     std::string print() const override
