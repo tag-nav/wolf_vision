@@ -350,6 +350,7 @@ TEST(ProcessorVisualOdometry, filterWithEssential)
 
     // Install camera
     ParamsSensorCameraPtr intr = std::make_shared<ParamsSensorCamera>();
+    intr->noise_std = Vector2d(1,1);
     intr->pinhole_model_raw = Eigen::Vector4d(100, 100, 240, 240);
     intr->width  = 480;
     intr->height = 480;
