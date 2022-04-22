@@ -267,7 +267,7 @@ void ProcessorVisualOdometry::preProcess()
         for (auto & cvkp : kps_last_new){
             WKeyPoint wkp(cvkp);
             mwkps_last_new[wkp.getId()] = wkp;
-        }
+        } 
         WOLF_INFO("Detected ", mwkps_last_new.size(), " new keypoints in last");
 
         TracksMap tracks_last_incoming_new = kltTrack(img_last, img_incoming, mwkps_last_new, mwkps_incoming_new);
@@ -294,6 +294,10 @@ void ProcessorVisualOdometry::preProcess()
 
         // add a flag so that voteForKeyFrame use it to vote for a KeyFrame 
         capture_image_incoming_->setLastWasRepopulated(true);
+
+        // Update captures
+        capture_image_last_->addKeyPoints(mwkps_last_new);
+
     }
     else
     {
