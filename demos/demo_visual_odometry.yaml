@@ -38,7 +38,8 @@ config:
       name:               "sen cam"
       extrinsic: 
         pose:             [0,0,0, 0,0,0,1]
-      follow:             "demos/camera_euroc_mav0.yaml"         # config parameters in this file
+      using_raw:          true
+      follow:             "demos/camera_euroc_mav0_notang.yaml"         # config parameters in this file
 
   processors:
     
