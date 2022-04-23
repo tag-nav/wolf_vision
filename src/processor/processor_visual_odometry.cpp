@@ -121,7 +121,7 @@ void ProcessorVisualOdometry::preProcess()
                 }
             }
         }
-        WOLF_INFO( "Initially detected " , capture_image_incoming_->getKeyPoints().size(), " keypoints in incoming" );
+        WOLF_DEBUG( "Initially detected " , capture_image_incoming_->getKeyPoints().size(), " keypoints in incoming" );
 
         // Initialize the tracks data structure with a "dummy track" where the keypoint is pointing to itself
         TracksMap tracks_init;
@@ -137,10 +137,10 @@ void ProcessorVisualOdometry::preProcess()
         {
            s += "#";
         }
-        WOLF_INFO("TRACKS: ", s);
+        WOLF_INFO("TRACKS: ", capture_image_incoming_->getKeyPoints().size(), " ", s);
 
-        auto dt_preprocess = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - t1).count();
-        WOLF_INFO( "dt_preprocess (ms): " , dt_preprocess );
+        auto __attribute__((unused)) dt_preprocess = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - t1).count();
+        WOLF_DEBUG( "dt_preprocess (ms): " , dt_preprocess );
 
         return;
     }
@@ -165,13 +165,13 @@ void ProcessorVisualOdometry::preProcess()
 
 
 
-    WOLF_INFO( "Tracking " , mwkps_last.size(), " keypoints in last" );
+    WOLF_DEBUG( "Tracking " , mwkps_last.size(), " keypoints in last" );
 
     // TracksMap between last and incoming
     // Input: ID of Wkp in last. Output: ID of the tracked Wkp in incoming.
     TracksMap tracks_last_incoming = kltTrack(img_last, img_incoming, mwkps_last, mwkps_incoming);
 
-//    WOLF_INFO( "Tracked " , mwkps_incoming.size(), " keypoints to incoming" );
+//    WOLF_DEBUG( "Tracked " , mwkps_incoming.size(), " keypoints to incoming" );
 
     // TracksMap between origin and last
     // Input: ID of Wkp in origin. Output: ID of the tracked Wkp in last.
@@ -181,7 +181,7 @@ void ProcessorVisualOdometry::preProcess()
     // Input: ID of Wkp in origin. Output: ID of the tracked Wkp in incoming.
     TracksMap tracks_origin_incoming = mergeTracks(tracks_origin_last, tracks_last_incoming);
 
-//    WOLF_INFO( "Merged " , tracks_last_incoming.size(), " tracks..." );
+//    WOLF_DEBUG( "Merged " , tracks_last_incoming.size(), " tracks..." );
 
     // Outliers rejection with essential matrix
     cv::Mat E;
@@ -200,7 +200,7 @@ void ProcessorVisualOdometry::preProcess()
             }
         }
     }
-    WOLF_INFO( "Tracked " , mwkps_incoming_filtered.size(), " inliers in incoming" );
+    WOLF_DEBUG( "Tracked " , mwkps_incoming_filtered.size(), " inliers in incoming" );
 
 
     ////////////////////////////////
@@ -209,12 +209,12 @@ void ProcessorVisualOdometry::preProcess()
     ////////////////////////////////
     size_t n_tracks_origin = tracks_origin_incoming.size();
 
-//    WOLF_INFO("# of tracks: ", n_tracks_origin, "; min # of tracks: ", params_visual_odometry_->min_features_for_keyframe);
+//    WOLF_DEBUG("# of tracks: ", n_tracks_origin, "; min # of tracks: ", params_visual_odometry_->min_features_for_keyframe);
 
     if (n_tracks_origin < params_visual_odometry_->min_features_for_keyframe)
     {
 
-//        WOLF_INFO( "Too Few Tracks. Detecting more keypoints in last" );
+//        WOLF_DEBUG( "Too Few Tracks. Detecting more keypoints in last" );
 
         // Erase all keypoints previously added to the cell grid
         cell_grid_.renew();
@@ -265,7 +265,7 @@ void ProcessorVisualOdometry::preProcess()
             }
         }
 
-//        WOLF_INFO("Detected ", kps_last_new.size(), " new raw keypoints");
+//        WOLF_DEBUG("Detected ", kps_last_new.size(), " new raw keypoints");
         
         // Create a map of wolf KeyPoints to track only the new ones
         KeyPointsMap mwkps_last_new, mwkps_incoming_new;
@@ -273,13 +273,13 @@ void ProcessorVisualOdometry::preProcess()
             WKeyPoint wkp(cvkp);
             mwkps_last_new[wkp.getId()] = wkp;
         } 
-        WOLF_INFO("Detected ", mwkps_last_new.size(), " new keypoints in last");
+        WOLF_DEBUG("Detected ", mwkps_last_new.size(), " new keypoints in last");
 
         TracksMap tracks_last_incoming_new = kltTrack(img_last, img_incoming, mwkps_last_new, mwkps_incoming_new);
 
-        WOLF_INFO("Tracked ", mwkps_incoming_new.size(), " inliers in incoming");
+        WOLF_DEBUG("Tracked ", mwkps_incoming_new.size(), " inliers in incoming");
 
-//        WOLF_INFO("Tracked ", mwkps_incoming_new.size(), " new keypoints to incoming");
+//        WOLF_DEBUG("Tracked ", mwkps_incoming_new.size(), " new keypoints to incoming");
 
         // Concatenation of old tracks and new tracks
         for (auto & track: tracks_last_incoming_new){
@@ -292,7 +292,7 @@ void ProcessorVisualOdometry::preProcess()
         // tracks that are not geometrically consistent are removed from tracks_last_incoming_new
         filterWithEssential(mwkps_last_filtered, mwkps_incoming_filtered, tracks_last_incoming_filtered, E);
 
-        WOLF_INFO("New total : ", n_tracks_origin, " + ", mwkps_incoming_new.size(), " = ", tracks_last_incoming_filtered.size(), " tracks");
+        WOLF_DEBUG("New total : ", n_tracks_origin, " + ", mwkps_incoming_new.size(), " = ", tracks_last_incoming_filtered.size(), " tracks");
 
         // add a flag so that voteForKeyFrame use it to vote for a KeyFrame 
         capture_image_incoming_->setLastWasRepopulated(true);
@@ -303,7 +303,7 @@ void ProcessorVisualOdometry::preProcess()
     }
     else
     {
-        WOLF_INFO("\n\n");
+        WOLF_DEBUG("\n\n");
     }
 
     // Update captures
@@ -311,7 +311,7 @@ void ProcessorVisualOdometry::preProcess()
     capture_image_incoming_->setTracksPrev(tracks_last_incoming_filtered);
     capture_image_incoming_->setTracksOrigin(tracks_origin_incoming);
 
-    auto dt_preprocess = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - t1).count();
+    auto __attribute__((unused)) dt_preprocess = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - t1).count();
 
     // print a bar with the number of active tracks in incoming
     std::string s;
@@ -319,9 +319,9 @@ void ProcessorVisualOdometry::preProcess()
     {
        s += "#";
     }
-    WOLF_INFO("TRACKS: ", s);
+    WOLF_INFO("TRACKS: ", capture_image_incoming_->getKeyPoints().size(), " ", s);
 
-    WOLF_INFO( "dt_preprocess (ms): " , dt_preprocess );
+    WOLF_DEBUG( "dt_preprocess (ms): " , dt_preprocess );
 
     return;
 }
@@ -346,7 +346,7 @@ unsigned int ProcessorVisualOdometry::processKnown()
         // otherwise we store the pair as a newly detected track (for processNew)
         TracksMap tracks_map_li = capture_image_incoming_->getTracksPrev();
         if (tracks_map_li.count(id_feat_last)){
-            // WOLF_INFO("A corresponding track has been found for id_feat_last ", id_feat_last );
+            // WOLF_DEBUG("A corresponding track has been found for id_feat_last ", id_feat_last );
             auto kp_track_li = tracks_map_li.find(id_feat_last);
             // create a feature using the corresponding WKeyPoint contained in incoming (hence the "second")
             auto feat_inco = FeatureBase::emplace<FeaturePointImage>(
@@ -361,8 +361,8 @@ unsigned int ProcessorVisualOdometry::processKnown()
             tracks_map_li_matched_.insert(kp_track_li_matched);
         }
     }
-    auto dt_processKnown = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - t1).count();
-    WOLF_INFO( "dt_processKnown (ms): " , dt_processKnown );
+    auto __attribute__((unused)) dt_processKnown = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - t1).count();
+    WOLF_DEBUG( "dt_processKnown (ms): " , dt_processKnown );
 
     // return number of successful tracks until incoming
     return tracks_map_li_matched_.size();
@@ -401,8 +401,8 @@ unsigned int ProcessorVisualOdometry::processNew(const int& _max_features)
         }
     }
 
-    auto dt_processNew = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - t1).count();
-    WOLF_INFO( "dt_processNew (ms): " , dt_processNew );
+    auto __attribute__((unused)) dt_processNew = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - t1).count();
+    WOLF_DEBUG( "dt_processNew (ms): " , dt_processNew );
 
     return counter_new_tracks;
 }
