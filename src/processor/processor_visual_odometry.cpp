@@ -83,7 +83,14 @@ void ProcessorVisualOdometry::preProcess()
     // Get Capture
     capture_image_incoming_ = std::static_pointer_cast<CaptureImage>(incoming_ptr_);
 
+
     cv::Mat img_incoming = capture_image_incoming_->getImage();
+
+    // Adaptive Histogram Correction to get more continuous lighting and higher contrast
+    // Seems to give better tracking but a bit slow, TOBENCHMARK
+    // cv::Ptr<cv::CLAHE> clahe = cv::createCLAHE(2.0, cv::Size(8,8));
+    // clahe->apply(img_incoming, img_incoming);
+
 
     // Time to PREPreprocess the image if necessary: greyscale if BGR, CLAHE etc...
     // once preprocessing is done, replace the original image (?)
@@ -138,11 +145,16 @@ void ProcessorVisualOdometry::preProcess()
         return;
     }
 
+    ////////////////////////////////
+    // FEATURE TRACKING
+    // Update capture Incoming data
+    //   - Track keypoints last->incoming
+    //   - Merge tracks origin->last with last->incoming to get origin->incoming
+    //   - Outlier rejection origin->incoming (essential matrix)
+    //   - If too few keypoints in incoming, detect new keypoints and last and track them in last->incoming
+    //   - All the results are stored in incoming capture for later Tree Processing
+    ////////////////////////////////
 
-    ////////////////////////
-    ////////////////////////
-    // TRACKING
-    // Proceeed to tracking the previous features
     capture_image_last_     = std::static_pointer_cast<CaptureImage>(last_ptr_);
     capture_image_origin_   = std::static_pointer_cast<CaptureImage>(origin_ptr_);
     cv::Mat img_last        = capture_image_last_->getImage();
@@ -151,14 +163,7 @@ void ProcessorVisualOdometry::preProcess()
     KeyPointsMap mwkps_last     = capture_image_last_   ->getKeyPoints();
     KeyPointsMap mwkps_incoming;  // init incoming
 
-    ////////////////////////////////
-    // FEATURE TRACKING
-    // Update capture Incoming data
-    //   - KeyPoints
-    //   - tracks wrt. origin and last
-    //   - descriptor
-    //   - ...
-    ////////////////////////////////
+
 
     WOLF_INFO( "Tracking " , mwkps_last.size(), " keypoints in last" );
 
@@ -277,9 +282,6 @@ void ProcessorVisualOdometry::preProcess()
 //        WOLF_INFO("Tracked ", mwkps_incoming_new.size(), " new keypoints to incoming");
 
         // Concatenation of old tracks and new tracks
-        // Only keep tracks until it reaches a max nb of tracks
-        // TODO: the strategy for keeping the best new tracks is dumb
-        //    -> should be improved for a better spatial repartition
         for (auto & track: tracks_last_incoming_new){
             tracks_last_incoming_filtered[track.first] = track.second;
             mwkps_last_filtered[track.first] = mwkps_last_new[track.first];
