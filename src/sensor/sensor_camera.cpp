@@ -41,10 +41,13 @@ SensorCamera::SensorCamera(const Eigen::VectorXd& _extrinsics, const ParamsSenso
                 correction_(distortion_.size()==0 ? 0 : distortion_.size() + 1), // make correction vector slightly larger in size than the distortion vector
                 pinhole_model_raw_(_intrinsics.pinhole_model_raw), //
                 pinhole_model_rectified_(_intrinsics.pinhole_model_rectified), //
-                using_raw_(true)
+                using_raw_(_intrinsics.using_raw)
 {
     assert(_extrinsics.size() == 7 && "Wrong intrinsics vector size. Should be 7 for 3d");
-    useRawImages();
+    if (using_raw_)
+        useRawImages();
+    else
+        useRectifiedImages();
     pinhole::computeCorrectionModel(getIntrinsic()->getState(), distortion_, correction_);
 }
 

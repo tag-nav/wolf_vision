@@ -34,64 +34,89 @@ WOLF_STRUCT_PTR_TYPEDEFS(ParamsSensorCamera);
  */
 struct ParamsSensorCamera : public ParamsSensorBase
 {
-        unsigned int width;                     ///< Image width in pixels
-        unsigned int height;                    ///< Image height in pixels
+        unsigned int    width;                  ///< Image width in pixels
+        unsigned int    height;                 ///< Image height in pixels
+        bool            using_raw;              ///< Use raw images?
         Eigen::Vector4d pinhole_model_raw;      ///< k = [u_0, v_0, alpha_u, alpha_v]  vector of pinhole intrinsic parameters
         Eigen::Vector4d pinhole_model_rectified;///< k = [u_0, v_0, alpha_u, alpha_v]  vector of pinhole intrinsic parameters
         Eigen::VectorXd distortion;             ///< d = [d_1, d_2, d_3, ...] radial distortion coefficients
-    ParamsSensorCamera()
-    {
-        //DEFINED FOR COMPATIBILITY PURPOSES. TO BE REMOVED IN THE FUTURE.
-    }
+    ParamsSensorCamera() :
+        width(0),
+        height(0),
+        using_raw(true)
+        {
+            //
+        };
+
     ParamsSensorCamera(std::string _unique_name, const ParamsServer& _server):
         ParamsSensorBase(_unique_name,  _server)
     {
-        width                   = _server.getParam<unsigned int>(prefix + _unique_name       + "/width");
-        height                  = _server.getParam<unsigned int>(prefix + _unique_name       + "/height");
-        VectorXd distortion     = _server.getParam<Eigen::VectorXd>(prefix + _unique_name + "/distortion_coefficients/data");
-        VectorXd intrinsic      = _server.getParam<Eigen::VectorXd>(prefix + _unique_name + "/camera_matrix/data");
-        VectorXd projection     = _server.getParam<Eigen::VectorXd>(prefix + _unique_name + "/projection_matrix/data");
+        width               = _server.getParam<unsigned int>(prefix + _unique_name       + "/width");
+        height              = _server.getParam<unsigned int>(prefix + _unique_name       + "/height");
+        using_raw           = _server.getParam<bool>        (prefix + _unique_name       + "/using_raw");
+        VectorXd distort    = _server.getParam<Eigen::VectorXd>(prefix + _unique_name + "/distortion_coefficients/data");
+        VectorXd intrinsic  = _server.getParam<Eigen::VectorXd>(prefix + _unique_name + "/camera_matrix/data");
+        VectorXd projection = _server.getParam<Eigen::VectorXd>(prefix + _unique_name + "/projection_matrix/data");
 
-        pinhole_model_raw[0] = intrinsic[2];
-        pinhole_model_raw[1] = intrinsic[5];
-        pinhole_model_raw[2] = intrinsic[0];
-        pinhole_model_raw[3] = intrinsic[4];
+        /* Get raw params from K matrix in camera_info:
+         *
+         *     | au  0 u0 |
+         * K = |  0 av v0 |
+         *     |  0  0  1 |
+         */
+        pinhole_model_raw[0] = intrinsic[2]; // u0
+        pinhole_model_raw[1] = intrinsic[5]; // v0
+        pinhole_model_raw[2] = intrinsic[0]; // au
+        pinhole_model_raw[3] = intrinsic[4]; // av
 
-        pinhole_model_rectified[0] = projection[2];
-        pinhole_model_rectified[1] = projection[6];
-        pinhole_model_rectified[2] = projection[0];
-        pinhole_model_rectified[3] = projection[5];
+        /* Get rectified params from P matrix in camera_info:
+         *
+         *     | au  0 u0 tx |
+         * P = |  0 av v0 ty |
+         *     |  0  0  1  0 |
+         */
+        pinhole_model_rectified[0] = projection[2]; // u0
+        pinhole_model_rectified[1] = projection[6]; // v0
+        pinhole_model_rectified[2] = projection[0]; // au
+        pinhole_model_rectified[3] = projection[5]; // av
 
-        assert (distortion.size() == 5 && "Distortion size must be size 5!");
+        /* Get distortion params from vector D in camera_info:
+         *
+         * D = [ r1 r2 t1 t2 r3 ], with ri: dadial params; ti: tangential params
+         *
+         * NOTE: Wolf ignores tangential params!!!
+         */
+        assert (distort.size() == 5 && "Distortion size must be size 5!");
 
-        WOLF_WARN_COND( distortion(2) != 0 || distortion(3) != 0 , "Wolf does not handle tangential distortion. Please consider re-calibrating without tangential distortion!");
+        WOLF_WARN_COND( distort(2) != 0 || distort(3) != 0 , "Wolf does not handle tangential distortion. Please consider re-calibrating without tangential distortion!");
 
-        if (distortion(4) == 0)
-            if (distortion(1) == 0)
-                if (distortion(0) == 0)
+        if (distort(4) == 0)
+            if (distort(1) == 0)
+                if (distort(0) == 0)
                     distortion.resize(0);
                 else
                 {
                     distortion.resize(1);
-                    distortion = distortion.head<1>();
+                    distortion = distort.head<1>();
                 }
             else
             {
                 distortion.resize(2);
-                distortion = distortion.head<2>();
+                distortion = distort.head<2>();
             }
         else
         {
             distortion.resize(3);
-            distortion.head<2>() = distortion.head<2>();
-            distortion.tail<1>() = distortion.tail<1>();
+            distortion.head<2>() = distort.head<2>();
+            distortion.tail<1>() = distort.tail<1>();
         }
     }
     std::string print() const override
     {
-        return ParamsSensorBase::print()                                             + "\n"
+        return ParamsSensorBase::print()                                                    + "\n"
             + "width: "         + std::to_string(width)                                     + "\n"
             + "height: "        + std::to_string(height)                                    + "\n"
+            + "using_raw: "     + std::to_string(using_raw)                                 + "\n"
             + "pinhole: "       + converter<std::string>::convert(pinhole_model_raw)        + "\n"
             + "pinhole rect.: " + converter<std::string>::convert(pinhole_model_rectified)  + "\n"
             + "distortion: "    + converter<std::string>::convert(distortion)               + "\n";
@@ -115,16 +140,16 @@ class SensorCamera : public SensorBase
         Eigen::VectorXd getDistortionVector()   { return distortion_; }
         Eigen::VectorXd getCorrectionVector()   { return correction_; }
         Eigen::Matrix3d getIntrinsicMatrix()    { return K_; }
-        Eigen::Vector4d getPinholeModel()       { return pinhole_model_raw_; }
+        Eigen::Vector4d getPinholeModel()       { if (using_raw_) return pinhole_model_raw_; else return pinhole_model_rectified_;}
 
         bool isUsingRawImages() { return using_raw_; }
         bool useRawImages();
         bool useRectifiedImages();
 
-        int getImgWidth(){return img_width_;}
-        int getImgHeight(){return img_height_;}
-        void setImgWidth(int _w){img_width_ = _w;}
-        void setImgHeight(int _h){img_height_ = _h;}
+        int getImgWidth()           {return img_width_;}
+        int getImgHeight()          {return img_height_;}
+        void setImgWidth(int _w)    {img_width_ = _w;}
+        void setImgHeight(int _h)   {img_height_ = _h;}
 
     private:
         int img_width_;
