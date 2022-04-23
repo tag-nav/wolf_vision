@@ -492,7 +492,6 @@ LandmarkBasePtr ProcessorVisualOdometry::emplaceLandmark(FeatureBasePtr _feat)
     double distance = 1;
     Eigen::Vector4d vec_homogeneous_c;
     vec_homogeneous_c = {point3d(0),point3d(1),point3d(2),point3d.norm()/distance};
-    vec_homogeneous_c.normalize();
 
     //TODO: lmk from camera to world coordinate frame.
     Transform<double,3,Isometry> T_w_r
@@ -504,6 +503,9 @@ LandmarkBasePtr ProcessorVisualOdometry::emplaceLandmark(FeatureBasePtr _feat)
     Eigen::Matrix<double, 4, 1> vec_homogeneous_w = T_w_r
                                            * T_r_c
                                            * vec_homogeneous_c;
+
+    // normalize to make equivalent to a unit quaternion
+    vec_homogeneous_w.normalize();
 
     auto lmk_hp_ptr = LandmarkBase::emplace<LandmarkHp>(getProblem()->getMap(), 
                                                         vec_homogeneous_w, 
