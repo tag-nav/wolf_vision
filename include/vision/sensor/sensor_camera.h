@@ -179,6 +179,8 @@ inline bool SensorCamera::useRectifiedImages()
 {
     getIntrinsic()->setState(pinhole_model_rectified_);
     K_ = setIntrinsicMatrix(pinhole_model_rectified_);
+    distortion_.resize(0); // remove distortion from model
+    correction_.resize(0);
     using_raw_ = false;
 
     return true;
