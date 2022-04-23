@@ -62,7 +62,15 @@ SensorCamera::~SensorCamera()
     //
 }
 
-Eigen::Matrix3d SensorCamera::setIntrinsicMatrix(Eigen::Vector4d _pinhole_model)
+Eigen::Matrix<double, 3, 4> SensorCamera::getProjectionMatrix() const
+{
+    Eigen::Matrix<double, 3, 4> P;
+    P.setZero();
+    P.leftCols(3) = getIntrinsicMatrix();
+    return P;
+}
+
+Eigen::Matrix3d SensorCamera::computeIntrinsicMatrix(const Eigen::Vector4d& _pinhole_model) const
 {
     Eigen::Matrix3d K;
     K(0, 0) = _pinhole_model(2);

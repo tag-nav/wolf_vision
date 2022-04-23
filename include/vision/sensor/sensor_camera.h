@@ -137,17 +137,18 @@ class SensorCamera : public SensorBase
 
         ~SensorCamera() override;
 
-        Eigen::VectorXd getDistortionVector()   { return distortion_; }
-        Eigen::VectorXd getCorrectionVector()   { return correction_; }
-        Eigen::Matrix3d getIntrinsicMatrix()    { return K_; }
-        Eigen::Vector4d getPinholeModel()       { if (using_raw_) return pinhole_model_raw_; else return pinhole_model_rectified_;}
+        Eigen::VectorXd getDistortionVector()const   { return distortion_; }
+        Eigen::VectorXd getCorrectionVector()const   { return correction_; }
+        Eigen::Matrix3d getIntrinsicMatrix() const   { return K_; }
+        Eigen::Vector4d getPinholeModel()    const   { if (using_raw_) return pinhole_model_raw_; else return pinhole_model_rectified_;}
+        Eigen::Matrix<double, 3, 4>getProjectionMatrix() const;
 
-        bool isUsingRawImages() { return using_raw_; }
+        bool isUsingRawImages() const { return using_raw_; }
         bool useRawImages();
         bool useRectifiedImages();
 
-        int getImgWidth()           {return img_width_;}
-        int getImgHeight()          {return img_height_;}
+        int getImgWidth()  const    {return img_width_;}
+        int getImgHeight() const    {return img_height_;}
         void setImgWidth(int _w)    {img_width_ = _w;}
         void setImgHeight(int _h)   {img_height_ = _h;}
 
@@ -160,7 +161,7 @@ class SensorCamera : public SensorBase
         Eigen::Matrix3d K_;
         bool using_raw_;
 
-        virtual Eigen::Matrix3d setIntrinsicMatrix(Eigen::Vector4d _pinhole_model);
+        Eigen::Matrix3d computeIntrinsicMatrix(const Eigen::Vector4d& _pinhole_model) const;
 
     public:
         EIGEN_MAKE_ALIGNED_OPERATOR_NEW; // to guarantee alignment (see http://eigen.tuxfamily.org/dox-devel/group__TopicStructHavingEigenMembers.html)
@@ -169,7 +170,7 @@ class SensorCamera : public SensorBase
 inline bool SensorCamera::useRawImages()
 {
     getIntrinsic()->setState(pinhole_model_raw_);
-    K_ = setIntrinsicMatrix(pinhole_model_raw_);
+    K_ = computeIntrinsicMatrix(pinhole_model_raw_);
     using_raw_ = true;
 
     return true;
@@ -178,7 +179,7 @@ inline bool SensorCamera::useRawImages()
 inline bool SensorCamera::useRectifiedImages()
 {
     getIntrinsic()->setState(pinhole_model_rectified_);
-    K_ = setIntrinsicMatrix(pinhole_model_rectified_);
+    K_ = computeIntrinsicMatrix(pinhole_model_rectified_);
     distortion_.resize(0); // remove distortion from model
     correction_.resize(0);
     using_raw_ = false;
