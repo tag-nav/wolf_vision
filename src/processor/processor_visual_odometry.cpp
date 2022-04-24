@@ -131,14 +131,6 @@ void ProcessorVisualOdometry::preProcess()
         capture_image_incoming_->setTracksOrigin(tracks_init);
         capture_image_incoming_->setTracksPrev(tracks_init);
 
-        // print a bar with the number of active tracks in incoming
-        std::string s;
-        for (int i = 0; i<capture_image_incoming_->getKeyPoints().size(); i++)
-        {
-           s += "#";
-        }
-        WOLF_INFO("TRACKS: ", capture_image_incoming_->getKeyPoints().size(), " ", s);
-
         auto __attribute__((unused)) dt_preprocess = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - t1).count();
         WOLF_DEBUG( "dt_preprocess (ms): " , dt_preprocess );
 
@@ -312,15 +304,6 @@ void ProcessorVisualOdometry::preProcess()
     capture_image_incoming_->setTracksOrigin(tracks_origin_incoming);
 
     auto __attribute__((unused)) dt_preprocess = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - t1).count();
-
-    // print a bar with the number of active tracks in incoming
-    std::string s;
-    for (int i = 0; i<capture_image_incoming_->getKeyPoints().size(); i++)
-    {
-       s += "#";
-    }
-    WOLF_INFO("TRACKS: ", capture_image_incoming_->getKeyPoints().size(), " ", s);
-
     WOLF_DEBUG( "dt_preprocess (ms): " , dt_preprocess );
 
     return;
@@ -538,6 +521,16 @@ void ProcessorVisualOdometry::postProcess()
         else
             ++track_it;
     }
+
+    // print a bar with the number of active tracks in incoming
+    unsigned int n = capture_image_incoming_->getKeyPoints().size();
+    std::string s(n/2, '#');
+    WOLF_INFO("TRACKS: ", n, " ", s);
+
+    n = getProblem()->getMap()->getLandmarkList().size();
+    s = std::string(n/2, '-');
+    WOLF_INFO("LMARKS: ", n, " ", s);
+
 
 }
 
