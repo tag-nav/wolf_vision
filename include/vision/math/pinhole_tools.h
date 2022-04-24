@@ -272,8 +272,7 @@ Matrix<typename Derived2::Scalar, 2, 1> distortPoint(const MatrixBase<Derived1> 
     EIGEN_STATIC_ASSERT_VECTOR_ONLY(Derived1);
     MatrixSizeCheck<2,1>::check(up);
 
-    SizeEigen n = d.size();
-    if (n == 0)
+    if (d.size() == 0)
         return up;
     else {
         typename Derived2::Scalar r2 = up(0) * up(0) + up(1) * up(1); // this is the norm squared: r2 = ||u||^2

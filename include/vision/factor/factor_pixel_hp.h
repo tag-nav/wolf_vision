@@ -130,13 +130,19 @@ inline void FactorPixelHp::expectation(const T* const _frame_p,
 {
     using namespace Eigen;
 
-    // frames
+    // frames w: world; r: robot; c: camera
     Matrix<T, 3, 1> p_wr(_frame_p);
     Quaternion<T>   q_wr(_frame_o);
     Matrix<T, 3, 1> p_rc(_sensor_p);
     Quaternion<T>   q_rc(_sensor_o);
+
+    // camera pose in world frame: transforms from camera to world
     Matrix<T, 3, 1> p_wc = p_wr + q_wr * p_rc;
     Quaternion<T>   q_wc = q_wr*q_rc;
+
+    // invert transform: from world to camera
+    // | R T |.inv = | R.tr -R.tr*T | == | q.conj -q.conj*T |
+    // | 0 1 |       |  0      1    |    |   0        1     |
     Quaternion<T>   q_cw = q_wc.conjugate();
     Matrix<T, 3, 1> p_cw = - (q_cw * p_wc);
 
@@ -148,7 +154,7 @@ inline void FactorPixelHp::expectation(const T* const _frame_p,
      * | q T | * | v | = | q*v + T+w | --> v' = q*v + T+w
      * | 0 1 |   | w |   |  0     w  |
      */
-    Matrix<T, 3, 1> v_dir = q_cw*lh_w.template head<3>() + p_cw * lh_w(3);
+    Matrix<T, 3, 1> v_dir = q_cw * lh_w.template head<3>() + p_cw * lh_w(3);
 
     // project point and exit
     Eigen::Map<Eigen::Matrix<T, 2, 1> > expectation(_expectation);
