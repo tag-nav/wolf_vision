@@ -486,16 +486,16 @@ LandmarkBasePtr ProcessorVisualOdometry::emplaceLandmark(FeatureBasePtr _feat)
 
     Eigen::Vector3d point3d;
     point3d = pinhole::backprojectPoint(
-    		getSensor()->getIntrinsic()->getState(),
-    		(std::static_pointer_cast<SensorCamera>(getSensor()))->getCorrectionVector(),
-			point2d);
+            getSensor()->getIntrinsic()->getState(),
+            (std::static_pointer_cast<SensorCamera>(getSensor()))->getCorrectionVector(),
+            point2d);
 
-    //double distance = params_bundle_adjustment_->distance; // arbitrary value
+    // double distance = params_bundle_adjustment_->distance; // arbitrary value
     double distance = 1;
     Eigen::Vector4d vec_homogeneous_c;
     vec_homogeneous_c = {point3d(0),point3d(1),point3d(2),point3d.norm()/distance};
 
-    //TODO: lmk from camera to world coordinate frame.
+    // lmk from camera to world coordinate frame.
     Transform<double,3,Isometry> T_w_r
         = Translation<double,3>(feat_pi->getFrame()->getP()->getState())
         * Quaterniond(_feat->getFrame()->getO()->getState().data());
