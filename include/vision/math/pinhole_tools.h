@@ -429,12 +429,13 @@ Matrix<typename Derived2::Scalar, 2, 1> pixellizePoint(const MatrixBase<Derived1
     MatrixSizeCheck<4,1>::check(k);
     MatrixSizeCheck<2,1>::check(ud);
 
+    typedef typename Derived1::Scalar S;
     typedef typename Derived2::Scalar T;
 
-    T u_0 = k(0);
-    T v_0 = k(1);
-    T a_u = k(2);
-    T a_v = k(3);
+    const S& u_0 = k(0);
+    const S& v_0 = k(1);
+    const S& a_u = k(2);
+    const S& a_v = k(3);
     Matrix<T, 2, 1> u;
 
     u(0) = u_0 + a_u * ud(0);
