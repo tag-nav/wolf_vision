@@ -152,7 +152,7 @@ inline void FactorPixelHp::expectation(const T* const _frame_p,
     // landmark dir vector in C frame
     /* note: transforming hmg point to get direction vector v':
      * | q T | * | v | = | q*v + T+w | --> v' = q*v + T+w
-     * | 0 1 |   | w |   |  0     w  |
+     * | 0 1 |   | w |   |     w     |
      */
     Matrix<T, 3, 1> v_dir = q_cw * lh_w.template head<3>() + p_cw * lh_w(3);
 
