@@ -144,15 +144,15 @@ inline void FactorPixelHp::expectation(const T* const _frame_p,
     Matrix<T, 4, 1> lh_w(_lmk_hmg);
 
     // landmark dir vector in C frame
+    /* note: transforming hmg point to get direction vector v':
+     * | q T | * | v | = | q*v + T+w | --> v' = q*v + T+w
+     * | 0 1 |   | w |   |  0     w  |
+     */
     Matrix<T, 3, 1> v_dir = q_cw*lh_w.template head<3>() + p_cw * lh_w(3);
-
-    // camera parameters
-    Matrix<T, 4, 1> intrinsic = intrinsic_.cast<T>();
-    Eigen::Matrix<T, Eigen::Dynamic, 1> distortion = distortion_.cast<T>();
 
     // project point and exit
     Eigen::Map<Eigen::Matrix<T, 2, 1> > expectation(_expectation);
-    expectation = pinhole::projectPoint(intrinsic, distortion, v_dir);
+    expectation = pinhole::projectPoint(intrinsic_, distortion_, v_dir);
 
 }
 
@@ -170,7 +170,7 @@ inline bool FactorPixelHp::operator ()(const T* const _frame_p,
 
     // residual
     Eigen::Map<Eigen::Matrix<T, 2, 1> > residuals(_residuals);
-    residuals = getMeasurementSquareRootInformationUpper().cast<T>() * (expected - getMeasurement());
+    residuals = getMeasurementSquareRootInformationUpper() * (expected - getMeasurement());
 
     return true;
 }
