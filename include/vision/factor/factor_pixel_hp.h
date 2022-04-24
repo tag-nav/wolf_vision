@@ -131,10 +131,10 @@ inline void FactorPixelHp::expectation(const T* const _frame_p,
     using namespace Eigen;
 
     // frames w: world; r: robot; c: camera
-    Matrix<T, 3, 1> p_wr(_frame_p);
-    Quaternion<T>   q_wr(_frame_o);
-    Matrix<T, 3, 1> p_rc(_sensor_p);
-    Quaternion<T>   q_rc(_sensor_o);
+    Map<const Matrix<T, 3, 1> > p_wr(_frame_p);
+    Map<const Quaternion<T> >   q_wr(_frame_o);
+    Map<const Matrix<T, 3, 1> > p_rc(_sensor_p);
+    Map<const Quaternion<T> >   q_rc(_sensor_o);
 
     // camera pose in world frame: transforms from camera to world
     Matrix<T, 3, 1> p_wc = p_wr + q_wr * p_rc;
