@@ -86,10 +86,12 @@ void ProcessorVisualOdometry::preProcess()
 
     cv::Mat img_incoming = capture_image_incoming_->getImage();
 
-    // Adaptive Histogram Correction to get more continuous lighting and higher contrast
-    // Seems to give better tracking but a bit slow, TOBENCHMARK
-    // cv::Ptr<cv::CLAHE> clahe = cv::createCLAHE(2.0, cv::Size(8,8));
-    // clahe->apply(img_incoming, img_incoming);
+    if (params_visual_odometry_->use_clahe_){
+        // Contrast Limited Adaptive Histogram Equalization  
+        // -> more continuous lighting and higher contrast images
+        cv::Ptr<cv::CLAHE> clahe = cv::createCLAHE(2.0, cv::Size(8,8));
+        clahe->apply(img_incoming, img_incoming);
+    }
 
 
     // Time to PREPreprocess the image if necessary: greyscale if BGR, CLAHE etc...

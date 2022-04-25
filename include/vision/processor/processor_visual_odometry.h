@@ -82,6 +82,7 @@ struct ParamsProcessorVisualOdometry : public ParamsProcessorTracker
     };
 
     double std_pix_;
+    bool use_clahe_;
     RansacParams ransac_params_;
     KltParams klt_params_;
     FastParams fast_params_;
@@ -94,6 +95,8 @@ struct ParamsProcessorVisualOdometry : public ParamsProcessorTracker
         ParamsProcessorTracker(_unique_name, _server)
     {
         std_pix_ = _server.getParam<int>(prefix + _unique_name + "/std_pix");
+
+        use_clahe_ = _server.getParam<bool>(prefix + _unique_name + "/use_clahe");
 
         ransac_params_.ransac_prob_   = _server.getParam<double>(prefix + _unique_name + "/ransac_params/ransac_prob");
         ransac_params_.ransac_thresh_ = _server.getParam<double>(prefix + _unique_name + "/ransac_params/ransac_thresh");
@@ -119,6 +122,7 @@ struct ParamsProcessorVisualOdometry : public ParamsProcessorTracker
     std::string print() const override
     {
         return ParamsProcessorTracker::print()                                                                   + "\n"
+            + "use_clahe_:                       " + std::to_string(use_clahe_)                                                   + "\n"
             + "ransac_params_.ransac_prob_:      " + std::to_string(ransac_params_.ransac_prob_)                 + "\n"
             + "ransac_params_.ransac_thresh_:    " + std::to_string(ransac_params_.ransac_thresh_)               + "\n"
             + "klt_params_.tracker_width_:       " + std::to_string(klt_params_.patch_width_)                    + "\n"

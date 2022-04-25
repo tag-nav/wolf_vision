@@ -14,6 +14,11 @@ max_new_features: 100
 
 ####################################
 # ProcessorVisualOdometry parameters
+
+# CLAHE = Contrast Limited Adaptive Histogram Equalization  
+# -> more continuous lighting and higher contrast images, 1-1.5 ms overhead
+use_clahe: true
+
 # FAST KeyPoint detection 
 fast_params:
     # Threshold on the keypoint pixel intensity (in uchar [0-255]) 
