@@ -15,34 +15,37 @@ max_new_features: 100
 ####################################
 # ProcessorVisualOdometry parameters
 
-# CLAHE = Contrast Limited Adaptive Histogram Equalization  
-# -> more continuous lighting and higher contrast images, 1-1.5 ms overhead
-use_clahe: true
+# Image Equalization methods
+#   0: none
+#   1: average
+#   2: histogram_equalization
+#   3: CLAHE = Contrast Limited Adaptive Histogram Equalization, 1-1.5 ms overhead
+equalization:
+    method: 1
+    average:
+        median: 127 # half of 8 bits = 255/2 = 127.5 --> to integer <-- TODO we could maybe automate this
+    histogram:
+    clahe:
+        clip_limit: 2
+        tile_grid_size: [8,8]
 
 # FAST KeyPoint detection 
-fast_params:
+fast:
     # Threshold on the keypoint pixel intensity (in uchar [0-255]) 
     # the higher, the more selective the detector is
-    threshold_fast: 30
+    threshold: 30
     # Avoids getting multiple keypoints at the same place
     non_max_suppresion: true
-    # number of cells used by the active search grid data structure
-    active_search_grid_nb_h: 8  # horizontal
-    active_search_grid_nb_v: 8  # vertical
-    # minimum margin of the region of interest from the edges of the image 
-    active_search_margin: 10
-    # reduce the size of each region of interest by n pixels to prevent keypoints from being too close
-    active_search_separation: 10
-
+    
 # Lucas Kanade tracking parameters
-klt_params:
+klt:
     patch_width: 15
     patch_height: 15
     nlevels_pyramids: 3
-    klt_max_err: 0.3
+    max_err: 0.3
 
 # tesselation grid    
-grid_params:
+grid:
     # number of cells used by the active search grid data structure
     nbr_cells_h: 6  # horizontal
     nbr_cells_v: 5  # vertical
@@ -51,12 +54,12 @@ grid_params:
     # reduce the size of each region of interest by n pixels to prevent keypoints from being too close
     separation: 10
 
-ransac_params:
+ransac:
     # specifies a desirable level of confidence (probability) that the estimated matrix is correct
-    ransac_prob: 0.999
+    prob: 0.999
     # maximum distance from a point to an epipolar line in pixels, beyond which the point 
     # is considered an outlier and is not used for computing the final fundamental matrix
-    ransac_thresh: 1
+    thresh: 1
 
 # Keep the number of tracks below 
 max_nb_tracks: 100

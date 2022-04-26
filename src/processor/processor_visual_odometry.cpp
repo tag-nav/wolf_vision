@@ -37,13 +37,13 @@ ProcessorVisualOdometry::ProcessorVisualOdometry(ParamsProcessorVisualOdometryPt
                 frame_count_(0)
 {
     // Preprocessor stuff
-    detector_ = cv::FastFeatureDetector::create(_params_vo->fast_params_.threshold_fast_, 
-                                                _params_vo->fast_params_.non_max_suppresion_,
+    detector_ = cv::FastFeatureDetector::create(_params_vo->fast.threshold,
+                                                _params_vo->fast.non_max_suppresion,
                                                 cv::FastFeatureDetector::TYPE_9_16); // TYPE_5_8, TYPE_7_12, TYPE_9_16
     
     // Processor stuff
     // Set pixel noise covariance
-    Eigen::Vector2d std_pix; std_pix << params_visual_odometry_->std_pix_, params_visual_odometry_->std_pix_;
+    Eigen::Vector2d std_pix; std_pix << params_visual_odometry_->std_pix, params_visual_odometry_->std_pix;
     pixel_cov_ = std_pix.array().square().matrix().asDiagonal();
 
 }
@@ -61,10 +61,10 @@ void ProcessorVisualOdometry::configure(SensorBasePtr _sensor)
     
     // Tessalation of the image
     cell_grid_ = ActiveSearchGrid(sen_cam_->getImgWidth(), sen_cam_->getImgHeight(),
-                                  params_visual_odometry_->grid_params_.nbr_cells_h_,
-                                  params_visual_odometry_->grid_params_.nbr_cells_v_,
-                                  params_visual_odometry_->grid_params_.margin_,
-                                  params_visual_odometry_->grid_params_.separation_);
+                                  params_visual_odometry_->grid.nbr_cells_h,
+                                  params_visual_odometry_->grid.nbr_cells_v,
+                                  params_visual_odometry_->grid.margin,
+                                  params_visual_odometry_->grid.separation);
 }
 
 TracksMap ProcessorVisualOdometry::mergeTracks(const TracksMap& tracks_prev_curr, const TracksMap& tracks_curr_next){
@@ -96,7 +96,7 @@ void ProcessorVisualOdometry::preProcess()
      *      2. opencv: histogram_equalization
      *      3. opencv: CLAHE
      */
-    switch (params_visual_odometry_->equalization_params_.method_)
+    switch (params_visual_odometry_->equalization.method)
     {
         case 0:
             break;
@@ -104,7 +104,7 @@ void ProcessorVisualOdometry::preProcess()
         {
             // average to central brightness
             auto img_avg = (cv::mean(img_incoming)).val[0];
-            img_incoming += cv::Scalar(round(params_visual_odometry_->equalization_params_.average_.median_ - img_avg) );
+            img_incoming += cv::Scalar(round(params_visual_odometry_->equalization.average.median - img_avg) );
             break;
         }
         case 2:
@@ -116,8 +116,8 @@ void ProcessorVisualOdometry::preProcess()
         {
             // Contrast Limited Adaptive Histogram Equalization  CLAHE
             // -> more continuous lighting and higher contrast images
-            cv::Ptr<cv::CLAHE> clahe = cv::createCLAHE(params_visual_odometry_->equalization_params_.clahe_.clip_limit_,
-                                                       params_visual_odometry_->equalization_params_.clahe_.tile_grid_size_);
+            cv::Ptr<cv::CLAHE> clahe = cv::createCLAHE(params_visual_odometry_->equalization.clahe.clip_limit,
+                                                       params_visual_odometry_->equalization.clahe.tile_grid_size);
             clahe->apply(img_incoming, img_incoming);
             break;
         }
@@ -134,8 +134,8 @@ void ProcessorVisualOdometry::preProcess()
         cv::Rect rect_roi;
         Eigen::Vector2i cell_index;
         std::vector<cv::KeyPoint> kps_roi;
-        for (int i=1; i < params_visual_odometry_->grid_params_.nbr_cells_h_-1; i++){
-            for (int j=1; j < params_visual_odometry_->grid_params_.nbr_cells_v_-1; j++){
+        for (int i=1; i < params_visual_odometry_->grid.nbr_cells_h-1; i++){
+            for (int j=1; j < params_visual_odometry_->grid.nbr_cells_v-1; j++){
                 cell_index << i,j;
                 cell_grid_.cell2roi(cell_index, rect_roi);
 
@@ -469,7 +469,7 @@ void ProcessorVisualOdometry::establishFactors()
         }
 
         // 2) create landmark if track is not associated with one and has enough length
-        else if(track_matrix_.trackSize(feat->trackId()) >= params_visual_odometry_->min_track_length_for_landmark_)
+        else if(track_matrix_.trackSize(feat->trackId()) >= params_visual_odometry_->min_track_length_for_landmark)
         {
             // std::cout << "NEW valid track \\o/" << std::endl;
             LandmarkBasePtr lmk = emplaceLandmark(feat_pi);
@@ -626,16 +626,16 @@ TracksMap ProcessorVisualOdometry::kltTrack(const cv::Mat _img_prev, const cv::M
 
 
     // Process one way: previous->current with current init with previous
-    ParamsProcessorVisualOdometry::KltParams prms = params_visual_odometry_->klt_params_;
+    ParamsProcessorVisualOdometry::KltParams prms = params_visual_odometry_->klt;
     cv::calcOpticalFlowPyrLK(
             _img_prev,
             _img_curr, 
             p2f_prev,
             p2f_curr,
             status, err,
-            {prms.patch_width_, prms.patch_height_}, 
-            prms.nlevels_pyramids_,
-            prms.criteria_,
+            {prms.patch_width, prms.patch_height},
+            prms.nlevels_pyramids,
+            prms.criteria,
             (cv::OPTFLOW_USE_INITIAL_FLOW + cv::OPTFLOW_LK_GET_MIN_EIGENVALS));
     
     // Process the other way: current->previous
@@ -647,16 +647,16 @@ TracksMap ProcessorVisualOdometry::kltTrack(const cv::Mat _img_prev, const cv::M
             p2f_curr,
             p2f_prev,
             status_back, err_back,
-            {prms.patch_width_, prms.patch_height_},
-            prms.nlevels_pyramids_,
-            prms.criteria_,
+            {prms.patch_width, prms.patch_height},
+            prms.nlevels_pyramids,
+            prms.criteria,
             (cv::OPTFLOW_USE_INITIAL_FLOW + cv::OPTFLOW_LK_GET_MIN_EIGENVALS));
 
     // Delete point if KLT failed
     for (size_t j = 0; j < status.size(); j++) {
 
-        if(!status_back.at(j)  ||  (err_back.at(j) > prms.klt_max_err_) ||
-           !status.at(j)  ||  (err.at(j) > prms.klt_max_err_)) {
+        if(!status_back.at(j)  ||  (err_back.at(j) > prms.max_err) ||
+           !status.at(j)  ||  (err.at(j) > prms.max_err)) {
             continue;
         }
 
@@ -675,7 +675,7 @@ TracksMap ProcessorVisualOdometry::kltTrack(const cv::Mat _img_prev, const cv::M
 
 bool ProcessorVisualOdometry::filterWithEssential(const KeyPointsMap _mwkps_prev, const KeyPointsMap _mwkps_curr, TracksMap &_tracks_prev_curr, cv::Mat &_E)
 {
-    ParamsProcessorVisualOdometry::RansacParams prms = params_visual_odometry_->ransac_params_;
+    ParamsProcessorVisualOdometry::RansacParams prms = params_visual_odometry_->ransac;
 
     // We need to build lists of pt2d for openCV function
     std::vector<cv::Point2d> p2d_prev, p2d_curr;
@@ -700,8 +700,8 @@ bool ProcessorVisualOdometry::filterWithEssential(const KeyPointsMap _mwkps_prev
                               p2d_curr, 
                               Kcv_, 
                               cv::RANSAC,
-                              prms.ransac_prob_,
-                              prms.ransac_thresh_ / focal,
+                              prms.prob,
+                              prms.thresh / focal,
                               cvMask);
     
     // Let's remove outliers from tracksMap

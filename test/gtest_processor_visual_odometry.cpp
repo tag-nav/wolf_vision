@@ -101,13 +101,13 @@ TEST(ProcessorVisualOdometry, kltTrack)
 
     // Create a processor
     ParamsProcessorVisualOdometryPtr params = std::make_shared<ParamsProcessorVisualOdometry>();
-    params->klt_params_.patch_height_ = 21;
-    params->klt_params_.patch_width_ = 21;
-    params->klt_params_.nlevels_pyramids_ = 3;
-    params->klt_params_.klt_max_err_ = 1.0;
-    params->klt_params_.criteria_ = cv::TermCriteria(cv::TermCriteria::COUNT+cv::TermCriteria::EPS, 30, 0.01);
-    params->fast_params_.threshold_fast_ = 30;
-    params->fast_params_.non_max_suppresion_ = true;
+    params->klt.patch_height = 21;
+    params->klt.patch_width = 21;
+    params->klt.nlevels_pyramids = 3;
+    params->klt.max_err = 1.0;
+    params->klt.criteria = cv::TermCriteria(cv::TermCriteria::COUNT+cv::TermCriteria::EPS, 30, 0.01);
+    params->fast.threshold = 30;
+    params->fast.non_max_suppresion = true;
 
     ProcessorVisualOdometryTest processor(params);
     cv::Ptr<cv::FeatureDetector> detector = processor.getDetector();
@@ -141,16 +141,16 @@ TEST(ProcessorVisualOdometry, kltTrack)
 //
 //    // Create a processor
 //    ParamsProcessorVisualOdometryPtr params = std::make_shared<ParamsProcessorVisualOdometry>();
-//    params->klt_params_.patch_height_ = 21;
-//    params->klt_params_.patch_width_ = 21;
-//    params->klt_params_.nlevels_pyramids_ = 3;
-//    params->klt_params_.klt_max_err_ = 0.2;
-//    params->klt_params_.criteria_ = cv::TermCriteria(cv::TermCriteria::COUNT+cv::TermCriteria::EPS, 30, 0.01);
-//    params->fast_params_.threshold_fast_ = 20;
-//    params->fast_params_.non_max_suppresion_ = true;
+//    params->klt_params.patch_height = 21;
+//    params->klt_params.patch_width = 21;
+//    params->klt_params.nlevels_pyramids = 3;
+//    params->klt_params.klt_max_err = 0.2;
+//    params->klt_params.criteria = cv::TermCriteria(cv::TermCriteria::COUNT+cv::TermCriteria::EPS, 30, 0.01);
+//    params->fast_params.threshold_fast = 20;
+//    params->fast_params.non_max_suppresion = true;
 //    params->min_features_for_keyframe = 50;
-//    params->max_nb_tracks_ = 400;
-//    params->min_track_length_for_landmark_ = 4;
+//    params->max_nb_tracks = 400;
+//    params->min_track_length_for_landmark = 4;
 //    ProcessorVisualOdometryTest processor(params);
 //
 //
@@ -340,12 +340,12 @@ TEST(ProcessorVisualOdometry, filterWithEssential)
     
     // Create a processor
     ParamsProcessorVisualOdometryPtr params = std::make_shared<ParamsProcessorVisualOdometry>();
-    params->grid_params_.margin_ = 10;
-    params->grid_params_.nbr_cells_h_ = 8;
-    params->grid_params_.nbr_cells_v_ = 8;
-    params->grid_params_.separation_ = 10;
-    params->ransac_params_.ransac_prob_ = 0.999;  // 0.99 makes the gtest fail -> missing one point
-    params->ransac_params_.ransac_thresh_ = 1.0;
+    params->grid.margin = 10;
+    params->grid.nbr_cells_h = 8;
+    params->grid.nbr_cells_v = 8;
+    params->grid.separation = 10;
+    params->ransac.prob = 0.999;  // 0.99 makes the gtest fail -> missing one point
+    params->ransac.thresh = 1.0;
     ProcessorVisualOdometryTest processor(params);
 
     // Install camera

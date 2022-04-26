@@ -56,119 +56,119 @@ struct ParamsProcessorVisualOdometry : public ParamsProcessorTracker
 {
     struct RansacParams
     {
-        double ransac_prob_;
-        double ransac_thresh_;
+        double prob;
+        double thresh;
     };
 
     struct KltParams
     {
-        int patch_width_;
-        int patch_height_;
-        double klt_max_err_;
-        int nlevels_pyramids_;
-        cv::TermCriteria criteria_;
+        int patch_width;
+        int patch_height;
+        double max_err;
+        int nlevels_pyramids;
+        cv::TermCriteria criteria;
     };
 
     struct FastParams
     {
-        int threshold_fast_;
-        bool non_max_suppresion_;
+        int threshold;
+        bool non_max_suppresion;
     };
 
     struct GridParams
     {
-        unsigned int nbr_cells_h_;
-        unsigned int nbr_cells_v_;
-        unsigned int margin_;
-        unsigned int separation_;
+        unsigned int nbr_cells_h;
+        unsigned int nbr_cells_v;
+        unsigned int margin;
+        unsigned int separation;
     };
 
     struct EqualizationParams
     {
-            unsigned int method_; // 0: none; 1: average; 2: histogram; 3: CLAHE
+            unsigned int method; // 0: none; 1: average; 2: histogram; 3: CLAHE
             // note: cv::histogramEqualization() has no tuning params
             struct AverageParams
             {
-                    int median_;
-            } average_;
+                    int median;
+            } average;
             struct ClaheParams
             {
-                    double clip_limit_;
-                    cv::Size2i tile_grid_size_;
-            } clahe_;
+                    double clip_limit;
+                    cv::Size2i tile_grid_size;
+            } clahe;
     };
 
-    double std_pix_;
-    RansacParams ransac_params_;
-    KltParams klt_params_;
-    FastParams fast_params_;
-    GridParams grid_params_;
-    EqualizationParams equalization_params_;
-    unsigned int max_nb_tracks_;
-    unsigned int min_track_length_for_landmark_;
+    double std_pix;
+    RansacParams ransac;
+    KltParams klt;
+    FastParams fast;
+    GridParams grid;
+    EqualizationParams equalization;
+    unsigned int max_nb_tracks;
+    unsigned int min_track_length_for_landmark;
 
     ParamsProcessorVisualOdometry() = default;
     ParamsProcessorVisualOdometry(std::string _unique_name, const ParamsServer& _server):
         ParamsProcessorTracker(_unique_name, _server)
     {
-        std_pix_ = _server.getParam<int>(prefix + _unique_name + "/std_pix");
+        std_pix = _server.getParam<double>(prefix + _unique_name + "/std_pix");
 
-        equalization_params_.method_ = _server.getParam<unsigned int>(prefix + _unique_name + "/equalization_params/method");
-        switch (equalization_params_.method_)
+        equalization.method = _server.getParam<unsigned int>(prefix + _unique_name + "/equalization/method");
+        switch (equalization.method)
         {
             case 0: break;
             case 1:
-                equalization_params_.average_.median_ = _server.getParam<unsigned int>(prefix + _unique_name + "/equalization_params/average/median");
+                equalization.average.median = _server.getParam<unsigned int>(prefix + _unique_name + "/equalization/average/median");
                 break;
             case 2:
                 // note: cv::histogramEqualization() has no tuning params
                 break;
             case 3:
-                equalization_params_.clahe_.clip_limit_ = _server.getParam<double>(prefix + _unique_name + "/equalization_params/clahe/clip_limit");
-                vector<int> grid_size = _server.getParam<vector<int>>(prefix + _unique_name + "/equalization_params/clahe/tile_grid_size");
-                equalization_params_.clahe_.tile_grid_size_.width  = grid_size[0];
-                equalization_params_.clahe_.tile_grid_size_.height = grid_size[1];
+                equalization.clahe.clip_limit = _server.getParam<double>(prefix + _unique_name + "/equalization/clahe/clip_limit");
+                vector<int> grid_size = _server.getParam<vector<int>>(prefix + _unique_name + "/equalization/clahe/tile_grid_size");
+                equalization.clahe.tile_grid_size.width  = grid_size[0];
+                equalization.clahe.tile_grid_size.height = grid_size[1];
                 break;
         }
 
-        ransac_params_.ransac_prob_   = _server.getParam<double>(prefix + _unique_name + "/ransac_params/ransac_prob");
-        ransac_params_.ransac_thresh_ = _server.getParam<double>(prefix + _unique_name + "/ransac_params/ransac_thresh");
+        ransac.prob   = _server.getParam<double>(prefix + _unique_name + "/ransac/prob");
+        ransac.thresh = _server.getParam<double>(prefix + _unique_name + "/ransac/thresh");
 
-        klt_params_.patch_width_        = _server.getParam<int>(prefix + _unique_name + "/klt_params/patch_width");
-        klt_params_.patch_height_       = _server.getParam<int>(prefix + _unique_name + "/klt_params/patch_height");
-        klt_params_.klt_max_err_        = _server.getParam<double>(prefix + _unique_name + "/klt_params/klt_max_err");
-        klt_params_.nlevels_pyramids_   = _server.getParam<int>(prefix + _unique_name + "/klt_params/nlevels_pyramids");
-        klt_params_.criteria_           = cv::TermCriteria(cv::TermCriteria::COUNT+cv::TermCriteria::EPS, 30, 0.01);  // everybody uses this defaults...
+        klt.patch_width        = _server.getParam<int>    (prefix + _unique_name + "/klt/patch_width");
+        klt.patch_height       = _server.getParam<int>    (prefix + _unique_name + "/klt/patch_height");
+        klt.max_err            = _server.getParam<double> (prefix + _unique_name + "/klt/max_err");
+        klt.nlevels_pyramids   = _server.getParam<int>    (prefix + _unique_name + "/klt/nlevels_pyramids");
+        klt.criteria           = cv::TermCriteria(cv::TermCriteria::COUNT+cv::TermCriteria::EPS, 30, 0.01);  // everybody uses this defaults...
 
-        fast_params_.threshold_fast_     = _server.getParam<int>( prefix + _unique_name + "/fast_params/threshold_fast");
-        fast_params_.non_max_suppresion_ = _server.getParam<bool>(prefix + _unique_name + "/fast_params/non_max_suppresion");
+        fast.threshold         = _server.getParam<int>    ( prefix + _unique_name + "/fast/threshold");
+        fast.non_max_suppresion = _server.getParam<bool>  (prefix + _unique_name + "/fast/non_max_suppresion");
 
-        grid_params_.nbr_cells_h_   = _server.getParam<unsigned int>(prefix + _unique_name + "/grid_params/nbr_cells_h");
-        grid_params_.nbr_cells_v_   = _server.getParam<unsigned int>(prefix + _unique_name + "/grid_params/nbr_cells_v");
-        grid_params_.margin_        = _server.getParam<unsigned int>(prefix + _unique_name + "/grid_params/margin");
-        grid_params_.separation_    = _server.getParam<unsigned int>(prefix + _unique_name + "/grid_params/separation");
+        grid.nbr_cells_h   = _server.getParam<unsigned int>(prefix + _unique_name + "/grid/nbr_cells_h");
+        grid.nbr_cells_v   = _server.getParam<unsigned int>(prefix + _unique_name + "/grid/nbr_cells_v");
+        grid.margin        = _server.getParam<unsigned int>(prefix + _unique_name + "/grid/margin");
+        grid.separation    = _server.getParam<unsigned int>(prefix + _unique_name + "/grid/separation");
 
-        max_nb_tracks_ = _server.getParam<unsigned int>(prefix + _unique_name + "/max_nb_tracks");
-        min_track_length_for_landmark_ = _server.getParam<unsigned int>(prefix + _unique_name + "/min_track_length_for_landmark");
+        max_nb_tracks = _server.getParam<unsigned int>(prefix + _unique_name + "/max_nb_tracks");
+        min_track_length_for_landmark = _server.getParam<unsigned int>(prefix + _unique_name + "/min_track_length_for_landmark");
 
     }
     std::string print() const override
     {
         return ParamsProcessorTracker::print()                                                                   + "\n"
-            + "ransac_params_.ransac_prob_:      " + std::to_string(ransac_params_.ransac_prob_)                 + "\n"
-            + "ransac_params_.ransac_thresh_:    " + std::to_string(ransac_params_.ransac_thresh_)               + "\n"
-            + "klt_params_.tracker_width_:       " + std::to_string(klt_params_.patch_width_)                    + "\n"
-            + "klt_params_.tracker_height_:      " + std::to_string(klt_params_.patch_height_)                   + "\n"
-            + "klt_params_.klt_max_err_:         " + std::to_string(klt_params_.klt_max_err_)                    + "\n"
-            + "klt_params_.nlevels_pyramids_:    " + std::to_string(klt_params_.nlevels_pyramids_)               + "\n"
-            + "fast_params_.threshold_fast_:     " + std::to_string(fast_params_.threshold_fast_)                + "\n"
-            + "fast_params_.non_max_suppresion_: " + std::to_string(fast_params_.non_max_suppresion_)            + "\n"
-            + "grid_params_.nbr_cells_h_:        " + std::to_string(grid_params_.nbr_cells_h_)                   + "\n"
-            + "grid_params_.nbr_cells_v_:        " + std::to_string(grid_params_.nbr_cells_v_)                   + "\n"
-            + "grid_params_.margin_:             " + std::to_string(grid_params_.margin_)                        + "\n"
-            + "grid_params_.separation_:         " + std::to_string(grid_params_.separation_)                    + "\n"
-            + "max_nb_tracks_:                   " + std::to_string(max_nb_tracks_)                              + "\n"
-            + "min_track_length_for_landmark_:   " + std::to_string(min_track_length_for_landmark_)              + "\n";
+            + "ransac.prob:               " + std::to_string(ransac.prob)                 + "\n"
+            + "ransac.thresh:             " + std::to_string(ransac.thresh)               + "\n"
+            + "klt.patch_width:           " + std::to_string(klt.patch_width)                    + "\n"
+            + "klt.patch_height:          " + std::to_string(klt.patch_height)                   + "\n"
+            + "klt.max_err:               " + std::to_string(klt.max_err)                    + "\n"
+            + "klt.nlevels_pyramids:      " + std::to_string(klt.nlevels_pyramids)               + "\n"
+            + "fast.threshold:            " + std::to_string(fast.threshold)                + "\n"
+            + "fast.non_max_suppresion:   " + std::to_string(fast.non_max_suppresion)            + "\n"
+            + "grid.nbr_cells_h:          " + std::to_string(grid.nbr_cells_h)                   + "\n"
+            + "grid.nbr_cells_v:          " + std::to_string(grid.nbr_cells_v)                   + "\n"
+            + "grid.margin:               " + std::to_string(grid.margin)                        + "\n"
+            + "grid.separation:           " + std::to_string(grid.separation)                    + "\n"
+            + "max_nb_tracks:                   " + std::to_string(max_nb_tracks)                              + "\n"
+            + "min_track_length_for_landmark:   " + std::to_string(min_track_length_for_landmark)              + "\n";
     }
 };
 
