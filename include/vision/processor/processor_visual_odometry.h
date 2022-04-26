@@ -98,12 +98,12 @@ struct ParamsProcessorVisualOdometry : public ParamsProcessorTracker
             } clahe;
     };
 
-    double std_pix;
     RansacParams ransac;
     KltParams klt;
     FastParams fast;
     GridParams grid;
     EqualizationParams equalization;
+    double std_pix;
     unsigned int max_nb_tracks;
     unsigned int min_track_length_for_landmark;
 
@@ -155,6 +155,7 @@ struct ParamsProcessorVisualOdometry : public ParamsProcessorTracker
     std::string print() const override
     {
         return ParamsProcessorTracker::print()                                                      + "\n"
+            + "equalization.method:       " + std::to_string(equalization.method)                   + "\n"
             + "ransac.prob:               " + std::to_string(ransac.prob)                           + "\n"
             + "ransac.thresh:             " + std::to_string(ransac.thresh)                         + "\n"
             + "klt.patch_width:           " + std::to_string(klt.patch_width)                       + "\n"
