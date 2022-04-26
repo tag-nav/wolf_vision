@@ -24,18 +24,7 @@
 #define INCLUDE_BASE_PROCESSOR_PROCESSOR_VISUAL_ODOMETRY_H_
 
 
-// Opencv includes
-#include <opencv2/core.hpp>
-#include <opencv2/imgcodecs.hpp>
-#include <opencv2/highgui.hpp>
-#include <opencv2/features2d.hpp>
-#include <opencv2/calib3d/calib3d.hpp>
-#include <opencv2/video/tracking.hpp>
-
-// wolf includes
-#include "core/math/rotations.h"
-#include "core/processor/processor_tracker.h"
-#include "core/processor/track_matrix.h"
+// wolf plugin includes
 #include "vision/math/pinhole_tools.h"
 #include "vision/sensor/sensor_camera.h"
 #include "vision/capture/capture_image.h"
@@ -43,6 +32,19 @@
 #include "vision/landmark/landmark_hp.h"
 #include "vision/factor/factor_pixel_hp.h"
 #include "vision/processor/active_search.h"
+
+// wolf includes
+#include <core/math/rotations.h>
+#include <core/processor/processor_tracker.h>
+#include <core/processor/track_matrix.h>
+
+// Opencv includes
+#include <opencv2/core.hpp>
+#include <opencv2/imgcodecs.hpp>
+#include <opencv2/highgui.hpp>
+#include <opencv2/features2d.hpp>
+#include <opencv2/calib3d/calib3d.hpp>
+#include <opencv2/video/tracking.hpp>
 
 
 
