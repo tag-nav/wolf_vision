@@ -104,7 +104,6 @@ struct ParamsProcessorVisualOdometry : public ParamsProcessorTracker
     GridParams grid;
     EqualizationParams equalization;
     double std_pix;
-    unsigned int max_nb_tracks;
     unsigned int min_track_length_for_landmark;
 
     ParamsProcessorVisualOdometry() = default;
@@ -148,7 +147,6 @@ struct ParamsProcessorVisualOdometry : public ParamsProcessorTracker
         grid.margin        = _server.getParam<unsigned int>(prefix + _unique_name + "/grid/margin");
         grid.separation    = _server.getParam<unsigned int>(prefix + _unique_name + "/grid/separation");
 
-        max_nb_tracks = _server.getParam<unsigned int>(prefix + _unique_name + "/max_nb_tracks");
         min_track_length_for_landmark = _server.getParam<unsigned int>(prefix + _unique_name + "/min_track_length_for_landmark");
 
     }
@@ -168,7 +166,6 @@ struct ParamsProcessorVisualOdometry : public ParamsProcessorTracker
             + "grid.nbr_cells_v:          " + std::to_string(grid.nbr_cells_v)                      + "\n"
             + "grid.margin:               " + std::to_string(grid.margin)                           + "\n"
             + "grid.separation:           " + std::to_string(grid.separation)                       + "\n"
-            + "max_nb_tracks:                   " + std::to_string(max_nb_tracks)                   + "\n"
             + "min_track_length_for_landmark:   " + std::to_string(min_track_length_for_landmark)   + "\n";
     }
 };
