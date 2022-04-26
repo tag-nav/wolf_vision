@@ -86,11 +86,40 @@ void ProcessorVisualOdometry::preProcess()
 
     cv::Mat img_incoming = capture_image_incoming_->getImage();
 
-    if (params_visual_odometry_->use_clahe_){
-        // Contrast Limited Adaptive Histogram Equalization  
-        // -> more continuous lighting and higher contrast images
-        cv::Ptr<cv::CLAHE> clahe = cv::createCLAHE(2.0, cv::Size(8,8));
-        clahe->apply(img_incoming, img_incoming);
+
+    /* Equalize image for better detection and tracking
+     * available methods:
+     *      0. none
+     *      1. average
+     *      2. opencv: histogram_equalization
+     *      3. opencv: CLAHE
+     */
+    switch (params_visual_odometry_->equalization_params_.method_)
+    {
+        case 0:
+            break;
+        case 1:
+        {
+            // average to central brightness
+            auto img_avg = (cv::mean(img_incoming)).val[0];
+            img_incoming += cv::Scalar(round(params_visual_odometry_->equalization_params_.average_.median_ - img_avg) );
+            break;
+        }
+        case 2:
+        {
+            // TODO: implement histogram equalization
+            WOLF_WARN("Histogram equalization not yet implemented. Ignoring.");
+            break;
+        }
+        case 3:
+        {
+            // Contrast Limited Adaptive Histogram Equalization  CLAHE
+            // -> more continuous lighting and higher contrast images
+            cv::Ptr<cv::CLAHE> clahe = cv::createCLAHE(params_visual_odometry_->equalization_params_.clahe_.clip_limit_,
+                                                       params_visual_odometry_->equalization_params_.clahe_.tile_grid_size_);
+            clahe->apply(img_incoming, img_incoming);
+            break;
+        }
     }
 
 

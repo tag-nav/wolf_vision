@@ -81,12 +81,30 @@ struct ParamsProcessorVisualOdometry : public ParamsProcessorTracker
         unsigned int separation_;
     };
 
+    struct EqualizationParams
+    {
+            unsigned int method_; // 0: none; 1: average; 2: histogram; 3: CLAHE
+            struct AverageParams
+            {
+                    int median_;
+            } average_;
+            struct HistogramParams
+            {
+                    // TODO: to be implemented
+            } histogram_;
+            struct ClaheParams
+            {
+                    double clip_limit_;
+                    cv::Size2i tile_grid_size_;
+            } clahe_;
+    };
+
     double std_pix_;
-    bool use_clahe_;
     RansacParams ransac_params_;
     KltParams klt_params_;
     FastParams fast_params_;
     GridParams grid_params_;
+    EqualizationParams equalization_params_;
     unsigned int max_nb_tracks_;
     unsigned int min_track_length_for_landmark_;
 
@@ -96,7 +114,23 @@ struct ParamsProcessorVisualOdometry : public ParamsProcessorTracker
     {
         std_pix_ = _server.getParam<int>(prefix + _unique_name + "/std_pix");
 
-        use_clahe_ = _server.getParam<bool>(prefix + _unique_name + "/use_clahe");
+        equalization_params_.method_ = _server.getParam<unsigned int>(prefix + _unique_name + "/equalization_params/method");
+        switch (equalization_params_.method_)
+        {
+            case 0: break;
+            case 1:
+                equalization_params_.average_.median_ = _server.getParam<unsigned int>(prefix + _unique_name + "/equalization_params/average/median");
+                break;
+            case 2:
+//                equalization_params_.average_.median_ = _server.getParam<unsigned int>(prefix + _unique_name + "/equalization_params/average/median");
+                break;
+            case 3:
+                equalization_params_.clahe_.clip_limit_ = _server.getParam<double>(prefix + _unique_name + "/equalization_params/clahe/clip_limit");
+                vector<int> grid_size = _server.getParam<vector<int>>(prefix + _unique_name + "/equalization_params/clahe/tile_grid_size");
+                equalization_params_.clahe_.tile_grid_size_.width  = grid_size[0];
+                equalization_params_.clahe_.tile_grid_size_.height = grid_size[1];
+                break;
+        }
 
         ransac_params_.ransac_prob_   = _server.getParam<double>(prefix + _unique_name + "/ransac_params/ransac_prob");
         ransac_params_.ransac_thresh_ = _server.getParam<double>(prefix + _unique_name + "/ransac_params/ransac_thresh");
@@ -122,7 +156,6 @@ struct ParamsProcessorVisualOdometry : public ParamsProcessorTracker
     std::string print() const override
     {
         return ParamsProcessorTracker::print()                                                                   + "\n"
-            + "use_clahe_:                       " + std::to_string(use_clahe_)                                                   + "\n"
             + "ransac_params_.ransac_prob_:      " + std::to_string(ransac_params_.ransac_prob_)                 + "\n"
             + "ransac_params_.ransac_thresh_:    " + std::to_string(ransac_params_.ransac_thresh_)               + "\n"
             + "klt_params_.tracker_width_:       " + std::to_string(klt_params_.patch_width_)                    + "\n"
