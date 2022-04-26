@@ -24,6 +24,8 @@
 //standard
 #include "vision/processor/processor_visual_odometry.h"
 
+#include <opencv2/imgproc.hpp>
+
 #include <chrono>
 #include <ctime>
 
@@ -107,8 +109,7 @@ void ProcessorVisualOdometry::preProcess()
         }
         case 2:
         {
-            // TODO: implement histogram equalization
-            WOLF_WARN("Histogram equalization not yet implemented. Ignoring.");
+            cv::equalizeHist( img_incoming, img_incoming );
             break;
         }
         case 3:

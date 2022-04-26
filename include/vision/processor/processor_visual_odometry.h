@@ -86,14 +86,11 @@ struct ParamsProcessorVisualOdometry : public ParamsProcessorTracker
     struct EqualizationParams
     {
             unsigned int method_; // 0: none; 1: average; 2: histogram; 3: CLAHE
+            // note: cv::histogramEqualization() has no tuning params
             struct AverageParams
             {
                     int median_;
             } average_;
-            struct HistogramParams
-            {
-                    // TODO: to be implemented
-            } histogram_;
             struct ClaheParams
             {
                     double clip_limit_;
@@ -124,7 +121,7 @@ struct ParamsProcessorVisualOdometry : public ParamsProcessorTracker
                 equalization_params_.average_.median_ = _server.getParam<unsigned int>(prefix + _unique_name + "/equalization_params/average/median");
                 break;
             case 2:
-//                equalization_params_.average_.median_ = _server.getParam<unsigned int>(prefix + _unique_name + "/equalization_params/average/median");
+                // note: cv::histogramEqualization() has no tuning params
                 break;
             case 3:
                 equalization_params_.clahe_.clip_limit_ = _server.getParam<double>(prefix + _unique_name + "/equalization_params/clahe/clip_limit");
