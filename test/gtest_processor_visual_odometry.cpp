@@ -232,9 +232,9 @@ TEST(ProcessorVisualOdometry, kltTrack)
 //    ProblemPtr problem      = Problem::autoSetup(server);
 //
 //    // Get sensor and processor
-//    SensorCameraPtr cam_ptr = std::dynamic_pointer_cast<SensorCamera>(problem->getSensor("sen cam"));
+//    SensorCameraPtr cam_ptr = std::dynamic_pointer_cast<SensorCamera>(problem->findSensor("sen cam"));
 //    ProcessorVisualOdometryPtr proc_vo_ptr;
-//    for (auto proc : problem->getSensor("sen cam")->getProcessorList()){
+//    for (auto proc : problem->findSensor("sen cam")->getProcessorList()){
 //        proc_vo_ptr = std::dynamic_pointer_cast<ProcessorVisualOdometry>(proc);
 //    }
 //

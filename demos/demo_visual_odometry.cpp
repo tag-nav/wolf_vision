@@ -56,7 +56,7 @@ int main(int argc, char** argv)
     problem->print(4,0,1,0);
 
     // recover sensor pointers and other stuff for later use (access by sensor name)
-    SensorCameraPtr sensor_cam = std::dynamic_pointer_cast<SensorCamera>(problem->getSensor("sen cam"));
+    SensorCameraPtr sensor_cam = std::dynamic_pointer_cast<SensorCamera>(problem->findSensor("sen cam"));
     // ProcessorVisualOdometryPtr proc_vo = std::dynamic_pointer_cast<ProcessorVisualOdometry>(problem->getProcessor("proc vo"));
 
     //    ==============================================================================
