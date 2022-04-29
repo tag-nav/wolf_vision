@@ -14,6 +14,9 @@ set(PLUGIN_NAME "wolf${PROJECT_NAME}")
 
 MESSAGE("Starting ${PROJECT_NAME} CMakeLists ...")
 
+# Paths
+SET(EXECUTABLE_OUTPUT_PATH ${CMAKE_CURRENT_SOURCE_DIR}/bin)
+SET(LIBRARY_OUTPUT_PATH ${CMAKE_CURRENT_SOURCE_DIR}/lib)
 set(INCLUDE_INSTALL_DIR include/iri-algorithms/wolf)
 set(LIB_INSTALL_DIR lib/)
 
@@ -193,8 +196,12 @@ endif()
 #Link the created libraries
 #===============EXAMPLE=========================
 TARGET_LINK_LIBRARIES(${PLUGIN_NAME} wolfcore)
+<<<<<<< Updated upstream
 TARGET_LINK_LIBRARIES(${PLUGIN_NAME} OpenCV)
 # TARGET_LINK_LIBRARIES(${PLUGIN_NAME} ${vision_utils_LIBRARY})
+=======
+TARGET_LINK_LIBRARIES(${PLUGIN_NAME} ${OpenCV_LIBRARIES})
+>>>>>>> Stashed changes
 
 #Build demos
 #===============EXAMPLE=========================
@@ -240,7 +247,6 @@ target_include_directories(${PLUGIN_NAME} INTERFACE
 )
 
 
-install(EXPORT ${PLUGIN_NAME}Targets DESTINATION lib/cmake/${PLUGIN_NAME})
 #install headers
 INSTALL(FILES ${HDRS_CAPTURE}
   DESTINATION ${INCLUDE_INSTALL_DIR}/${PROJECT_NAME}/capture)
