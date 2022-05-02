@@ -48,7 +48,7 @@ macro(wolf_report_not_found REASON_MSG)
   # FindPackage() use the camelcase library name, not uppercase.
   if (wolfvision_FIND_QUIETLY)
     message(STATUS "Failed to find wolfvision- " ${REASON_MSG} ${ARGN})
-  else (wolfvision_FIND_REQUIRED)
+  elseif (wolfvision_FIND_REQUIRED)
     message(FATAL_ERROR "Failed to find wolfvision - " ${REASON_MSG} ${ARGN})
   else()
     # Neither QUIETLY nor REQUIRED, use SEND_ERROR which emits an error
