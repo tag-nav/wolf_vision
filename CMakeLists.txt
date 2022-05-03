@@ -83,8 +83,10 @@ option(_WOLF_TRACE "Enable wolf tracing macro" ON)
 
 # ============ DEPENDENCIES ==================
 FIND_PACKAGE(wolfcore REQUIRED)
-SET(PRINT_INFO_VU false)
-FIND_PACKAGE(OpenCV REQUIRED)
+FIND_PACKAGE(OpenCV REQUIRED 
+  COMPONENTS core imgcodecs highgui features2d calib3d video
+)
+
 
 # ============ config.h ==================
 string(TOUPPER ${PROJECT_NAME} UPPER_NAME)
@@ -184,10 +186,29 @@ elseif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
   # using GCC
 endif()
 
-#Link the created libraries
+# Link the created libraries
 #===============EXAMPLE=========================
 TARGET_LINK_LIBRARIES(${PLUGIN_NAME} wolfcore)
-TARGET_LINK_LIBRARIES(${PLUGIN_NAME} OpenCV)
+# For OpenCV, link with respect to each required components, found in the find_package command
+# The required components have the same name as the include files e.g. <opencv2/core.hpp>
+# or the opencv2 subdirectory in which they are found, e.g. <opencv2/video/tracking.hpp>
+TARGET_LINK_LIBRARIES(${PLUGIN_NAME} 
+  opencv_core
+  opencv_imgcodecs
+  opencv_highgui
+  opencv_features2d
+  opencv_calib3d
+  opencv_video
+)
+
+
+# # TARGET_LINK_LIBRARIES(${PLUGIN_NAME} opencv)
+# get_target_property(toto wolfcore INCLUDE_DIRECTORIES)
+# message(WARNING ${toto})
+# get_target_property(toto wolfcore INTERFACE_INCLUDE_DIRECTORIES)
+# message(WARNING ${toto})
+# get_target_property(toto wolfcore INTERFACE_SYSTEM_INCLUDE_DIRECTORIES)
+# message(WARNING ${toto})
 
 #Build demos
 #===============EXAMPLE=========================
