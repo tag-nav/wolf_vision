@@ -99,9 +99,15 @@ inline FactorPixelHp::FactorPixelHp(const FeatureBasePtr&   _ftr_ptr,
 
 inline Eigen::VectorXd FactorPixelHp::expectation() const
 {
+<<<<<<< HEAD
     FrameBasePtr    frm = getFeature()->getCapture()->getFrame();
     SensorBasePtr   sen = getFeature()->getCapture()->getSensor();
     LandmarkBasePtr lmk = getLandmarkOther();
+=======
+    auto frm  = getFeature()->getCapture()->getFrame();
+    auto sen  = getFeature()->getCapture()->getSensor();
+    auto lmk  = getLandmarkOther();
+>>>>>>> devel
 
     const Eigen::MatrixXd frame_pos     = frm->getP()->getState();
     const Eigen::MatrixXd frame_ori     = frm->getO()->getState();

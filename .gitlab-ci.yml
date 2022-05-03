@@ -114,8 +114,6 @@ license_headers:
     - key: wolf-focal
       paths:
       - ci_deps/wolf/
-  except:
-    - master
   before_script:
     - *preliminaries_definition
     - *install_wolf_definition
@@ -133,8 +131,6 @@ build_and_test:bionic:
     - key: visionutils-bionic
       paths:
       - ci_deps/vision_utils/
-  except:
-    - master
   before_script:
     - *preliminaries_definition
     - *install_wolf_definition
@@ -154,8 +150,6 @@ build_and_test:focal:
     - key: visionutils-focal
       paths:
       - ci_deps/vision_utils/
-  except:
-    - master
   before_script:
     - *preliminaries_definition
     - *install_wolf_definition
