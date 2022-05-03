@@ -224,29 +224,35 @@ class ProcessorBundleAdjustment : public ProcessorTrackerFeature
         /**
          * \brief Return Image for debug purposes
          */
-        cv::Mat getImageDebug() const;
+        const cv::Mat& getImageDebug() const;
 
         /**
          * \brief Return list of Features tracked in a Capture
          */
-        std::list<FeatureBasePtr> trackedFeatures(const CaptureBasePtr& _capture_ptr) const;
+        FeatureBasePtrList trackedFeatures(const CaptureBasePtr& _capture_ptr);
         /**
         * \brief Return list of Landmarks
         */
-        std::list<LandmarkBasePtr> currentLandmarks() const;
+        LandmarkBaseConstPtrList currentLandmarks() const;
+        LandmarkBasePtrList currentLandmarks();
 };
 
-inline cv::Mat ProcessorBundleAdjustment::getImageDebug() const
+inline const cv::Mat& ProcessorBundleAdjustment::getImageDebug() const
 {
     return image_debug_;
 }
 
-inline std::list<FeatureBasePtr> ProcessorBundleAdjustment::trackedFeatures(const CaptureBasePtr& _capture_ptr) const
+inline FeatureBasePtrList ProcessorBundleAdjustment::trackedFeatures(const CaptureBasePtr& _capture_ptr)
 {
 	return track_matrix_.snapshotAsList(_capture_ptr);
 }
 
-inline std::list<LandmarkBasePtr> ProcessorBundleAdjustment::currentLandmarks() const
+inline LandmarkBaseConstPtrList ProcessorBundleAdjustment::currentLandmarks() const
+{
+	return getProblem()->getMap()->getLandmarkList();
+}
+
+inline LandmarkBasePtrList ProcessorBundleAdjustment::currentLandmarks()
 {
 	return getProblem()->getMap()->getLandmarkList();
 }

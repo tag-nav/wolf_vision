@@ -186,6 +186,7 @@ class ProcessorTrackerFeatureTrifocal : public ProcessorTrackerFeature
          */
         void establishFactors() override;
 
+        CaptureBaseConstPtr getPrevOrigin() const;
         CaptureBasePtr getPrevOrigin();
 
         bool isInlier(const cv::KeyPoint& _kp_incoming, const cv::KeyPoint& _kp_last);
@@ -211,6 +212,11 @@ class ProcessorTrackerFeatureTrifocal : public ProcessorTrackerFeature
         /// \brief Get pixel covariance
         const Matrix2d& pixelCov() const;
 };
+
+inline CaptureBaseConstPtr ProcessorTrackerFeatureTrifocal::getPrevOrigin() const
+{
+    return prev_origin_ptr_;
+}
 
 inline CaptureBasePtr ProcessorTrackerFeatureTrifocal::getPrevOrigin()
 {
