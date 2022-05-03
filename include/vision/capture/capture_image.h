@@ -124,7 +124,7 @@ class CaptureImage : public CaptureBase
         const TracksMap& getTracksOrigin() const {return tracks_origin_;}
         void setTracksOrigin(const TracksMap& _tracks){tracks_origin_ = _tracks;}
 
-        bool getLastWasRepopulated(){return last_was_repopulated_;}
+        bool getLastWasRepopulated() const {return last_was_repopulated_;}
         void setLastWasRepopulated(bool _repopulated){last_was_repopulated_ = _repopulated;}
 
         void addKeyPoint(const WKeyPoint& _wkp);
