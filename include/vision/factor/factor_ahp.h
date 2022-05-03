@@ -103,9 +103,9 @@ inline FactorAhp::FactorAhp(const FeatureBasePtr&   _ftr_ptr,
 
 inline Eigen::VectorXd FactorAhp::expectation() const
 {
-    FrameBasePtr frm_current = getFeature()->getCapture()->getFrame();
-    FrameBasePtr frm_anchor  = getFrameOther();
-    LandmarkBasePtr lmk      = getLandmarkOther();
+    auto frm_current = getFeature()->getCapture()->getFrame();
+    auto frm_anchor  = getFrameOther();
+    auto lmk         = getLandmarkOther();
 
     const Eigen::MatrixXd frame_current_pos = frm_current->getP()->getState();
     const Eigen::MatrixXd frame_current_ori = frm_current->getO()->getState();
@@ -151,7 +151,7 @@ inline void FactorAhp::expectation(const T* const _current_frame_p,
     TransformType       T_R0_C0 = t_r0_c0 * q_r0_c0;
 
     // current robot to current camera transform
-    CaptureBasePtr      current_capture = this->getFeature()->getCapture();
+    auto                current_capture = this->getFeature()->getCapture();
     Translation<T, 3>   t_r1_c1  (current_capture->getSensorP()->getState().cast<T>());
     Quaterniond         q_r1_c1_s(Eigen::Vector4d(current_capture->getSensorO()->getState()));
     Quaternion<T>       q_r1_c1 = q_r1_c1_s.cast<T>();

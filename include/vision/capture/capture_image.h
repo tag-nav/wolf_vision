@@ -64,10 +64,47 @@ class CaptureImage : public CaptureBase
         void setDescriptors(const cv::Mat &_descriptors);
         void setKeypoints(const std::vector<cv::KeyPoint>& _keypoints);
         cv::Mat& getDescriptors();
+        const std::vector<cv::KeyPoint>& getKeypoints() const;
         std::vector<cv::KeyPoint>& getKeypoints();
         void setGlobalDescriptor(const cv::Mat &_global_descriptor);
         cv::Mat& getGlobalDescriptor();
 };
+
+
+inline const cv::Mat& CaptureImage::getImage() const
+{
+    return frame_.getImage();
+}
+
+inline void CaptureImage::setDescriptors(const cv::Mat& _descriptors)
+{
+    frame_.setDescriptors(_descriptors);
+}
+
+inline void CaptureImage::setKeypoints(const std::vector<cv::KeyPoint> &_keypoints)
+{
+    frame_.setKeyPoints(_keypoints);
+}
+
+inline cv::Mat& CaptureImage::getDescriptors()
+{
+    return frame_.getDescriptors();
+}
+
+inline std::vector<cv::KeyPoint>& CaptureImage::getKeypoints()
+{
+    return frame_.getKeyPoints();
+}
+
+inline void CaptureImage::setGlobalDescriptor(const cv::Mat& _global_descriptor)
+{
+    global_descriptor_ = _global_descriptor;
+}
+
+inline cv::Mat& CaptureImage::getGlobalDescriptor()
+{
+    return global_descriptor_;
+}
 
 } // namespace wolf
 
