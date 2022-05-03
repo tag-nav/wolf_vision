@@ -31,5 +31,4 @@ src/CMakeFiles/cmake.check_cache
 vision.found
 
 \.vscode/
-build_release/
-
+doc/html

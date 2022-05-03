@@ -173,9 +173,9 @@ int main(int argc, char** argv)
         camera->process(image);
 
         // solve only when new KFs are added
-        if (problem->getTrajectory()->getFrameMap().size() > number_of_KFs)
+        if (problem->getTrajectory()->size() > number_of_KFs)
         {
-            number_of_KFs = problem->getTrajectory()->getFrameMap().size();
+            number_of_KFs = problem->getTrajectory()->size();
             std::string report = solver->solve(wolf::SolverManager::ReportVerbosity::BRIEF);
             std::cout << report << std::endl;
             if (number_of_KFs > 5)
