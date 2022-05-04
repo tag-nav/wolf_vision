@@ -218,9 +218,12 @@ ENDIF(BUILD_TESTS)
 #install library
 #=============================================================
 INSTALL(TARGETS ${PLUGIN_NAME} EXPORT ${PLUGIN_NAME}Targets
-      RUNTIME DESTINATION bin
-      LIBRARY DESTINATION lib
-      ARCHIVE DESTINATION lib)
+  RUNTIME DESTINATION bin
+  LIBRARY DESTINATION ${LIB_INSTALL_DIR}
+  ARCHIVE DESTINATION ${LIB_INSTALL_DIR}
+)
+install(EXPORT ${PLUGIN_NAME}Targets DESTINATION lib/${PLUGIN_NAME}/cmake)
+
 
 # Configure the package installation
 include(CMakePackageConfigHelpers)
