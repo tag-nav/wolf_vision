@@ -201,15 +201,6 @@ TARGET_LINK_LIBRARIES(${PLUGIN_NAME}
   opencv_video
 )
 
-
-# # TARGET_LINK_LIBRARIES(${PLUGIN_NAME} opencv)
-# get_target_property(toto wolfcore INCLUDE_DIRECTORIES)
-# message(WARNING ${toto})
-# get_target_property(toto wolfcore INTERFACE_INCLUDE_DIRECTORIES)
-# message(WARNING ${toto})
-# get_target_property(toto wolfcore INTERFACE_SYSTEM_INCLUDE_DIRECTORIES)
-# message(WARNING ${toto})
-
 #Build demos
 #===============EXAMPLE=========================
 IF(BUILD_DEMOS)
