@@ -22,14 +22,15 @@
 #ifndef LANDMARK_AHP_H
 #define LANDMARK_AHP_H
 
-//Wolf includes
-#include "core/landmark/landmark_base.h"
-
 // yaml
 #include <yaml-cpp/yaml.h>
 
-// Vision utils
-#include <vision_utils/vision_utils.h>
+// OpenCV includes
+#include <opencv2/core.hpp>
+
+//Wolf includes
+#include "core/landmark/landmark_base.h"
+
 
 namespace wolf {
     

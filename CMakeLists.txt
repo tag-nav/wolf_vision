@@ -81,7 +81,6 @@ option(_WOLF_TRACE "Enable wolf tracing macro" ON)
 
 # ============ DEPENDENCIES ==================
 FIND_PACKAGE(wolfcore REQUIRED)
-FIND_PACKAGE(vision_utils REQUIRED)
 SET(PRINT_INFO_VU false)
 FIND_PACKAGE(OpenCV REQUIRED)
 
@@ -108,7 +107,6 @@ include_directories("${PROJECT_BINARY_DIR}/conf")
 
 # ============ INCLUDES ==================
 INCLUDE_DIRECTORIES(${wolfcore_INCLUDE_DIRS})
-INCLUDE_DIRECTORIES(${vision_utils_INCLUDE_DIR})
 INCLUDE_DIRECTORIES(${OpenCV_INCLUDE_DIRS})
 INCLUDE_DIRECTORIES(BEFORE "include")
 
@@ -117,16 +115,16 @@ SET(HDRS_CAPTURE
 include/vision/capture/capture_image.h
   )
 SET(HDRS_FACTOR
-include/vision/factor/factor_trifocal.h
-include/vision/factor/factor_ahp.h
+# include/vision/factor/factor_trifocal.h
+# include/vision/factor/factor_ahp.h
 include/vision/factor/factor_pixel_hp.h
-include/vision/factor/factor_epipolar.h
+# include/vision/factor/factor_epipolar.h
   )
 SET(HDRS_FEATURE
 include/vision/feature/feature_point_image.h
   )
 SET(HDRS_LANDMARK
-  include/vision/landmark/landmark_ahp.h
+  # include/vision/landmark/landmark_ahp.h
   include/vision/landmark/landmark_hp.h
   include/vision/landmark/landmark_point_3d.h
   )
@@ -134,11 +132,8 @@ SET(HDRS_MATH
 include/vision/math/pinhole_tools.h
   )
 SET(HDRS_PROCESSOR
-include/vision/processor/processor_tracker_feature_trifocal.h
-include/vision/processor/processor_params_image.h
-include/vision/processor/processor_tracker_landmark_image.h
-include/vision/processor/processor_tracker_feature_image.h
-include/vision/processor/processor_bundle_adjustment.h
+include/vision/processor/processor_visual_odometry.h
+include/vision/processor/active_search.h
   )
 SET(HDRS_SENSOR
 include/vision/sensor/sensor_camera.h
@@ -152,25 +147,19 @@ SET(SRCS_FEATURE
 src/feature/feature_point_image.cpp
   )
 SET(SRCS_LANDMARK
-src/landmark/landmark_ahp.cpp
+# src/landmark/landmark_ahp.cpp
 src/landmark/landmark_hp.cpp
 src/landmark/landmark_point_3d.cpp
   )
 SET(SRCS_PROCESSOR
-src/processor/processor_tracker_feature_trifocal.cpp
-src/processor/processor_tracker_feature_image.cpp
-src/processor/processor_tracker_landmark_image.cpp
-src/processor/processor_bundle_adjustment.cpp
+src/processor/processor_visual_odometry.cpp
+src/processor/active_search.cpp
   )
 SET(SRCS_SENSOR
 src/sensor/sensor_camera.cpp
   )
 SET(SRCS_YAML
-src/yaml/processor_tracker_feature_trifocal_yaml.cpp
-src/yaml/sensor_camera_yaml.cpp
-src/yaml/processor_image_yaml.cpp
-src/yaml/processor_bundle_adjustment_yaml.cpp
-  )
+)
 
 # create the shared library
 ADD_LIBRARY(${PLUGIN_NAME}
@@ -197,9 +186,8 @@ endif()
 
 #Link the created libraries
 #===============EXAMPLE=========================
-TARGET_LINK_LIBRARIES(${PLUGIN_NAME} ${wolfcore_LIBRARIES})
+TARGET_LINK_LIBRARIES(${PLUGIN_NAME} wolfcore)
 TARGET_LINK_LIBRARIES(${PLUGIN_NAME} ${OpenCV_LIBS})
-TARGET_LINK_LIBRARIES(${PLUGIN_NAME} ${vision_utils_LIBRARY})
 
 #Build demos
 #===============EXAMPLE=========================

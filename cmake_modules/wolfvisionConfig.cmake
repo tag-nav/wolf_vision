@@ -66,10 +66,6 @@ set(wolfvision_FOUND TRUE)
 
 # Now we gather all the required dependencies for Wolf Laser
 
-FIND_PACKAGE(vision_utils REQUIRED)
-list(APPEND wolfvision_INCLUDE_DIRS ${vision_utils_INCLUDE_DIR})
-list(APPEND wolfvision_LIBRARIES ${vision_utils_LIBRARY})
-
 FIND_PACKAGE(OpenCV REQUIRED)
 list(APPEND wolfvision_INCLUDE_DIRS ${OpenCV_INCLUDE_DIRS})
 list(APPEND wolfvision_LIBRARIES ${OpenCV_LIBS})

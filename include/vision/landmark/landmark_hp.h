@@ -28,9 +28,8 @@
 // yaml
 #include <yaml-cpp/yaml.h>
 
-// Vision utils
-#include <vision_utils/vision_utils.h>
-
+// OpenCV includes
+#include <opencv2/core.hpp>
 namespace wolf {
     
 WOLF_PTR_TYPEDEFS(LandmarkHp);
@@ -43,7 +42,7 @@ class LandmarkHp : public LandmarkBase
 
 
     public:
-        LandmarkHp(Eigen::Vector4d _position_homogeneous, SensorBasePtr _sensor_, cv::Mat _2d_descriptor);
+        LandmarkHp(Eigen::Vector4d _position_homogeneous, cv::Mat _2d_descriptor);
 
         ~LandmarkHp() override;
 
