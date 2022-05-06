@@ -66,10 +66,6 @@ if(BUILD_TESTS)
     enable_testing()
 endif()
 
-#CMAKE modules
-SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake_modules")
-MESSAGE(STATUS ${CMAKE_MODULE_PATH})
-
 # Some wolf compilation options
 IF((CMAKE_BUILD_TYPE MATCHES DEBUG) OR (CMAKE_BUILD_TYPE MATCHES debug) OR (CMAKE_BUILD_TYPE MATCHES Debug))
   set(_WOLF_DEBUG true)
@@ -85,8 +81,9 @@ FIND_PACKAGE(OpenCV REQUIRED
 
 
 # ============ config.h ==================
-string(TOUPPER ${PROJECT_NAME} UPPER_NAME)
 set(_WOLF_ROOT_DIR ${CMAKE_SOURCE_DIR})
+# variable used to compile the config.h.in file
+string(TOUPPER ${PROJECT_NAME} PROJECT_NAME_UPPER)
 
 # Define the directory where will be the configured config.h
 SET(WOLF_CONFIG_DIR ${PROJECT_BINARY_DIR}/conf/${PROJECT_NAME}/internal)
