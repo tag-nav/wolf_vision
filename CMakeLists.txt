@@ -186,7 +186,7 @@ endif()
 
 #Link the created libraries
 #===============EXAMPLE=========================
-TARGET_LINK_LIBRARIES(${PLUGIN_NAME} wolfcore)
+TARGET_LINK_LIBRARIES(${PLUGIN_NAME} ${wolfcore_LIBRARIES})
 TARGET_LINK_LIBRARIES(${PLUGIN_NAME} ${OpenCV_LIBS})
 
 #Build demos
