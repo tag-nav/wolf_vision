@@ -81,8 +81,12 @@ option(_WOLF_TRACE "Enable wolf tracing macro" ON)
 
 # ============ DEPENDENCIES ==================
 FIND_PACKAGE(wolfcore REQUIRED)
-SET(PRINT_INFO_VU false)
 FIND_PACKAGE(OpenCV REQUIRED)
+IF(OpenCV_FOUND)
+  MESSAGE(STATUS "Found OpenCV: ${OpenCV_INCLUDE_DIRS}")
+ELSEIF()
+  MESSAGE(STATUS "OpenCV not found!")
+ENDIF()
 
 # ============ config.h ==================
 string(TOUPPER ${PROJECT_NAME} UPPER_NAME)
