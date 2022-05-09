@@ -23,7 +23,7 @@
 #include "core/yaml/yaml_conversion.h"
 
 // wolf
-#include "core/common/factory.h"
+#include "core/processor/factory_processor.h"
 
 // yaml-cpp library
 #include <yaml-cpp/yaml.h>

@@ -31,7 +31,7 @@
 
 // wolf
 #include "vision/sensor/sensor_camera.h"
-#include "core/common/factory.h"
+#include "core/sensor/factory_sensor.h"
 
 // yaml-cpp library
 #include <yaml-cpp/yaml.h>
