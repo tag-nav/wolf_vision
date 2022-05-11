@@ -78,7 +78,11 @@ FIND_PACKAGE(wolfcore REQUIRED)
 FIND_PACKAGE(OpenCV REQUIRED 
   COMPONENTS core imgcodecs highgui features2d calib3d video
 )
-
+IF(OpenCV_FOUND)
+  MESSAGE(STATUS "Found OpenCV: ${OpenCV_INCLUDE_DIRS}")
+ELSEIF()
+  MESSAGE(STATUS "OpenCV not found!")
+ENDIF()
 
 # ============ config.h ==================
 set(_WOLF_ROOT_DIR ${CMAKE_SOURCE_DIR})
@@ -154,6 +158,7 @@ SET(SRCS_SENSOR
 src/sensor/sensor_camera.cpp
   )
 SET(SRCS_YAML
+src/yaml/sensor_camera_yaml.cpp
 )
 
 # create the shared library
