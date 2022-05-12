@@ -74,8 +74,8 @@ ENDIF()
 option(_WOLF_TRACE "Enable wolf tracing macro" ON)
 
 # ============ DEPENDENCIES ==================
-FIND_PACKAGE(wolfcore REQUIRED)
-FIND_PACKAGE(OpenCV REQUIRED 
+FIND_PACKAGE(wolfcore REQUIRED CONFIG)
+FIND_PACKAGE(OpenCV REQUIRED CONFIG
   COMPONENTS core imgcodecs highgui features2d calib3d video
 )
 IF(OpenCV_FOUND)
@@ -269,7 +269,7 @@ INSTALL(DIRECTORY ${SPDLOG_INCLUDE_DIRS} DESTINATION "include/iri-algorithms/")
 
 export(PACKAGE ${PLUGIN_NAME})
 
-FIND_PACKAGE(Doxygen)
+FIND_PACKAGE(Doxygen MODULE)
 
 FIND_PATH(IRI_DOC_DIR doxygen.conf ${CMAKE_SOURCE_DIR}/doc/iri_doc/)
 IF (IRI_DOC_DIR)
