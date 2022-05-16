@@ -5,6 +5,7 @@ stages:
 ############ YAML ANCHORS ############
 .print_variables_template: &print_variables_definition
   # Print variables
+  - echo $WOLF_CORE_BRANCH
   - echo $CI_COMMIT_BRANCH
   - echo $WOLF_VISION_BRANCH
 
