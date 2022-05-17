@@ -33,8 +33,7 @@ namespace wolf{
 
 ProcessorVisualOdometry::ProcessorVisualOdometry(ParamsProcessorVisualOdometryPtr _params_vo) :
                 ProcessorTracker("ProcessorVisualOdometry", "PO", 3, _params_vo),
-                params_visual_odometry_(_params_vo),
-                frame_count_(0)
+                params_visual_odometry_(_params_vo)
 {
     // Preprocessor stuff
     detector_ = cv::FastFeatureDetector::create(_params_vo->fast.threshold,
@@ -195,8 +194,6 @@ void ProcessorVisualOdometry::preProcess()
     // Input: ID of Wkp in last. Output: ID of the tracked Wkp in incoming.
     TracksMap tracks_last_incoming = kltTrack(img_last, img_incoming, mwkps_last, mwkps_incoming);
 
-//    WOLF_DEBUG( "Tracked " , mwkps_incoming.size(), " keypoints to incoming" );
-
     // TracksMap between origin and last
     // Input: ID of Wkp in origin. Output: ID of the tracked Wkp in last.
     TracksMap tracks_origin_last = capture_image_last_->getTracksOrigin();
@@ -204,8 +201,6 @@ void ProcessorVisualOdometry::preProcess()
     // Merge tracks to get TracksMap between origin and incoming
     // Input: ID of Wkp in origin. Output: ID of the tracked Wkp in incoming.
     TracksMap tracks_origin_incoming = mergeTracks(tracks_origin_last, tracks_last_incoming);
-
-//    WOLF_DEBUG( "Merged " , tracks_last_incoming.size(), " tracks..." );
 
     // Outliers rejection with essential matrix
     cv::Mat E;
@@ -233,13 +228,9 @@ void ProcessorVisualOdometry::preProcess()
     ////////////////////////////////
     size_t n_tracks_origin = tracks_origin_incoming.size();
 
-//    WOLF_DEBUG("# of tracks: ", n_tracks_origin, "; min # of tracks: ", params_visual_odometry_->min_features_for_keyframe);
 
     if (n_tracks_origin < params_visual_odometry_->min_features_for_keyframe)
     {
-
-//        WOLF_DEBUG( "Too Few Tracks. Detecting more keypoints in last" );
-
         // Erase all keypoints previously added to the cell grid
         cell_grid_.renew();
 
@@ -289,8 +280,6 @@ void ProcessorVisualOdometry::preProcess()
             }
         }
 
-//        WOLF_DEBUG("Detected ", kps_last_new.size(), " new raw keypoints");
-        
         // Create a map of wolf KeyPoints to track only the new ones
         KeyPointsMap mwkps_last_new, mwkps_incoming_new;
         for (auto & cvkp : kps_last_new){
@@ -302,8 +291,6 @@ void ProcessorVisualOdometry::preProcess()
         TracksMap tracks_last_incoming_new = kltTrack(img_last, img_incoming, mwkps_last_new, mwkps_incoming_new);
 
         WOLF_DEBUG("Tracked ", mwkps_incoming_new.size(), " inliers in incoming");
-
-//        WOLF_DEBUG("Tracked ", mwkps_incoming_new.size(), " new keypoints to incoming");
 
         // Concatenation of old tracks and new tracks
         for (auto & track: tracks_last_incoming_new){
@@ -324,10 +311,6 @@ void ProcessorVisualOdometry::preProcess()
         // Update captures
         capture_image_last_->addKeyPoints(mwkps_last_new);
 
-    }
-    else
-    {
-        WOLF_DEBUG("\n\n");
     }
 
     // Update captures
@@ -539,19 +522,11 @@ LandmarkBasePtr ProcessorVisualOdometry::emplaceLandmark(FeatureBasePtr _feat)
 
 void ProcessorVisualOdometry::postProcess()
 {
-    frame_count_ ++;
-
-    // delete tracks with no keyframes
-    for (auto track_it = track_matrix_.getTracks().begin(); track_it != track_matrix_.getTracks().end(); /* do not increment iterator yet... */)
+    // Delete tracks with no keyframes
+    for (const auto& track_id : track_matrix_.trackIds())
     {
-        auto track_id = track_it->first;
         if (track_matrix_.trackAtKeyframes(track_id).empty())
-        {
-            ++track_it;                      // ... increment iterator **before** erasing the element!!!
             track_matrix_.remove(track_id);
-        }
-        else
-            ++track_it;
     }
 
     // print a bar with the number of active tracks in incoming
@@ -562,8 +537,6 @@ void ProcessorVisualOdometry::postProcess()
     n = getProblem()->getMap()->getLandmarkList().size();
     s = std::string(n/2, '-');
     WOLF_INFO("LMARKS: ", n, " ", s);
-
-
 }
 
 bool ProcessorVisualOdometry::voteForKeyFrame() const
