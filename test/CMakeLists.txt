@@ -1,6 +1,13 @@
 # Retrieve googletest from github & compile
 add_subdirectory(gtest)
 
+############# USE THIS TEST AS AN EXAMPLE #################
+#                                                         #
+# Create a specific test executable for gtest_example     #
+# wolf_add_gtest(gtest_example gtest_example.cpp)         #
+#                                                         #
+###########################################################
+
 wolf_add_gtest(gtest_pinhole gtest_pinhole.cpp)
 
 wolf_add_gtest(gtest_capture_image gtest_capture_image.cpp)
