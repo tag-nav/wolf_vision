@@ -529,14 +529,20 @@ void ProcessorVisualOdometry::postProcess()
             track_matrix_.remove(track_id);
     }
 
-    // print a bar with the number of active tracks in incoming
+    // print a bar with the number of active features in incoming
     unsigned int n = capture_image_incoming_->getKeyPoints().size();
     std::string s(n/2, '#');
-    WOLF_INFO("TRACKS: ", n, " ", s);
+    WOLF_INFO("FEATRS/2: ", n, " ", s);
 
+    // print a bar with the number of active tracks
+    n = track_matrix_.trackIds().size();
+    s = std::string(n/4, 'o');
+    WOLF_INFO("TRACKS/4: ", n, " ", s);
+
+    // print a bar with the number of landmarks
     n = getProblem()->getMap()->getLandmarkList().size();
     s = std::string(n/2, '-');
-    WOLF_INFO("LMARKS: ", n, " ", s);
+    WOLF_INFO("LMARKS/2: ", n, " ", s);
 }
 
 bool ProcessorVisualOdometry::voteForKeyFrame() const
