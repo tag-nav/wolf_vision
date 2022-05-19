@@ -198,8 +198,6 @@ class ProcessorVisualOdometry : public ProcessorTracker
         ActiveSearchGrid cell_grid_;
 
     private:
-        int frame_count_;
-
         // camera
         cv::Mat Kcv_;
 
