@@ -22,14 +22,15 @@
 #ifndef LANDMARK_AHP_H
 #define LANDMARK_AHP_H
 
-//Wolf includes
-#include "core/landmark/landmark_base.h"
-
 // yaml
 #include <yaml-cpp/yaml.h>
 
-// Vision utils
-#include <vision_utils/vision_utils.h>
+// OpenCV includes
+#include <opencv2/core.hpp>
+
+//Wolf includes
+#include "core/landmark/landmark_base.h"
+
 
 namespace wolf {
     
@@ -51,8 +52,10 @@ class LandmarkAhp : public LandmarkBase
         const cv::Mat& getCvDescriptor() const;
         void setCvDescriptor(const cv::Mat& _descriptor);
 
-        const FrameBasePtr  getAnchorFrame () const;
-        const SensorBasePtr getAnchorSensor() const;
+        FrameBaseConstPtr  getAnchorFrame () const;
+        FrameBasePtr  getAnchorFrame ();
+        SensorBaseConstPtr getAnchorSensor() const;
+        SensorBasePtr getAnchorSensor();
 
         void setAnchorFrame  (FrameBasePtr  _anchor_frame );
         void setAnchorSensor (SensorBasePtr _anchor_sensor);
@@ -79,7 +82,12 @@ inline void LandmarkAhp::setCvDescriptor(const cv::Mat& _descriptor)
     cv_descriptor_ = _descriptor;
 }
 
-inline const FrameBasePtr LandmarkAhp::getAnchorFrame() const
+inline FrameBaseConstPtr LandmarkAhp::getAnchorFrame() const
+{
+    return anchor_frame_;
+}
+
+inline FrameBasePtr LandmarkAhp::getAnchorFrame() 
 {
     return anchor_frame_;
 }
@@ -89,7 +97,12 @@ inline void LandmarkAhp::setAnchorFrame(FrameBasePtr _anchor_frame)
     anchor_frame_ = _anchor_frame;
 }
 
-inline const SensorBasePtr LandmarkAhp::getAnchorSensor() const
+inline SensorBaseConstPtr LandmarkAhp::getAnchorSensor() const
+{
+    return anchor_sensor_;
+}
+
+inline SensorBasePtr LandmarkAhp::getAnchorSensor()
 {
     return anchor_sensor_;
 }

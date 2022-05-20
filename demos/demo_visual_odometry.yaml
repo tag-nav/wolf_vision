@@ -1,0 +1,51 @@
+config:
+
+  problem:
+  
+    dimension:            3               # space is 3d
+    frame_structure:      "PO"            # keyframes have position and orientation
+  
+    prior:
+      mode:               "factor"
+      $state:
+        P: [0,0,0]
+        O: [0,0,0,1]
+      $sigma:
+        P: [0.001, 0.001, 0.001]
+        O: [0.31, 0.31, 0.31]
+      time_tolerance:     0.005
+
+    tree_manager:
+      type: "none"
+      plugin: "core"
+  
+  solver:
+    max_num_iterations: 100
+    verbose: 0
+    period: 0.2
+    interrupt_on_problem_change: false
+    n_threads: 2
+    compute_cov: false
+    minimizer: LEVENBERG_MARQUARDT
+    use_nonmonotonic_steps: false         # only for LEVENBERG_MARQUARDT and DOGLEG
+    function_tolerance: 0.000001
+    gradient_tolerance: 0.0000000001
+    
+  sensors:
+    
+    - type:               "SensorCamera"
+      plugin:             "vision"
+      name:               "sen cam"
+      extrinsic: 
+        pose:             [0,0,0, 0,0,0,1]
+      using_raw:          true
+      follow:             "demos/camera_euroc_mav0_notang.yaml"         # config parameters in this file
+
+  processors:
+    
+    - type:               "ProcessorVisualOdometry"
+      plugin:             "vision"
+      name:               "prc vo"
+      sensor_name:        "sen cam"                                    # attach processor to this sensor
+      follow:             "demos/processor_visual_odometry.yaml"        # config parameters in this file
+    

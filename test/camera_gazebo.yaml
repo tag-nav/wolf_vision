@@ -1,0 +1,22 @@
+width: 1280
+height: 960
+camera_name: gazebo
+camera_matrix:
+  rows: 3
+  cols: 3
+  data: [640, 0.000000, 640, 
+         0.000000, 640, 480, 
+         0.000000, 0.000000, 1.000000]
+distortion_model: none
+distortion_coefficients:
+  rows: 1
+  cols: 5
+  data: [0, 0, 0, 0, 0]
+rectification_matrix:
+  rows: 3
+  cols: 3
+  data: [1, 0, 0, 0, 1, 0, 0, 0, 1]
+projection_matrix:
+  rows: 3
+  cols: 4
+  data: [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0]

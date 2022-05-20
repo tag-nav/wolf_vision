@@ -46,10 +46,10 @@ class FactorPixelHp : public FactorAutodiff<FactorPixelHp, 2, 3, 4, 3, 4, 4>
     public:
 
         FactorPixelHp(const FeatureBasePtr&   _ftr_ptr,
-                      const LandmarkHpPtr&   _landmark_ptr,
+                      const LandmarkHpPtr&    _landmark_ptr,
                       const ProcessorBasePtr& _processor_ptr,
-                      bool              _apply_loss_function,
-                      FactorStatus  _status = FAC_ACTIVE);
+                      bool                    _apply_loss_function,
+                      FactorStatus            _status = FAC_ACTIVE);
 
         ~FactorPixelHp() override = default;
 
@@ -94,26 +94,28 @@ inline FactorPixelHp::FactorPixelHp(const FeatureBasePtr&   _ftr_ptr,
                                                         _landmark_ptr->getP()),
         intrinsic_(_ftr_ptr->getCapture()->getSensor()->getIntrinsic()->getState())
 {
-//	std::cout << "FactorPixelHp::Constructor\n";
-    // obtain some intrinsics from provided sensor
     distortion_ = (std::static_pointer_cast<SensorCamera>(_ftr_ptr->getCapture()->getSensor()))->getDistortionVector();
 }
 
 inline Eigen::VectorXd FactorPixelHp::expectation() const
 {
-    FrameBasePtr frm = getFeature()->getCapture()->getFrame();
-    SensorBasePtr sen  = getFeature()->getCapture()->getSensor();
-    LandmarkBasePtr lmk      = getLandmarkOther();
+    auto frm  = getFeature()->getCapture()->getFrame();
+    auto sen  = getFeature()->getCapture()->getSensor();
+    auto lmk  = getLandmarkOther();
 
-    const Eigen::MatrixXd frame_pos = frm->getP()->getState();
-    const Eigen::MatrixXd frame_ori = frm->getO()->getState();
-    const Eigen::MatrixXd sensor_pos  = sen ->getP()->getState();
-    const Eigen::MatrixXd sensor_ori  = sen ->getO()->getState();
-    const Eigen::MatrixXd lmk_pos_hmg       = lmk        ->getP()->getState();
+    const Eigen::MatrixXd frame_pos     = frm->getP()->getState();
+    const Eigen::MatrixXd frame_ori     = frm->getO()->getState();
+    const Eigen::MatrixXd sensor_pos    = sen->getP()->getState();
+    const Eigen::MatrixXd sensor_ori    = sen->getO()->getState();
+    const Eigen::MatrixXd lmk_pos_hmg   = lmk->getP()->getState();
 
     Eigen::Vector2d exp;
-    expectation(frame_pos.data(), frame_ori.data(), sensor_pos.data(), sensor_ori.data(),
-    			lmk_pos_hmg.data(), exp.data());
+    expectation(frame_pos.data(),
+                frame_ori.data(),
+                sensor_pos.data(),
+                sensor_ori.data(),
+    			lmk_pos_hmg.data(),
+    			exp.data());
 
     return exp;
 }
@@ -128,48 +130,35 @@ inline void FactorPixelHp::expectation(const T* const _frame_p,
 {
     using namespace Eigen;
 
-    // All involved transforms typedef
-    typedef Eigen::Transform<T, 3, Eigen::Isometry> TransformType;
+    // frames w: world; r: robot; c: camera
+    Map<const Matrix<T, 3, 1> > p_wr(_frame_p);
+    Map<const Quaternion<T> >   q_wr(_frame_o);
+    Map<const Matrix<T, 3, 1> > p_rc(_sensor_p);
+    Map<const Quaternion<T> >   q_rc(_sensor_o);
 
-    // world to current robot transform
-    Map<const Matrix<T, 3, 1> > p_w_r(_frame_p);
-    Translation<T, 3>           t_w_r(p_w_r);
-    Map<const Quaternion<T> >   q_w_r(_frame_o);
-    TransformType               T_w_r = t_w_r * q_w_r;
+    // camera pose in world frame: transforms from camera to world
+    Matrix<T, 3, 1> p_wc = p_wr + q_wr * p_rc;
+    Quaternion<T>   q_wc = q_wr*q_rc;
 
-    // current robot to current camera transform
-    Map<const Matrix<T, 3, 1> > p_r_c(_sensor_p);
-    Translation<T, 3>           t_r_c(p_r_c);
-    Map<const Quaternion<T> >  	q_r_c(_sensor_o);
-    TransformType       		T_r_c = t_r_c * q_r_c;
+    // invert transform: from world to camera
+    // | R T |.inv = | R.tr -R.tr*T | == | q.conj -q.conj*T |
+    // | 0 1 |       |  0      1    |    |   0        1     |
+    Quaternion<T>   q_cw = q_wc.conjugate();
+    Matrix<T, 3, 1> p_cw = - (q_cw * p_wc);
 
-    // hmg point in current camera frame C
-    Eigen::Map<const Eigen::Matrix<T, 4, 1> > landmark_hmg(_lmk_hmg);
-    Eigen::Matrix<T, 4, 1> landmark_hmg_c = T_r_c .inverse(Eigen::Isometry)
-                                           * T_w_r .inverse(Eigen::Isometry)
-                                           * landmark_hmg;
+    // landmark hmg
+    Matrix<T, 4, 1> lh_w(_lmk_hmg);
 
-    //std::cout << "p_w_r = \n\t" << _frame_p[0] << "\n\t" << _frame_p[1] << "\n\t" << _frame_p[2] << "\n";
-//    std::cout << "q_w_r = \n\t" << _frame_o[0] << "\n\t" << _frame_o[1] << "\n\t" << _frame_o[2] << "\n\t" << _frame_o[3] << "\n";
-//    std::cout << "p_r_c = \n\t" << _sensor_p[0] << "\n\t" << _sensor_p[1] << "\n\t" << _sensor_p[2] << "\n";
-//    std::cout << "q_r_c = \n\t" << _sensor_o[0] << "\n\t" << _sensor_o[1] << "\n\t" << _sensor_o[2] << "\n\t" << _sensor_o[3] << "\n";
-//    std::cout << "landmark_hmg_c = \n\t" << landmark_hmg_c(0) << "\n\t" << landmark_hmg_c(1) << "\n\t" << landmark_hmg_c(2) << "\n\t" << landmark_hmg_c(3) << "\n";
-
-    // lmk direction vector
-    Eigen::Matrix<T, 3, 1> v_dir = landmark_hmg_c.head(3);
-
-    // lmk inverse distance
-    T rho = landmark_hmg_c(3);
-
-    // camera parameters
-    Matrix<T, 4, 1> intrinsic = intrinsic_.cast<T>();
-    Eigen::Matrix<T, Eigen::Dynamic, 1> distortion = distortion_.cast<T>();
+    // landmark dir vector in C frame
+    /* note: transforming hmg point to get direction vector v':
+     * | q T | * | v | = | q*v + T+w | --> v' = q*v + T+w
+     * | 0 1 |   | w |   |     w     |
+     */
+    Matrix<T, 3, 1> v_dir = q_cw * lh_w.template head<3>() + p_cw * lh_w(3);
 
     // project point and exit
     Eigen::Map<Eigen::Matrix<T, 2, 1> > expectation(_expectation);
-    expectation = pinhole::projectPoint(intrinsic, distortion, v_dir/rho);
-
-//    std::cout << "expectation = \n\t" << expectation(0) << "\n\t" << expectation(1) << "\n";
+    expectation = pinhole::projectPoint(intrinsic_, distortion_, v_dir);
 
 }
 
@@ -185,12 +174,10 @@ inline bool FactorPixelHp::operator ()(const T* const _frame_p,
     Eigen::Matrix<T, 2, 1> expected;
     expectation(_frame_p, _frame_o, _sensor_p, _sensor_o, _lmk_hmg, expected.data());
 
-    // measured
-    Eigen::Matrix<T, 2, 1> measured = getMeasurement().cast<T>();
-
     // residual
     Eigen::Map<Eigen::Matrix<T, 2, 1> > residuals(_residuals);
-    residuals = getMeasurementSquareRootInformationUpper().cast<T>() * (expected - measured);
+    residuals = getMeasurementSquareRootInformationUpper() * (expected - getMeasurement());
+
     return true;
 }
 

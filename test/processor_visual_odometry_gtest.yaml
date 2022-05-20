@@ -1,0 +1,56 @@
+time_tolerance: 0.005
+
+keyframe_vote:
+    voting_active: true
+    # Trigger a new keyframe creation as well as detection of new keypoints in last frame
+    # when the track number goes below min_features_for_keyframe in incoming
+    min_features_for_keyframe: 25
+
+# Use a robust cost function
+apply_loss_function: true
+
+# Select the best new Keypoints when performing detection
+max_new_features: 4
+
+####################################
+# ProcessorVisualOdometry parameters
+# FAST KeyPoint detection 
+fast_params:
+    # Threshold on the keypoint pixel intensity (in uchar [0-255]) 
+    # the higher, the more selective the detector is
+    threshold_fast: 10
+    # Avoids getting multiple keypoints at the same place
+    non_max_suppresion: false
+    
+# Lucas Kanade tracking parameters
+klt_params:
+    patch_width:      21
+    patch_height:     21
+    nlevels_pyramids: 3
+    klt_max_err:      0.2
+
+# tesselation grid    
+grid_params:
+    # number of cells used by the active search grid data structure
+    nbr_cells_h: 6  # horizontal
+    nbr_cells_v: 5  # vertical
+    # minimum margin of the region of interest from the edges of the image 
+    margin: 10
+    # reduce the size of each region of interest by n pixels to prevent keypoints from being too close
+    separation: 10
+
+ransac_params:
+    # specifies a desirable level of confidence (probability) that the estimated matrix is correct
+    ransac_prob: 0.999
+    # maximum distance from a point to an epipolar line in pixels, beyond which the point 
+    # is considered an outlier and is not used for computing the final fundamental matrix
+    ransac_thresh: 1
+
+# Keep the number of tracks below 
+max_nb_tracks: 30
+
+# standard deviation of the pixel reprojection factor 
+std_pix: 1
+
+# before creating a landmark, wait until the track is old enough
+min_track_length_for_landmark: 20

@@ -1,22 +1,20 @@
 # Pre-requisites about cmake itself
-CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
+CMAKE_MINIMUM_REQUIRED(VERSION 3.10)
 
-if(COMMAND cmake_policy)
-  cmake_policy(SET CMP0005 NEW) 
-  cmake_policy(SET CMP0003 NEW)
-endif(COMMAND cmake_policy)
 # MAC OSX RPATH
 SET(CMAKE_MACOSX_RPATH true)
 
 # The project name
 PROJECT(vision)
-set(PLUGIN_NAME wolf${PROJECT_NAME})
+set(PLUGIN_NAME "wolf${PROJECT_NAME}")
 
 MESSAGE("Starting ${PROJECT_NAME} CMakeLists ...")
 
+# Paths
 SET(EXECUTABLE_OUTPUT_PATH ${CMAKE_CURRENT_SOURCE_DIR}/bin)
 SET(LIBRARY_OUTPUT_PATH ${CMAKE_CURRENT_SOURCE_DIR}/lib)
-SET(CMAKE_INSTALL_PREFIX /usr/local)
+set(INCLUDE_INSTALL_DIR include/iri-algorithms/wolf)
+set(LIB_INSTALL_DIR lib/)
 
 IF (NOT CMAKE_BUILD_TYPE)
   SET(CMAKE_BUILD_TYPE "DEBUG")
@@ -68,10 +66,6 @@ if(BUILD_TESTS)
     enable_testing()
 endif()
 
-#CMAKE modules
-SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake_modules")
-MESSAGE(STATUS ${CMAKE_MODULE_PATH})
-
 # Some wolf compilation options
 IF((CMAKE_BUILD_TYPE MATCHES DEBUG) OR (CMAKE_BUILD_TYPE MATCHES debug) OR (CMAKE_BUILD_TYPE MATCHES Debug))
   set(_WOLF_DEBUG true)
@@ -80,14 +74,20 @@ ENDIF()
 option(_WOLF_TRACE "Enable wolf tracing macro" ON)
 
 # ============ DEPENDENCIES ==================
-FIND_PACKAGE(wolfcore REQUIRED)
-FIND_PACKAGE(vision_utils REQUIRED)
-SET(PRINT_INFO_VU false)
-FIND_PACKAGE(OpenCV REQUIRED)
+FIND_PACKAGE(wolfcore REQUIRED CONFIG)
+FIND_PACKAGE(OpenCV REQUIRED CONFIG
+  COMPONENTS core imgcodecs highgui features2d calib3d video
+)
+IF(OpenCV_FOUND)
+  MESSAGE(STATUS "Found OpenCV: ${OpenCV_INCLUDE_DIRS}")
+ELSEIF()
+  MESSAGE(STATUS "OpenCV not found!")
+ENDIF()
 
 # ============ config.h ==================
-string(TOUPPER ${PROJECT_NAME} UPPER_NAME)
 set(_WOLF_ROOT_DIR ${CMAKE_SOURCE_DIR})
+# variable used to compile the config.h.in file
+string(TOUPPER ${PROJECT_NAME} PROJECT_NAME_UPPER)
 
 # Define the directory where will be the configured config.h
 SET(WOLF_CONFIG_DIR ${PROJECT_BINARY_DIR}/conf/${PROJECT_NAME}/internal)
@@ -107,9 +107,6 @@ message("CONFIG DIRECTORY ${PROJECT_BINARY_DIR}")
 include_directories("${PROJECT_BINARY_DIR}/conf")
 
 # ============ INCLUDES ==================
-INCLUDE_DIRECTORIES(${wolfcore_INCLUDE_DIRS})
-INCLUDE_DIRECTORIES(${vision_utils_INCLUDE_DIR})
-INCLUDE_DIRECTORIES(${OpenCV_INCLUDE_DIRS})
 INCLUDE_DIRECTORIES(BEFORE "include")
 
 # ============ HEADERS ============ 
@@ -117,16 +114,16 @@ SET(HDRS_CAPTURE
 include/vision/capture/capture_image.h
   )
 SET(HDRS_FACTOR
-include/vision/factor/factor_trifocal.h
-include/vision/factor/factor_ahp.h
+# include/vision/factor/factor_trifocal.h
+# include/vision/factor/factor_ahp.h
 include/vision/factor/factor_pixel_hp.h
-include/vision/factor/factor_epipolar.h
+# include/vision/factor/factor_epipolar.h
   )
 SET(HDRS_FEATURE
 include/vision/feature/feature_point_image.h
   )
 SET(HDRS_LANDMARK
-  include/vision/landmark/landmark_ahp.h
+  # include/vision/landmark/landmark_ahp.h
   include/vision/landmark/landmark_hp.h
   include/vision/landmark/landmark_point_3d.h
   )
@@ -134,11 +131,8 @@ SET(HDRS_MATH
 include/vision/math/pinhole_tools.h
   )
 SET(HDRS_PROCESSOR
-include/vision/processor/processor_tracker_feature_trifocal.h
-include/vision/processor/processor_params_image.h
-include/vision/processor/processor_tracker_landmark_image.h
-include/vision/processor/processor_tracker_feature_image.h
-include/vision/processor/processor_bundle_adjustment.h
+include/vision/processor/processor_visual_odometry.h
+include/vision/processor/active_search.h
   )
 SET(HDRS_SENSOR
 include/vision/sensor/sensor_camera.h
@@ -152,25 +146,20 @@ SET(SRCS_FEATURE
 src/feature/feature_point_image.cpp
   )
 SET(SRCS_LANDMARK
-src/landmark/landmark_ahp.cpp
+# src/landmark/landmark_ahp.cpp
 src/landmark/landmark_hp.cpp
 src/landmark/landmark_point_3d.cpp
   )
 SET(SRCS_PROCESSOR
-src/processor/processor_tracker_feature_trifocal.cpp
-src/processor/processor_tracker_feature_image.cpp
-src/processor/processor_tracker_landmark_image.cpp
-src/processor/processor_bundle_adjustment.cpp
+src/processor/processor_visual_odometry.cpp
+src/processor/active_search.cpp
   )
 SET(SRCS_SENSOR
 src/sensor/sensor_camera.cpp
   )
 SET(SRCS_YAML
-src/yaml/processor_tracker_feature_trifocal_yaml.cpp
 src/yaml/sensor_camera_yaml.cpp
-src/yaml/processor_image_yaml.cpp
-src/yaml/processor_bundle_adjustment_yaml.cpp
-  )
+)
 
 # create the shared library
 ADD_LIBRARY(${PLUGIN_NAME}
@@ -195,11 +184,20 @@ elseif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
   # using GCC
 endif()
 
-#Link the created libraries
+# Link the created libraries
 #===============EXAMPLE=========================
-TARGET_LINK_LIBRARIES(${PLUGIN_NAME} ${wolfcore_LIBRARIES})
-TARGET_LINK_LIBRARIES(${PLUGIN_NAME} ${OpenCV_LIBS})
-TARGET_LINK_LIBRARIES(${PLUGIN_NAME} ${vision_utils_LIBRARY})
+TARGET_LINK_LIBRARIES(${PLUGIN_NAME} wolfcore)
+# For OpenCV, link with respect to each required components, found in the find_package command
+# The required components have the same name as the include files e.g. <opencv2/core.hpp>
+# or the opencv2 subdirectory in which they are found, e.g. <opencv2/video/tracking.hpp>
+TARGET_LINK_LIBRARIES(${PLUGIN_NAME} 
+  opencv_core
+  opencv_imgcodecs
+  opencv_highgui
+  opencv_features2d
+  opencv_calib3d
+  opencv_video
+)
 
 #Build demos
 #===============EXAMPLE=========================
@@ -218,40 +216,60 @@ ENDIF(BUILD_TESTS)
 #install library
 #=============================================================
 INSTALL(TARGETS ${PLUGIN_NAME} EXPORT ${PLUGIN_NAME}Targets
-      RUNTIME DESTINATION bin
-      LIBRARY DESTINATION lib
-      ARCHIVE DESTINATION lib)
+  RUNTIME DESTINATION bin
+  LIBRARY DESTINATION ${LIB_INSTALL_DIR}
+  ARCHIVE DESTINATION ${LIB_INSTALL_DIR}
+)
+install(EXPORT ${PLUGIN_NAME}Targets DESTINATION lib/${PLUGIN_NAME}/cmake)
 
-install(EXPORT ${PLUGIN_NAME}Targets DESTINATION lib/cmake/${PLUGIN_NAME})
+
+# Configure the package installation
+include(CMakePackageConfigHelpers)
+configure_package_config_file(
+  ${CMAKE_SOURCE_DIR}/cmake_modules/${PLUGIN_NAME}Config.cmake.in
+  ${CMAKE_CURRENT_BINARY_DIR}/${PLUGIN_NAME}Config.cmake
+  INSTALL_DESTINATION ${LIB_INSTALL_DIR}/${PLUGIN_NAME}/cmake
+  PATH_VARS INCLUDE_INSTALL_DIR LIB_INSTALL_DIR
+)
+
+install(
+  FILES 
+  ${CMAKE_CURRENT_BINARY_DIR}/${PLUGIN_NAME}Config.cmake
+  DESTINATION 
+  ${LIB_INSTALL_DIR}/${PLUGIN_NAME}/cmake
+)
+
+# Specifies include directories to use when compiling the plugin target
+# This way, include_directories does not need to be called in plugins depending on this one
+target_include_directories(${PLUGIN_NAME} INTERFACE
+  $<INSTALL_INTERFACE:${INCLUDE_INSTALL_DIR}>
+)
+
+
 #install headers
 INSTALL(FILES ${HDRS_CAPTURE}
-  DESTINATION include/iri-algorithms/wolf/plugin_${PROJECT_NAME}/${PROJECT_NAME}/capture)
+  DESTINATION ${INCLUDE_INSTALL_DIR}/${PROJECT_NAME}/capture)
 INSTALL(FILES ${HDRS_FACTOR}
-  DESTINATION include/iri-algorithms/wolf/plugin_${PROJECT_NAME}/${PROJECT_NAME}/factor)
+  DESTINATION ${INCLUDE_INSTALL_DIR}/${PROJECT_NAME}/factor)
 INSTALL(FILES ${HDRS_FEATURE}
-  DESTINATION include/iri-algorithms/wolf/plugin_${PROJECT_NAME}/${PROJECT_NAME}/feature)
+  DESTINATION ${INCLUDE_INSTALL_DIR}/${PROJECT_NAME}/feature)
 INSTALL(FILES ${HDRS_LANDMARK}
-  DESTINATION include/iri-algorithms/wolf/plugin_${PROJECT_NAME}/${PROJECT_NAME}/landmark)
+  DESTINATION ${INCLUDE_INSTALL_DIR}/${PROJECT_NAME}/landmark)
 INSTALL(FILES ${HDRS_MATH}
-  DESTINATION include/iri-algorithms/wolf/plugin_${PROJECT_NAME}/${PROJECT_NAME}/math)
+  DESTINATION ${INCLUDE_INSTALL_DIR}/${PROJECT_NAME}/math)
 INSTALL(FILES ${HDRS_PROCESSOR}
-  DESTINATION include/iri-algorithms/wolf/plugin_${PROJECT_NAME}/${PROJECT_NAME}/processor)
+  DESTINATION ${INCLUDE_INSTALL_DIR}/${PROJECT_NAME}/processor)
 INSTALL(FILES ${HDRS_SENSOR}
-  DESTINATION include/iri-algorithms/wolf/plugin_${PROJECT_NAME}/${PROJECT_NAME}/sensor)
+  DESTINATION ${INCLUDE_INSTALL_DIR}/${PROJECT_NAME}/sensor)
 
-FILE(WRITE ${PROJECT_NAME}.found "")
-INSTALL(FILES ${PROJECT_NAME}.found
-  DESTINATION include/iri-algorithms/wolf/plugin_${PROJECT_NAME})
 INSTALL(FILES "${WOLF_CONFIG_DIR}/config.h"
-  DESTINATION include/iri-algorithms/wolf/plugin_${PROJECT_NAME}/${PROJECT_NAME}/internal)
-
-INSTALL(FILES "${CMAKE_SOURCE_DIR}/cmake_modules/${PLUGIN_NAME}Config.cmake" DESTINATION "lib/cmake/${PLUGIN_NAME}")
+  DESTINATION ${INCLUDE_INSTALL_DIR}/${PROJECT_NAME}/internal)
 
 INSTALL(DIRECTORY ${SPDLOG_INCLUDE_DIRS} DESTINATION "include/iri-algorithms/")
 
 export(PACKAGE ${PLUGIN_NAME})
 
-FIND_PACKAGE(Doxygen)
+FIND_PACKAGE(Doxygen MODULE)
 
 FIND_PATH(IRI_DOC_DIR doxygen.conf ${CMAKE_SOURCE_DIR}/doc/iri_doc/)
 IF (IRI_DOC_DIR)

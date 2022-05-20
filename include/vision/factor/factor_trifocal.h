@@ -44,16 +44,17 @@ class FactorTrifocal : public FactorAutodiff<FactorTrifocal, 3, 3, 4, 3, 4, 3, 4
         /** \brief Class constructor
          */
         FactorTrifocal(const FeatureBasePtr& _feature_1_ptr,
-                               const FeatureBasePtr& _feature_2_ptr,
-                               const FeatureBasePtr& _feature_own_ptr,
-                               const ProcessorBasePtr& _processor_ptr,
-                               bool _apply_loss_function,
-                               FactorStatus _status);
+                       const FeatureBasePtr& _feature_2_ptr,
+                       const FeatureBasePtr& _feature_own_ptr,
+                       const ProcessorBasePtr& _processor_ptr,
+                       bool _apply_loss_function,
+                       FactorStatus _status);
 
         /** \brief Class Destructor
          */
         ~FactorTrifocal() override;
 
+        FeatureBaseConstPtr getFeaturePrev() const;
         FeatureBasePtr getFeaturePrev();
 
         const Vector3d& getPixelCanonical3() const
@@ -169,10 +170,10 @@ FactorTrifocal::FactorTrifocal(const FeatureBasePtr& _feature_1_ptr,
         FactorAutodiff( "TRIFOCAL PLP",
                         TOP_GEOM,
                         _feature_own_ptr,
-                        nullptr,
-                        nullptr,
-                        _feature_2_ptr, //< this sets feature 2 (the one between the oldest and the newest)
-                        nullptr,
+                        FrameBasePtrList(),
+                        CaptureBasePtrList(),
+                        FeatureBasePtrList({_feature_2_ptr, _feature_1_ptr}), //< this sets feature 2 (the one between the oldest and the newest)
+                        LandmarkBasePtrList(),
                         _processor_ptr,
                         _apply_loss_function,
                         _status,
@@ -189,7 +190,7 @@ FactorTrifocal::FactorTrifocal(const FeatureBasePtr& _feature_1_ptr,
         sqrt_information_upper(Matrix3d::Zero())
 {
     // First add feature_1_ptr to the list of features (because the constructor FeatureAutodiff did not do so)
-    if (_feature_1_ptr) feature_other_list_.push_back(_feature_1_ptr);
+    //if (_feature_1_ptr) feature_other_list_.push_back(_feature_1_ptr);
 
     // Store some geometry elements
     Matrix3d K_inv          = camera_ptr_->getIntrinsicMatrix().inverse();

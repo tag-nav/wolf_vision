@@ -19,20 +19,35 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 //--------LICENSE_END--------
+
+
 #include "vision/capture/capture_image.h"
 
 namespace wolf {
 
-CaptureImage::CaptureImage(const TimeStamp& _ts, SensorCameraPtr _camera_ptr, const cv::Mat& _data_cv) :
+
+size_t WKeyPoint::id_count_ = 0;
+
+WKeyPoint::WKeyPoint():
+    id_(++id_count_)
+{
+}
+
+WKeyPoint::WKeyPoint(const cv::KeyPoint& _cv_kp):
+    id_(++id_count_),
+    cv_kp_(_cv_kp)
+{
+}
+
+
+CaptureImage::CaptureImage(const TimeStamp& _ts, SensorCameraPtr _camera_ptr, const cv::Mat& _img) :
     CaptureBase("CaptureImage", _ts, _camera_ptr),
-    frame_(_data_cv),
-    grid_features_(nullptr),
-    keypoints_(KeyPointVector()),
+    img_(_img),
+    mwkps_(KeyPointsMap()),
     descriptors_(cv::Mat()),
-    matches_from_precedent_(DMatchVector()),
-    matches_normalized_scores_(std::vector<double>()),
-    map_index_to_next_(std::map<int, int>()),
-    global_descriptor_(cv::Mat())
+    tracks_origin_(TracksMap()),
+    tracks_prev_(TracksMap()),
+    last_was_repopulated_(false)
 {
     //
 }
@@ -44,37 +59,57 @@ CaptureImage::~CaptureImage()
 
 const cv::Mat& CaptureImage::getImage() const
 {
-    return frame_.getImage();
+    return img_;
 }
 
-void CaptureImage::setDescriptors(const cv::Mat& _descriptors)
+void CaptureImage::setImage(const cv::Mat& _img)
 {
-    frame_.setDescriptors(_descriptors);
+    // Is assignment enough? Use clone or copyTo instead?
+    img_ = _img;
 }
 
-void CaptureImage::setKeypoints(const std::vector<cv::KeyPoint> &_keypoints)
+
+void CaptureImage::addKeyPoint(const WKeyPoint& _wkp)
 {
-    frame_.setKeyPoints(_keypoints);
+    mwkps_.insert(std::pair<size_t, WKeyPoint>(_wkp.getId(), _wkp));
 }
 
-cv::Mat& CaptureImage::getDescriptors()
+void CaptureImage::addKeyPoint(const cv::KeyPoint& _cv_kp)
 {
-    return frame_.getDescriptors();
+    WKeyPoint wkp(_cv_kp); 
+    addKeyPoint(wkp);
 }
 
-std::vector<cv::KeyPoint>& CaptureImage::getKeypoints()
+void CaptureImage::addKeyPoints(const std::vector<WKeyPoint>& _vec_wkp)
 {
-    return frame_.getKeyPoints();
+    for (WKeyPoint wkp: _vec_wkp){
+        addKeyPoint(wkp);
+    }
 }
 
-void CaptureImage::setGlobalDescriptor(const cv::Mat& _global_descriptor)
+void CaptureImage::addKeyPoints(const std::vector<cv::KeyPoint>& _vec_cv_kp)
 {
-    global_descriptor_ = _global_descriptor;
+    for (auto cv_kp: _vec_cv_kp){
+//        WKeyPoint wkp(cv_kp);
+        addKeyPoint(cv_kp);
+    }
 }
 
-cv::Mat& CaptureImage::getGlobalDescriptor()
+void CaptureImage::addKeyPoints(const KeyPointsMap& _mwkps)
 {
-    return global_descriptor_;
+    for (auto mwkp: _mwkps){
+        addKeyPoint(mwkp.second);
+    }
+}
+
+void CaptureImage::removeKeyPoint(size_t _id)
+{
+    mwkps_.erase(_id);
+}
+
+void CaptureImage::removeKeyPoint(const WKeyPoint& _wkp)
+{
+    mwkps_.erase(_wkp.getId());
 }
 
 } // namespace wolf

@@ -26,12 +26,12 @@
  *      \author: jsola
  */
 
-// wolf yaml
-#include "core/yaml/yaml_conversion.h"
+// this plugin
+#include "vision/sensor/sensor_camera.h"
 
 // wolf
-#include "vision/sensor/sensor_camera.h"
-#include "core/common/factory.h"
+#include "core/sensor/factory_sensor.h"
+#include "core/yaml/yaml_conversion.h"
 
 // yaml-cpp library
 #include <yaml-cpp/yaml.h>
