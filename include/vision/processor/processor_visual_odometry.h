@@ -290,6 +290,16 @@ class ProcessorVisualOdometry : public ProcessorTracker
     private:
         void retainBest(std::vector<cv::KeyPoint> &_keypoints, int n);
 
+        /* Equalize image for better detection and tracking
+        * available methods:
+        *      0. none
+        *      1. average
+        *      2. opencv: histogram_equalization
+        *      3. opencv: CLAHE
+        */
+        void equalize_img(cv::Mat &img_incoming, ParamsProcessorVisualOdometry::EqualizationParams equalization)
+;
+
 };
 
 } //namespace wolf

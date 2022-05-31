@@ -87,40 +87,7 @@ void ProcessorVisualOdometry::preProcess()
 
     cv::Mat img_incoming = capture_image_incoming_->getImage();
 
-
-    /* Equalize image for better detection and tracking
-     * available methods:
-     *      0. none
-     *      1. average
-     *      2. opencv: histogram_equalization
-     *      3. opencv: CLAHE
-     */
-    switch (params_visual_odometry_->equalization.method)
-    {
-        case 0:
-            break;
-        case 1:
-        {
-            // average to central brightness
-            auto img_avg = (cv::mean(img_incoming)).val[0];
-            img_incoming += cv::Scalar(round(params_visual_odometry_->equalization.average.median - img_avg) );
-            break;
-        }
-        case 2:
-        {
-            cv::equalizeHist( img_incoming, img_incoming );
-            break;
-        }
-        case 3:
-        {
-            // Contrast Limited Adaptive Histogram Equalization  CLAHE
-            // -> more continuous lighting and higher contrast images
-            cv::Ptr<cv::CLAHE> clahe = cv::createCLAHE(params_visual_odometry_->equalization.clahe.clip_limit,
-                                                       params_visual_odometry_->equalization.clahe.tile_grid_size);
-            clahe->apply(img_incoming, img_incoming);
-            break;
-        }
-    }
+    equalize_img(img_incoming, params_visual_odometry_->equalization);
 
 
     // Time to PREPreprocess the image if necessary: greyscale if BGR, CLAHE etc...
@@ -703,6 +670,37 @@ void ProcessorVisualOdometry::retainBest(std::vector<cv::KeyPoint> &_keypoints, 
         std::nth_element(_keypoints.begin(), _keypoints.begin() + n, _keypoints.end(),
             [](cv::KeyPoint& a, cv::KeyPoint& b) { return a.response > b.response; });
         _keypoints.resize(n);
+    }
+}
+
+
+void ProcessorVisualOdometry::equalize_img(cv::Mat &img_incoming, ParamsProcessorVisualOdometry::EqualizationParams equalization)
+{
+    switch (equalization.method)
+    {
+        case 0:
+            break;
+        case 1:
+        {
+            // average to central brightness
+            auto img_avg = (cv::mean(img_incoming)).val[0];
+            img_incoming += cv::Scalar(round(equalization.average.median - img_avg) );
+            break;
+        }
+        case 2:
+        {
+            cv::equalizeHist( img_incoming, img_incoming );
+            break;
+        }
+        case 3:
+        {
+            // Contrast Limited Adaptive Histogram Equalization  CLAHE
+            // -> more continuous lighting and higher contrast images
+            cv::Ptr<cv::CLAHE> clahe = cv::createCLAHE(equalization.clahe.clip_limit,
+                                                       equalization.clahe.tile_grid_size);
+            clahe->apply(img_incoming, img_incoming);
+            break;
+        }
     }
 }
 
