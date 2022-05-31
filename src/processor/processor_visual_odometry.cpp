@@ -84,41 +84,15 @@ void ProcessorVisualOdometry::preProcess()
     // Get Capture
     capture_image_incoming_ = std::static_pointer_cast<CaptureImage>(incoming_ptr_);
 
-
     cv::Mat img_incoming = capture_image_incoming_->getImage();
 
-    equalize_img(img_incoming, params_visual_odometry_->equalization);
+    equalize_img(img_incoming);
 
-
-    // Time to PREPreprocess the image if necessary: greyscale if BGR, CLAHE etc...
-    // once preprocessing is done, replace the original image (?)
 
     // if first image, compute keypoints, add to capture incoming and return
     if (last_ptr_ == nullptr){
+        detect_keypoints_empty_grid(img_incoming, capture_image_incoming_);
 
-        // detect one FAST keypoint in each cell of the grid
-        cv::Rect rect_roi;
-        Eigen::Vector2i cell_index;
-        std::vector<cv::KeyPoint> kps_roi;
-        for (int i=1; i < params_visual_odometry_->grid.nbr_cells_h-1; i++){
-            for (int j=1; j < params_visual_odometry_->grid.nbr_cells_v-1; j++){
-                cell_index << i,j;
-                cell_grid_.cell2roi(cell_index, rect_roi);
-
-                cv::Mat img_roi(img_incoming, rect_roi);  // no data copy -> no overhead
-                detector_->detect(img_roi, kps_roi);
-
-                if (kps_roi.size() > 0){
-                    // retain only the best image in each region of interest
-                    retainBest(kps_roi, 1);
-                    // Keypoints are detected in the local coordinates of the region of interest
-                    // -> translate to the full image corner coordinate system
-                    kps_roi.at(0).pt.x = kps_roi.at(0).pt.x + rect_roi.x;
-                    kps_roi.at(0).pt.y = kps_roi.at(0).pt.y + rect_roi.y;
-                    capture_image_incoming_->addKeyPoint(kps_roi.at(0));
-                }
-            }
-        }
         WOLF_DEBUG( "Initially detected " , capture_image_incoming_->getKeyPoints().size(), " keypoints in incoming" );
 
         // Initialize the tracks data structure with a "dummy track" where the keypoint is pointing to itself
@@ -134,6 +108,7 @@ void ProcessorVisualOdometry::preProcess()
 
         return;
     }
+
 
     ////////////////////////////////
     // FEATURE TRACKING
@@ -152,8 +127,6 @@ void ProcessorVisualOdometry::preProcess()
     KeyPointsMap mwkps_origin   = capture_image_origin_ ->getKeyPoints();
     KeyPointsMap mwkps_last     = capture_image_last_   ->getKeyPoints();
     KeyPointsMap mwkps_incoming;  // init incoming
-
-
 
     WOLF_DEBUG( "Tracking " , mwkps_last.size(), " keypoints in last" );
 
@@ -177,15 +150,8 @@ void ProcessorVisualOdometry::preProcess()
     // and remove also from mwkps_incoming all the keypoints that have not been tracked
     TracksMap tracks_last_incoming_filtered;
     KeyPointsMap mwkps_incoming_filtered;
-    for (auto & track_origin_incoming : tracks_origin_incoming){
-        for (auto & track_last_incoming : tracks_last_incoming){
-            if (track_origin_incoming.second == track_last_incoming.second){
-                tracks_last_incoming_filtered[track_last_incoming.first] = track_last_incoming.second;
-                mwkps_incoming_filtered[track_last_incoming.second] = mwkps_incoming.at(track_last_incoming.second);
-                continue;
-            }
-        }
-    }
+    filter_last_incoming_tracks_from_ransac_result(tracks_last_incoming, mwkps_incoming, tracks_origin_incoming,
+                                                   tracks_last_incoming_filtered, mwkps_incoming_filtered);
     WOLF_DEBUG( "Tracked " , mwkps_incoming_filtered.size(), " inliers in incoming" );
 
 
@@ -621,6 +587,10 @@ TracksMap ProcessorVisualOdometry::kltTrack(const cv::Mat _img_prev, const cv::M
 
 bool ProcessorVisualOdometry::filterWithEssential(const KeyPointsMap _mwkps_prev, const KeyPointsMap _mwkps_curr, TracksMap &_tracks_prev_curr, cv::Mat &_E)
 {
+    // We need at least five tracks
+    // TODO: this case is NOT handled by the rest of the algorithm currently
+    if (_tracks_prev_curr.size() < 5) return false;
+
     ParamsProcessorVisualOdometry::RansacParams prms = params_visual_odometry_->ransac;
 
     // We need to build lists of pt2d for openCV function
@@ -634,13 +604,10 @@ bool ProcessorVisualOdometry::filterWithEssential(const KeyPointsMap _mwkps_prev
         p2d_curr.push_back(cv::Point2d(ray_curr.x(), ray_curr.y()));
     }
 
-    // We need at least five tracks
-    if (p2d_prev.size() < 5) return false;
-
     cv::Mat cvMask;
     cv::Mat K = cv::Mat::eye(3,3,CV_32F);
     double focal = (sen_cam_->getIntrinsicMatrix()(0,0) +
-                   sen_cam_->getIntrinsicMatrix()(1,1)) / 2;
+                    sen_cam_->getIntrinsicMatrix()(1,1)) / 2;
 
     _E = cv::findEssentialMat(p2d_prev, 
                               p2d_curr, 
@@ -674,9 +641,9 @@ void ProcessorVisualOdometry::retainBest(std::vector<cv::KeyPoint> &_keypoints, 
 }
 
 
-void ProcessorVisualOdometry::equalize_img(cv::Mat &img_incoming, ParamsProcessorVisualOdometry::EqualizationParams equalization)
+void ProcessorVisualOdometry::equalize_img(cv::Mat &img_incoming)
 {
-    switch (equalization.method)
+    switch (params_visual_odometry_->equalization.method)
     {
         case 0:
             break;
@@ -684,7 +651,7 @@ void ProcessorVisualOdometry::equalize_img(cv::Mat &img_incoming, ParamsProcesso
         {
             // average to central brightness
             auto img_avg = (cv::mean(img_incoming)).val[0];
-            img_incoming += cv::Scalar(round(equalization.average.median - img_avg) );
+            img_incoming += cv::Scalar(round(params_visual_odometry_->equalization.average.median - img_avg) );
             break;
         }
         case 2:
@@ -696,13 +663,67 @@ void ProcessorVisualOdometry::equalize_img(cv::Mat &img_incoming, ParamsProcesso
         {
             // Contrast Limited Adaptive Histogram Equalization  CLAHE
             // -> more continuous lighting and higher contrast images
-            cv::Ptr<cv::CLAHE> clahe = cv::createCLAHE(equalization.clahe.clip_limit,
-                                                       equalization.clahe.tile_grid_size);
+            cv::Ptr<cv::CLAHE> clahe = cv::createCLAHE(params_visual_odometry_->equalization.clahe.clip_limit,
+                                                       params_visual_odometry_->equalization.clahe.tile_grid_size);
             clahe->apply(img_incoming, img_incoming);
             break;
         }
     }
 }
+
+void ProcessorVisualOdometry::detect_keypoints_empty_grid(cv::Mat img_incoming, CaptureImagePtr capture_image_incoming)
+{
+    // detect one FAST keypoint in each cell of the grid
+    cv::Rect rect_roi;
+    Eigen::Vector2i cell_index;
+    std::vector<cv::KeyPoint> kps_roi;
+    for (int i=1; i < params_visual_odometry_->grid.nbr_cells_h-1; i++){
+        for (int j=1; j < params_visual_odometry_->grid.nbr_cells_v-1; j++){
+            cell_index << i,j;
+            cell_grid_.cell2roi(cell_index, rect_roi);
+
+            cv::Mat img_roi(img_incoming, rect_roi);  // no data copy -> no overhead
+            detector_->detect(img_roi, kps_roi);
+
+            if (kps_roi.size() > 0){
+                // retain only the best image in each region of interest
+                retainBest(kps_roi, 1);
+                // Keypoints are detected in the local coordinates of the region of interest
+                // -> translate to the full image corner coordinate system
+                kps_roi.at(0).pt.x = kps_roi.at(0).pt.x + rect_roi.x;
+                kps_roi.at(0).pt.y = kps_roi.at(0).pt.y + rect_roi.y;
+                capture_image_incoming->addKeyPoint(kps_roi.at(0));
+            }
+        }
+    }
+}
+
+
+void ProcessorVisualOdometry::filter_last_incoming_tracks_from_ransac_result(const TracksMap& tracks_last_incoming, const KeyPointsMap& mwkps_incoming, const TracksMap& tracks_origin_incoming,
+                                                                             TracksMap& tracks_last_incoming_filtered, KeyPointsMap& mwkps_incoming_filtered)
+{
+    /*
+    Use origin -> incoming track
+    O ---------------------> I
+    to filter last -> incoming track (and tracked keypoint map in incoming)
+                  L -------> I
+    based of the tracks alive after RANSAC check on O --> I
+
+    This ugly double loop is due to the fact that features ids in Incoming are in the "values" of both maps, which requires linear search.
+    Ideally, this may be solved a Boost.Bimap.
+    **/
+
+    for (auto & track_origin_incoming : tracks_origin_incoming){
+        for (auto & track_last_incoming : tracks_last_incoming){
+            if (track_origin_incoming.second == track_last_incoming.second){
+                tracks_last_incoming_filtered[track_last_incoming.first] = track_last_incoming.second;
+                mwkps_incoming_filtered[track_last_incoming.second] = mwkps_incoming.at(track_last_incoming.second);
+                continue;
+            }
+        }
+    }                                                    
+}
+
 
 } //namespace wolf
 

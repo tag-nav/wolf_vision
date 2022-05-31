@@ -297,8 +297,13 @@ class ProcessorVisualOdometry : public ProcessorTracker
         *      2. opencv: histogram_equalization
         *      3. opencv: CLAHE
         */
-        void equalize_img(cv::Mat &img_incoming, ParamsProcessorVisualOdometry::EqualizationParams equalization)
-;
+        void equalize_img(cv::Mat &img_incoming);
+
+        void detect_keypoints_empty_grid(cv::Mat img_incoming, CaptureImagePtr capture_image_incoming);
+
+        void filter_last_incoming_tracks_from_ransac_result(const TracksMap& tracks_last_incoming, const KeyPointsMap& mwkps_incoming, const TracksMap& tracks_origin_incoming,
+                                                            TracksMap& tracks_last_incoming_filtered, KeyPointsMap& mwkps_incoming_filtered);
+
 
 };
 
