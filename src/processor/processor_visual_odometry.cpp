@@ -164,54 +164,11 @@ void ProcessorVisualOdometry::preProcess()
 
     if (n_tracks_origin < params_visual_odometry_->min_features_for_keyframe)
     {
-        // Erase all keypoints previously added to the cell grid
-        cell_grid_.renew();
 
-        // Add last Keypoints that still form valid tracks between last and incoming
-        // And create a filtered map for last keypoints
-        KeyPointsMap mwkps_last_filtered;
-        for (auto track: tracks_last_incoming_filtered){
-            mwkps_last_filtered[track.first] = mwkps_last[track.first];
-            size_t last_kp_id = track.first;
-            cell_grid_.hitCell(capture_image_last_->getKeyPoints().at(last_kp_id).getCvKeyPoint());
-        }
-
-
-        // Detect new KeyPoints 
         std::vector<cv::KeyPoint> kps_last_new;
-        
-        // Use the grid to detect new keypoints in empty cells
-        // We try a bunch of times to add keypoints to randomly selected empty regions of interest
-        for (int i=0; i < params_visual_odometry_->max_new_features; i++){
-            cv::Rect rect_roi;
-
-            bool is_empty = cell_grid_.pickRoi(rect_roi);
-            if (!is_empty) // no empty cells!
-            {
-                break;
-            }
-            cv::Mat img_roi(img_last, rect_roi);  // no data copy -> no overhead
-            std::vector<cv::KeyPoint> kps_roi;
-            detector_->detect(img_roi, kps_roi);
-            if (kps_roi.size() > 0){
-                // retain only the best keypoint in each region of interest
-                retainBest(kps_roi, 1);
-
-                // Keypoints are detected in the local coordinates of the region of interest
-                // -> translate to the full image corner coordinate system
-                kps_roi.at(0).pt.x = kps_roi.at(0).pt.x + rect_roi.x;
-                kps_roi.at(0).pt.y = kps_roi.at(0).pt.y + rect_roi.y;
-                kps_last_new.push_back(kps_roi.at(0));
-
-                // update grid with this detection
-                cell_grid_.hitCell(kps_roi.at(0));
-            }
-            else
-            {
-                // block this grid's cell so that it is not reused for detection
-                cell_grid_.blockCell(rect_roi);
-            }
-        }
+        KeyPointsMap mwkps_last_filtered;
+        detect_keypoints_in_empty_grid_cells(img_last, tracks_last_incoming_filtered, mwkps_last,
+                                             kps_last_new, mwkps_last_filtered);
 
         // Create a map of wolf KeyPoints to track only the new ones
         KeyPointsMap mwkps_last_new, mwkps_incoming_new;
@@ -722,6 +679,55 @@ void ProcessorVisualOdometry::filter_last_incoming_tracks_from_ransac_result(con
             }
         }
     }                                                    
+}
+
+
+void ProcessorVisualOdometry::detect_keypoints_in_empty_grid_cells(cv::Mat img_last, const TracksMap& tracks_last_incoming_filtered, const KeyPointsMap& mwkps_last, 
+                                                                   std::vector<cv::KeyPoint>& kps_last_new, KeyPointsMap& mwkps_last_filtered)
+{
+    // Erase all keypoints previously added to the cell grid
+    cell_grid_.renew();
+
+    // Add last Keypoints that still form valid tracks between last and incoming
+    // And create a filtered map for last keypoints
+    for (auto track: tracks_last_incoming_filtered){
+        mwkps_last_filtered[track.first] = mwkps_last.at(track.first);
+        size_t last_kp_id = track.first;
+        cell_grid_.hitCell(capture_image_last_->getKeyPoints().at(last_kp_id).getCvKeyPoint());
+    }
+
+    // Use the grid to detect new keypoints in empty cells
+    // We try a bunch of times to add keypoints to randomly selected empty regions of interest
+    for (int i=0; i < params_visual_odometry_->max_new_features; i++){
+        cv::Rect rect_roi;
+
+        bool is_empty = cell_grid_.pickRoi(rect_roi);
+        if (!is_empty) // no empty cells!
+        {
+            break;
+        }
+        cv::Mat img_roi(img_last, rect_roi);  // no data copy -> no overhead
+        std::vector<cv::KeyPoint> kps_roi;
+        detector_->detect(img_roi, kps_roi);
+        if (kps_roi.size() > 0){
+            // retain only the best keypoint in each region of interest
+            retainBest(kps_roi, 1);
+
+            // Keypoints are detected in the local coordinates of the region of interest
+            // -> translate to the full image corner coordinate system
+            kps_roi.at(0).pt.x = kps_roi.at(0).pt.x + rect_roi.x;
+            kps_roi.at(0).pt.y = kps_roi.at(0).pt.y + rect_roi.y;
+            kps_last_new.push_back(kps_roi.at(0));
+
+            // update grid with this detection
+            cell_grid_.hitCell(kps_roi.at(0));
+        }
+        else
+        {
+            // block this grid's cell so that it is not reused for detection
+            cell_grid_.blockCell(rect_roi);
+        }
+    }
 }
 
 

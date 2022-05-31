@@ -303,6 +303,9 @@ class ProcessorVisualOdometry : public ProcessorTracker
 
         void filter_last_incoming_tracks_from_ransac_result(const TracksMap& tracks_last_incoming, const KeyPointsMap& mwkps_incoming, const TracksMap& tracks_origin_incoming,
                                                             TracksMap& tracks_last_incoming_filtered, KeyPointsMap& mwkps_incoming_filtered);
+        
+        void detect_keypoints_in_empty_grid_cells(cv::Mat img_last, const TracksMap& tracks_last_incoming_filtered, const KeyPointsMap& mwkps_last, 
+                                                  std::vector<cv::KeyPoint>& kps_last_new, KeyPointsMap& mwkps_last_filtered);
 
 
 };
