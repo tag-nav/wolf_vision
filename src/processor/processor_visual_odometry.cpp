@@ -231,11 +231,11 @@ unsigned int ProcessorVisualOdometry::processKnown()
         size_t id_feat_last = feat_pi_last->getKeyPoint().getId();  
 
         // if this feature id is in the last->incoming tracks of capture incoming, the track is continued
-        // otherwise we store the pair as a newly detected track (for processNew)
+        // the matched pairs are stored in tracks_map_li_matched_ which is used in processNew to select the point that have NOT been match as "new"
         TracksMap tracks_map_li = capture_image_incoming_->getTracksPrev();
         if (tracks_map_li.count(id_feat_last)){
-            // WOLF_DEBUG("A corresponding track has been found for id_feat_last ", id_feat_last );
             auto kp_track_li = tracks_map_li.find(id_feat_last);
+
             // create a feature using the corresponding WKeyPoint contained in incoming (hence the "second")
             auto feat_inco = FeatureBase::emplace<FeaturePointImage>(
                                                     capture_image_incoming_, 
@@ -267,10 +267,8 @@ unsigned int ProcessorVisualOdometry::processNew(const int& _max_features)
     // So we need to reset the origin tracks of incoming used in preProcess so that they correspond to the future origin (currently last)  
     capture_image_incoming_->setTracksOrigin(capture_image_incoming_->getTracksPrev());
 
-    // We have matched the tracks in the track matrix with the last->incoming tracks 
-    // stored in the TracksMap from getTracksPrev()
+    // We have matched the tracks in the track matrix with the last->incoming tracks stored in the TracksMap from getTracksPrev()
     // Now we need to add new tracks in the track matrix for the NEW tracks.
-    //
     // Use book-keeping prepared in processKnown: the TracksMap that have been matched were stored in tracks_map_li_matched_
     // and here add tracks only for those that have not been matched
 
@@ -296,9 +294,6 @@ unsigned int ProcessorVisualOdometry::processNew(const int& _max_features)
 }
 
 
-
-
-
 void ProcessorVisualOdometry::establishFactors()
 {
     // Function only called when KF is created using last
@@ -307,6 +302,8 @@ void ProcessorVisualOdometry::establishFactors()
     //     2) if the feature track is not associated to a landmark yet and is long enough, create a new landmark
     //        using triangulation as a prior, using previous KF current estimates. Create a KF-Lmk factor for all these KFs. 
     //        For bookkeeping, define the landmark id as the track id.
+
+    WOLF_INFO("   establishFactors")
 
     std::list<FeatureBasePtr> tracks_snapshot_last = track_matrix_.snapshotAsList(last_ptr_);
 
@@ -322,10 +319,13 @@ void ProcessorVisualOdometry::establishFactors()
 
         // verify if a landmark is associated to this track (BAD implementation)
         LandmarkBasePtr associated_lmk = nullptr;
+
+        // OPTIM: try to reverse iterate the map
         for (auto lmk: getProblem()->getMap()->getLandmarkList())
         {
             if (lmk->id() == feat_pi->trackId()){
                 associated_lmk = lmk;
+                break;
             }
         }
 
@@ -344,8 +344,8 @@ void ProcessorVisualOdometry::establishFactors()
         // 2) create landmark if track is not associated with one and has enough length
         else if(track_matrix_.trackSize(feat->trackId()) >= params_visual_odometry_->min_track_length_for_landmark)
         {
-            // std::cout << "NEW valid track \\o/" << std::endl;
-            LandmarkBasePtr lmk = emplaceLandmark(feat_pi);
+            WOLF_INFO("   NEW valid track \\o/")
+            LandmarkBasePtr lmk = emplaceLandmarkNaive(feat_pi);
             lmk->setId(feat_pi->trackId());
 
             // Add factors from all KFs of this track to the new lmk
@@ -364,7 +364,7 @@ void ProcessorVisualOdometry::establishFactors()
     return;
 }
 
-LandmarkBasePtr ProcessorVisualOdometry::emplaceLandmark(FeatureBasePtr _feat)
+LandmarkBasePtr ProcessorVisualOdometry::emplaceLandmarkNaive(FeatureBasePtr _feat)
 {
     // Taken from processor_bundle_adjustment
     // Initialize the landmark in its ray (based on pixel meas) and using a arbitrary distance
