@@ -46,11 +46,12 @@ using namespace cv;
 
 std::string wolf_vision_root = _WOLF_VISION_ROOT_DIR;
 
-class ProcessorVisualOdometryTest : public ProcessorVisualOdometry
+WOLF_PTR_TYPEDEFS(ProcessorVisualOdometry_Wrapper);
+class ProcessorVisualOdometry_Wrapper : public ProcessorVisualOdometry
 {
 	public:
 
-		ProcessorVisualOdometryTest(ParamsProcessorVisualOdometryPtr& _params_vo):
+		ProcessorVisualOdometry_Wrapper(ParamsProcessorVisualOdometryPtr& _params_vo):
 		    ProcessorVisualOdometry(_params_vo)
 	    {
 
@@ -82,6 +83,12 @@ class ProcessorVisualOdometryTest : public ProcessorVisualOdometry
         }
 };
 
+// namespace wolf{
+// // Register in the Factories
+// WOLF_REGISTER_PROCESSOR(ProcessorVisualOdometry_Wrapper);
+// }
+// ////////////////////////////////////////////////////////////////
+
 TEST(ProcessorVisualOdometry, kltTrack)
 {
     cv::Mat img = cv::imread(wolf_vision_root + "/test/markers.jpg", cv::IMREAD_GRAYSCALE);
@@ -109,7 +116,7 @@ TEST(ProcessorVisualOdometry, kltTrack)
     params->fast.threshold = 30;
     params->fast.non_max_suppresion = true;
 
-    ProcessorVisualOdometryTest processor(params);
+    ProcessorVisualOdometry_Wrapper processor(params);
     cv::Ptr<cv::FeatureDetector> detector = processor.getDetector();
     
     std::vector<cv::KeyPoint> kps;
@@ -151,7 +158,7 @@ TEST(ProcessorVisualOdometry, kltTrack)
 //    params->min_features_for_keyframe = 50;
 //    params->max_nb_tracks = 400;
 //    params->min_track_length_for_landmark = 4;
-//    ProcessorVisualOdometryTest processor(params);
+//    ProcessorVisualOdometry_Wrapper processor(params);
 //
 //
 //    // Install camera
@@ -320,87 +327,110 @@ TEST(ProcessorVisualOdometry, mergeTracks)
 
 }
 
+
+
+
+
+////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////
+// Now we deal with multiview geometry so it helps to
+// create a map of landmarks to project them
+////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////
+
+
+
 cv::Point2f project(Eigen::Matrix3f K, Eigen::Vector3f p){
         Eigen::Vector3f ph = K * p;
         ph = ph / ph(2,0);
         return cv::Point2f(ph(0), ph(1));
 }
 
-TEST(ProcessorVisualOdometry, filterWithEssential)
+class ProcessorVOMultiView_class : public testing::Test{
+
+    public:
+        KeyPointsMap mwkps_prev, mwkps_curr;
+        TracksMap tracks_prev_curr;
+        ProcessorVisualOdometry_WrapperPtr processor;
+        Eigen::Matrix3f K;
+
+        void SetUp() override
+        {
+
+            // Create a simple camera model
+            K << 100, 0, 240,
+                0, 100, 240,
+                0, 0, 1;
+            
+            // Create a processor
+            ParamsProcessorVisualOdometryPtr params = std::make_shared<ParamsProcessorVisualOdometry>();
+            params->grid.margin = 10;
+            params->grid.nbr_cells_h = 8;
+            params->grid.nbr_cells_v = 8;
+            params->grid.separation = 10;
+            params->ransac.prob = 0.999;  // 0.99 makes the gtest fail -> missing one point
+            params->ransac.thresh = 1.0;
+            processor = std::make_shared<ProcessorVisualOdometry_Wrapper>(params);
+
+            // Install camera
+            ParamsSensorCameraPtr intr = std::make_shared<ParamsSensorCamera>();
+            intr->pinhole_model_raw = Eigen::Vector4d(100, 100, 240, 240);
+            intr->width  = 480;
+            intr->height = 480;
+            SensorCameraPtr cam_ptr = std::make_shared<SensorCamera>((Eigen::Vector7d() << 0,0,0,  0,0,0,1).finished(), intr);
+            processor->configure(cam_ptr);
+
+            // Set 3D points on the previous view
+            Eigen::Vector3f X1_prev(1.0, 1.0, 2.0);
+            Eigen::Vector3f X2_prev(-1.0, -1.0, 2.0);
+            Eigen::Vector3f X3_prev(-0.75, -0.75, 3.0);
+            Eigen::Vector3f X4_prev(-0.75, 0.75, 2.5);
+            Eigen::Vector3f X5_prev(0.75, -0.75, 2.0);
+            Eigen::Vector3f X6_prev(0.0, 1.0, 2.0);
+            Eigen::Vector3f X7_prev(0.1, -1.0, 3.0);
+            Eigen::Vector3f X8_prev(0.75, 0.75, 2.0);
+
+            // Project pixels in the previous view
+            mwkps_prev.insert(std::pair<size_t, WKeyPoint>(0, WKeyPoint(cv::KeyPoint(project(K,X1_prev), 1))));
+            mwkps_prev.insert(std::pair<size_t, WKeyPoint>(1, WKeyPoint(cv::KeyPoint(project(K,X2_prev), 1))));
+            mwkps_prev.insert(std::pair<size_t, WKeyPoint>(2, WKeyPoint(cv::KeyPoint(project(K,X3_prev), 1))));
+            mwkps_prev.insert(std::pair<size_t, WKeyPoint>(3, WKeyPoint(cv::KeyPoint(project(K,X4_prev), 1))));
+            mwkps_prev.insert(std::pair<size_t, WKeyPoint>(4, WKeyPoint(cv::KeyPoint(project(K,X5_prev), 1))));
+            mwkps_prev.insert(std::pair<size_t, WKeyPoint>(5, WKeyPoint(cv::KeyPoint(project(K,X6_prev), 1))));
+            mwkps_prev.insert(std::pair<size_t, WKeyPoint>(6, WKeyPoint(cv::KeyPoint(project(K,X7_prev), 1))));
+            mwkps_prev.insert(std::pair<size_t, WKeyPoint>(7, WKeyPoint(cv::KeyPoint(project(K,X8_prev), 1))));
+
+            // Set the transformation between the two views
+            Eigen::Vector3f t(0.1, 0.1, 0.0);
+            // Eigen::Vector3f euler(0.0, 0.0, 0.0);  // degenerate case!
+            Eigen::Vector3f euler(0.2, 0.1, 0.3);
+            Eigen::Matrix3f R = e2R(euler);
+
+            // Project pixels in the current view
+            mwkps_curr.insert(std::pair<size_t, WKeyPoint>(0, WKeyPoint(cv::KeyPoint(project(K,R*X1_prev + t), 1))));
+            mwkps_curr.insert(std::pair<size_t, WKeyPoint>(1, WKeyPoint(cv::KeyPoint(project(K,R*X2_prev + t), 1))));
+            mwkps_curr.insert(std::pair<size_t, WKeyPoint>(2, WKeyPoint(cv::KeyPoint(project(K,R*X3_prev + t), 1))));
+            mwkps_curr.insert(std::pair<size_t, WKeyPoint>(3, WKeyPoint(cv::KeyPoint(project(K,R*X4_prev + t), 1))));
+            mwkps_curr.insert(std::pair<size_t, WKeyPoint>(4, WKeyPoint(cv::KeyPoint(project(K,R*X5_prev + t), 1))));
+            mwkps_curr.insert(std::pair<size_t, WKeyPoint>(5, WKeyPoint(cv::KeyPoint(project(K,R*X6_prev + t), 1))));
+            mwkps_curr.insert(std::pair<size_t, WKeyPoint>(6, WKeyPoint(cv::KeyPoint(project(K,R*X7_prev + t), 1))));
+            mwkps_curr.insert(std::pair<size_t, WKeyPoint>(7, WKeyPoint(cv::KeyPoint(project(K,R*X8_prev + t), 1))));  
+
+            // Build the tracksMap
+            for (size_t i=0; i<mwkps_curr.size(); ++i)
+            {
+                tracks_prev_curr.insert(std::pair<size_t, size_t>(i,i));
+            }
+        }
+};
+
+
+TEST_F(ProcessorVOMultiView_class, filterWithEssential)
 {
-    KeyPointsMap mwkps_prev, mwkps_curr;
-    TracksMap tracks_prev_curr;
     cv::Mat E;
 
-    // Create a simple camera model
-    Eigen::Matrix3f K;
-    K << 100, 0, 240,
-         0, 100, 240,
-         0, 0, 1;
-    
-    // Create a processor
-    ParamsProcessorVisualOdometryPtr params = std::make_shared<ParamsProcessorVisualOdometry>();
-    params->grid.margin = 10;
-    params->grid.nbr_cells_h = 8;
-    params->grid.nbr_cells_v = 8;
-    params->grid.separation = 10;
-    params->ransac.prob = 0.999;  // 0.99 makes the gtest fail -> missing one point
-    params->ransac.thresh = 1.0;
-    ProcessorVisualOdometryTest processor(params);
-
-    // Install camera
-    ParamsSensorCameraPtr intr = std::make_shared<ParamsSensorCamera>();
-    intr->pinhole_model_raw = Eigen::Vector4d(100, 100, 240, 240);
-    intr->width  = 480;
-    intr->height = 480;
-    SensorCameraPtr cam_ptr = std::make_shared<SensorCamera>((Eigen::Vector7d() << 0,0,0,  0,0,0,1).finished(), intr);
-    processor.configure(cam_ptr);
-
-    // Set 3D points on the previous view
-    Eigen::Vector3f X1_prev(1.0, 1.0, 2.0);
-    Eigen::Vector3f X2_prev(-1.0, -1.0, 2.0);
-    Eigen::Vector3f X3_prev(-0.75, -0.75, 3.0);
-    Eigen::Vector3f X4_prev(-0.75, 0.75, 2.5);
-    Eigen::Vector3f X5_prev(0.75, -0.75, 2.0);
-    Eigen::Vector3f X6_prev(0.0, 1.0, 2.0);
-    Eigen::Vector3f X7_prev(0.1, -1.0, 3.0);
-    Eigen::Vector3f X8_prev(0.75, 0.75, 2.0);
-
-    // Project pixels in the previous view
-    mwkps_prev.insert(std::pair<size_t, WKeyPoint>(0, WKeyPoint(cv::KeyPoint(project(K,X1_prev), 1))));
-    mwkps_prev.insert(std::pair<size_t, WKeyPoint>(1, WKeyPoint(cv::KeyPoint(project(K,X2_prev), 1))));
-    mwkps_prev.insert(std::pair<size_t, WKeyPoint>(2, WKeyPoint(cv::KeyPoint(project(K,X3_prev), 1))));
-    mwkps_prev.insert(std::pair<size_t, WKeyPoint>(3, WKeyPoint(cv::KeyPoint(project(K,X4_prev), 1))));
-    mwkps_prev.insert(std::pair<size_t, WKeyPoint>(4, WKeyPoint(cv::KeyPoint(project(K,X5_prev), 1))));
-    mwkps_prev.insert(std::pair<size_t, WKeyPoint>(5, WKeyPoint(cv::KeyPoint(project(K,X6_prev), 1))));
-    mwkps_prev.insert(std::pair<size_t, WKeyPoint>(6, WKeyPoint(cv::KeyPoint(project(K,X7_prev), 1))));
-    mwkps_prev.insert(std::pair<size_t, WKeyPoint>(7, WKeyPoint(cv::KeyPoint(project(K,X8_prev), 1))));
-
-    // Set the transformation between the two views
-    Eigen::Vector3f t(0.1, 0.1, 0.0);
-    // Eigen::Vector3f euler(0.0, 0.0, 0.0);  // degenerate case!
-    Eigen::Vector3f euler(0.2, 0.1, 0.3);
-    Eigen::Matrix3f R = e2R(euler);
-    
-
-    // Project pixels in the current view
-    mwkps_curr.insert(std::pair<size_t, WKeyPoint>(0, WKeyPoint(cv::KeyPoint(project(K,R*X1_prev + t), 1))));
-    mwkps_curr.insert(std::pair<size_t, WKeyPoint>(1, WKeyPoint(cv::KeyPoint(project(K,R*X2_prev + t), 1))));
-    mwkps_curr.insert(std::pair<size_t, WKeyPoint>(2, WKeyPoint(cv::KeyPoint(project(K,R*X3_prev + t), 1))));
-    mwkps_curr.insert(std::pair<size_t, WKeyPoint>(3, WKeyPoint(cv::KeyPoint(project(K,R*X4_prev + t), 1))));
-    mwkps_curr.insert(std::pair<size_t, WKeyPoint>(4, WKeyPoint(cv::KeyPoint(project(K,R*X5_prev + t), 1))));
-    mwkps_curr.insert(std::pair<size_t, WKeyPoint>(5, WKeyPoint(cv::KeyPoint(project(K,R*X6_prev + t), 1))));
-    mwkps_curr.insert(std::pair<size_t, WKeyPoint>(6, WKeyPoint(cv::KeyPoint(project(K,R*X7_prev + t), 1))));
-    mwkps_curr.insert(std::pair<size_t, WKeyPoint>(7, WKeyPoint(cv::KeyPoint(project(K,R*X8_prev + t), 1))));  
-
-    // Build the tracksMap
-    for (size_t i=0; i<mwkps_curr.size(); ++i)
-    {
-        tracks_prev_curr.insert(std::pair<size_t, size_t>(i,i));
-    }
-
     // Let's try FilterWithEssential, all points here are inliers
-    processor.filterWithEssential(mwkps_prev, mwkps_curr, tracks_prev_curr, E);
+    processor->filterWithEssential(mwkps_prev, mwkps_curr, tracks_prev_curr, E);
     ASSERT_EQ(tracks_prev_curr.size(), mwkps_curr.size());
 
     // We had here an outlier: a keyPoint that doesn't move
@@ -409,8 +439,11 @@ TEST(ProcessorVisualOdometry, filterWithEssential)
     tracks_prev_curr.insert(std::pair<size_t, size_t>(8,8)); 
 
     // point at 8 must be discarded
-    processor.filterWithEssential(mwkps_prev, mwkps_curr, tracks_prev_curr, E);
+    processor->filterWithEssential(mwkps_prev, mwkps_curr, tracks_prev_curr, E);
     ASSERT_EQ(tracks_prev_curr.count(8), 0);
+
+    // do we retrieve the right orientation from the essential matrix?
+
 
 }
 
