@@ -349,7 +349,8 @@ void ProcessorVisualOdometry::establishFactors()
             WOLF_INFO("   NEW valid track \\o/")
             Track track_kf = track_matrix_.trackAtKeyframes(feat->trackId());
 
-            LandmarkBasePtr lmk = emplaceLandmarkTriangulation(feat_pi, track_kf);
+            // LandmarkBasePtr lmk = emplaceLandmarkTriangulation(feat_pi, track_kf);
+            LandmarkBasePtr lmk = emplaceLandmarkNaive(feat_pi);
             if (lmk == nullptr){
                 continue;
             }
