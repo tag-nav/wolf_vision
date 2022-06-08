@@ -375,28 +375,48 @@ void ProcessorVisualOdometry::establishFactors()
 }
 
 
-LandmarkBasePtr ProcessorVisualOdometry::emplaceLandmarkTriangulation(FeatureBasePtr _feat, Track _track_kf)
+LandmarkBasePtr ProcessorVisualOdometry::emplaceLandmarkTriangulation(FeaturePointImagePtr _feat, Track _track_kf)
 {
     // at least 2 KF needed to triangulate
     if (_track_kf.size() < 2)
     {
         return nullptr;
     }
+    Vector4d pt_c;
+    bool success = tryTriangulationFromFeatures(_feat, _track_kf, pt_c);
+    if (!success)
+    {
+        return nullptr;
+    }
 
+    WOLF_INFO("New lmk: ", pt_c.transpose())
+    auto lmk_hp_ptr = LandmarkBase::emplace<LandmarkHp>(getProblem()->getMap(), 
+                                                        pt_c, 
+                                                        _feat->getKeyPoint().getDescriptor());
+
+    // Set all IDs equal to track ID
+    size_t track_id = _feat->trackId();
+    lmk_hp_ptr->setId(track_id);
+    _feat->setLandmarkId(track_id);
+
+    return lmk_hp_ptr;
+}
+
+
+bool ProcessorVisualOdometry::tryTriangulationFromFeatures(FeaturePointImagePtr _feat, Track _track_kf, Vector4d& pt_c)
+{
     // heuristic: use oldest feature/KF to triangulate with respect to current time
     FeaturePointImagePtr feat_pi1 = std::static_pointer_cast<FeaturePointImage>(_track_kf.begin()->second);
-    // Feature at current time
-    FeaturePointImagePtr feat_pi2 = std::static_pointer_cast<FeaturePointImage>(_feat);
 
     cv::Vec2d pix1, pix2;
     // WOLF_INFO("TOTO")
     cv::eigen2cv(feat_pi1->getMeasurement(), pix1);
-    cv::eigen2cv(feat_pi2->getMeasurement(), pix2);
+    cv::eigen2cv(_feat->getMeasurement(), pix2);
     // WOLF_INFO(pix1, pix2)
     
     // create 3x4 projection matrices [K|0] * Tcw 
     Matrix4d Tcw1 = getTcw(feat_pi1->getCapture()->getTimeStamp()).matrix();
-    Matrix4d Tcw2 = getTcw(feat_pi2->getCapture()->getTimeStamp()).matrix();
+    Matrix4d Tcw2 = getTcw(_feat->getCapture()->getTimeStamp()).matrix();
     Eigen::Matrix<double, 3, 4> P1 = sen_cam_->getProjectionMatrix() * Tcw1;
     Eigen::Matrix<double, 3, 4> P2 = sen_cam_->getProjectionMatrix() * Tcw2;
     cv::Mat P1_cv, P2_cv;
@@ -410,46 +430,33 @@ LandmarkBasePtr ProcessorVisualOdometry::emplaceLandmarkTriangulation(FeatureBas
     cv::triangulatePoints(P1_cv, P2_cv, pix1, pix2, ptcv_w);
     // WOLF_INFO("YAY: ", ptcv_w)
 
-
     /////////////////////////////////////////////////////////
     // check that triangulation was done with enough parallax   
     /////////////////////////////////////////////////////////
     bool triangulation_is_a_success = true;  // Not implemented yet
     if(!triangulation_is_a_success)
     {
-        return nullptr;
+        return false;
     }
 
     // normalize to make equivalent to a unit quaternion
-    Eigen::Vector4d pt_c;
     cv::cv2eigen(ptcv_w, pt_c);
     
     // HACK: to avoid "nans" in residal, set Z = 1
-    pt_c(2) = 1 * pt_c(3);
+    // pt_c(2) = 1 * pt_c(3);
 
-    // Normilization necessary since homogeneous point stateblock is supposed to be unitary 
+    // Normalization necessary since homogeneous point stateblock is supposed to be unitary 
     pt_c.normalize();
 
-    WOLF_INFO("New lmk: ", pt_c.transpose())
-    auto lmk_hp_ptr = LandmarkBase::emplace<LandmarkHp>(getProblem()->getMap(), 
-                                                        pt_c, 
-                                                        feat_pi2->getKeyPoint().getDescriptor());
-
-    // Set all IDs equal to track ID
-    size_t track_id = _feat->trackId();
-    lmk_hp_ptr->setId(track_id);
-    _feat->setLandmarkId(track_id);
-
-    return lmk_hp_ptr;
+    return true;
 }
 
 
-LandmarkBasePtr ProcessorVisualOdometry::emplaceLandmarkNaive(FeatureBasePtr _feat)
+LandmarkBasePtr ProcessorVisualOdometry::emplaceLandmarkNaive(FeaturePointImagePtr _feat)
 {
     // Taken from processor_bundle_adjustment
     // Initialize the landmark in its ray (based on pixel meas) and using a arbitrary distance
 
-    FeaturePointImagePtr feat_pi = std::static_pointer_cast<FeaturePointImage>(_feat);
     Eigen::Vector2d point2d = _feat->getMeasurement();
 
     Eigen::Vector3d point3d;
@@ -465,7 +472,7 @@ LandmarkBasePtr ProcessorVisualOdometry::emplaceLandmarkNaive(FeatureBasePtr _fe
 
     // lmk from camera to world coordinate frame.
     Transform<double,3,Isometry> T_w_r
-        = Translation<double,3>(feat_pi->getFrame()->getP()->getState())
+        = Translation<double,3>(_feat->getFrame()->getP()->getState())
         * Quaterniond(_feat->getFrame()->getO()->getState().data());
     Transform<double,3,Isometry> T_r_c
 		= Translation<double,3>(_feat->getCapture()->getSensorP()->getState())
@@ -479,7 +486,7 @@ LandmarkBasePtr ProcessorVisualOdometry::emplaceLandmarkNaive(FeatureBasePtr _fe
 
     auto lmk_hp_ptr = LandmarkBase::emplace<LandmarkHp>(getProblem()->getMap(), 
                                                         vec_homogeneous_w, 
-                                                        feat_pi->getKeyPoint().getDescriptor());
+                                                        _feat->getKeyPoint().getDescriptor());
 
     // Set all IDs equal to track ID
     size_t track_id = _feat->trackId();
@@ -653,25 +660,47 @@ bool ProcessorVisualOdometry::filterWithEssential(const KeyPointsMap _mwkps_prev
     std::vector<size_t> all_indices;
     for (auto & track : _tracks_prev_curr){
         all_indices.push_back(track.first);
-        Eigen::Vector2d ray_prev = pinhole::depixellizePoint(sen_cam_->getPinholeModel(), _mwkps_prev.at(track.first).getEigenKeyPoint());
-        Eigen::Vector2d ray_curr = pinhole::depixellizePoint(sen_cam_->getPinholeModel(), _mwkps_curr.at(track.second).getEigenKeyPoint());
-        p2d_prev.push_back(cv::Point2d(ray_prev.x(), ray_prev.y()));
-        p2d_curr.push_back(cv::Point2d(ray_curr.x(), ray_curr.y()));
+
+        // ////////////////////////
+        // // We may want to use rays instead of pixels
+        // Eigen::Vector2d ray_prev = pinhole::depixellizePoint(sen_cam_->getPinholeModel(), _mwkps_prev.at(track.first).getEigenKeyPoint());
+        // Eigen::Vector2d ray_curr = pinhole::depixellizePoint(sen_cam_->getPinholeModel(), _mwkps_curr.at(track.second).getEigenKeyPoint());
+        // p2d_prev.push_back(cv::Point2d(ray_prev.x(), ray_prev.y()));
+        // p2d_curr.push_back(cv::Point2d(ray_curr.x(), ray_curr.y()));
+        // ////////////////////////
+
+        // use pixels 
+        p2d_prev.push_back(_mwkps_prev.at(track.first).getCvPoint());
+        p2d_curr.push_back(_mwkps_curr.at(track.first).getCvPoint());
     }
 
     cv::Mat cvMask;
-    cv::Mat K = cv::Mat::eye(3,3,CV_32F);
-    double focal = (sen_cam_->getIntrinsicMatrix()(0,0) +
-                    sen_cam_->getIntrinsicMatrix()(1,1)) / 2;
 
+    // ////////////////////////
+    // // If we use rays then the    
+    // cv::Mat K = cv::Mat::eye(3,3,CV_32F);
+    // double focal = (sen_cam_->getIntrinsicMatrix()(0,0) +
+    //                 sen_cam_->getIntrinsicMatrix()(1,1)) / 2;
+
+    // // If using rays, thresh dived by the average focal
+    // _E = cv::findEssentialMat(p2d_prev, 
+    //                           p2d_curr, 
+    //                           K, 
+    //                           cv::RANSAC,
+    //                           prms.prob,
+    //                           prms.thresh / focal,
+    //                           cvMask);
+    // ////////////////////////
+    
+    // Essential matrix from pixels
     _E = cv::findEssentialMat(p2d_prev, 
                               p2d_curr, 
                               Kcv_, 
                               cv::RANSAC,
                               prms.prob,
-                              prms.thresh / focal,
+                              prms.thresh,
                               cvMask);
-    
+
     // Let's remove outliers from tracksMap
     for (size_t k=0; k<all_indices.size(); k++){
         if (cvMask.at<bool>(k) == 0){

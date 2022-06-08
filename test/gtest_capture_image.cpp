@@ -60,7 +60,7 @@ class CaptureImage_test : public testing::Test
             cv_kp2_ = cv::KeyPoint(2.0, 0.0, 0);
             wkp0_ = WKeyPoint(cv_kp0_);
             wkp1_ = WKeyPoint  (cv_kp1_);
-            wkp2_ = WKeyPoint  (cv_kp2_);
+            wkp2_ = WKeyPoint  (Eigen::Vector2d(cv_kp2_.pt.x, cv_kp2_.pt.y));
         }
 };
 

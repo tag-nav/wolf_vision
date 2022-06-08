@@ -253,18 +253,27 @@ class ProcessorVisualOdometry : public ProcessorTracker
          * 
          * Implementation: Use rays of features detections in last frame and create a landmark at 1 meter (arbitrary) 
          */
-        LandmarkBasePtr emplaceLandmarkNaive(FeatureBasePtr _feature_ptr);
+        LandmarkBasePtr emplaceLandmarkNaive(FeaturePointImagePtr _feature_ptr);
 
         /**
          * \brief Emplace a landmark corresponding to a track and initialize it with triangulation.
          * \param _feature_ptr a pointer to the feature used to create the new landmark
          * \param _track_kf track with only features associated to keyframes that maye be used for initialisation
          * \return a pointer to the created landmark. If null, the triangulation failed due to low parallax
+         */
+        LandmarkBasePtr emplaceLandmarkTriangulation(FeaturePointImagePtr _feature_ptr, Track _track_kf);
+
+                /**
+         * \brief Emplace a landmark corresponding to a track and initialize it with triangulation.
+         * \param _feature_ptr a pointer to the feature used to create the new landmark
+         * \param _track_kf track with only features associated to keyframes that maye be used for initialisation
+         * \return the triangulated point in P3 homogeneous coordinates
          * 
          * Implementation: try to triangulate a new landmark based on previous frames estimates.
          * Apply a numerical test to asses if parallax is enough.
          */
-        LandmarkBasePtr emplaceLandmarkTriangulation(FeatureBasePtr _feature_ptr, Track _track_kf);
+        bool tryTriangulationFromFeatures(FeaturePointImagePtr _feat, Track _track_kf, Eigen::Vector4d&);
+
 
         Eigen::Isometry3d getTcw(TimeStamp _ts) const;
 

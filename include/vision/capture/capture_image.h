@@ -53,6 +53,7 @@ class WKeyPoint
 
         WKeyPoint();
         WKeyPoint(const cv::KeyPoint& _cv_kp);
+        WKeyPoint(const Eigen::Vector2d& _eig_kp);
 
         size_t getId() const {return id_;}
         void setId(size_t _id) {id_ = _id;}

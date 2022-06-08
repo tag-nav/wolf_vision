@@ -27,12 +27,17 @@
  */
 
 #include <string>
+
+#include <Eigen/Dense>
+
+#include <opencv2/imgcodecs.hpp>
+#include <opencv2/core/eigen.hpp>
+
 #include <core/utils/utils_gtest.h>
 #include <core/sensor/sensor_base.h>
 #include <core/yaml/parser_yaml.h>
-#include <opencv2/imgcodecs.hpp>
-
-#include "core/math/rotations.h"
+#include <core/math/rotations.h>
+#include <core/processor/track_matrix.h>
 
 #include "vision/processor/processor_visual_odometry.h"
 #include "vision/sensor/sensor_camera.h"
@@ -40,6 +45,7 @@
 #include "vision/landmark/landmark_hp.h"
 #include "vision/capture/capture_image.h"
 #include "vision/internal/config.h"
+
 
 using namespace wolf;
 using namespace cv;
@@ -221,7 +227,7 @@ TEST(ProcessorVisualOdometry, kltTrack)
 //                        static_cast<float>(capture_image_incoming->getKeyPoints().size());
 //    ASSERT_TRUE(track_ratio > 0.8);
 //
-//    // Check if tracks_prev and tracks_origin are similar
+//    // Check if tracks_c1 and tracks_origin are similar
 //    ASSERT_EQ(capture_image_incoming->getTracksPrev().size(), capture_image_incoming->getTracksOrigin().size());
 //
 //}
@@ -272,7 +278,7 @@ TEST(ProcessorVisualOdometry, kltTrack)
 //    capture_image_1->process();
 //
 //    ASSERT_EQ(proc_vo_ptr->getTrackMatrix().numTracks(),capture_image_1->getTracksPrev().size());
-//    // Check if tracks_prev and tracks_origin are similar
+//    // Check if tracks_c1 and tracks_origin are similar
 //    ASSERT_EQ(capture_image_1->getTracksPrev().size(), capture_image_1->getTracksOrigin().size());
 //
 //    // ----------------------------------------
@@ -338,30 +344,22 @@ TEST(ProcessorVisualOdometry, mergeTracks)
 ////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////
 
-
-
-cv::Point2f project(Eigen::Matrix3f K, Eigen::Vector3f p){
-        Eigen::Vector3f ph = K * p;
-        ph = ph / ph(2,0);
-        return cv::Point2f(ph(0), ph(1));
-}
-
 class ProcessorVOMultiView_class : public testing::Test{
 
     public:
-        KeyPointsMap mwkps_prev, mwkps_curr;
-        TracksMap tracks_prev_curr;
+        KeyPointsMap mwkps_c1, mwkps_c2;
+        TracksMap tracks_c1_c2;
         ProcessorVisualOdometry_WrapperPtr processor;
-        Eigen::Matrix3f K;
-
+        Eigen::Vector3d t_21;
+        Eigen::Matrix3d R_21;
+        Eigen::Vector4d k;
+        cv::Mat Kcv;
         void SetUp() override
         {
-
-            // Create a simple camera model
-            K << 100, 0, 240,
-                0, 100, 240,
-                0, 0, 1;
-            
+            k << 376, 240, 460, 460;
+            Kcv = (cv::Mat_<double>(3,3) << k(2), 0,    k(0),
+                                            0,    k(3), k(1),
+                                            0,    0,    1);
             // Create a processor
             ParamsProcessorVisualOdometryPtr params = std::make_shared<ParamsProcessorVisualOdometry>();
             params->grid.margin = 10;
@@ -374,52 +372,53 @@ class ProcessorVOMultiView_class : public testing::Test{
 
             // Install camera
             ParamsSensorCameraPtr intr = std::make_shared<ParamsSensorCamera>();
-            intr->pinhole_model_raw = Eigen::Vector4d(100, 100, 240, 240);
-            intr->width  = 480;
+            intr->pinhole_model_raw = k;  // Necessary so that the internal Kcv camera matrix is configured properly
+            intr->distortion = Eigen::Vector4d::Zero();
+            intr->width  = 752;
             intr->height = 480;
             SensorCameraPtr cam_ptr = std::make_shared<SensorCamera>((Eigen::Vector7d() << 0,0,0,  0,0,0,1).finished(), intr);
             processor->configure(cam_ptr);
 
-            // Set 3D points on the previous view
-            Eigen::Vector3f X1_prev(1.0, 1.0, 2.0);
-            Eigen::Vector3f X2_prev(-1.0, -1.0, 2.0);
-            Eigen::Vector3f X3_prev(-0.75, -0.75, 3.0);
-            Eigen::Vector3f X4_prev(-0.75, 0.75, 2.5);
-            Eigen::Vector3f X5_prev(0.75, -0.75, 2.0);
-            Eigen::Vector3f X6_prev(0.0, 1.0, 2.0);
-            Eigen::Vector3f X7_prev(0.1, -1.0, 3.0);
-            Eigen::Vector3f X8_prev(0.75, 0.75, 2.0);
+            // Set 3D points on the previous camera frame -> all in front of the camera is better
+            Eigen::Vector3d X1_c1(1.0, 1.0, 2.0);
+            Eigen::Vector3d X2_c1(-1.0, -1.0, 2.0);
+            Eigen::Vector3d X3_c1(-0.75, -0.75, 3.0);
+            Eigen::Vector3d X4_c1(-0.75, 0.75, 2.5);
+            Eigen::Vector3d X5_c1(0.75, -0.75, 2.0);
+            Eigen::Vector3d X6_c1(0.0, 1.0, 2.0);
+            Eigen::Vector3d X7_c1(0.1, -1.0, 3.0);
+            Eigen::Vector3d X8_c1(0.75, 0.75, 2.0);
 
             // Project pixels in the previous view
-            mwkps_prev.insert(std::pair<size_t, WKeyPoint>(0, WKeyPoint(cv::KeyPoint(project(K,X1_prev), 1))));
-            mwkps_prev.insert(std::pair<size_t, WKeyPoint>(1, WKeyPoint(cv::KeyPoint(project(K,X2_prev), 1))));
-            mwkps_prev.insert(std::pair<size_t, WKeyPoint>(2, WKeyPoint(cv::KeyPoint(project(K,X3_prev), 1))));
-            mwkps_prev.insert(std::pair<size_t, WKeyPoint>(3, WKeyPoint(cv::KeyPoint(project(K,X4_prev), 1))));
-            mwkps_prev.insert(std::pair<size_t, WKeyPoint>(4, WKeyPoint(cv::KeyPoint(project(K,X5_prev), 1))));
-            mwkps_prev.insert(std::pair<size_t, WKeyPoint>(5, WKeyPoint(cv::KeyPoint(project(K,X6_prev), 1))));
-            mwkps_prev.insert(std::pair<size_t, WKeyPoint>(6, WKeyPoint(cv::KeyPoint(project(K,X7_prev), 1))));
-            mwkps_prev.insert(std::pair<size_t, WKeyPoint>(7, WKeyPoint(cv::KeyPoint(project(K,X8_prev), 1))));
+            mwkps_c1.insert(std::pair<size_t, WKeyPoint>(0, WKeyPoint(pinhole::projectPoint(k, intr->distortion, X1_c1))));
+            mwkps_c1.insert(std::pair<size_t, WKeyPoint>(1, WKeyPoint(pinhole::projectPoint(k, intr->distortion, X2_c1))));
+            mwkps_c1.insert(std::pair<size_t, WKeyPoint>(2, WKeyPoint(pinhole::projectPoint(k, intr->distortion, X3_c1))));
+            mwkps_c1.insert(std::pair<size_t, WKeyPoint>(3, WKeyPoint(pinhole::projectPoint(k, intr->distortion, X4_c1))));
+            mwkps_c1.insert(std::pair<size_t, WKeyPoint>(4, WKeyPoint(pinhole::projectPoint(k, intr->distortion, X5_c1))));
+            mwkps_c1.insert(std::pair<size_t, WKeyPoint>(5, WKeyPoint(pinhole::projectPoint(k, intr->distortion, X6_c1))));
+            mwkps_c1.insert(std::pair<size_t, WKeyPoint>(6, WKeyPoint(pinhole::projectPoint(k, intr->distortion, X7_c1))));
+            mwkps_c1.insert(std::pair<size_t, WKeyPoint>(7, WKeyPoint(pinhole::projectPoint(k, intr->distortion, X8_c1))));
 
-            // Set the transformation between the two views
-            Eigen::Vector3f t(0.1, 0.1, 0.0);
-            // Eigen::Vector3f euler(0.0, 0.0, 0.0);  // degenerate case!
-            Eigen::Vector3f euler(0.2, 0.1, 0.3);
-            Eigen::Matrix3f R = e2R(euler);
+            // Set the transformation between views 1 and 2 
+            t_21 = Vector3d(0.1, 0.1, 0.0);
+            // Eigen::Vector3d euler(0.0, 0.0, 0.0);  // degenerate case!
+            Eigen::Vector3d euler(0.2, 0.1, 0.3);
+            R_21 = e2R(euler);
 
-            // Project pixels in the current view
-            mwkps_curr.insert(std::pair<size_t, WKeyPoint>(0, WKeyPoint(cv::KeyPoint(project(K,R*X1_prev + t), 1))));
-            mwkps_curr.insert(std::pair<size_t, WKeyPoint>(1, WKeyPoint(cv::KeyPoint(project(K,R*X2_prev + t), 1))));
-            mwkps_curr.insert(std::pair<size_t, WKeyPoint>(2, WKeyPoint(cv::KeyPoint(project(K,R*X3_prev + t), 1))));
-            mwkps_curr.insert(std::pair<size_t, WKeyPoint>(3, WKeyPoint(cv::KeyPoint(project(K,R*X4_prev + t), 1))));
-            mwkps_curr.insert(std::pair<size_t, WKeyPoint>(4, WKeyPoint(cv::KeyPoint(project(K,R*X5_prev + t), 1))));
-            mwkps_curr.insert(std::pair<size_t, WKeyPoint>(5, WKeyPoint(cv::KeyPoint(project(K,R*X6_prev + t), 1))));
-            mwkps_curr.insert(std::pair<size_t, WKeyPoint>(6, WKeyPoint(cv::KeyPoint(project(K,R*X7_prev + t), 1))));
-            mwkps_curr.insert(std::pair<size_t, WKeyPoint>(7, WKeyPoint(cv::KeyPoint(project(K,R*X8_prev + t), 1))));  
+            mwkps_c2.insert(std::pair<size_t, WKeyPoint>(0, WKeyPoint(pinhole::projectPoint(k, intr->distortion, R_21*X1_c1 + t_21))));
+            mwkps_c2.insert(std::pair<size_t, WKeyPoint>(1, WKeyPoint(pinhole::projectPoint(k, intr->distortion, R_21*X2_c1 + t_21))));
+            mwkps_c2.insert(std::pair<size_t, WKeyPoint>(2, WKeyPoint(pinhole::projectPoint(k, intr->distortion, R_21*X3_c1 + t_21))));
+            mwkps_c2.insert(std::pair<size_t, WKeyPoint>(3, WKeyPoint(pinhole::projectPoint(k, intr->distortion, R_21*X4_c1 + t_21))));
+            mwkps_c2.insert(std::pair<size_t, WKeyPoint>(4, WKeyPoint(pinhole::projectPoint(k, intr->distortion, R_21*X5_c1 + t_21))));
+            mwkps_c2.insert(std::pair<size_t, WKeyPoint>(5, WKeyPoint(pinhole::projectPoint(k, intr->distortion, R_21*X6_c1 + t_21))));
+            mwkps_c2.insert(std::pair<size_t, WKeyPoint>(6, WKeyPoint(pinhole::projectPoint(k, intr->distortion, R_21*X7_c1 + t_21))));
+            mwkps_c2.insert(std::pair<size_t, WKeyPoint>(7, WKeyPoint(pinhole::projectPoint(k, intr->distortion, R_21*X8_c1 + t_21))));
+
 
             // Build the tracksMap
-            for (size_t i=0; i<mwkps_curr.size(); ++i)
+            for (size_t i=0; i<mwkps_c2.size(); ++i)
             {
-                tracks_prev_curr.insert(std::pair<size_t, size_t>(i,i));
+                tracks_c1_c2.insert(std::pair<size_t, size_t>(i,i));
             }
         }
 };
@@ -430,22 +429,79 @@ TEST_F(ProcessorVOMultiView_class, filterWithEssential)
     cv::Mat E;
 
     // Let's try FilterWithEssential, all points here are inliers
-    processor->filterWithEssential(mwkps_prev, mwkps_curr, tracks_prev_curr, E);
-    ASSERT_EQ(tracks_prev_curr.size(), mwkps_curr.size());
+    processor->filterWithEssential(mwkps_c1, mwkps_c2, tracks_c1_c2, E);
+    ASSERT_EQ(tracks_c1_c2.size(), mwkps_c2.size());
 
+    ////////////////////////////////////////////////////////////////////
     // We had here an outlier: a keyPoint that doesn't move
-    mwkps_prev.insert(std::pair<size_t, WKeyPoint>(8, WKeyPoint(cv::KeyPoint(cv::Point2d(120,140), 1))));
-    mwkps_curr.insert(std::pair<size_t, WKeyPoint>(8, WKeyPoint(cv::KeyPoint(cv::Point2d(120,140), 1))));
-    tracks_prev_curr.insert(std::pair<size_t, size_t>(8,8)); 
+    mwkps_c1.insert(std::pair<size_t, WKeyPoint>(8, WKeyPoint(cv::KeyPoint(cv::Point2d(120,140), 1))));
+    mwkps_c2.insert(std::pair<size_t, WKeyPoint>(8, WKeyPoint(cv::KeyPoint(cv::Point2d(120,140), 1))));
+    tracks_c1_c2.insert(std::pair<size_t, size_t>(8,8)); 
 
     // point at 8 must be discarded
-    processor->filterWithEssential(mwkps_prev, mwkps_curr, tracks_prev_curr, E);
-    ASSERT_EQ(tracks_prev_curr.count(8), 0);
-
-    // do we retrieve the right orientation from the essential matrix?
-
+    processor->filterWithEssential(mwkps_c1, mwkps_c2, tracks_c1_c2, E);
+    ASSERT_EQ(tracks_c1_c2.count(8), 0);
 
 }
+
+
+TEST_F(ProcessorVOMultiView_class, recoverPoseOpenCV)
+{
+
+    // Check that the computed essential matrix corresponds to the camera movement
+    // -> recover the orientation and compare to groundtruth
+    cv::Mat E;
+
+    // Compute essential matrix, all points here are inliers
+    processor->filterWithEssential(mwkps_c1, mwkps_c2, tracks_c1_c2, E);
+
+    ////////////////////////////////////////////////////////////////////
+    // can we retrieve the right orientation from the essential matrix?
+    std::vector<cv::Point2f> pts_c1, pts_c2;
+    for (int i=0; i < mwkps_c1.size(); i++){
+        pts_c1.push_back(mwkps_c1.at(i).getCvKeyPoint().pt);
+        pts_c2.push_back(mwkps_c2.at(i).getCvKeyPoint().pt);
+    }
+
+    cv::Mat R_out, t_out;
+    cv::Mat mask;
+    cv::recoverPose(E, pts_c1, pts_c2, Kcv, R_out, t_out, mask);
+
+    Eigen::Matrix3d R_out_eig, R_21_eig;
+    cv::cv2eigen(R_out, R_out_eig);
+    ASSERT_MATRIX_APPROX(R_21, R_out_eig, 1e-4);
+}
+
+
+// SEFAULT!!!!!!!!
+// TEST_F(ProcessorVOMultiView_class, tryTriangulationFromFeatures)
+// {
+//     ProblemPtr problem = Problem::create("PO", 3);
+
+//     VectorComposite state1("P0");
+//     state1['P'] = Vector3d::Zero();
+//     state1['O'] = Quaterniond::Identity().coeffs();
+//     FrameBasePtr KF1 = FrameBase::emplace<FrameBase>(problem->getTrajectory(), 0.0, "PO", state1);
+//     CaptureBasePtr c1 = CaptureBase::emplace<CaptureImage>(KF1, 0.0, nullptr, cv::Mat());
+//     FeatureBasePtr f1 = FeatureBase::emplace<FeaturePointImage>(c1, mwkps_c1.at(0), Matrix2d::Identity());
+    
+//     VectorComposite state2("P0");
+//     state2['P'] = Vector3d::Zero();
+//     state2['O'] = Quaterniond::Identity().coeffs();
+//     FrameBasePtr KF2 = FrameBase::emplace<FrameBase>(problem->getTrajectory(), 1.0, "PO", state1);
+//     CaptureBasePtr c2 = CaptureBase::emplace<CaptureImage>(KF2, 1.0, nullptr, cv::Mat());
+//     FeatureBasePtr f2 = FeatureBase::emplace<FeaturePointImage>(c2, mwkps_c2.at(0), Matrix2d::Identity());
+
+//     Track track;
+//     track.insert(std::pair<TimeStamp, FeatureBasePtr>(0.0, f1));
+//     track.insert(std::pair<TimeStamp, FeatureBasePtr>(1.0, f2));
+    
+//     Vector4d pt_c;
+//     auto f2_pi = std::static_pointer_cast<FeaturePointImage>(f2);
+//     processor->tryTriangulationFromFeatures(f2_pi, track, pt_c);
+//     WOLF_INFO(pt_c);
+
+// }
 
 int main(int argc, char **argv)
 {

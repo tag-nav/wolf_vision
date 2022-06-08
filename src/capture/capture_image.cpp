@@ -39,7 +39,15 @@ WKeyPoint::WKeyPoint(const cv::KeyPoint& _cv_kp):
 {
 }
 
+WKeyPoint::WKeyPoint(const Eigen::Vector2d& _eig_kp):
+    id_(++id_count_)
+{
+    cv_kp_.pt = cv::Point2f(_eig_kp(0), _eig_kp(1));
+}
 
+
+
+/////////////////
 CaptureImage::CaptureImage(const TimeStamp& _ts, SensorCameraPtr _camera_ptr, const cv::Mat& _img) :
     CaptureBase("CaptureImage", _ts, _camera_ptr),
     img_(_img),
