@@ -672,7 +672,7 @@ bool ProcessorVisualOdometry::filterWithEssential(const KeyPointsMap _mwkps_prev
 
         // use pixels 
         p2d_prev.push_back(_mwkps_prev.at(track.first).getCvPoint());
-        p2d_curr.push_back(_mwkps_curr.at(track.first).getCvPoint());
+        p2d_curr.push_back(_mwkps_curr.at(track.second).getCvPoint());
     }
 
     cv::Mat cvMask;
