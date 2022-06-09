@@ -355,12 +355,6 @@ void ProcessorVisualOdometry::establishFactors()
                 continue;
             }
 
-            // Add factors from all KFs of this track to the new lmk
-            WOLF_INFO("\n\nHEY")
-            WOLF_INFO(feat_pi->getFrame()->getStateVector().transpose())
-            WOLF_INFO(lmk->getStateVector().transpose())
-            WOLF_INFO(getSensor()->getStateVector().transpose())
-
             for (auto feat_kf: track_kf)
             {
                 LandmarkHpPtr lmk_hp = std::dynamic_pointer_cast<LandmarkHp>(lmk);
