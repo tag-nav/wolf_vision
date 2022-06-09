@@ -235,8 +235,6 @@ install(
   ${LIB_INSTALL_DIR}/${PLUGIN_NAME}/cmake
 )
 
-# Specifies include directories to use when compiling the plugin target
-# This way, include_directories does not need to be called in plugins depending on this one
 target_include_directories(${PLUGIN_NAME} PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
   $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}/conf>
