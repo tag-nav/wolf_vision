@@ -434,8 +434,8 @@ TEST_F(ProcessorVOMultiView_class, filterWithEssential)
 
     ////////////////////////////////////////////////////////////////////
     // We had here an outlier: a keyPoint that doesn't move
-    mwkps_c1.insert(std::pair<size_t, WKeyPoint>(8, WKeyPoint(cv::KeyPoint(cv::Point2d(120,140), 1))));
-    mwkps_c2.insert(std::pair<size_t, WKeyPoint>(8, WKeyPoint(cv::KeyPoint(cv::Point2d(120,140), 1))));
+    mwkps_c1.insert(std::pair<size_t, WKeyPoint>(8, WKeyPoint(cv::KeyPoint(cv::Point2f(120,140), 1))));
+    mwkps_c2.insert(std::pair<size_t, WKeyPoint>(8, WKeyPoint(cv::KeyPoint(cv::Point2f(120,140), 1))));
     tracks_c1_c2.insert(std::pair<size_t, size_t>(8,8)); 
 
     // point at 8 must be discarded
@@ -463,6 +463,7 @@ TEST_F(ProcessorVOMultiView_class, recoverPoseOpenCV)
         pts_c2.push_back(mwkps_c2.at(i).getCvKeyPoint().pt);
     }
 
+
     cv::Mat R_out, t_out;
     cv::Mat mask;
     cv::recoverPose(E, pts_c1, pts_c2, Kcv, R_out, t_out, mask);
@@ -470,10 +471,53 @@ TEST_F(ProcessorVOMultiView_class, recoverPoseOpenCV)
     Eigen::Matrix3d R_out_eig, R_21_eig;
     cv::cv2eigen(R_out, R_out_eig);
     ASSERT_MATRIX_APPROX(R_21, R_out_eig, 1e-4);
+
+    //////////////////////////////////////////////////////
+    // Can we also use it to detect outliers using cheirality check?
+    // Does not seem so...
+    // Maybe the outliers are not rightly chosen for this test:
+    // inside recoverPose, triangulatePoints is called and then there are
+    // checks on depth coordinate of the triangulated point in both camera frames:
+    // if depth is negative or depth lower than a threshold, point considered as an "outlier"
+    // Can simply mean an absence of movement, hard to tune threshold...
+
+    // add outliers
+    pts_c1.push_back(cv::Point2f(165.0, 190.0));
+    pts_c2.push_back(cv::Point2f(200.0, 190.0));
+
+    pts_c1.push_back(cv::Point2f(100.0, 250.0));
+    pts_c2.push_back(cv::Point2f(100.0, 250.0));
+
+    pts_c1.push_back(cv::Point2f(400.0, 70.0));
+    pts_c2.push_back(cv::Point2f(400.0, 70.0));
+
+    pts_c1.push_back(cv::Point2f(300.0, 300.0));
+    pts_c2.push_back(cv::Point2f(100.0, 300.0));    
+    
+    
+    cv::Mat triangulated_pts;
+    double distance_threshold = 80.0;
+    // cv::recoverPose(E, pts_c1, pts_c2, Kcv, R_out, t_out, mask);
+    cv::recoverPose(E, pts_c1, pts_c2, Kcv, R_out, t_out, distance_threshold, mask, triangulated_pts);
+
+    // triangulated_pts.size()
+    std::cout << triangulated_pts.size() << std::endl;
+
+
+    // std::cout << "mask" << std::endl;
+    // std::cout << mask << std::endl;
+
+    // std::cout << "R_out" << std::endl;
+    // std::cout << R_out << std::endl;
+    // std::cout << "t_out" << std::endl;
+    // std::cout << t_out << std::endl;
+
+
+
 }
 
 
-// SEFAULT!!!!!!!!
+// // SEFAULT!!!!!!!!
 // TEST_F(ProcessorVOMultiView_class, tryTriangulationFromFeatures)
 // {
 //     ProblemPtr problem = Problem::create("PO", 3);
@@ -500,7 +544,6 @@ TEST_F(ProcessorVOMultiView_class, recoverPoseOpenCV)
 //     auto f2_pi = std::static_pointer_cast<FeaturePointImage>(f2);
 //     processor->tryTriangulationFromFeatures(f2_pi, track, pt_c);
 //     WOLF_INFO(pt_c);
-
 // }
 
 int main(int argc, char **argv)
