@@ -429,19 +429,21 @@ TEST_F(ProcessorVOMultiView_class, filterWithEssential)
     cv::Mat E;
 
     // Let's try FilterWithEssential, all points here are inliers
-    processor->filterWithEssential(mwkps_c1, mwkps_c2, tracks_c1_c2, E);
+    VectorComposite toto;  // empty VectorComposite -> does not recoverPose
+    bool success = processor->filterWithEssential(mwkps_c1, mwkps_c2, tracks_c1_c2, E, toto);
+    ASSERT_TRUE(success);
     ASSERT_EQ(tracks_c1_c2.size(), mwkps_c2.size());
 
     ////////////////////////////////////////////////////////////////////
     // We had here an outlier: a keyPoint that doesn't move
-    mwkps_c1.insert(std::pair<size_t, WKeyPoint>(8, WKeyPoint(cv::KeyPoint(cv::Point2f(120,140), 1))));
-    mwkps_c2.insert(std::pair<size_t, WKeyPoint>(8, WKeyPoint(cv::KeyPoint(cv::Point2f(120,140), 1))));
+    mwkps_c1.insert(std::pair<size_t, WKeyPoint>(8, WKeyPoint(cv::KeyPoint(cv::Point2d(120,140), 1))));
+    mwkps_c2.insert(std::pair<size_t, WKeyPoint>(8, WKeyPoint(cv::KeyPoint(cv::Point2d(120,140), 1))));
     tracks_c1_c2.insert(std::pair<size_t, size_t>(8,8)); 
 
     // point at 8 must be discarded
-    processor->filterWithEssential(mwkps_c1, mwkps_c2, tracks_c1_c2, E);
+    success = processor->filterWithEssential(mwkps_c1, mwkps_c2, tracks_c1_c2, E, toto);
+    ASSERT_TRUE(success);
     ASSERT_EQ(tracks_c1_c2.count(8), 0);
-
 }
 
 
@@ -453,11 +455,12 @@ TEST_F(ProcessorVOMultiView_class, recoverPoseOpenCV)
     cv::Mat E;
 
     // Compute essential matrix, all points here are inliers
-    processor->filterWithEssential(mwkps_c1, mwkps_c2, tracks_c1_c2, E);
+    VectorComposite titi;
+    processor->filterWithEssential(mwkps_c1, mwkps_c2, tracks_c1_c2, E, titi);
 
     ////////////////////////////////////////////////////////////////////
     // can we retrieve the right orientation from the essential matrix?
-    std::vector<cv::Point2f> pts_c1, pts_c2;
+    std::vector<cv::Point2d> pts_c1, pts_c2;
     for (int i=0; i < mwkps_c1.size(); i++){
         pts_c1.push_back(mwkps_c1.at(i).getCvKeyPoint().pt);
         pts_c2.push_back(mwkps_c2.at(i).getCvKeyPoint().pt);
@@ -472,6 +475,11 @@ TEST_F(ProcessorVOMultiView_class, recoverPoseOpenCV)
     cv::cv2eigen(R_out, R_out_eig);
     ASSERT_MATRIX_APPROX(R_21, R_out_eig, 1e-4);
 
+
+    // Same with helper function
+    VectorComposite pose_21_out = ProcessorVisualOdometry::pose_from_essential_matrix(E, pts_c1, pts_c2, Kcv, mask);
+
+
     //////////////////////////////////////////////////////
     // Can we also use it to detect outliers using cheirality check?
     // Does not seem so...
@@ -482,26 +490,28 @@ TEST_F(ProcessorVOMultiView_class, recoverPoseOpenCV)
     // Can simply mean an absence of movement, hard to tune threshold...
 
     // add outliers
-    pts_c1.push_back(cv::Point2f(165.0, 190.0));
-    pts_c2.push_back(cv::Point2f(200.0, 190.0));
+    pts_c1.push_back(cv::Point2d(165.0, 190.0));
+    pts_c2.push_back(cv::Point2d(200.0, 190.0));
 
-    pts_c1.push_back(cv::Point2f(100.0, 250.0));
-    pts_c2.push_back(cv::Point2f(100.0, 250.0));
+    pts_c1.push_back(cv::Point2d(100.0, 250.0));
+    pts_c2.push_back(cv::Point2d(100.0, 250.0));
 
-    pts_c1.push_back(cv::Point2f(400.0, 70.0));
-    pts_c2.push_back(cv::Point2f(400.0, 70.0));
+    pts_c1.push_back(cv::Point2d(400.0, 70.0));
+    pts_c2.push_back(cv::Point2d(400.0, 70.0));
 
-    pts_c1.push_back(cv::Point2f(300.0, 300.0));
-    pts_c2.push_back(cv::Point2f(100.0, 300.0));    
+    pts_c1.push_back(cv::Point2d(300.0, 300.0));
+    pts_c2.push_back(cv::Point2d(100.0, 300.0));    
     
+    mask = 255*cv::Mat::ones(12, 1, CV_64F);
     
     cv::Mat triangulated_pts;
     double distance_threshold = 80.0;
     // cv::recoverPose(E, pts_c1, pts_c2, Kcv, R_out, t_out, mask);
-    cv::recoverPose(E, pts_c1, pts_c2, Kcv, R_out, t_out, distance_threshold, mask, triangulated_pts);
+    cv::Mat new_mask;
+    cv::recoverPose(E, pts_c1, pts_c2, Kcv, R_out, t_out, distance_threshold, new_mask, triangulated_pts);
 
     // triangulated_pts.size()
-    std::cout << triangulated_pts.size() << std::endl;
+    // std::cout << triangulated_pts.size() << std::endl;
 
 
     // std::cout << "mask" << std::endl;
@@ -511,9 +521,6 @@ TEST_F(ProcessorVOMultiView_class, recoverPoseOpenCV)
     // std::cout << R_out << std::endl;
     // std::cout << "t_out" << std::endl;
     // std::cout << t_out << std::endl;
-
-
-
 }
 
 

@@ -24,17 +24,16 @@
 //standard
 #include "vision/processor/processor_visual_odometry.h"
 
-#include <opencv2/imgproc.hpp>
-#include <opencv2/calib3d.hpp>
-#include <opencv2/core/eigen.hpp>
-
 #include <chrono>
 #include <ctime>
 
 namespace wolf{
 
+using namespace SE3;
+
 ProcessorVisualOdometry::ProcessorVisualOdometry(ParamsProcessorVisualOdometryPtr _params_vo) :
                 ProcessorTracker("ProcessorVisualOdometry", "PO", 3, _params_vo),
+                MotionProvider("PO", _params_vo),
                 params_visual_odometry_(_params_vo)
 {
     // Preprocessor stuff
@@ -146,7 +145,16 @@ void ProcessorVisualOdometry::preProcess()
 
     // Outliers rejection with essential matrix
     cv::Mat E;
-    filterWithEssential(mwkps_origin, mwkps_incoming, tracks_origin_incoming, E);
+    VectorComposite pose_ol("PO", {3,4});
+    bool success = filterWithEssential(mwkps_origin, mwkps_incoming, tracks_origin_incoming, E, pose_ol);
+    if (success){
+        // store result of recoverPose if RANSAC was handled well
+        buffer_pose_cam_ol_.emplace(origin_ptr_->getTimeStamp(), std::make_shared<VectorComposite>(pose_ol));
+    }
+    else{
+        WOLF_WARN("!!!!!!Essential matrix RANSAC failed!!!!!!!!");
+        // return;  // What should we do in this case? 
+    }
 
     // Edit tracks prev with only inliers wrt origin
     // and remove also from mwkps_incoming all the keypoints that have not been tracked
@@ -193,7 +201,8 @@ void ProcessorVisualOdometry::preProcess()
 
         // Outliers rejection with essential matrix
         // tracks that are not geometrically consistent are removed from tracks_last_incoming_new
-        filterWithEssential(mwkps_last_filtered, mwkps_incoming_filtered, tracks_last_incoming_filtered, E);
+        VectorComposite not_used;
+        filterWithEssential(mwkps_last_filtered, mwkps_incoming_filtered, tracks_last_incoming_filtered, E, not_used);
 
         WOLF_DEBUG("New total : ", n_tracks_origin, " + ", mwkps_incoming_new.size(), " = ", tracks_last_incoming_filtered.size(), " tracks");
 
@@ -492,7 +501,6 @@ LandmarkBasePtr ProcessorVisualOdometry::emplaceLandmarkNaive(FeaturePointImageP
 }
 
 
-
 Eigen::Isometry3d ProcessorVisualOdometry::getTcw(TimeStamp _ts) const
 {
     // get robot position and orientation at capture's timestamp
@@ -642,7 +650,11 @@ TracksMap ProcessorVisualOdometry::kltTrack(const cv::Mat _img_prev, const cv::M
     return tracks_prev_curr;
 }
 
-bool ProcessorVisualOdometry::filterWithEssential(const KeyPointsMap _mwkps_prev, const KeyPointsMap _mwkps_curr, TracksMap &_tracks_prev_curr, cv::Mat &_E)
+bool ProcessorVisualOdometry::filterWithEssential(const KeyPointsMap _mwkps_prev, 
+                                                  const KeyPointsMap _mwkps_curr, 
+                                                  TracksMap &_tracks_prev_curr, 
+                                                  cv::Mat &_E, 
+                                                  VectorComposite &_pose_prev_curr)
 {
     // We need at least five tracks
     // TODO: this case is NOT handled by the rest of the algorithm currently
@@ -696,6 +708,12 @@ bool ProcessorVisualOdometry::filterWithEssential(const KeyPointsMap _mwkps_prev
                               prms.thresh,
                               cvMask);
 
+    // recover the pose relative pose if asked
+    if (_pose_prev_curr.includesStructure("PO")){
+        // modifies the mask of inliers -> maybe to change?
+        _pose_prev_curr = pose_from_essential_matrix(_E, p2d_prev, p2d_curr, Kcv_, cvMask);
+    }
+
     // Let's remove outliers from tracksMap
     for (size_t k=0; k<all_indices.size(); k++){
         if (cvMask.at<bool>(k) == 0){
@@ -705,6 +723,29 @@ bool ProcessorVisualOdometry::filterWithEssential(const KeyPointsMap _mwkps_prev
 
     return true;
 }
+
+
+VectorComposite ProcessorVisualOdometry::pose_from_essential_matrix(const cv::Mat& _E, 
+                                                                    const std::vector<cv::Point2d>& _p2d_prev, 
+                                                                    const std::vector<cv::Point2d>& _p2d_curr, 
+                                                                    const cv::Mat& _K,
+                                                                    cv::Mat& _cvMask)
+{
+    cv::Mat R_out, t_out;
+    cv::recoverPose(_E, _p2d_prev, _p2d_curr, _K, R_out, t_out, _cvMask);
+
+    // translation into eigen objects
+    Eigen::Matrix3d R_eig;
+    Eigen::Vector3d t_eig;
+    cv::cv2eigen(R_out, R_eig);
+    cv::cv2eigen(t_out, t_eig);
+
+    VectorComposite pose_prev_curr("PO", {3,4});
+    pose_prev_curr['P'] = t_eig;
+    pose_prev_curr['O'] = Quaterniond(R_eig).coeffs();
+    return pose_prev_curr;
+}
+
 
 void ProcessorVisualOdometry::retainBest(std::vector<cv::KeyPoint> &_keypoints, int n)
 {
@@ -851,6 +892,95 @@ void ProcessorVisualOdometry::detect_keypoints_in_empty_grid_cells(cv::Mat img_l
         }
     }
 }
+
+
+
+
+
+
+
+/////////////////////////
+// MotionProvider methods
+/////////////////////////
+
+VectorComposite ProcessorVisualOdometry::getState( const StateStructure& _structure ) const
+{
+    return getState(getTimeStamp(), _structure);
+}
+
+TimeStamp ProcessorVisualOdometry::getTimeStamp() const
+{
+    if ( last_ptr_ == nullptr )
+        return TimeStamp::Invalid();
+    else
+        return last_ptr_->getTimeStamp();
+}
+
+VectorComposite ProcessorVisualOdometry::getState(const TimeStamp& _ts, const StateStructure& _structure) const
+{
+    // valid last...
+    if (last_ptr_ != origin_ptr_)
+    {
+
+        std::shared_ptr<VectorComposite> pose_cam_ol_ptr = buffer_pose_cam_ol_.selectFirstBefore(_ts, getTimeTolerance());
+
+        if( !pose_cam_ol_ptr )
+        {
+            WOLF_WARN(getName(), ": Requested state with time stamp out of tolerance. Returning empty VectorComposite");
+            return VectorComposite();
+        }
+        else
+        {
+            return *pose_cam_ol_ptr;
+        }
+    }
+    // return state at origin if possible
+    else
+    {
+        if (origin_ptr_ == nullptr || fabs(_ts - origin_ptr_->getTimeStamp()) > params_->time_tolerance)
+        {
+            WOLF_WARN(getName(), ": Requested state with time stamp out of tolerance. Returning empty VectorComposite");
+            return VectorComposite();
+        }
+        else
+            return origin_ptr_->getFrame()->getState("PO");
+    }
+}
+
+
+
+
+
+VectorComposite ProcessorVisualOdometry::getStateFromRelativeOriginLast(VectorComposite co_pose_cl) const
+{
+    if (origin_ptr_ == nullptr or
+        origin_ptr_->isRemoving() or
+        last_ptr_ == nullptr or
+        last_ptr_->getFrame() == nullptr) // We do not have any info of where to find a valid state
+                                          // Further checking here for origin_ptr is redundant: if last=null, then origin=null too.
+    {
+        WOLF_WARN("Processor has no state. Returning an empty VectorComposite");
+        return VectorComposite(); // return empty state
+    }
+    
+    VectorComposite r_pose_c = getSensor()->getState();
+    VectorComposite c_pose_r = inverse(r_pose_c);
+
+    // composte poses to obtain the relative robot transformation
+    VectorComposite ro_pose_rl = SE3::compose(r_pose_c, SE3::compose(co_pose_cl, c_pose_r));
+
+    // Pose at origin
+    VectorComposite w_pose_ro = getOrigin()->getFrame()->getState();
+
+    // Pose at last using composition
+    VectorComposite w_pose_rl = SE3::compose(w_pose_ro, ro_pose_rl);
+
+    WOLF_INFO("I WAS CALLED!!!")
+
+    return w_pose_rl;
+}
+
+
 
 
 } //namespace wolf

@@ -35,23 +35,37 @@
 
 // wolf includes
 #include <core/math/rotations.h>
+#include <core/math/SE3.h>
+#include <core/state_block/state_composite.h>
 #include <core/processor/processor_tracker.h>
 #include <core/processor/track_matrix.h>
+#include <core/processor/motion_provider.h>
 
 // Opencv includes
 #include <opencv2/core.hpp>
+#include <opencv2/imgproc.hpp>
+#include <opencv2/calib3d.hpp>
 #include <opencv2/imgcodecs.hpp>
 #include <opencv2/features2d.hpp>
 #include <opencv2/calib3d/calib3d.hpp>
 #include <opencv2/video/tracking.hpp>
+#include <opencv2/core/eigen.hpp>
 
 
 
 namespace wolf{
 
+/** \brief Buffer of VectorComposite
+ *
+ * Object and functions to manage a buffer of VectorComposite objects.
+ * Used to hold a memory of origin->last relative poses.
+ */
+class BufferVectorCompositePtr : public Buffer<std::shared_ptr<VectorComposite>> { };
+
+
 WOLF_STRUCT_PTR_TYPEDEFS(ParamsProcessorVisualOdometry);
 
-struct ParamsProcessorVisualOdometry : public ParamsProcessorTracker
+struct ParamsProcessorVisualOdometry : public ParamsProcessorTracker, public ParamsMotionProvider
 {
     struct RansacParams
     {
@@ -107,7 +121,8 @@ struct ParamsProcessorVisualOdometry : public ParamsProcessorTracker
 
     ParamsProcessorVisualOdometry() = default;
     ParamsProcessorVisualOdometry(std::string _unique_name, const ParamsServer& _server):
-        ParamsProcessorTracker(_unique_name, _server)
+        ParamsProcessorTracker(_unique_name, _server),
+        ParamsMotionProvider(_unique_name, _server)
     {
         std_pix = _server.getParam<double>(prefix + _unique_name + "/std_pix");
 
@@ -171,11 +186,17 @@ struct ParamsProcessorVisualOdometry : public ParamsProcessorTracker
 
 WOLF_PTR_TYPEDEFS(ProcessorVisualOdometry);
 
-class ProcessorVisualOdometry : public ProcessorTracker
+class ProcessorVisualOdometry : public ProcessorTracker, public MotionProvider
 {
     public:
         ProcessorVisualOdometry(ParamsProcessorVisualOdometryPtr _params_visual_odometry);
         virtual ~ProcessorVisualOdometry() override {};
+
+        // MotionProvider class pure virtual methods
+        VectorComposite getState(const StateStructure& _structure = "") const override;
+        TimeStamp getTimeStamp( ) const override;
+        VectorComposite getState(const TimeStamp& _ts, const StateStructure& _structure = "") const override;
+        VectorComposite getRelativePoseOriginLast() const;
 
         WOLF_PROCESSOR_CREATE(ProcessorVisualOdometry, ParamsProcessorVisualOdometry);
 
@@ -203,6 +224,9 @@ class ProcessorVisualOdometry : public ProcessorTracker
 
         // bookeeping
         TracksMap tracks_map_li_matched_;
+
+        // buffer of origin->last camera relative poses mapping origin to last
+        BufferVectorCompositePtr buffer_pose_cam_ol_;
 
 
     public:
@@ -300,7 +324,11 @@ class ProcessorVisualOdometry : public ProcessorTracker
 
         /** \brief Remove outliers from the tracks map with a RANSAC 5-points algorithm implemented on openCV
          */
-        bool filterWithEssential(const KeyPointsMap mwkps_prev, const KeyPointsMap mwkps_curr, TracksMap &tracks_prev_curr, cv::Mat &E);
+        bool filterWithEssential(const KeyPointsMap mwkps_prev, 
+                                 const KeyPointsMap mwkps_curr, 
+                                 TracksMap &tracks_prev_curr, 
+                                 cv::Mat &E, 
+                                 VectorComposite &_pose_prev_curr);
 
         /** \brief Tool to merge tracks 
          */
@@ -309,6 +337,14 @@ class ProcessorVisualOdometry : public ProcessorTracker
         void setParams(const ParamsProcessorVisualOdometryPtr _params);
 
         const TrackMatrix& getTrackMatrix() const {return track_matrix_;}
+
+        VectorComposite getStateFromRelativeOriginLast(VectorComposite co_pose_cl) const;
+
+        static VectorComposite pose_from_essential_matrix(const cv::Mat& _E, 
+                                                          const std::vector<cv::Point2d>& p2d_prev, 
+                                                          const std::vector<cv::Point2d>& p2d_curr, 
+                                                          const cv::Mat& _K,
+                                                          cv::Mat& cvMask);
 
     private:
         void retainBest(std::vector<cv::KeyPoint> &_keypoints, int n);
@@ -329,7 +365,6 @@ class ProcessorVisualOdometry : public ProcessorTracker
         
         void detect_keypoints_in_empty_grid_cells(cv::Mat img_last, const TracksMap& tracks_last_incoming_filtered, const KeyPointsMap& mwkps_last, 
                                                   std::vector<cv::KeyPoint>& kps_last_new, KeyPointsMap& mwkps_last_filtered);
-
 
 };
 
