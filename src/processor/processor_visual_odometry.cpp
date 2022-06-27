@@ -243,7 +243,6 @@ unsigned int ProcessorVisualOdometry::processKnown()
 
         // if this feature id is in the last->incoming tracks of capture incoming, the track is continued
         // the matched pairs are stored in tracks_map_li_matched_ which is used in processNew to select the point that have NOT been match as "new"
-        TracksMap tracks_map_li = capture_image_incoming_->getTracksPrev();
         if (tracks_map_li.count(id_feat_last)){
             auto kp_track_li = tracks_map_li.find(id_feat_last);
 
@@ -827,7 +826,9 @@ void ProcessorVisualOdometry::filter_last_incoming_tracks_from_ransac_result(con
     O ---------------------> I
     to filter last -> incoming track (and tracked keypoint map in incoming)
                   L -------> I
-    based of the tracks alive after RANSAC check on O --> I
+    based of the tracks alive after RANSAC check on origin -> incoming
+    O ---------------------> I
+
 
     This ugly double loop is due to the fact that features ids in Incoming are in the "values" of both maps, which requires linear search.
     Ideally, this may be solved a Boost.Bimap.
