@@ -33,3 +33,4 @@ src/CMakeFiles/cmake.check_cache
 
 \.vscode/
 doc/html
+.clang-format

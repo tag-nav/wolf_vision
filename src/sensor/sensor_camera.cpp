@@ -23,7 +23,7 @@
 #include "vision/sensor/sensor_camera.h"
 #include "vision/math/pinhole_tools.h"
 
-#include "core/state_block/state_block.h"
+#include "core/state_block/state_block_derived.h"
 #include "core/state_block/state_quaternion.h"
 
 namespace wolf
@@ -31,9 +31,9 @@ namespace wolf
 
 SensorCamera::SensorCamera(const Eigen::VectorXd& _extrinsics, const ParamsSensorCamera& _intrinsics) :
                 SensorBase("SensorCamera", 
-                           std::make_shared<StateBlock>(_extrinsics.head(3), true), 
+                           std::make_shared<StatePoint3d>(_extrinsics.head(3), true), 
                            std::make_shared<StateQuaternion>(_extrinsics.tail(4), true), 
-                           std::make_shared<StateBlock>(_intrinsics.pinhole_model_raw, true), 
+                           std::make_shared<StateParams4>(_intrinsics.pinhole_model_raw, true), 
                            1),
                 img_width_(_intrinsics.width), //
                 img_height_(_intrinsics.height), //
