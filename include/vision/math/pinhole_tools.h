@@ -32,7 +32,7 @@
  *
  */
 
-#include "core/common/wolf.h"
+#include <core/common/wolf.h>
 
 #include <iostream>
 
