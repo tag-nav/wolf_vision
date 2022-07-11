@@ -5,7 +5,7 @@ config:
     dimension:            3               # space is 3d
     frame_structure:      "PO"            # keyframes have position and orientation
   
-    prior:
+    first_frame:
       mode:               "factor"
       $state:
         P: [0,0,0]
