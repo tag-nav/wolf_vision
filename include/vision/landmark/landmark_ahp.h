@@ -63,7 +63,7 @@ class LandmarkAhp : public LandmarkBase
         Eigen::Vector3d getPointInAnchorSensor() const;
         Eigen::Vector3d point() const;
 
-        YAML::Node saveToYaml() const override;
+        YAML::Node toYaml() const override;
 
         /** \brief Creator for Factory<LandmarkBase, YAML::Node>
          * Caution: This creator does not set the landmark's anchor frame and sensor.

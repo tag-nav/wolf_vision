@@ -40,10 +40,10 @@ LandmarkHp::~LandmarkHp()
     //
 }
 
-YAML::Node LandmarkHp::saveToYaml() const
+YAML::Node LandmarkHp::toYaml() const
 {
     // First base things
-    YAML::Node node = LandmarkBase::saveToYaml();
+    YAML::Node node = LandmarkBase::toYaml();
 
     // Then add specific things
     std::vector<int> v;

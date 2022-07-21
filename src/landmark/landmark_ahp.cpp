@@ -44,10 +44,10 @@ LandmarkAhp::~LandmarkAhp()
     //
 }
 
-YAML::Node LandmarkAhp::saveToYaml() const
+YAML::Node LandmarkAhp::toYaml() const
 {
     // First base things
-    YAML::Node node = LandmarkBase::saveToYaml();
+    YAML::Node node = LandmarkBase::toYaml();
 
     // Then add specific things
     std::vector<int> v;
