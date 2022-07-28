@@ -232,7 +232,6 @@ TracksMap ProcessorVisualOdometry::mergeTracks(const TracksMap& tracks_prev_curr
 
 unsigned int ProcessorVisualOdometry::processKnown()
 {
-
     auto t1 = std::chrono::system_clock::now();
     // Extend the process track matrix by using information stored in the incoming capture
 
@@ -255,6 +254,9 @@ unsigned int ProcessorVisualOdometry::processKnown()
                                                     capture_image_incoming_, 
                                                     capture_image_incoming_->getKeyPoints().at(kp_track_li->second), 
                                                     pixel_cov_);
+            // the landmark id of the incoming feature is the same as the last one: 0 if not associated yet, the true landmark id if already associated
+            feat_inco->setLandmarkId(feat_pi_last->landmarkId());
+            // extend the track
             track_matrix_.add(feat_pi_last->trackId(), feat_inco);
 
             // add tracks_map_li to a vector so that it so that 
@@ -288,14 +290,14 @@ unsigned int ProcessorVisualOdometry::processNew(const int& _max_features)
 
     unsigned int counter_new_tracks = 0;
     for (std::pair<size_t,size_t> track_li: capture_image_incoming_->getTracksPrev()){
-        // if track not matched, then create a new track in the track matrix etc.
+        // if the track is not matched, then create a new track in the track matrix etc.
         if (!tracks_map_li_matched_.count(track_li.first)){
             // create a new last feature, a new track using this last feature and add the incoming feature to this track
             WKeyPoint kp_last = capture_image_last_->getKeyPoints().at(track_li.first);
             WKeyPoint kp_inco = capture_image_incoming_->getKeyPoints().at(track_li.second);
             FeaturePointImagePtr feat_pi_last = FeatureBase::emplace<FeaturePointImage>(capture_image_last_, kp_last, pixel_cov_);
             FeaturePointImagePtr feat_pi_inco = FeatureBase::emplace<FeaturePointImage>(capture_image_incoming_, kp_inco, pixel_cov_);
-            track_matrix_.newTrack(feat_pi_last);
+            track_matrix_.newTrack(feat_pi_last);  // newTrack set also the track id of the feature internally
             track_matrix_.add(feat_pi_last->trackId(), feat_pi_inco);
             counter_new_tracks++;
         }
@@ -323,12 +325,11 @@ bool ProcessorVisualOdometry::new_landmark_is_viable(int track_id)
 
 void ProcessorVisualOdometry::establishFactors()
 {
-    // Function only called when KF is created using last
-    // Loop over the snapshot in corresponding to last capture. Does 2 things:
+    // Function only called when a KF is created using at ts last
+    // Loop over the snapshot of last capture. Does 2 things:
     //     1) for tracks already associated to a landmark, create a KF-Lmk factor between the last KF and the landmark.
-    //     2) if the feature track is not associated to a landmark yet and is long enough, create a new landmark
-    //        using triangulation as a prior, using previous KF current estimates. Create a KF-Lmk factor for all these KFs. 
-    //        For bookkeeping, define the landmark id as the track id.
+    //     2) if the feature track is not associated to a landmark yet and is long enough, create a new landmark. 
+    //        Create a KF-Lmk factor for all these KFs.
 
     WOLF_INFO("   establishFactors")
 
@@ -344,23 +345,26 @@ void ProcessorVisualOdometry::establishFactors()
     {
         auto feat_pi = std::static_pointer_cast<FeaturePointImage>(feat);
 
-        // verify if a landmark is associated to this track (BAD implementation)
+        // verify if a landmark is associated to this track
+        // TODO: use std::find_if instead
         LandmarkBasePtr associated_lmk = nullptr;
 
-        // OPTIM: try to reverse iterate the map
+        // linear search on the landmark ids to get the right landmark -> BAD
+        // An std::map for the Landmark Map would help greatly here
+        // OPTIM: try to reverse iterate the map?
         for (auto lmk: getProblem()->getMap()->getLandmarkList())
         {
-            if (lmk->id() == feat_pi->trackId()){
+            if (lmk->id() == feat_pi->landmarkId()){
                 associated_lmk = lmk;
                 break;
             }
         }
 
         // 1) create a factor between new KF and assocatiated track landmark
-        //    HYP: assuming the trackid are the same as the landmark ID -> BAD if other types of landmarks involved
         if (associated_lmk)
         {
             LandmarkHpPtr associated_lmk_hp = std::dynamic_pointer_cast<LandmarkHp>(associated_lmk);
+            assert(associated_lmk_hp && "Selected landmark is not a visual odometry landmark!");
             FactorBase::emplace<FactorPixelHp>(feat_pi,
                                                feat_pi,
                                                associated_lmk_hp,
@@ -368,7 +372,7 @@ void ProcessorVisualOdometry::establishFactors()
                                                params_visual_odometry_->apply_loss_function);
         }
 
-        // 2) create landmark if track is not associated with one and has enough length
+        // 2) create a landmark if the track is not associated with one and meets certain criterias
         else if(new_landmark_is_viable(feat->trackId()))
         {
             WOLF_INFO("   NEW valid track \\o/")
@@ -376,8 +380,13 @@ void ProcessorVisualOdometry::establishFactors()
 
             // LandmarkBasePtr lmk = emplaceLandmarkTriangulation(feat_pi, track_kf);
             LandmarkBasePtr lmk = emplaceLandmarkNaive(feat_pi);
-            if (lmk == nullptr){
-                continue;
+
+            // Associate all features of the track to the landmark
+            // (A simpler option would be to set the landmark ID equal to the track ID
+            // but this would create conflict if landmarks are created by other processors -> not good)
+            for (auto feat_track: track_matrix_.track(feat->trackId()))
+            {
+                feat_track.second->setLandmarkId(lmk->id());
             }
 
             for (auto feat_kf: track_kf)
@@ -397,6 +406,10 @@ void ProcessorVisualOdometry::establishFactors()
 
 LandmarkBasePtr ProcessorVisualOdometry::emplaceLandmarkTriangulation(FeaturePointImagePtr _feat, Track _track_kf)
 {
+    ///////////////
+    // NOT USED YET
+    ///////////////
+
     // at least 2 KF needed to triangulate
     if (_track_kf.size() < 2)
     {
@@ -414,10 +427,10 @@ LandmarkBasePtr ProcessorVisualOdometry::emplaceLandmarkTriangulation(FeaturePoi
                                                         pt_c, 
                                                         _feat->getKeyPoint().getDescriptor());
 
-    // Set all IDs equal to track ID
-    size_t track_id = _feat->trackId();
-    lmk_hp_ptr->setId(track_id);
-    _feat->setLandmarkId(track_id);
+    // // Set all IDs equal to track ID
+    // size_t track_id = _feat->trackId();
+    // lmk_hp_ptr->setId(track_id);
+    // _feat->setLandmarkId(track_id);
 
     return lmk_hp_ptr;
 }
@@ -507,12 +520,6 @@ LandmarkBasePtr ProcessorVisualOdometry::emplaceLandmarkNaive(FeaturePointImageP
     auto lmk_hp_ptr = LandmarkBase::emplace<LandmarkHp>(getProblem()->getMap(), 
                                                         vec_homogeneous_w, 
                                                         _feat->getKeyPoint().getDescriptor());
-
-    // Set all IDs equal to track ID
-    size_t track_id = _feat->trackId();
-    lmk_hp_ptr->setId(track_id);
-    _feat->setLandmarkId(track_id);
-
     return lmk_hp_ptr;
 }
 
