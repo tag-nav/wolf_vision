@@ -76,7 +76,7 @@ class WKeyPoint
 // ID in a frame
 typedef std::unordered_map<size_t, WKeyPoint> KeyPointsMap;
 
-// This maps the IDs of the Wolf KeyPoints that are tracked from a frame to the other.
+// Map the IDs of the Wolf KeyPoints that are tracked from a frame to the other.
 // It takes the ID of a WKeyPoint and returns the ID of its track in another Frame.
 typedef std::unordered_map<size_t, size_t> TracksMap;
 

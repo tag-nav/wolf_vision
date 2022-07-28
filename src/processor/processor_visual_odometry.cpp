@@ -67,16 +67,6 @@ void ProcessorVisualOdometry::configure(SensorBasePtr _sensor)
                                   params_visual_odometry_->grid.separation);
 }
 
-TracksMap ProcessorVisualOdometry::mergeTracks(const TracksMap& tracks_prev_curr, const TracksMap& tracks_curr_next){
-    TracksMap tracks_prev_next;
-    for (auto &match : tracks_prev_curr){
-        if (tracks_curr_next.count(match.second)){
-            tracks_prev_next[match.first] = tracks_curr_next.at(match.second);
-        }
-    }
-    return tracks_prev_next;
-}
-
 void ProcessorVisualOdometry::preProcess()
 {
 
@@ -146,7 +136,9 @@ void ProcessorVisualOdometry::preProcess()
     // Outliers rejection with essential matrix
     cv::Mat E;
     VectorComposite pose_ol("PO", {3,4});
+    int __attribute__((unused)) track_nb_before = tracks_origin_incoming.size();
     bool success = filterWithEssential(mwkps_origin, mwkps_incoming, tracks_origin_incoming, E, pose_ol);
+    WOLF_DEBUG("After RANSAC: ", track_nb_before, "->", tracks_origin_incoming.size())
     if (success){
         // store result of recoverPose if RANSAC was handled well
         buffer_pose_cam_ol_.emplace(origin_ptr_->getTimeStamp(), std::make_shared<VectorComposite>(pose_ol));
@@ -223,6 +215,18 @@ void ProcessorVisualOdometry::preProcess()
     WOLF_DEBUG( "dt_preprocess (ms): " , dt_preprocess );
 
     return;
+}
+
+
+TracksMap ProcessorVisualOdometry::mergeTracks(const TracksMap& tracks_prev_curr, const TracksMap& tracks_curr_next){
+    // merge tracks prev->curr and curr->next to get prev->next
+    TracksMap tracks_prev_next;
+    for (auto &match : tracks_prev_curr){
+        if (tracks_curr_next.count(match.second)){
+            tracks_prev_next[match.first] = tracks_curr_next.at(match.second);
+        }
+    }
+    return tracks_prev_next;
 }
 
 
@@ -304,6 +308,19 @@ unsigned int ProcessorVisualOdometry::processNew(const int& _max_features)
 }
 
 
+bool ProcessorVisualOdometry::new_landmark_is_viable(int track_id)
+{
+    // a track should be old enough so that the keypoints can be considered stable (stable)
+    bool track_old_enough = track_matrix_.trackSize(track_id) >= params_visual_odometry_->lmk_creation.min_track_length_for_landmark;
+
+    // Check if enough parallax has appeared while the camera moves through the scene so as the Landmark can be safely initialized.
+    // As a heuristic, we can check that the pixel distance between first detection time and current time is over a threshold.
+    double dist_pix = (track_matrix_.firstFeature(track_id)->getMeasurement() - track_matrix_.lastFeature(track_id)->getMeasurement()).norm();
+    bool enough_parallax = dist_pix > params_visual_odometry_->lmk_creation.min_pixel_dist;
+
+    return track_old_enough && enough_parallax;
+}
+
 void ProcessorVisualOdometry::establishFactors()
 {
     // Function only called when KF is created using last
@@ -352,7 +369,7 @@ void ProcessorVisualOdometry::establishFactors()
         }
 
         // 2) create landmark if track is not associated with one and has enough length
-        else if(track_matrix_.trackSize(feat->trackId()) >= params_visual_odometry_->min_track_length_for_landmark)
+        else if(new_landmark_is_viable(feat->trackId()))
         {
             WOLF_INFO("   NEW valid track \\o/")
             Track track_kf = track_matrix_.trackAtKeyframes(feat->trackId());
@@ -519,10 +536,12 @@ Eigen::Isometry3d ProcessorVisualOdometry::getTcw(TimeStamp _ts) const
 
 void ProcessorVisualOdometry::postProcess()
 {
-    // Delete tracks with no keyframes
+
+    // Delete all dead tracks
+    auto snap_last = track_matrix_.snapshot(capture_image_last_);
     for (const auto& track_id : track_matrix_.trackIds())
     {
-        if (track_matrix_.trackAtKeyframes(track_id).empty())
+        if (snap_last.count(track_id) == 0)
             track_matrix_.remove(track_id);
     }
 
@@ -655,6 +674,9 @@ bool ProcessorVisualOdometry::filterWithEssential(const KeyPointsMap _mwkps_prev
                                                   cv::Mat &_E, 
                                                   VectorComposite &_pose_prev_curr)
 {
+    // TODO: Check new RANSAC methods introduced in opencv 4.5.0  
+    // https://opencv.org/evaluating-opencvs-new-ransacs/
+
     // We need at least five tracks
     // TODO: this case is NOT handled by the rest of the algorithm currently
     if (_tracks_prev_curr.size() < 5) return false;
@@ -683,12 +705,12 @@ bool ProcessorVisualOdometry::filterWithEssential(const KeyPointsMap _mwkps_prev
     cv::Mat cvMask;
 
     // ////////////////////////
-    // // If we use rays then the    
+    // // If we use rays then the camera matrix to pass is the identity 
     // cv::Mat K = cv::Mat::eye(3,3,CV_32F);
     // double focal = (sen_cam_->getIntrinsicMatrix()(0,0) +
     //                 sen_cam_->getIntrinsicMatrix()(1,1)) / 2;
 
-    // // If using rays, thresh dived by the average focal
+    // // If using rays, thresh divided by the average focal
     // _E = cv::findEssentialMat(p2d_prev, 
     //                           p2d_curr, 
     //                           K, 
@@ -709,8 +731,9 @@ bool ProcessorVisualOdometry::filterWithEssential(const KeyPointsMap _mwkps_prev
 
     // recover the pose relative pose if asked
     if (_pose_prev_curr.includesStructure("PO")){
-        // modifies the mask of inliers -> maybe to change?
-        _pose_prev_curr = pose_from_essential_matrix(_E, p2d_prev, p2d_curr, Kcv_, cvMask);
+        // clone the mask not to change it. Otherwise it seems that the mask is reduced to all tracks being outliers...
+        cv::Mat cvMask_dummy = cvMask.clone();
+        _pose_prev_curr = pose_from_essential_matrix(_E, p2d_prev, p2d_curr, Kcv_, cvMask_dummy);
     }
 
     // Let's remove outliers from tracksMap
@@ -822,9 +845,7 @@ void ProcessorVisualOdometry::filter_last_incoming_tracks_from_ransac_result(con
                                                                              TracksMap& tracks_last_incoming_filtered, KeyPointsMap& mwkps_incoming_filtered)
 {
     /*
-    Use origin -> incoming track
-    O ---------------------> I
-    to filter last -> incoming track (and tracked keypoint map in incoming)
+    Filter last -> incoming track (and tracked keypoint map in incoming)
                   L -------> I
     based of the tracks alive after RANSAC check on origin -> incoming
     O ---------------------> I

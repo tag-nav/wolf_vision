@@ -67,5 +67,9 @@ max_nb_tracks: 100
 # standard deviation of the pixel reprojection factor 
 std_pix: 1
 
-# before creating a landmark, wait until the track is old enough
-min_track_length_for_landmark: 3
+# Rules to create a new landmark from a track
+lmk_creation:
+    # wait until the track is old enough
+    min_track_length_for_landmark: 3
+    # enough pixel distance
+    min_pixel_dist: 0.0

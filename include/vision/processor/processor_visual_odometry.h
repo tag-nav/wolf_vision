@@ -25,6 +25,7 @@
 
 
 // wolf plugin includes
+#include "vision/internal/config.h"
 #include "vision/math/pinhole_tools.h"
 #include "vision/sensor/sensor_camera.h"
 #include "vision/capture/capture_image.h"
@@ -111,13 +112,19 @@ struct ParamsProcessorVisualOdometry : public ParamsProcessorTracker, public Par
             } clahe;
     };
 
+    struct LandmarkCreationParams
+    {
+        unsigned int min_track_length_for_landmark;
+        double min_pixel_dist;
+    };
+
     RansacParams ransac;
     KltParams klt;
     FastParams fast;
     GridParams grid;
     EqualizationParams equalization;
+    LandmarkCreationParams lmk_creation;
     double std_pix;
-    unsigned int min_track_length_for_landmark;
 
     ParamsProcessorVisualOdometry() = default;
     ParamsProcessorVisualOdometry(std::string _unique_name, const ParamsServer& _server):
@@ -161,7 +168,9 @@ struct ParamsProcessorVisualOdometry : public ParamsProcessorTracker, public Par
         grid.margin        = _server.getParam<unsigned int>(prefix + _unique_name + "/grid/margin");
         grid.separation    = _server.getParam<unsigned int>(prefix + _unique_name + "/grid/separation");
 
-        min_track_length_for_landmark = _server.getParam<unsigned int>(prefix + _unique_name + "/min_track_length_for_landmark");
+        lmk_creation.min_track_length_for_landmark = _server.getParam<unsigned int>(prefix + _unique_name + "/lmk_creation/min_track_length_for_landmark");
+        lmk_creation.min_pixel_dist = _server.getParam<double>(prefix + _unique_name + "/lmk_creation/min_pixel_dist");
+        
 
     }
     std::string print() const override
@@ -180,7 +189,8 @@ struct ParamsProcessorVisualOdometry : public ParamsProcessorTracker, public Par
             + "grid.nbr_cells_v:          " + std::to_string(grid.nbr_cells_v)                      + "\n"
             + "grid.margin:               " + std::to_string(grid.margin)                           + "\n"
             + "grid.separation:           " + std::to_string(grid.separation)                       + "\n"
-            + "min_track_length_for_landmark:   " + std::to_string(min_track_length_for_landmark)   + "\n";
+            + "lmk_creation.min_track_length_for_landmark:   " + std::to_string(lmk_creation.min_track_length_for_landmark)   + "\n"
+            + "lmk_creation.min_pixel_dist:   " + std::to_string(lmk_creation.min_pixel_dist)   + "\n";
     }
 };
 
@@ -330,7 +340,11 @@ class ProcessorVisualOdometry : public ProcessorTracker, public MotionProvider
                                  cv::Mat &E, 
                                  VectorComposite &_pose_prev_curr);
 
-        /** \brief Tool to merge tracks 
+        /** \brief Merge track maps between moments prev->curr and curr->next to give a track map between prev->next.
+         * 
+         * \param tracks_prev_curr prev->curr track map 
+         * \param tracks_curr_next curr->next track map 
+         * \return merged track prev->next
          */
         static TracksMap mergeTracks(const TracksMap& tracks_prev_curr, const TracksMap& tracks_curr_next);
 
@@ -345,6 +359,11 @@ class ProcessorVisualOdometry : public ProcessorTracker, public MotionProvider
                                                           const std::vector<cv::Point2d>& p2d_curr, 
                                                           const cv::Mat& _K,
                                                           cv::Mat& cvMask);
+
+        /** \brief sequence of heuristics to decide if a track is worthy of becoming a landmark
+         * 
+         */
+        bool new_landmark_is_viable(int track_id);
 
     private:
         void retainBest(std::vector<cv::KeyPoint> &_keypoints, int n);
