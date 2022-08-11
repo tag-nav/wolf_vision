@@ -331,12 +331,6 @@ TEST(ProcessorVisualOdometry, filterWithEssential)
     KeyPointsMap mwkps_prev, mwkps_curr;
     TracksMap tracks_prev_curr;
     cv::Mat E;
-
-    // Create a simple camera model
-    Eigen::Matrix3f K;
-    K << 100, 0, 240,
-         0, 100, 240,
-         0, 0, 1;
     
     // Create a processor
     ParamsProcessorVisualOdometryPtr params = std::make_shared<ParamsProcessorVisualOdometry>();
@@ -350,10 +344,14 @@ TEST(ProcessorVisualOdometry, filterWithEssential)
 
     // Install camera
     ParamsSensorCameraPtr intr = std::make_shared<ParamsSensorCamera>();
+    // intr->pinhole_model_raw = Eigen::Vector4d(240, 240, 100, 100);
     intr->pinhole_model_raw = Eigen::Vector4d(100, 100, 240, 240);
+    intr->pinhole_model_rectified = intr->pinhole_model_raw;
     intr->width  = 480;
     intr->height = 480;
     SensorCameraPtr cam_ptr = std::make_shared<SensorCamera>((Eigen::Vector7d() << 0,0,0,  0,0,0,1).finished(), intr);
+
+
     processor.configure(cam_ptr);
 
     // Set 3D points on the previous view
@@ -365,6 +363,9 @@ TEST(ProcessorVisualOdometry, filterWithEssential)
     Eigen::Vector3f X6_prev(0.0, 1.0, 2.0);
     Eigen::Vector3f X7_prev(0.1, -1.0, 3.0);
     Eigen::Vector3f X8_prev(0.75, 0.75, 2.0);
+
+    // Get camera model
+    Matrix3f K = cam_ptr->getIntrinsicMatrix().cast<float>();
 
     // Project pixels in the previous view
     mwkps_prev.insert(std::pair<size_t, WKeyPoint>(0, WKeyPoint(cv::KeyPoint(project(K,X1_prev), 1))));
@@ -378,7 +379,6 @@ TEST(ProcessorVisualOdometry, filterWithEssential)
 
     // Set the transformation between the two views
     Eigen::Vector3f t(0.1, 0.1, 0.0);
-    // Eigen::Vector3f euler(0.0, 0.0, 0.0);  // degenerate case!
     Eigen::Vector3f euler(0.2, 0.1, 0.3);
     Eigen::Matrix3f R = e2R(euler);
     
