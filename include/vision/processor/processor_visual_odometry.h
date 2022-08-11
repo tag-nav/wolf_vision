@@ -352,6 +352,9 @@ class ProcessorVisualOdometry : public ProcessorTracker, public MotionProvider
 
         const TrackMatrix& getTrackMatrix() const {return track_matrix_;}
 
+        ///////////////////////////////////////
+        // MotionProvider related methods
+
         VectorComposite getStateFromRelativeOriginLast(VectorComposite co_pose_cl) const;
 
         static VectorComposite pose_from_essential_matrix(const cv::Mat& _E, 
@@ -359,6 +362,8 @@ class ProcessorVisualOdometry : public ProcessorTracker, public MotionProvider
                                                           const std::vector<cv::Point2d>& p2d_curr, 
                                                           const cv::Mat& _K,
                                                           cv::Mat& cvMask);
+        ///////////////////////////////////////
+
 
         /** \brief sequence of heuristics to decide if a track is worthy of becoming a landmark
          * 

@@ -375,7 +375,6 @@ void ProcessorVisualOdometry::establishFactors()
         // 2) create a landmark if the track is not associated with one and meets certain criterias
         else if(new_landmark_is_viable(feat->trackId()))
         {
-            WOLF_INFO("   NEW valid track \\o/")
             Track track_kf = track_matrix_.trackAtKeyframes(feat->trackId());
 
             // LandmarkBasePtr lmk = emplaceLandmarkTriangulation(feat_pi, track_kf);
