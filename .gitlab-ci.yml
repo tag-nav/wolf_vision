@@ -100,7 +100,7 @@ stages:
   - cd build
   - cmake -DCMAKE_BUILD_TYPE=release ..
   - make -j$(nproc)
-  - ctest -j$(nproc)
+  - ctest --output-on-failure -j$(nproc)
   - make install
 
 .build_and_test_template: &build_and_test_definition
