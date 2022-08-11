@@ -58,7 +58,7 @@ class CaptureImage_test : public testing::Test
             cv_kp0_ = cv::KeyPoint(0.0, 0.0, 0);
             cv_kp1_ = cv::KeyPoint(1.0, 0.0, 0);
             cv_kp2_ = cv::KeyPoint(2.0, 0.0, 0);
-            wkp0_ = WKeyPoint(cv_kp0_);
+            wkp0_ = WKeyPoint  (cv_kp0_);
             wkp1_ = WKeyPoint  (cv_kp1_);
             wkp2_ = WKeyPoint  (cv_kp2_);
         }
@@ -75,9 +75,13 @@ TEST_F(CaptureImage_test, WKeyPoint_class)
     ASSERT_EQ(wkp0_.getCvKeyPoint().pt.x, 0.0);
     ASSERT_EQ(wkp1_.getCvKeyPoint().pt.x, 1.0);
     ASSERT_EQ(wkp2_.getCvKeyPoint().pt.x, 2.0);
+    ASSERT_EQ(wkp0_.getEigenKeyPoint()(0), 0.0);
+    ASSERT_EQ(wkp1_.getEigenKeyPoint()(0), 1.0);
+    ASSERT_EQ(wkp2_.getEigenKeyPoint()(0), 2.0);
 
     wkp0_.setCvKeyPoint(cv_kp1_);
     ASSERT_EQ(wkp0_.getCvKeyPoint().pt.x, 1.0);
+    ASSERT_EQ(wkp0_.getEigenKeyPoint()(0), 1.0);
 
     cv::Mat desc = 3*cv::Mat::eye(4, 4, CV_8UC1);
     wkp0_.setDescriptor(desc);
