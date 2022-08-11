@@ -652,43 +652,36 @@ TracksMap ProcessorVisualOdometry::kltTrack(const cv::Mat _img_prev, const cv::M
     return tracks_prev_curr;
 }
 
-bool ProcessorVisualOdometry::filterWithEssential(const KeyPointsMap _mwkps_prev, const KeyPointsMap _mwkps_curr, TracksMap &_tracks_prev_curr, cv::Mat &_E)
+bool ProcessorVisualOdometry::filterWithEssential(const KeyPointsMap _mwkps_prev, 
+                                                  const KeyPointsMap _mwkps_curr, 
+                                                  TracksMap &_tracks_prev_curr, 
+                                                  cv::Mat &_E)
 {
-    ParamsProcessorVisualOdometry::RansacParams prms = params_visual_odometry_->ransac;
+    // We need at least five tracks
+    if (_tracks_prev_curr.size() < 5) return false;
 
     // We need to build lists of pt2d for openCV function
     std::vector<cv::Point2d> p2d_prev, p2d_curr;
     std::vector<size_t> all_indices;
     for (auto & track : _tracks_prev_curr){
         all_indices.push_back(track.first);
-        Eigen::Vector2d ray_prev = pinhole::depixellizePoint(sen_cam_->getPinholeModel(), _mwkps_prev.at(track.first).getEigenKeyPoint());
-        Eigen::Vector2d ray_curr = pinhole::depixellizePoint(sen_cam_->getPinholeModel(), _mwkps_curr.at(track.second).getEigenKeyPoint());
-        p2d_prev.push_back(cv::Point2d(ray_prev.x(), ray_prev.y()));
-        p2d_curr.push_back(cv::Point2d(ray_curr.x(), ray_curr.y()));
+        p2d_prev.push_back(_mwkps_prev.at(track.first).getCvPoint());
+        p2d_curr.push_back(_mwkps_curr.at(track.second).getCvPoint());
     }
-
-    // We need at least five tracks
-    if (p2d_prev.size() < 5) return false;
 
     cv::Mat cvMask;
-    cv::Mat K = cv::Mat::eye(3,3,CV_32F);
-    double focal = (sen_cam_->getIntrinsicMatrix()(0,0) +
-                   sen_cam_->getIntrinsicMatrix()(1,1)) / 2;
-
-    _E = cv::findEssentialMat(p2d_prev, 
-                              p2d_curr, 
-                              Kcv_, 
+    _E = cv::findEssentialMat(p2d_prev,
+                              p2d_curr,
+                              Kcv_,
                               cv::RANSAC,
-                              prms.prob,
-                              prms.thresh / focal,
+                              params_visual_odometry_->ransac.prob,
+                              params_visual_odometry_->ransac.thresh,
                               cvMask);
-    
+
     // Let's remove outliers from tracksMap
-    for (size_t k=0; k<all_indices.size(); k++){
-        if (cvMask.at<bool>(k) == 0){
+    for (size_t k = 0; k < all_indices.size(); k++)
+        if (cvMask.at<bool>(k) == 0)
             _tracks_prev_curr.erase(all_indices.at(k));
-        }
-    }
 
     return true;
 }
