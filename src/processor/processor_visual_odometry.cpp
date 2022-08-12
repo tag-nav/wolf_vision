@@ -596,13 +596,6 @@ void ProcessorVisualOdometry::resetDerived()
     tracks_map_li_matched_.clear();
 }
 
-
-
-void ProcessorVisualOdometry::setParams(const ParamsProcessorVisualOdometryPtr _params)
-{
-    params_visual_odometry_ = _params;
-}
-
 TracksMap ProcessorVisualOdometry::kltTrack(const cv::Mat _img_prev, const cv::Mat _img_curr, const KeyPointsMap &_mwkps_prev, KeyPointsMap &_mwkps_curr)
 {
     if (_mwkps_prev.empty()) return TracksMap();

@@ -348,8 +348,6 @@ class ProcessorVisualOdometry : public ProcessorTracker, public MotionProvider
          */
         static TracksMap mergeTracks(const TracksMap& tracks_prev_curr, const TracksMap& tracks_curr_next);
 
-        void setParams(const ParamsProcessorVisualOdometryPtr _params);
-
         const TrackMatrix& getTrackMatrix() const {return track_matrix_;}
 
         ///////////////////////////////////////
