@@ -25,7 +25,7 @@
 #include "vision/processor/processor_visual_odometry.h"
 
 #include <opencv2/imgproc.hpp>
-
+#include <opencv2/core/eigen.hpp>
 #include <chrono>
 #include <ctime>
 
@@ -50,13 +50,10 @@ ProcessorVisualOdometry::ProcessorVisualOdometry(ParamsProcessorVisualOdometryPt
 void ProcessorVisualOdometry::configure(SensorBasePtr _sensor)
 {
 	//Initialize camera sensor pointer
-	sen_cam_ = std::static_pointer_cast<SensorCamera>(_sensor);
-    Eigen::Matrix3d K = sen_cam_->getIntrinsicMatrix();
-    
-    Kcv_ = (cv::Mat_<float>(3,3) << K(0,0), 0, K(0,2),
-               0, K(1,1), K(1,2),
-               0, 0, 1);
+	sen_cam_ = std::static_pointer_cast<SensorCamera>(_sensor);    
 
+    // Intrinsic matrix for OpenCV computations Kcv_
+    cv::eigen2cv(sen_cam_->getIntrinsicMatrix(), Kcv_);
     
     // Tessalation of the image
     cell_grid_ = ActiveSearchGrid(sen_cam_->getImgWidth(), sen_cam_->getImgHeight(),
