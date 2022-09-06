@@ -86,23 +86,6 @@ stages:
   - make -j$(nproc)
   - make install
 
-.install_visionutils_template: &install_visionutils_definition
-  - cd ${CI_PROJECT_DIR}/ci_deps
-  - if [ -d vision_utils ]; then
-  -   echo "directory vision_utils exists"
-  -   cd vision_utils
-  -   git pull
-  - else
-  -   git clone https://gitlab.iri.upc.edu/labrobotica/algorithms/vision_utils.git
-  -   cd vision_utils
-  - fi
-  - mkdir -pv build
-  - cd build
-  - cmake -DCMAKE_BUILD_TYPE=release ..
-  - make -j$(nproc)
-  - ctest -j$(nproc)
-  - make install
-
 .build_and_test_template: &build_and_test_definition
   - cd $CI_PROJECT_DIR
   - mkdir -pv build
@@ -115,7 +98,7 @@ stages:
 ############ LICENSE HEADERS ############
 license_headers:
   stage: license
-  image: labrobotica/wolf_vision_deps:20.04
+  image: labrobotica/wolf_vision_deps_new:20.04
   cache:
     - key: wolf-focal
       paths:
@@ -129,7 +112,7 @@ license_headers:
 
 ############ UBUNTU 18.04 TESTS ############
 build_and_test:bionic:
-  image: labrobotica/wolf_vision_deps:18.04
+  image: labrobotica/wolf_vision_deps_new:18.04
   stage: build_and_test
   cache:
     - key: wolf-bionic
@@ -142,14 +125,13 @@ build_and_test:bionic:
     - *print_variables_definition
     - *preliminaries_definition
     - *install_wolf_definition
-    - *install_visionutils_definition
     - ldconfig # update links (shared libraries)
   script:
     - *build_and_test_definition
 
 ############ UBUNTU 20.04 TESTS ############
 build_and_test:focal:
-  image: labrobotica/wolf_vision_deps:20.04
+  image: labrobotica/wolf_vision_deps_new:20.04
   stage: build_and_test
   cache:
     - key: wolf-focal
@@ -162,7 +144,6 @@ build_and_test:focal:
     - *print_variables_definition
     - *preliminaries_definition
     - *install_wolf_definition
-    - *install_visionutils_definition
     - ldconfig # update links (shared libraries)
   script:
     - *build_and_test_definition
