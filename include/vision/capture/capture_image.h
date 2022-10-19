@@ -29,13 +29,14 @@
 #ifndef CAPTURE_IMAGE_H
 #define CAPTURE_IMAGE_H
 
+// vision includes
+#include "vision/sensor/sensor_camera.h"
+
+// Wolf includes
+#include <core/capture/capture_base.h>
+
 // OpenCV includes
 #include <opencv2/core.hpp>
-
-
-//Wolf includes
-#include <core/capture/capture_base.h>
-#include "vision/sensor/sensor_camera.h"
 
 
 namespace wolf {

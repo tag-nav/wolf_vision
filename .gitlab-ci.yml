@@ -92,7 +92,7 @@ stages:
   - cd build
   - cmake -DCMAKE_BUILD_TYPE=release -DBUILD_TESTS=ON -DBUILD_DEMOS=OFF ..
   - make -j$(nproc)
-  - ctest -j$(nproc)
+  - ctest -j$(nproc) --output-on-failure
   - make install
 
 ############ LICENSE HEADERS ############

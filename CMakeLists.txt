@@ -13,7 +13,7 @@ MESSAGE("Starting ${PROJECT_NAME} CMakeLists ...")
 # Paths
 SET(EXECUTABLE_OUTPUT_PATH ${CMAKE_CURRENT_SOURCE_DIR}/bin)
 SET(LIBRARY_OUTPUT_PATH ${CMAKE_CURRENT_SOURCE_DIR}/lib)
-set(INCLUDE_INSTALL_DIR include/iri-algorithms/wolf)
+set(INCLUDE_INSTALL_DIR include/wolf)
 set(LIB_INSTALL_DIR lib/)
 
 IF (NOT CMAKE_BUILD_TYPE)
@@ -30,7 +30,7 @@ include(CheckCXXCompilerFlag)
 CHECK_CXX_COMPILER_FLAG("-std=c++14" COMPILER_SUPPORTS_CXX14)
 if(COMPILER_SUPPORTS_CXX14)
 		message(STATUS "The compiler ${CMAKE_CXX_COMPILER} has C++14 support.")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14")
+    set(CMAKE_CXX_STANDARD 14)
 else()
   message(STATUS "The compiler ${CMAKE_CXX_COMPILER} has no C++14 support. Please use a different C++ compiler.")
 endif()
@@ -111,31 +111,31 @@ INCLUDE_DIRECTORIES(BEFORE "include")
 
 # ============ HEADERS ============ 
 SET(HDRS_CAPTURE
-include/vision/capture/capture_image.h
+include/${PROJECT_NAME}/capture/capture_image.h
   )
 SET(HDRS_FACTOR
-# include/vision/factor/factor_trifocal.h
-# include/vision/factor/factor_ahp.h
-include/vision/factor/factor_pixel_hp.h
-# include/vision/factor/factor_epipolar.h
+# include/${PROJECT_NAME}/factor/factor_trifocal.h
+# include/${PROJECT_NAME}/factor/factor_ahp.h
+include/${PROJECT_NAME}/factor/factor_pixel_hp.h
+# include/${PROJECT_NAME}/factor/factor_epipolar.h
   )
 SET(HDRS_FEATURE
-include/vision/feature/feature_point_image.h
+include/${PROJECT_NAME}/feature/feature_point_image.h
   )
 SET(HDRS_LANDMARK
-  # include/vision/landmark/landmark_ahp.h
-  include/vision/landmark/landmark_hp.h
-  include/vision/landmark/landmark_point_3d.h
+  # include/${PROJECT_NAME}/landmark/landmark_ahp.h
+  include/${PROJECT_NAME}/landmark/landmark_hp.h
+  include/${PROJECT_NAME}/landmark/landmark_point_3d.h
   )
 SET(HDRS_MATH
-include/vision/math/pinhole_tools.h
+include/${PROJECT_NAME}/math/pinhole_tools.h
   )
 SET(HDRS_PROCESSOR
-include/vision/processor/processor_visual_odometry.h
-include/vision/processor/active_search.h
+include/${PROJECT_NAME}/processor/processor_visual_odometry.h
+include/${PROJECT_NAME}/processor/active_search.h
   )
 SET(HDRS_SENSOR
-include/vision/sensor/sensor_camera.h
+include/${PROJECT_NAME}/sensor/sensor_camera.h
   )
 
 # ============ SOURCES ============ 
@@ -264,8 +264,6 @@ INSTALL(FILES ${HDRS_SENSOR}
 
 INSTALL(FILES "${WOLF_CONFIG_DIR}/config.h"
   DESTINATION ${INCLUDE_INSTALL_DIR}/${PROJECT_NAME}/internal)
-
-INSTALL(DIRECTORY ${SPDLOG_INCLUDE_DIRS} DESTINATION "include/iri-algorithms/")
 
 export(PACKAGE ${PLUGIN_NAME})
 

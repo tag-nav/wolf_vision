@@ -20,15 +20,15 @@
 //
 //--------LICENSE_END--------
 #include "vision/landmark/landmark_point_3d.h"
+#include <core/state_block/state_block_derived.h>
 
 namespace wolf {
 
 LandmarkPoint3d::LandmarkPoint3d(Eigen::Vector3d _position, cv::Mat _2d_descriptor) :
-    LandmarkBase("LandmarkPoint3d", std::make_shared<StateBlock>(_position, false)),
+    LandmarkBase("LandmarkPoint3d", std::make_shared<StatePoint3d>(_position, false)),
     descriptor_(_2d_descriptor)
 {
-    //LandmarkPoint3d* landmark_ptr = (LandmarkPoint3d*)_p_ptr;
-//    position_ =
+    getStateBlock('P')->setTransformable();
 //    descriptor_ = _2d_descriptor;
 }
 
