@@ -149,7 +149,7 @@ license_headers:
   stage: license
   image: labrobotica/wolf_vision_deps:20.04
   before_script:
-    - *print_variables_definition
+    - *preliminaries_definition
   script:
     - *license_header_definition
 
