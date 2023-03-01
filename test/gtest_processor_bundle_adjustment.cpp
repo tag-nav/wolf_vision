@@ -41,7 +41,7 @@
 
 using namespace wolf;
 
-std::string wolf_vision_root = _WOLF_VISION_ROOT_DIR;
+std::string wolf_vision_root = _WOLF_VISION_CODE_DIR;
 
 class ProcessorBundleAdjustmentDummy : public ProcessorBundleAdjustment
 {

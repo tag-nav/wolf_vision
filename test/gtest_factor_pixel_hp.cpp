@@ -40,7 +40,7 @@
 using namespace wolf;
 using namespace Eigen;
 
-std::string wolf_vision_root = _WOLF_VISION_ROOT_DIR;
+std::string wolf_vision_root = _WOLF_VISION_CODE_DIR;
 
 
 class FactorPixelHpTest : public testing::Test{

@@ -44,7 +44,7 @@
 using namespace wolf;
 using namespace cv;
 
-std::string wolf_vision_root = _WOLF_VISION_ROOT_DIR;
+std::string wolf_vision_root = _WOLF_VISION_CODE_DIR;
 
 class ProcessorVisualOdometryTest : public ProcessorVisualOdometry
 {
@@ -222,7 +222,7 @@ TEST(ProcessorVisualOdometry, kltTrack)
 //TEST(ProcessorVisualOdometry, process)
 //{
 //    // Config file to parse. Here is where all the problem is defined:
-//    std::string wolf_vision_root = _WOLF_VISION_ROOT_DIR;
+//    std::string wolf_vision_root = _WOLF_VISION_CODE_DIR;
 //    std::string config_file = "test/gtest_visual_odometry.yaml";
 //
 //    // parse file into params server: each param will be retrievable from this params server:

@@ -99,7 +99,7 @@ using Eigen::Vector7d;
 
 using namespace wolf;
 
-std::string wolf_vision_root = _WOLF_VISION_ROOT_DIR;
+std::string wolf_vision_root = _WOLF_VISION_CODE_DIR;
 
 int main(int argc, char** argv)
 {

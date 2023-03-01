@@ -85,7 +85,7 @@ ELSEIF()
 ENDIF()
 
 # ============ config.h ==================
-set(_WOLF_ROOT_DIR ${CMAKE_SOURCE_DIR})
+set(_WOLF_CODE_DIR ${CMAKE_SOURCE_DIR})
 # variable used to compile the config.h.in file
 string(TOUPPER ${PROJECT_NAME} PROJECT_NAME_UPPER)
 
@@ -112,6 +112,9 @@ INCLUDE_DIRECTORIES(BEFORE "include")
 # ============ HEADERS ============ 
 SET(HDRS_CAPTURE
 include/${PROJECT_NAME}/capture/capture_image.h
+  )
+SET(HDRS_COMMON
+include/${PROJECT_NAME}/common/vision.h
   )
 SET(HDRS_FACTOR
 # include/${PROJECT_NAME}/factor/factor_trifocal.h

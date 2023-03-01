@@ -34,7 +34,7 @@
 
 using namespace wolf;
 
-std::string wolf_vision_root = _WOLF_VISION_ROOT_DIR;
+std::string wolf_vision_root = _WOLF_VISION_CODE_DIR;
 
 int main(int argc, char** argv)
 {
@@ -43,7 +43,7 @@ int main(int argc, char** argv)
     WOLF_INFO("======== CONFIGURE PROBLEM =======");
 
     // Config file to parse. Here is where all the problem is defined:
-    std::string wolf_vision_root = _WOLF_VISION_ROOT_DIR;
+    std::string wolf_vision_root = _WOLF_VISION_CODE_DIR;
     std::string config_file = "demos/demo_visual_odometry.yaml";
 
     // parse file into params server: each param will be retrievable from this params server:
