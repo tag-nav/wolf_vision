@@ -1,10 +1,10 @@
-//--------LICENSE_START--------
-//
-// Copyright (C) 2020,2021,2022,2023 Institut de Robòtica i Informàtica Industrial, CSIC-UPC.
-// Authors: Joan Solà Ortega (jsola@iri.upc.edu)
+// WOLF - Copyright (C) 2020,2021,2022,2023
+// Institut de Robòtica i Informàtica Industrial, CSIC-UPC.
+// Authors: Joan Solà Ortega (jsola@iri.upc.edu) and
+// Joan Vallvé Navarro (jvallve@iri.upc.edu)
 // All rights reserved.
 //
-// This file is part of WOLF
+// This file is part of WOLF: http://www.iri.upc.edu/wolf
 // WOLF is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
@@ -17,13 +17,11 @@
 //
 // You should have received a copy of the GNU Lesser General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
-//
-//--------LICENSE_END--------
-#ifndef _FACTOR_TRIFOCAL_H_
-#define _FACTOR_TRIFOCAL_H_
+
+#pragma once
 
 //Wolf includes
-//#include "core/common/wolf.h"
+#include "vision/common/vision.h"
 #include "core/factor/factor_autodiff.h"
 #include "vision/sensor/sensor_camera.h"
 
@@ -453,5 +451,3 @@ void FactorTrifocal::print_scalar(const double& _val) const
 }
 
 }    // namespace wolf
-
-#endif /* _FACTOR_AUTODIFF_TRIFOCAL_H_ */

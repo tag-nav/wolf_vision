@@ -1,10 +1,10 @@
-//--------LICENSE_START--------
-//
-// Copyright (C) 2020,2021,2022,2023 Institut de Robòtica i Informàtica Industrial, CSIC-UPC.
-// Authors: Joan Solà Ortega (jsola@iri.upc.edu)
+// WOLF - Copyright (C) 2020,2021,2022,2023
+// Institut de Robòtica i Informàtica Industrial, CSIC-UPC.
+// Authors: Joan Solà Ortega (jsola@iri.upc.edu) and
+// Joan Vallvé Navarro (jvallve@iri.upc.edu)
 // All rights reserved.
 //
-// This file is part of WOLF
+// This file is part of WOLF: http://www.iri.upc.edu/wolf
 // WOLF is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
@@ -17,22 +17,10 @@
 //
 // You should have received a copy of the GNU Lesser General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
-//
-//--------LICENSE_END--------
-#ifndef PINHOLETOOLS_H
-#define PINHOLETOOLS_H
 
-/**
- * \file pinhole_tools.h
- *
- * \date 06/04/2010
- * \author jsola
- *
- *  ## Add a description here ##
- *
- */
+#pragma once
 
-#include "core/common/wolf.h"
+#include "vision/common/vision.h"
 
 #include <iostream>
 
@@ -783,48 +771,46 @@ void computeCorrectionModel(const Vk & k, const Vd & d, Vc & c)
         c = iRd * (rc - rd);
     }
 
-//	//This method follows the one in:  https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4934233/
-//    SizeEigen size = c.size();
-//    if (size != 0 && size <=9) //Only implemented to compute a maximum of 9 distortion correction parameters
-//    {
-//    	c(0) = -d(0);
-//    	if (d.size() >= 2)
-//    	{
-//    		c(1) = 3 * pow(d(0),2) - d(1);
-//    	}
-//
-//    	if (d.size() >= 3)
-//    	{
-//    		c(2) = -12 * pow(d(0), 3) + 8 * d(0) * d(1) - d(2);
-//
-////			c(3) = 55 * pow(d(0), 4) - 55 * pow(d(0), 2) * d(1) + 5 * pow(d(1), 2) + 10 * d(0) * d(2) - d(3);
-////
-////			c(4) = -273 * pow(d(0), 5) + 364 * pow(d(0), 3) * d(1) - 78 * d(0) * pow(d(1), 2) - 78 * pow(d(0), 2) * d(2) + 12 * d(1) * d(2) + 12 * d(0) * d(3);
-////
-////			c(5) = 1428 * pow(d(0), 6) - 2380 * pow(d(0), 4) * d(1) + 840 * pow(d(0), 2) * pow(d(1), 2) - 35 * pow(d(1), 3) + 560 * pow(d(0), 3) * d(2)
-////					- 210 * d(0) * d(1) * d(2) + 7 * pow(d(2), 2) - 105 * pow(d(0), 2) * d(3) + 14 * d(1) * d(3);
-////
-////			c(6) = -7752 * pow(d(0), 7) + 15504 * pow(d(0), 5) * d(1) - 7752 * pow(d(0), 3) * pow(d(1), 2) + 816 * d(0) * pow(d(1), 3) + 2448 * pow(d(0), 2) * d(1) * d(2)
-////					- 136 * pow(d(1), 2) * d(2) - 136 * d(0) * pow(d(2), 2) + 816 * pow(d(0), 3) * d(3) - 272 * d(0) * d(1) * d(3) + 16 * d(2) * d(3);
-////
-////			c(7) = 43263 * pow(d(0), 8) - 100947 * pow(d(0), 6) * d(1) + 65835 * pow(d(0), 4) * pow(d(1), 2) - 11970 * pow(d(0), 2) * pow(d(1), 3) + 285 * pow(d(1), 4)
-////					+ 26334 * pow(d(0), 5) * d(2) - 23940 * pow(d(0), 3) * d(1) * d(2) + 3420 * d(0) * pow(d(1), 2) * d(2) + 1710 * pow(d(0), 2) * pow(d(2), 2)
-////					- 171 * d(1) * pow(d(2), 2)	- 5985 * pow(d(0), 4) * d(3) + 3420 * pow(d(0), 2) * d(1) * d(3) - 171 * pow(d(1), 2) * d(3) - 342 * d(0) * d(2) * d(3)
-////					+ 9 * pow(d(3), 2);
-////
-////			c(8) = -246675 * pow(d(0), 9) + 657800 * pow(d(0), 7) * d(1) - 531300 * pow(d(0), 5) * pow(d(1), 2) + 141680 * pow(d(0), 3) * pow(d(1), 3)
-////					- 8855 * d(0) * pow(d(1), 4) - 177100 * pow(d(0), 6) * d(2) + 212520 * pow(d(0), 4) * d(1) * d(2) - 53130 * pow(d(0), 2) * pow(d(1), 2) * d(2)
-////					+ 1540 * pow(d(1), 3) * d(2) - 17710 * pow(d(0), 3) * pow(d(2), 2) + 4620 * d(0) * d(1) * pow(d(2), 2) - 70 * pow(d(2), 3)
-////					+ 42504 * pow(d(0), 5) * d(3) - 35420 * pow(d(0), 3) * d(1) * d(3) + 4620 * d(0) * pow(d(1), 2) * d(3) + 4620 * pow(d(0), 2) * d(2) * d(3)
-////					- 420 * d(1) * d(2) * d(3) - 210 * d(0) * pow(d(3), 2);
-//    	}
-//    	c = c.head(size);
-//    }
-
+/*	//This method follows the one in:  https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4934233/
+*    SizeEigen size = c.size();
+*    if (size != 0 && size <=9) //Only implemented to compute a maximum of 9 distortion correction parameters
+*    {
+*    	c(0) = -d(0);
+*    	if (d.size() >= 2)
+*    	{
+*    		c(1) = 3 * pow(d(0),2) - d(1);
+*    	}
+*
+*    	if (d.size() >= 3)
+*    	{
+*    		c(2) = -12 * pow(d(0), 3) + 8 * d(0) * d(1) - d(2);
+*
+*			c(3) = 55 * pow(d(0), 4) - 55 * pow(d(0), 2) * d(1) + 5 * pow(d(1), 2) + 10 * d(0) * d(2) - d(3);
+*
+*			c(4) = -273 * pow(d(0), 5) + 364 * pow(d(0), 3) * d(1) - 78 * d(0) * pow(d(1), 2) - 78 * pow(d(0), 2) * d(2) + 12 * d(1) * d(2) + 12 * d(0) * d(3);
+*
+*			c(5) = 1428 * pow(d(0), 6) - 2380 * pow(d(0), 4) * d(1) + 840 * pow(d(0), 2) * pow(d(1), 2) - 35 * pow(d(1), 3) + 560 * pow(d(0), 3) * d(2) //
+*					- 210 * d(0) * d(1) * d(2) + 7 * pow(d(2), 2) - 105 * pow(d(0), 2) * d(3) + 14 * d(1) * d(3);   //
+*
+*			c(6) = -7752 * pow(d(0), 7) + 15504 * pow(d(0), 5) * d(1) - 7752 * pow(d(0), 3) * pow(d(1), 2) + 816 * d(0) * pow(d(1), 3) + 2448 * pow(d(0), 2) * d(1) * d(2)  //
+*					- 136 * pow(d(1), 2) * d(2) - 136 * d(0) * pow(d(2), 2) + 816 * pow(d(0), 3) * d(3) - 272 * d(0) * d(1) * d(3) + 16 * d(2) * d(3);  //
+*
+*			c(7) = 43263 * pow(d(0), 8) - 100947 * pow(d(0), 6) * d(1) + 65835 * pow(d(0), 4) * pow(d(1), 2) - 11970 * pow(d(0), 2) * pow(d(1), 3) + 285 * pow(d(1), 4) //
+*					+ 26334 * pow(d(0), 5) * d(2) - 23940 * pow(d(0), 3) * d(1) * d(2) + 3420 * d(0) * pow(d(1), 2) * d(2) + 1710 * pow(d(0), 2) * pow(d(2), 2) //
+*					- 171 * d(1) * pow(d(2), 2)	- 5985 * pow(d(0), 4) * d(3) + 3420 * pow(d(0), 2) * d(1) * d(3) - 171 * pow(d(1), 2) * d(3) - 342 * d(0) * d(2) * d(3) //
+*					+ 9 * pow(d(3), 2); //
+*
+*			c(8) = -246675 * pow(d(0), 9) + 657800 * pow(d(0), 7) * d(1) - 531300 * pow(d(0), 5) * pow(d(1), 2) + 141680 * pow(d(0), 3) * pow(d(1), 3)  //
+*					- 8855 * d(0) * pow(d(1), 4) - 177100 * pow(d(0), 6) * d(2) + 212520 * pow(d(0), 4) * d(1) * d(2) - 53130 * pow(d(0), 2) * pow(d(1), 2) * d(2)  //
+*					+ 1540 * pow(d(1), 3) * d(2) - 17710 * pow(d(0), 3) * pow(d(2), 2) + 4620 * d(0) * d(1) * pow(d(2), 2) - 70 * pow(d(2), 3)  //
+*					+ 42504 * pow(d(0), 5) * d(3) - 35420 * pow(d(0), 3) * d(1) * d(3) + 4620 * d(0) * pow(d(1), 2) * d(3) + 4620 * pow(d(0), 2) * d(2) * d(3)  //
+*					- 420 * d(1) * d(2) * d(3) - 210 * d(0) * pow(d(3), 2); //
+*    	}
+*    	c = c.head(size);
+*    }
+*/
 }
 
 } // namespace pinhole
 
 } // namespace wolf
-
-#endif // PINHOLETOOLS_H

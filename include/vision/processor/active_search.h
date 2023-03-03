@@ -1,10 +1,10 @@
-//--------LICENSE_START--------
-//
-// Copyright (C) 2020,2021,2022,2023 Institut de Robòtica i Informàtica Industrial, CSIC-UPC.
-// Authors: Joan Solà Ortega (jsola@iri.upc.edu)
+// WOLF - Copyright (C) 2020,2021,2022,2023
+// Institut de Robòtica i Informàtica Industrial, CSIC-UPC.
+// Authors: Joan Solà Ortega (jsola@iri.upc.edu) and
+// Joan Vallvé Navarro (jvallve@iri.upc.edu)
 // All rights reserved.
 //
-// This file is part of WOLF
+// This file is part of WOLF: http://www.iri.upc.edu/wolf
 // WOLF is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
@@ -17,28 +17,18 @@
 //
 // You should have received a copy of the GNU Lesser General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
-//
-//--------LICENSE_END--------
-/**
- * \file active_search.h
- *
- *  Active search detection and matching for points.
- *
- * \date 10/04/2016
- * \author jsola, dinesh
- */
 
-#ifndef ACTIVESEARCH_H_
-#define ACTIVESEARCH_H_
+#pragma once
 
 // Wolf includes
-#include <core/common/wolf.h>
+#include "vision/common/vision.h"
 
-//OpenCV includes
+// OpenCV includes
 #include <opencv2/core/core.hpp>
 #include <opencv2/features2d/features2d.hpp>
 
-namespace wolf{
+namespace wolf
+{
 
 /**
  * \brief Active search tesselation grid.
@@ -58,14 +48,16 @@ namespace wolf{
  * The feature density can be controlled by adjusting the grid's number of cells.  Important notes:
  * - Typically, use grids of 5x5 to 18x12 cells.
  * - Try to make reasonably square cells.
- * - The final cell sizes are always integers, even if the H and V number of cells are not an exact divisors of the image size.
+ * - The final cell sizes are always integers, even if the H and V number of cells are not an exact divisors of the
+ * image size.
  *
  * This class implements a few interesting features:
  * - The grid can be randomly re-positioned at each frame to avoid dead zones at the cell edges.
  * - Only the inner cells are activated for feature detection to avoid reaching the image edges.
  * - The region of interest (ROI) associated with a particular cell is shrunk with a parameterizable amount
  *   to guarantee a minimum 'separation' between existing and new features.
- * - The region of interest is ensured to lie at a distance from the image boundaries, defined by the parameter 'margin'.
+ * - The region of interest is ensured to lie at a distance from the image boundaries, defined by the parameter
+ * 'margin'.
  *
  * The blue and green grids in the figure below represent the grid
  * at two different offsets, corresponding to two different frames.
@@ -130,154 +122,158 @@ namespace wolf{
  * \endcode
  *
  */
-class ActiveSearchGrid {
+class ActiveSearchGrid
+{
+  private:
+    Eigen::Vector2i img_size_;
+    Eigen::Vector2i grid_size_;
+    Eigen::Vector2i cell_size_;
+    Eigen::Vector2i offset_;
+    Eigen::Vector2i roi_coordinates_;
+    Eigen::MatrixXi projections_count_;
+    Eigen::MatrixXi empty_cells_tile_tmp_;
+    int             separation_;
+    int             margin_;
 
-    private:
-        Eigen::Vector2i img_size_;
-        Eigen::Vector2i grid_size_;
-        Eigen::Vector2i cell_size_;
-        Eigen::Vector2i offset_;
-        Eigen::Vector2i roi_coordinates_;
-        Eigen::MatrixXi projections_count_;
-        Eigen::MatrixXi empty_cells_tile_tmp_;
-        int separation_;
-        int margin_;
+  public:
+    EIGEN_MAKE_ALIGNED_OPERATOR_NEW;  // to guarantee alignment (see
+                                      // http://eigen.tuxfamily.org/dox-devel/group__TopicStructHavingEigenMembers.html)
 
-    public:
-        EIGEN_MAKE_ALIGNED_OPERATOR_NEW; // to guarantee alignment (see http://eigen.tuxfamily.org/dox-devel/group__TopicStructHavingEigenMembers.html)
+    /**
+     * \brief Void constructor
+     *
+     * Calling this constructor requires the use of setup() to configure.
+     */
+    ActiveSearchGrid();
 
-        /**
-         * \brief Void constructor
-         *
-         * Calling this constructor requires the use of setup() to configure.
-         */
-        ActiveSearchGrid();
+    /**
+     * \brief Constructor.
+     * \param _img_size_h horizontal image size, in pixels.
+     * \param _img_size_v vertical image size.
+     * \param _n_cells_h horizontal number of cells per image width.
+     * \param _n_cells_v vertical number of cells per image height.
+     * \param _margin minimum separation to the edge of the image
+     * \param _separation minimum separation between existing and new points.
+     */
+    ActiveSearchGrid(const int& _img_size_h,
+                     const int& _img_size_v,
+                     const int& _n_cells_h,
+                     const int& _n_cells_v,
+                     const int& _margin     = 0,
+                     const int& _separation = 0);
 
-        /**
-         * \brief Constructor.
-         * \param _img_size_h horizontal image size, in pixels.
-         * \param _img_size_v vertical image size.
-         * \param _n_cells_h horizontal number of cells per image width.
-         * \param _n_cells_v vertical number of cells per image height.
-         * \param _margin minimum separation to the edge of the image
-         * \param _separation minimum separation between existing and new points.
-         */
-        ActiveSearchGrid(const int & _img_size_h, const int & _img_size_v,
-                         const int & _n_cells_h,  const int & _n_cells_v,
-                         const int & _margin = 0,
-                         const int & _separation = 0);
+    /**
+     * \brief Function to set the parameters of the active search grid
+     * \param _img_size_h horizontal image size, in pixels.
+     * \param _img_size_v vertical image size.
+     * \param _n_cells_h horizontal number of cells per image width.
+     * \param _n_cells_v vertical number of cells per image height.
+     * \param _margin minimum separation to the edge of the image
+     * \param _separation minimum separation between existing and new points.
+     */
+    void setup(const int& _img_size_h,
+               const int& _img_size_v,
+               const int& _n_cells_h,
+               const int& _n_cells_v,
+               const int& _margin     = 0,
+               const int& _separation = 0);
 
-        /**
-         * \brief Function to set the parameters of the active search grid
-         * \param _img_size_h horizontal image size, in pixels.
-         * \param _img_size_v vertical image size.
-         * \param _n_cells_h horizontal number of cells per image width.
-         * \param _n_cells_v vertical number of cells per image height.
-         * \param _margin minimum separation to the edge of the image
-         * \param _separation minimum separation between existing and new points.
-         */
-        void setup(const int & _img_size_h, const int & _img_size_v,
-                   const int & _n_cells_h,  const int & _n_cells_v,
-                   const int & _margin = 0,
-                   const int & _separation = 0);
+    /**
+     * \brief Re-set the image size
+     * \param _img_size_h horizontal image size, in pixels.
+     * \param _img_size_v vertical image size.
+     */
+    void resizeImage(unsigned int _img_size_h, unsigned int _img_size_v);
 
-        /**
-         * \brief Re-set the image size
-         * \param _img_size_h horizontal image size, in pixels.
-         * \param _img_size_v vertical image size.
-         */
-        void resizeImage(unsigned int _img_size_h, unsigned int _img_size_v);
+    /** \brief Clear grid.
+     *
+     * Sets all cell counters to zero.
+     */
+    void clear();
 
-        /** \brief Clear grid.
-         *
-         * Sets all cell counters to zero.
-         */
-        void clear();
+    /**
+     * \brief Clear grid and position it at a new random location.
+     *
+     * Sets all cell counters to zero and sets a new random grid position.
+     */
+    void renew();
 
-        /**
-         * \brief Clear grid and position it at a new random location.
-         *
-         * Sets all cell counters to zero and sets a new random grid position.
-         */
-        void renew();
+    /**
+     * \brief Add a projected pixel to the grid.
+     * If the cell is blocked, unblock and add.
+     * \param _x the x-coordinate of the pixel to add.
+     * \param _y the y-coordinate of the pixel to add.
+     */
+    template <typename Scalar>
+    void hitCell(const Scalar _x, const Scalar _y);
 
-        /**
-         * \brief Add a projected pixel to the grid.
-         * If the cell is blocked, unblock and add.
-         * \param _x the x-coordinate of the pixel to add.
-         * \param _y the y-coordinate of the pixel to add.
-         */
-        template<typename Scalar>
-        void hitCell(const Scalar _x, const Scalar _y);
+    /**
+     * \brief Add a projected pixel to the grid.
+     * If the cell is blocked, unblock and add.
+     * \param _pix the pixel to add as an Eigen 2-vector with any Scalar type (can be a non-integer).
+     */
+    template <typename Scalar>
+    void hitCell(const Eigen::Matrix<Scalar, 2, 1>& _pix);
 
-        /**
-         * \brief Add a projected pixel to the grid.
-         * If the cell is blocked, unblock and add.
-         * \param _pix the pixel to add as an Eigen 2-vector with any Scalar type (can be a non-integer).
-         */
-        template<typename Scalar>
-        void hitCell(const Eigen::Matrix<Scalar, 2, 1>& _pix);
+    /**
+     * \brief Add a projected pixel to the grid.
+     * If the cell is blocked, unblock and add.
+     * \param _pix the pixel to add as a cv::KeyPoint.
+     */
+    void hitCell(const cv::KeyPoint& _pix);
 
-        /**
-         * \brief Add a projected pixel to the grid.
-         * If the cell is blocked, unblock and add.
-         * \param _pix the pixel to add as a cv::KeyPoint.
-         */
-        void hitCell(const cv::KeyPoint& _pix);
+    /**
+     * \brief Get ROI of a random empty cell.
+     * \param _roi the resulting ROI
+     * \return true if ROI exists.
+     */
+    bool pickRoi(cv::Rect& _roi);
 
-        /**
-         * \brief Get ROI of a random empty cell.
-         * \param _roi the resulting ROI
-         * \return true if ROI exists.
-         */
-        bool pickRoi(cv::Rect & _roi);
+    /**
+     * \brief Block a cell known to be empty in order to avoid searching again in it.
+     * \param _cell the cell where nothing was found
+     */
+    void blockCell(const Eigen::Vector2i& _cell);
 
-        /**
-         * \brief Block a cell known to be empty in order to avoid searching again in it.
-         * \param _cell the cell where nothing was found
-         */
-        void blockCell(const Eigen::Vector2i & _cell);
+    /**
+     * \brief Call this after pickRoi if no point was found in the roi
+     * in order to avoid searching again in it.
+     * \param _roi the ROI where nothing was found
+     */
+    void blockCell(const cv::Rect& _roi);
 
-        /**
-         * \brief Call this after pickRoi if no point was found in the roi
-         * in order to avoid searching again in it.
-         * \param _roi the ROI where nothing was found
-         */
-        void blockCell(const cv::Rect & _roi);
+    /**
+     * \brief Get the region of interest, reduced by a margin.
+     */
+    void cell2roi(const Eigen::Vector2i& _cell, cv::Rect& _roi);
 
-        /**
-         * \brief Get the region of interest, reduced by a margin.
-         */
-        void cell2roi(const Eigen::Vector2i & _cell, cv::Rect& _roi);
+  private:
+    /**
+     * \brief Get cell corresponding to pixel
+     */
+    template <typename Scalar>
+    Eigen::Vector2i coords2cell(const Scalar _x, const Scalar _y);
 
-    private:
-        /**
-         * \brief Get cell corresponding to pixel
-         */
-        template<typename Scalar>
-        Eigen::Vector2i coords2cell(const Scalar _x, const Scalar _y);
+    /**
+     * \brief Get cell origin (exact pixel)
+     */
+    Eigen::Vector2i cellOrigin(const Eigen::Vector2i& _cell);
 
-        /**
-         * \brief Get cell origin (exact pixel)
-         */
-        Eigen::Vector2i cellOrigin(const Eigen::Vector2i & _cell);
+    /**
+     * \brief Get cell center (can be decimal if size of cell is an odd number of pixels)
+     */
+    Eigen::Vector2i cellCenter(const Eigen::Vector2i& _cell);
 
-        /**
-         * \brief Get cell center (can be decimal if size of cell is an odd number of pixels)
-         */
-        Eigen::Vector2i cellCenter(const Eigen::Vector2i& _cell);
+    /**
+     * \brief Get one random empty cell
+     */
+    bool pickEmptyCell(Eigen::Vector2i& _cell);
 
-        /**
-         * \brief Get one random empty cell
-         */
-        bool pickEmptyCell(Eigen::Vector2i & _cell);
-
-        /**
-         * \brief True if the cell is blocked
-         * \param _cell the queried cell
-         */
-        bool isCellBlocked(const Eigen::Vector2i& _cell);
-
+    /**
+     * \brief True if the cell is blocked
+     * \param _cell the queried cell
+     */
+    bool isCellBlocked(const Eigen::Vector2i& _cell);
 };
 
 inline void ActiveSearchGrid::clear()
@@ -287,8 +283,8 @@ inline void ActiveSearchGrid::clear()
 
 inline void ActiveSearchGrid::renew()
 {
-    offset_(0) = -(margin_ + rand() % (cell_size_(0) - 2 * margin_)); // from -margin to -(cellSize(0)-margin)
-    offset_(1) = -(margin_ + rand() % (cell_size_(1) - 2 * margin_)); // from -margin to -(cellSize(0)-margin)
+    offset_(0) = -(margin_ + rand() % (cell_size_(0) - 2 * margin_));  // from -margin to -(cellSize(0)-margin)
+    offset_(1) = -(margin_ + rand() % (cell_size_(1) - 2 * margin_));  // from -margin to -(cellSize(0)-margin)
     clear();
 }
 
@@ -297,26 +293,24 @@ inline void ActiveSearchGrid::hitCell(const cv::KeyPoint& _pix)
     hitCell(_pix.pt.x, _pix.pt.y);
 }
 
-template<typename Scalar>
+template <typename Scalar>
 inline void ActiveSearchGrid::hitCell(const Eigen::Matrix<Scalar, 2, 1>& _pix)
 {
     hitCell(_pix(0), _pix(1));
 }
 
-template<typename Scalar>
+template <typename Scalar>
 inline void ActiveSearchGrid::hitCell(const Scalar _x, const Scalar _y)
 {
     Eigen::Vector2i cell = coords2cell(_x, _y);
-    if (cell(0) < 0 || cell(1) < 0 || cell(0) >= grid_size_(0) || cell(1) >= grid_size_(1))
-        return;
+    if (cell(0) < 0 || cell(1) < 0 || cell(0) >= grid_size_(0) || cell(1) >= grid_size_(1)) return;
 
-    if (isCellBlocked(cell))
-        projections_count_(cell(0), cell(1)) = 0; // unblock cell: it becomes empty
+    if (isCellBlocked(cell)) projections_count_(cell(0), cell(1)) = 0;  // unblock cell: it becomes empty
 
     projections_count_(cell(0), cell(1))++;
 }
 
-template<typename Scalar>
+template <typename Scalar>
 inline Eigen::Vector2i ActiveSearchGrid::coords2cell(const Scalar _x, const Scalar _y)
 {
     Eigen::Vector2i cell;
@@ -327,9 +321,8 @@ inline Eigen::Vector2i ActiveSearchGrid::coords2cell(const Scalar _x, const Scal
 
 inline Eigen::Vector2i ActiveSearchGrid::cellCenter(const Eigen::Vector2i& _cell)
 {
-    return cellOrigin(_cell) + cell_size_ / 2; // beware these are all integers, so the result is truncated to the smaller integer
+    return cellOrigin(_cell) +
+           cell_size_ / 2;  // beware these are all integers, so the result is truncated to the smaller integer
 }
 
-}
-
-#endif /* ACTIVESEARCH_H_ */
+}  // namespace wolf
