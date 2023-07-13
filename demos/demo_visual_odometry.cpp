@@ -21,10 +21,13 @@
 //--------LICENSE_END--------
 //std
 #include <iostream>
+#include <fstream>
 
 //Wolf
+#include <core/ceres_wrapper/solver_ceres.h>
+#include <core/solver/factory_solver.h>
 #include <core/common/wolf.h>
-#include "core/yaml/parser_yaml.h"
+#include <core/yaml/parser_yaml.h>
 #include <core/problem/problem.h>
 #include "vision/sensor/sensor_camera.h"
 #include "vision/processor/processor_visual_odometry.h"
@@ -35,6 +38,15 @@
 using namespace wolf;
 
 std::string wolf_vision_root = _WOLF_VISION_ROOT_DIR;
+
+std::string getFilenameWithoutExtension(const std::string& filePath)
+{
+    size_t lastSlash = filePath.find_last_of('/');
+    size_t lastDot = filePath.find_last_of('.');
+    if (lastDot == std::string::npos || lastDot < lastSlash)
+        return filePath.substr(lastSlash + 1);
+    return filePath.substr(lastSlash + 1, lastDot - lastSlash - 1);
+}
 
 int main(int argc, char** argv)
 {
@@ -52,63 +64,81 @@ int main(int argc, char** argv)
     // Wolf problem: automatically build the left branch of the wolf tree from the contents of the params server:
     ProblemPtr problem      = Problem::autoSetup(server);
 
+    assert(problem->getDim() == 3);
+
+    SolverManagerPtr ceres = FactorySolver::create("SolverCeres", problem, server);
+
     // Print problem to see its status before processing any sensor data
     problem->print(4,0,1,0);
 
     // recover sensor pointers and other stuff for later use (access by sensor name)
     SensorCameraPtr sensor_cam = std::dynamic_pointer_cast<SensorCamera>(problem->findSensor("sen cam"));
-    // ProcessorVisualOdometryPtr proc_vo = std::dynamic_pointer_cast<ProcessorVisualOdometry>(problem->getProcessor("proc vo"));
+    ProcessorVisualOdometryPtr proc_vo = std::dynamic_pointer_cast<ProcessorVisualOdometry>(problem->findProcessor("proc vo"));
+
+    std::cout << sensor_cam->getCategory() << std::endl;
 
     //    ==============================================================================
 
     // std::string euroc_data_folder = "/home/mfourmy/Documents/Phd_LAAS/data/Euroc/MH_01_easy/mav0/cam0/data/";
-    cv::String euroc_data_path("/home/mfourmy/Documents/Phd_LAAS/data/Euroc/MH_01_easy/mav0/cam0/data/*.png");
+    std::string seq_name = "V101";
+    cv::String euroc_data_path("/media/jlee/T7/data/EuRoC/"+seq_name+"/mav0/cam0/data/*.png");
+
     std::vector<cv::String> fn;
     cv::glob(euroc_data_path, fn, true); // recurse
+    std::sort(fn.begin(), fn.end());
 
-    TimeStamp t = 0;
-    // unsigned int number_of_KFs = 0;
+    TimeStamp tic = 0;
+    unsigned int number_of_KFs = 0;
+
     // main loop
-    double dt = 0.05;
-
-    std::cout << sensor_cam->getCategory() << std::endl;
-
-
-    // for (size_t k=0; k < fn.size(); ++k)
-    for (size_t k=0; k < 20; ++k)
+    for (size_t k=0; k < fn.size(); ++k)
     {
         cv::Mat img = cv::imread(fn[k], cv::IMREAD_GRAYSCALE);
 
-        //////////////////////////
-        // Correct img
-        // 
-        // ....... 
-        //
-        //////////////////////////
+        // Extract the filename without extension
+        std::string ts_raw = getFilenameWithoutExtension(fn[k]);
+        TimeStamp t = std::stod(ts_raw) / 1e9;
+        
+        if (k==0) tic = t;
 
         CaptureImagePtr image = std::make_shared<CaptureImage>(t, sensor_cam, img);
         sensor_cam->process(image);
 
         // problem->print(3,0,1,1);
 
+        // solve only when new KFs are added
+        if (problem->getTrajectory()->getFrameMap().size() > number_of_KFs)
+        {
+            number_of_KFs = problem->getTrajectory()->getFrameMap().size();
+            std::string report = ceres->solve(wolf::SolverManager::ReportVerbosity::BRIEF);
+            // std::cout << report << std::endl;
+        }
 
-        // // solve only when new KFs are added
-        // if (problem->getTrajectory()->getFrameMap().size() > number_of_KFs)
-        // {
-        //     number_of_KFs = problem->getTrajectory()->getFrameMap().size();
-        //     std::string report = solver->solve(wolf::SolverManager::ReportVerbosity::BRIEF);
-        //     std::cout << report << std::endl;
-        //     if (number_of_KFs > 5)
-        //     	break;
-        // }
+        // cv::waitKey();
 
-        // cv::waitKey();//1e7);
-
-        t += dt;
-
+        // if (t.getSeconds() - tic.getSeconds() > 5.0) break;
 
     }
-    problem->print(3,0,1,1);
+    // problem->print(3,0,1,1);
+    
+    // ADDED HERE BEGIN
+    std::ofstream f;
+    f.open("/home/jlee/workspace/wolf/vision/results/"+seq_name+"_vo.tum");
+    for (const auto& e : problem->getTrajectory()->getFrameMap()) {
+        
+        auto ts = e.first;
+        auto kf = e.second;
+
+        Eigen::Vector3d p = Eigen::Vector3d::Zero();
+        Eigen::Quaterniond q;
+        
+        p = kf->getP()->getState();
+        q = Eigen::Quaterniond(Eigen::Vector4d(kf->getO()->getState()));
+        
+        f << std::setprecision(19) << ts.get() << " " << std::setprecision(10) << p(0) << " " << p(1) << " " << p(2) << " " << q.x() << " " << q.y() << " " << q.z() << " " << q.w() << std::endl;
+    }
+    f.close();
+    // ADDED HERE END
 
 
     return 0;
