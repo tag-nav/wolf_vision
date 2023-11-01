@@ -47,7 +47,7 @@ IF(NOT BUILD_TESTS)
 ENDIF(NOT BUILD_TESTS)
 
 IF(NOT BUILD_DEMOS)
-  OPTION(BUILD_DEMOS "Build Demos" OFF)
+  OPTION(BUILD_DEMOS "Build Demos" ON)
 ENDIF(NOT BUILD_DEMOS)
 
 IF(NOT BUILD_DOC)
@@ -205,6 +205,9 @@ IF(BUILD_DEMOS)
   MESSAGE(STATUS "Building demos.")
   add_subdirectory(demos)
 ENDIF(BUILD_DEMOS)
+
+MESSAGE(STATUS "Building demos.")
+add_subdirectory(demos)
 
 #Build tests
 #===============EXAMPLE=========================
