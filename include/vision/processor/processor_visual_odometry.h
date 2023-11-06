@@ -280,7 +280,15 @@ class ProcessorVisualOdometry : public ProcessorTracker
          */
         bool filterWithEssential(const KeyPointsMap mwkps_prev, const KeyPointsMap mwkps_curr, TracksMap &tracks_prev_curr, cv::Mat &E);
 
-        cv::Mat draw_matching(const cv::Mat _img_prev, const cv::Mat _img_curr, const KeyPointsMap _mwkps_prev, const KeyPointsMap _mwkps_curr, TracksMap &_tracks_prev_curr);
+        CaptureImagePtr get_capture_image_last() {
+            return capture_image_last_;
+        }
+        CaptureImagePtr get_capture_image_incoming() {
+            return capture_image_incoming_;
+        }
+        CaptureImagePtr get_capture_image_origin() {
+            return capture_image_origin_;
+        }
 
         /** \brief Tool to merge tracks 
          */

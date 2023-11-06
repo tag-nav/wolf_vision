@@ -298,13 +298,6 @@ void ProcessorVisualOdometry::preProcess()
             mwkps_last_filtered[track.first] = mwkps_last_new[track.first];
             mwkps_incoming_filtered[track.second] = mwkps_incoming_new[track.second];
         }
-
-        // Visualize pair of images before filtering out outlier features
-        cv::Mat vis_img = draw_matching(img_last, img_incoming, mwkps_last_filtered, mwkps_incoming_filtered, tracks_last_incoming_filtered);
-
-        // Show the visualized image (you can also save it if needed)
-        cv::imshow("KeyPoint Visualization", vis_img);
-        cv::waitKey(1);
         
         // Outliers rejection with essential matrix
         // tracks that are not geometrically consistent are removed from tracks_last_incoming_new
@@ -700,44 +693,6 @@ bool ProcessorVisualOdometry::filterWithEssential(const KeyPointsMap _mwkps_prev
     }
 
     return true;
-}
-
-cv::Mat ProcessorVisualOdometry::draw_matching(const cv::Mat _img_prev, const cv::Mat _img_curr, const KeyPointsMap _mwkps_prev, const KeyPointsMap _mwkps_curr, TracksMap &_tracks_prev_curr) {
-    // Create a copy of the input images for visualization
-    cv::Mat img_prev = _img_prev.clone();
-    cv::Mat img_curr = _img_curr.clone();
-    
-    // We need to build lists of pt2d for openCV function
-    std::vector<cv::Point2d> p2d_prev, p2d_curr;
-    // std::vector<size_t> all_indices;
-    for (auto & track : _tracks_prev_curr){
-        // all_indices.push_back(track.first);
-        Eigen::Vector2d ray_prev = pinhole::depixellizePoint(sen_cam_->getPinholeModel(), _mwkps_prev.at(track.first).getEigenKeyPoint());
-        Eigen::Vector2d ray_curr = pinhole::depixellizePoint(sen_cam_->getPinholeModel(), _mwkps_curr.at(track.second).getEigenKeyPoint());
-        p2d_prev.push_back(cv::Point2d(ray_prev.x(), ray_prev.y()));
-        p2d_curr.push_back(cv::Point2d(ray_curr.x(), ray_curr.y()));
-    }
-    
-    // Loop through the corresponding keypoints and draw them on the images
-    for (size_t i = 0; i < p2d_prev.size(); i++) {
-        // Draw a circle or some marker at the keypoints
-        cv::circle(img_prev, p2d_prev[i], 5, cv::Scalar(0, 0, 255), -1); // Red circle on the previous image
-        cv::circle(img_curr, p2d_curr[i], 5, cv::Scalar(0, 0, 255), -1); // Red circle on the current image
-
-        // Draw a line connecting the corresponding keypoints
-        cv::line(img_prev, p2d_prev[i], p2d_curr[i], cv::Scalar(0, 255, 0), 2); // Green line connecting keypoints
-    }
-
-    // Create a side-by-side visualization of the two images
-    cv::Mat visualized_img;
-    cv::hconcat(img_prev, img_curr, visualized_img);
-
-    // Show the visualized image (you can also save it if needed)
-    // cv::imshow("KeyPoint Visualization", visualized_img);
-    // cv::waitKey(0);
-    
-    return visualized_img;
-    
 }
 
 void ProcessorVisualOdometry::retainBest(std::vector<cv::KeyPoint> &_keypoints, int n)
