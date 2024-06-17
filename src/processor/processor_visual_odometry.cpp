@@ -1,6 +1,6 @@
 //--------LICENSE_START--------
 //
-// Copyright (C) 2020,2021,2022,2023 Institut de Robòtica i Informàtica Industrial, CSIC-UPC.
+// Copyright (C) 2020,2021,2022,2023,2024 Institut de Robòtica i Informàtica Industrial, CSIC-UPC.
 // Authors: Joan Solà Ortega (jsola@iri.upc.edu)
 // All rights reserved.
 //
@@ -434,7 +434,7 @@ void ProcessorVisualOdometry::establishFactors()
         LandmarkBasePtr associated_lmk = nullptr;
         for (auto lmk: getProblem()->getMap()->getLandmarkList())
         {
-            if (lmk->id() == feat_pi->trackId()){
+            if (lmk->trackId() == feat_pi->trackId()){
                 associated_lmk = lmk;
             }
         }
@@ -444,11 +444,14 @@ void ProcessorVisualOdometry::establishFactors()
         if (associated_lmk)
         {
             LandmarkHpPtr associated_lmk_hp = std::dynamic_pointer_cast<LandmarkHp>(associated_lmk);
-            FactorBase::emplace<FactorPixelHp>(feat_pi,
-                                               feat_pi,
-                                               associated_lmk_hp,
-                                               shared_from_this(),
-                                               params_visual_odometry_->apply_loss_function);
+            
+            if (associated_lmk_hp) {
+                FactorBase::emplace<FactorPixelHp>(feat_pi,
+                                                feat_pi,
+                                                associated_lmk_hp,
+                                                shared_from_this(),
+                                                params_visual_odometry_->apply_loss_function);
+            }
         }
 
         // 2) create landmark if track is not associated with one and has enough length
@@ -456,7 +459,6 @@ void ProcessorVisualOdometry::establishFactors()
         {
             // std::cout << "NEW valid track \\o/" << std::endl;
             LandmarkBasePtr lmk = emplaceLandmark(feat_pi);
-            lmk->setId(feat_pi->trackId());
 
             // Add factors from all KFs of this track to the new lmk
             Track track_kf = track_matrix_.trackAtKeyframes(feat->trackId());
@@ -513,8 +515,8 @@ LandmarkBasePtr ProcessorVisualOdometry::emplaceLandmark(FeatureBasePtr _feat)
 
     // Set all IDs equal to track ID
     size_t track_id = _feat->trackId();
-    lmk_hp_ptr->setId(track_id);
-    _feat->setLandmarkId(track_id);
+    lmk_hp_ptr->setTrackId(track_id);
+    _feat->setLandmarkId(lmk_hp_ptr->id());
 
     return lmk_hp_ptr;
 }
