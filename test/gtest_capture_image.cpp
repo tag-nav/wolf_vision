@@ -1,10 +1,6 @@
 //--------LICENSE_START--------
 //
-<<<<<<< HEAD
-// Copyright (C) 2020,2021,2022,2023 Institut de Robòtica i Informàtica Industrial, CSIC-UPC.
-=======
 // Copyright (C) 2020,2021,2022,2023,2024 Institut de Robòtica i Informàtica Industrial, CSIC-UPC.
->>>>>>> upstream
 // Authors: Joan Solà Ortega (jsola@iri.upc.edu)
 // All rights reserved.
 //
