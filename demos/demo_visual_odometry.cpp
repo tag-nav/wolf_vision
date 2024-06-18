@@ -1,6 +1,6 @@
 //--------LICENSE_START--------
 //
-// Copyright (C) 2020,2021,2022,2023,2024 Institut de Robòtica i Informàtica Industrial, CSIC-UPC.
+// Copyright (C) 2020,2021,2022,2023 Institut de Robòtica i Informàtica Industrial, CSIC-UPC.
 // Authors: Joan Solà Ortega (jsola@iri.upc.edu)
 // All rights reserved.
 //
@@ -21,20 +21,40 @@
 //--------LICENSE_END--------
 //std
 #include <iostream>
+#include <fstream>
 
 //Wolf
+#include <core/ceres_wrapper/solver_ceres.h>
+#include <core/solver/factory_solver.h>
 #include <core/common/wolf.h>
-#include "core/yaml/parser_yaml.h"
+#include <core/yaml/parser_yaml.h>
 #include <core/problem/problem.h>
 #include "vision/sensor/sensor_camera.h"
 #include "vision/processor/processor_visual_odometry.h"
 #include "vision/capture/capture_image.h"
 #include "vision/internal/config.h"
 
+// opencv
+#include <opencv2/core/types.hpp>
+#include <opencv2/features2d.hpp>
+
+#include <opencv2/highgui/highgui.hpp>
+#include <opencv2/core/core.hpp>
+
+
 
 using namespace wolf;
 
 std::string wolf_vision_root = _WOLF_VISION_ROOT_DIR;
+
+std::string getFilenameWithoutExtension(const std::string& filePath)
+{
+    size_t lastSlash = filePath.find_last_of('/');
+    size_t lastDot = filePath.find_last_of('.');
+    if (lastDot == std::string::npos || lastDot < lastSlash)
+        return filePath.substr(lastSlash + 1);
+    return filePath.substr(lastSlash + 1, lastDot - lastSlash - 1);
+}
 
 int main(int argc, char** argv)
 {
@@ -52,65 +72,118 @@ int main(int argc, char** argv)
     // Wolf problem: automatically build the left branch of the wolf tree from the contents of the params server:
     ProblemPtr problem      = Problem::autoSetup(server);
 
+    assert(problem->getDim() == 3);
+
+    SolverManagerPtr ceres = FactorySolver::create("SolverCeres", problem, server);
+
     // Print problem to see its status before processing any sensor data
     problem->print(4,0,1,0);
 
     // recover sensor pointers and other stuff for later use (access by sensor name)
     SensorCameraPtr sensor_cam = std::dynamic_pointer_cast<SensorCamera>(problem->findSensor("sen cam"));
-    // ProcessorVisualOdometryPtr proc_vo = std::dynamic_pointer_cast<ProcessorVisualOdometry>(problem->getProcessor("proc vo"));
+    ProcessorVisualOdometryPtr proc_vo = std::dynamic_pointer_cast<ProcessorVisualOdometry>(problem->findProcessor("prc vo"));
+
+    std::cout << sensor_cam->getCategory() << std::endl;
 
     //    ==============================================================================
 
     // std::string euroc_data_folder = "/home/mfourmy/Documents/Phd_LAAS/data/Euroc/MH_01_easy/mav0/cam0/data/";
-    cv::String euroc_data_path("/home/mfourmy/Documents/Phd_LAAS/data/Euroc/MH_01_easy/mav0/cam0/data/*.png");
+    // std::string seq_name = "V101";
+    cv::String euroc_data_path("/home/jlee/workspace/ae598-3dv/AE598Project/data/mav0/cam0/data/*.png");
+
     std::vector<cv::String> fn;
     cv::glob(euroc_data_path, fn, true); // recurse
+    std::sort(fn.begin(), fn.end());
 
-    TimeStamp t = 0;
-    // unsigned int number_of_KFs = 0;
+    TimeStamp tic = 0;
+    unsigned int number_of_KFs = 0;
+
     // main loop
-    double dt = 0.05;
-
-    std::cout << sensor_cam->getCategory() << std::endl;
-
-
-    // for (size_t k=0; k < fn.size(); ++k)
-    for (size_t k=0; k < 20; ++k)
+    for (size_t k=0; k < fn.size(); ++k)
     {
         cv::Mat img = cv::imread(fn[k], cv::IMREAD_GRAYSCALE);
 
-        //////////////////////////
-        // Correct img
-        // 
-        // ....... 
-        //
-        //////////////////////////
+        // Extract the filename without extension
+        std::string ts_raw = getFilenameWithoutExtension(fn[k]);
+        TimeStamp t = std::stod(ts_raw) / 1e9;
+        
+        if (k==0) tic = t;
 
         CaptureImagePtr image = std::make_shared<CaptureImage>(t, sensor_cam, img);
+        std::cout << "[Frame " << k << "] call process ... " << std::endl;
         sensor_cam->process(image);
+        std::cout << "[Frame " << k << "] done calling process ... " << std::endl;
 
+        CaptureImagePtr capture_image_last_ptr = proc_vo->get_capture_image_last();
+        CaptureImagePtr capture_image_incoming_ptr = proc_vo->get_capture_image_incoming();
+        
+        if (!(capture_image_last_ptr==nullptr) && !(capture_image_incoming_ptr==nullptr)) {
+            cv::Mat img_last = capture_image_last_ptr->getImage().clone(); 
+            cv::Mat img_incoming = capture_image_incoming_ptr->getImage().clone(); 
+
+            KeyPointsMap mwkps_last = capture_image_last_ptr->getKeyPoints();
+            KeyPointsMap mwkps_incoming = capture_image_incoming_ptr->getKeyPoints();
+            TracksMap tracks_last_incoming = capture_image_incoming_ptr->getTracksPrev();
+
+            // We need to build lists of pt2d for openCV function
+            std::vector<cv::KeyPoint> p2d_last, p2d_incoming;
+            std::vector<cv::DMatch> matches;
+            int cnt = 0;
+            for (auto & track : tracks_last_incoming){
+                // all_indices.push_back(track.first);
+                p2d_last.push_back(mwkps_last.at(track.first).getCvKeyPoint());
+                p2d_incoming.push_back(mwkps_incoming.at(track.second).getCvKeyPoint());
+                // matches.push_back(cv::DMatch(track.first, track.second, 0));
+                matches.push_back(cv::DMatch(cnt, cnt, 0));
+                cnt ++;
+            }
+
+            // Create a side-by-side visualization of the two images
+            cv::Mat vis_img;
+            // cv::hconcat(img_last, img_incoming, vis_img);
+
+            cv::drawMatches(img_last, p2d_last, img_incoming, p2d_incoming, matches, vis_img);
+
+            // Show the visualized image (you can also save it if needed)
+            cv::imshow("KeyPoint Visualization", vis_img);
+            cv::waitKey(1);
+        }
         // problem->print(3,0,1,1);
 
+        // solve only when new KFs are added
+        if (problem->getTrajectory()->getFrameMap().size() > number_of_KFs)
+        {
+            number_of_KFs = problem->getTrajectory()->getFrameMap().size();
+            std::string report = ceres->solve(wolf::SolverManager::ReportVerbosity::BRIEF);
+            // std::cout << report << std::endl;
+        }
 
-        // // solve only when new KFs are added
-        // if (problem->getTrajectory()->getFrameMap().size() > number_of_KFs)
-        // {
-        //     number_of_KFs = problem->getTrajectory()->getFrameMap().size();
-        //     std::string report = solver->solve(wolf::SolverManager::ReportVerbosity::BRIEF);
-        //     std::cout << report << std::endl;
-        //     if (number_of_KFs > 5)
-        //     	break;
-        // }
+        // cv::waitKey();
 
-        // cv::waitKey();//1e7);
-
-        t += dt;
-
+        // if (t.getSeconds() - tic.getSeconds() > 5.0) break;
 
     }
-    problem->print(3,0,1,1);
+    // problem->print(3,0,1,1);
+    
+    // ADDED HERE BEGIN
+    std::ofstream f;
+    f.open("/home/jlee/workspace/wolf/vision/results/vo.tum");
+    for (const auto& e : problem->getTrajectory()->getFrameMap()) {
+        
+        auto ts = e.first;
+        auto kf = e.second;
+
+        Eigen::Vector3d p = Eigen::Vector3d::Zero();
+        Eigen::Quaterniond q;
+        
+        p = kf->getP()->getState();
+        q = Eigen::Quaterniond(Eigen::Vector4d(kf->getO()->getState()));
+        
+        f << std::setprecision(19) << ts.get() << " " << std::setprecision(10) << p(0) << " " << p(1) << " " << p(2) << " " << q.x() << " " << q.y() << " " << q.z() << " " << q.w() << std::endl;
+    }
+    f.close();
+    // ADDED HERE END
 
 
     return 0;
 }
-
