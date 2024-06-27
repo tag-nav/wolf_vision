@@ -45,7 +45,11 @@
 #include <opencv2/features2d.hpp>
 #include <opencv2/calib3d/calib3d.hpp>
 #include <opencv2/video/tracking.hpp>
+#include <opencv2/imgproc.hpp>
+#include <opencv2/core/eigen.hpp>
 
+#include <chrono>
+#include <ctime>
 
 
 namespace wolf{
@@ -54,6 +58,55 @@ WOLF_STRUCT_PTR_TYPEDEFS(ParamsProcessorVisualOdometry);
 
 struct ParamsProcessorVisualOdometry : public ParamsProcessorTracker
 {
+    struct RansacParams
+    {
+        double prob;
+        double thresh;
+    };
+
+    struct KltParams
+    {
+        int patch_width;
+        int patch_height;
+        double max_err;
+        int nlevels_pyramids;
+        cv::TermCriteria criteria;
+    };
+
+    struct FastParams
+    {
+        int threshold;
+        bool non_max_suppresion;
+    };
+
+    struct GridParams
+    {
+        unsigned int nbr_cells_h;
+        unsigned int nbr_cells_v;
+        unsigned int margin;
+        unsigned int separation;
+    };
+
+    struct EqualizationParams
+    {
+            unsigned int method; // 0: none; 1: average; 2: histogram; 3: CLAHE
+            // note: cv::histogramEqualization() has no tuning params
+            struct AverageParams
+            {
+                    int median;
+            } average;
+            struct ClaheParams
+            {
+                    double clip_limit;
+                    cv::Size2i tile_grid_size;
+            } clahe;
+    };
+
+    RansacParams ransac;
+    KltParams klt;
+    FastParams fast;
+    GridParams grid;
+    EqualizationParams equalization;
     double std_pix;
     unsigned int min_track_length_for_landmark;
 
@@ -62,26 +115,61 @@ struct ParamsProcessorVisualOdometry : public ParamsProcessorTracker
         ParamsProcessorTracker(_unique_name, _server)
     {
         std_pix = _server.getParam<double>(prefix + _unique_name + "/std_pix");
+
+        equalization.method = _server.getParam<unsigned int>(prefix + _unique_name + "/equalization/method");
+        switch (equalization.method)
+        {
+            case 0: break;
+            case 1:
+                equalization.average.median = _server.getParam<unsigned int>(prefix + _unique_name + "/equalization/average/median");
+                break;
+            case 2:
+                // note: cv::histogramEqualization() has no tuning params
+                break;
+            case 3:
+                equalization.clahe.clip_limit = _server.getParam<double>(prefix + _unique_name + "/equalization/clahe/clip_limit");
+                vector<int> grid_size = _server.getParam<vector<int>>(prefix + _unique_name + "/equalization/clahe/tile_grid_size");
+                equalization.clahe.tile_grid_size.width  = grid_size[0];
+                equalization.clahe.tile_grid_size.height = grid_size[1];
+                break;
+        }
+
+        ransac.prob   = _server.getParam<double>(prefix + _unique_name + "/ransac/prob");
+        ransac.thresh = _server.getParam<double>(prefix + _unique_name + "/ransac/thresh");
+
+        klt.patch_width        = _server.getParam<int>    (prefix + _unique_name + "/klt/patch_width");
+        klt.patch_height       = _server.getParam<int>    (prefix + _unique_name + "/klt/patch_height");
+        klt.max_err            = _server.getParam<double> (prefix + _unique_name + "/klt/max_err");
+        klt.nlevels_pyramids   = _server.getParam<int>    (prefix + _unique_name + "/klt/nlevels_pyramids");
+        klt.criteria           = cv::TermCriteria(cv::TermCriteria::COUNT+cv::TermCriteria::EPS, 30, 0.01);  // everybody uses this defaults...
+
+        fast.threshold         = _server.getParam<int>    ( prefix + _unique_name + "/fast/threshold");
+        fast.non_max_suppresion = _server.getParam<bool>  (prefix + _unique_name + "/fast/non_max_suppresion");
+
+        grid.nbr_cells_h   = _server.getParam<unsigned int>(prefix + _unique_name + "/grid/nbr_cells_h");
+        grid.nbr_cells_v   = _server.getParam<unsigned int>(prefix + _unique_name + "/grid/nbr_cells_v");
+        grid.margin        = _server.getParam<unsigned int>(prefix + _unique_name + "/grid/margin");
+        grid.separation    = _server.getParam<unsigned int>(prefix + _unique_name + "/grid/separation");
+
         min_track_length_for_landmark = _server.getParam<unsigned int>(prefix + _unique_name + "/min_track_length_for_landmark");
 
-        // [TODO] Add others (if needed)
     }
     std::string print() const override
     {
         return ParamsProcessorTracker::print()                                                      + "\n"
-            // + "equalization.method:       " + std::to_string(equalization.method)                   + "\n"
-            // + "ransac.prob:               " + std::to_string(ransac.prob)                           + "\n"
-            // + "ransac.thresh:             " + std::to_string(ransac.thresh)                         + "\n"
-            // + "klt.patch_width:           " + std::to_string(klt.patch_width)                       + "\n"
-            // + "klt.patch_height:          " + std::to_string(klt.patch_height)                      + "\n"
-            // + "klt.max_err:               " + std::to_string(klt.max_err)                           + "\n"
-            // + "klt.nlevels_pyramids:      " + std::to_string(klt.nlevels_pyramids)                  + "\n"
-            // + "fast.threshold:            " + std::to_string(fast.threshold)                        + "\n"
-            // + "fast.non_max_suppresion:   " + std::to_string(fast.non_max_suppresion)               + "\n"
-            // + "grid.nbr_cells_h:          " + std::to_string(grid.nbr_cells_h)                      + "\n"
-            // + "grid.nbr_cells_v:          " + std::to_string(grid.nbr_cells_v)                      + "\n"
-            // + "grid.margin:               " + std::to_string(grid.margin)                           + "\n"
-            // + "grid.separation:           " + std::to_string(grid.separation)                       + "\n"
+            + "equalization.method:       " + std::to_string(equalization.method)                   + "\n"
+            + "ransac.prob:               " + std::to_string(ransac.prob)                           + "\n"
+            + "ransac.thresh:             " + std::to_string(ransac.thresh)                         + "\n"
+            + "klt.patch_width:           " + std::to_string(klt.patch_width)                       + "\n"
+            + "klt.patch_height:          " + std::to_string(klt.patch_height)                      + "\n"
+            + "klt.max_err:               " + std::to_string(klt.max_err)                           + "\n"
+            + "klt.nlevels_pyramids:      " + std::to_string(klt.nlevels_pyramids)                  + "\n"
+            + "fast.threshold:            " + std::to_string(fast.threshold)                        + "\n"
+            + "fast.non_max_suppresion:   " + std::to_string(fast.non_max_suppresion)               + "\n"
+            + "grid.nbr_cells_h:          " + std::to_string(grid.nbr_cells_h)                      + "\n"
+            + "grid.nbr_cells_v:          " + std::to_string(grid.nbr_cells_v)                      + "\n"
+            + "grid.margin:               " + std::to_string(grid.margin)                           + "\n"
+            + "grid.separation:           " + std::to_string(grid.separation)                       + "\n"
             + "min_track_length_for_landmark:   " + std::to_string(min_track_length_for_landmark)   + "\n";
     }
 };
@@ -103,19 +191,27 @@ class ProcessorVisualOdometry : public ProcessorTracker
 
         Matrix2d pixel_cov_;
 
+        // detector
+        cv::Ptr<cv::FeatureDetector> detector_;
+
         // A few casted smart pointers
         CaptureImagePtr capture_image_last_;
         CaptureImagePtr capture_image_incoming_;
         CaptureImagePtr capture_image_origin_;
         SensorCameraPtr sen_cam_;
 
+        ActiveSearchGrid cell_grid_;
+
     private:
         // camera
         cv::Mat Kcv_;
+        cv::Mat dcv_;
 
         // bookeeping
         TracksMap tracks_map_li_matched_;
 
+        // flag if the processor is initialized with two keyframes and enough 3D map points
+        bool is_initialized = false;
 
     public:
 
@@ -124,34 +220,26 @@ class ProcessorVisualOdometry : public ProcessorTracker
          */
         void configure(SensorBasePtr _sensor) override;
 
-        /** \brief Pre-process incoming Capture, see ProcessorTracker
+        /**
+         * \brief Function that determines the current stage of the visual odometry process:
+         *        initializing the first keyframe, initializing the second keyframe, or running.
+         */
+        void processCapture(CaptureBasePtr) override;
+
+        // Functions related to preprocessing the incoming capture
+        /** \brief Pre-process incoming Capture
          */
         void preProcess() override;
 
-        /** \brief Post-process, see ProcessorTracker
-         */
-        virtual void postProcess() override;
-
+        // Functions related to keyframe and factor creation
         /** \brief Vote for KeyFrame generation, see ProcessorTracker
          */
         bool voteForKeyFrame() const override;
 
         /**
-         * \brief Tracker function
-         * \return The number of successful tracks.
-         *
-         * see ProcessorTracker
+         * \brief Sets the keyframe to the incoming capture.
          */
-        unsigned int processKnown() override;
-
-
-        /**
-         * \brief Process new Features
-         * \param _max_features the maximum number of new feature tracks
-         * \return the number of new tracks
-         */
-        unsigned int processNew(const int& _max_features) override;
-
+        FrameBasePtr addKF(int _kf_status);
 
         /**
          * \brief Creates and adds factors from last_ to origin_
@@ -159,37 +247,41 @@ class ProcessorVisualOdometry : public ProcessorTracker
         void establishFactors() override;
 
         /**
-         * \brief Emplace a landmark corresponding to a track and initialize it with triangulation.
+         * \brief Emplace a landmark corresponding to a track and initialize it.
          * \param _feature_ptr a pointer to the feature used to create the new landmark
          * \return a pointer to the created landmark
          */
-        LandmarkBasePtr emplaceLandmark(FeatureBasePtr _feature_ptr);
+        LandmarkBasePtr emplaceLandmark(FeatureBasePtr _feature);
 
-
-        /** \brief Advance the incoming Capture to become the last.
-         *
-         * see ProcessorTracker
+        // Functions related to feature extraction
+        /**
+         * \brief Populates features in the incoming capture.
          */
+        size_t populateFeatures();
+
+        // Functions related to feature tracking
+        /**
+         * \brief Tracks features from origin to last to incoming.
+         */        
+        size_t trackFeatures();
+
+        /**
+         * \brief Updates the member variable (TrackMatrix track_matrix_) for managing the feature tracking status.
+         */        
+        void updateTrackMatrix();
+        
+        // override functions unused yet
+        virtual void postProcess() override;
+        unsigned int processKnown() override;
+        unsigned int processNew(const int& _max_features) override;
         void advanceDerived() override;
-
-
-        /** \brief Reset the tracker using the \b last Capture as the new \b origin.
-         */
         void resetDerived() override;
 
-        /** \brief Tool to merge tracks 
-         */
-        static TracksMap mergeTracks(const TracksMap& tracks_prev_curr, const TracksMap& tracks_curr_next);
-
-        CaptureImagePtr get_capture_image_last() {
-            return capture_image_last_;
-        }
-        CaptureImagePtr get_capture_image_incoming() {
-            return capture_image_incoming_;
-        }
-        CaptureImagePtr get_capture_image_origin() {
-            return capture_image_origin_;
-        }
+        CaptureImagePtr get_capture_image_last() { return capture_image_last_; }
+        CaptureImagePtr get_capture_image_incoming() { return capture_image_incoming_; }
+        CaptureImagePtr get_capture_image_origin() { return capture_image_origin_; }
+        void setParams(const ParamsProcessorVisualOdometryPtr _params);
+        const TrackMatrix& getTrackMatrix() const {return track_matrix_;}
 
 };
 

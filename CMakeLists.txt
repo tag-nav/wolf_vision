@@ -133,6 +133,7 @@ include/${PROJECT_NAME}/math/pinhole_tools.h
 SET(HDRS_PROCESSOR
 include/${PROJECT_NAME}/processor/processor_visual_odometry.h
 include/${PROJECT_NAME}/processor/active_search.h
+include/${PROJECT_NAME}/processor/vo_utils.h
   )
 SET(HDRS_SENSOR
 include/${PROJECT_NAME}/sensor/sensor_camera.h
@@ -153,6 +154,7 @@ src/landmark/landmark_point_3d.cpp
 SET(SRCS_PROCESSOR
 src/processor/processor_visual_odometry.cpp
 src/processor/active_search.cpp
+src/processor/vo_utils.cpp
   )
 SET(SRCS_SENSOR
 src/sensor/sensor_camera.cpp
