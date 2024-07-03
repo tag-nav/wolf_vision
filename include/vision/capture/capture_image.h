@@ -75,10 +75,15 @@ class WKeyPoint
 // This map is frame specific and enables to recover a Wolf KeyPoint with a certain
 // ID in a frame
 typedef std::unordered_map<size_t, WKeyPoint> KeyPointsMap;
+// key (type: size_t) stands for WKeyPoint ID. 
+// This is different from ID associated with the value (type: WKeyPoint), 
+// which is auto-generated when every WKeyPoint instance is created. (see id_count_)
 
 // This maps the IDs of the Wolf KeyPoints that are tracked from a frame to the other.
 // It takes the ID of a WKeyPoint and returns the ID of its track in another Frame.
 typedef std::unordered_map<size_t, size_t> TracksMap;
+// key (type: size_t) stands for WKeyPoint ID in the previous frame.
+// value (type: size_t) stands for the corresponding WKeyPoint ID (beware: this is not identical to above!) in the current frame.
 
 // Set ClassPtr, ClassConstPtr and ClassWPtr typedefs;
 WOLF_PTR_TYPEDEFS(CaptureImage);
@@ -119,10 +124,10 @@ class CaptureImage : public CaptureBase
         const KeyPointsMap getKeyPoints() const {return mwkps_;}
         void setKeyPoints(const KeyPointsMap& _mwkps){mwkps_ = _mwkps;}
 
-        const TracksMap& getTracksPrev() const {return tracks_prev_;}
+        TracksMap& getTracksPrev() {return tracks_prev_;}
         void setTracksPrev(const TracksMap& _tracks){tracks_prev_ = _tracks;}
 
-        const TracksMap& getTracksOrigin() const {return tracks_origin_;}
+        TracksMap& getTracksOrigin() {return tracks_origin_;}
         void setTracksOrigin(const TracksMap& _tracks){tracks_origin_ = _tracks;}
 
         bool getLastWasRepopulated() const {return last_was_repopulated_;}
@@ -137,6 +142,8 @@ class CaptureImage : public CaptureBase
 
         void removeKeyPoint(size_t _kp_id);
         void removeKeyPoint(const WKeyPoint& _wkp);
+
+        size_t frame_cnt_;  // FOR DEBUGGING
 
 };
 

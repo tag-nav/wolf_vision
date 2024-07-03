@@ -195,9 +195,9 @@ class ProcessorVisualOdometry : public ProcessorTracker
         cv::Ptr<cv::FeatureDetector> detector_;
 
         // A few casted smart pointers
-        CaptureImagePtr capture_image_last_;
-        CaptureImagePtr capture_image_incoming_;
-        CaptureImagePtr capture_image_origin_;
+        CaptureImagePtr capture_last_;
+        CaptureImagePtr capture_incoming_;
+        CaptureImagePtr capture_origin_;
         SensorCameraPtr sen_cam_;
 
         ActiveSearchGrid cell_grid_;
@@ -248,10 +248,10 @@ class ProcessorVisualOdometry : public ProcessorTracker
 
         /**
          * \brief Emplace a landmark corresponding to a track and initialize it.
-         * \param _feature_ptr a pointer to the feature used to create the new landmark
+         * \param FeaturePointImagePtr a pointer to the feature used to create the new landmark
          * \return a pointer to the created landmark
          */
-        LandmarkBasePtr emplaceLandmark(FeatureBasePtr _feature);
+        LandmarkHpPtr emplaceLandmark(FeaturePointImagePtr);
 
         // Functions related to feature extraction
         /**
@@ -269,6 +269,23 @@ class ProcessorVisualOdometry : public ProcessorTracker
          * \brief Updates the member variable (TrackMatrix track_matrix_) for managing the feature tracking status.
          */        
         void updateTrackMatrix();
+
+        // other utility functions
+        /**
+         * @brief Extracts 2D feature points and corresponding transformed 3D landmark points from a given capture image.
+         * 
+         * This function takes a capture image and extracts the associated 2D feature points and 3D landmark points. 
+         * The 3D points are transformed from world coordinates to camera coordinates. The resulting 2D and 3D points 
+         * are stored in the provided vectors.
+         * 
+         * @param capture A constant pointer to the capture image containing the features and landmarks.
+         * @param pts3d A reference to a vector of Eigen::Vector3d to store the transformed 3D landmark points in camera coordinates.
+         * @param pts2d A reference to a vector of Eigen::Vector2d to store the 2D feature points.
+         */
+        void extractPointsFromCaptureImage(const CaptureImagePtr capture,
+                                           std::vector<Eigen::Vector3d>& pts3d,
+                                           std::vector<Eigen::Vector2d>& pts2d);
+
         
         // override functions unused yet
         virtual void postProcess() override;
@@ -277,9 +294,9 @@ class ProcessorVisualOdometry : public ProcessorTracker
         void advanceDerived() override;
         void resetDerived() override;
 
-        CaptureImagePtr get_capture_image_last() { return capture_image_last_; }
-        CaptureImagePtr get_capture_image_incoming() { return capture_image_incoming_; }
-        CaptureImagePtr get_capture_image_origin() { return capture_image_origin_; }
+        CaptureImagePtr get_capture_last() { return capture_last_; }
+        CaptureImagePtr get_capture_incoming() { return capture_incoming_; }
+        CaptureImagePtr get_capture_origin() { return capture_origin_; }
         void setParams(const ParamsProcessorVisualOdometryPtr _params);
         const TrackMatrix& getTrackMatrix() const {return track_matrix_;}
 

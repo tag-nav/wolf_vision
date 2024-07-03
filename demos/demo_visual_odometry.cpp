@@ -77,7 +77,7 @@ int main(int argc, char** argv)
     SolverManagerPtr ceres = FactorySolver::create("SolverCeres", problem, server);
 
     // Print problem to see its status before processing any sensor data
-    problem->print(4,0,1,0);
+    problem->print(4,1,1,1);
 
     // recover sensor pointers and other stuff for later use (access by sensor name)
     SensorCameraPtr sensor_cam = std::dynamic_pointer_cast<SensorCamera>(problem->findSensor("sen cam"));
@@ -110,43 +110,15 @@ int main(int argc, char** argv)
         if (k==0) tic = t;
 
         CaptureImagePtr image = std::make_shared<CaptureImage>(t, sensor_cam, img);
-        std::cout << "[Frame " << k << "] call process ... " << std::endl;
+        std::cout << "[Frame " << k << "]" << std::endl;
         sensor_cam->process(image);
-        std::cout << "[Frame " << k << "] done calling process ... " << std::endl;
 
-        CaptureImagePtr capture_image_last_ptr = proc_vo->get_capture_image_last();
-        CaptureImagePtr capture_image_incoming_ptr = proc_vo->get_capture_image_incoming();
+        CaptureImagePtr capture_origin = proc_vo->get_capture_origin();
+        CaptureImagePtr capture_last = proc_vo->get_capture_last();
+        CaptureImagePtr capture_incoming = proc_vo->get_capture_incoming();
         
-        if (!(capture_image_last_ptr==nullptr) && !(capture_image_incoming_ptr==nullptr)) {
-            cv::Mat img_last = capture_image_last_ptr->getImage().clone(); 
-            cv::Mat img_incoming = capture_image_incoming_ptr->getImage().clone(); 
-
-            KeyPointsMap mwkps_last = capture_image_last_ptr->getKeyPoints();
-            KeyPointsMap mwkps_incoming = capture_image_incoming_ptr->getKeyPoints();
-            TracksMap tracks_last_incoming = capture_image_incoming_ptr->getTracksPrev();
-
-            // We need to build lists of pt2d for openCV function
-            std::vector<cv::KeyPoint> p2d_last, p2d_incoming;
-            std::vector<cv::DMatch> matches;
-            int cnt = 0;
-            for (auto & track : tracks_last_incoming){
-                // all_indices.push_back(track.first);
-                p2d_last.push_back(mwkps_last.at(track.first).getCvKeyPoint());
-                p2d_incoming.push_back(mwkps_incoming.at(track.second).getCvKeyPoint());
-                // matches.push_back(cv::DMatch(track.first, track.second, 0));
-                matches.push_back(cv::DMatch(cnt, cnt, 0));
-                cnt ++;
-            }
-
-            // Create a side-by-side visualization of the two images
-            cv::Mat vis_img;
-            // cv::hconcat(img_last, img_incoming, vis_img);
-
-            cv::drawMatches(img_last, p2d_last, img_incoming, p2d_incoming, matches, vis_img);
-
-            // Show the visualized image (you can also save it if needed)
-            cv::imshow("KeyPoint Visualization", vis_img);
-            cv::waitKey(1);
+        if (!(capture_last==nullptr) && !(capture_incoming==nullptr)) {
+            
         }
         // problem->print(3,0,1,1);
 
