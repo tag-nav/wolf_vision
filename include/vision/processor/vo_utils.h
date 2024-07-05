@@ -25,6 +25,9 @@
 #include <opencv2/imgproc.hpp>
 #include <opencv2/core/eigen.hpp>
 
+// // Eigen includes
+// #include <Eigen/Dense>
+// #include <Eigen/Geometry>
 
 namespace wolf{
 namespace vo_utils {
@@ -38,6 +41,26 @@ TracksMap mergeTracks(const TracksMap& tracks_prev_curr, const TracksMap& tracks
 TracksMap kltTrack(const ParamsProcessorVisualOdometryPtr _params_vo,
                    const cv::Mat& _img_prev, const cv::Mat& _img_curr,
                    const KeyPointsMap &_mwkps_prev, KeyPointsMap& _mwkps_curr);
+
+// functions related to 3d vision
+Eigen::Vector3d triangulate(const Eigen::Vector2d& pt2d_prev, 
+                            const Eigen::Vector2d& pt2d_curr, 
+                            const Eigen::Isometry3d& T_inC_ofW_prev, 
+                            const Eigen::Isometry3d& T_inC_ofW_curr);
+
+Eigen::Isometry3d getRelativePoseByEpipolarGeometry(const std::vector<cv::Point2f>& pts_prev,
+                                                    const std::vector<cv::Point2f>& pts_curr,
+                                                    const cv::Mat& K,
+                                                    const double scale = 1.0);
+
+// functions related to getter / setters
+Eigen::Isometry3d getTinW(const FrameBasePtr frame);
+void setTinW(const Eigen::Isometry3d& T_inW, FrameBasePtr frame);
+void getFeaturePairs(const FrameBasePtr frame_prev, const FrameBasePtr frame_curr, 
+                     const TrackMatrix& track_matrix, const SensorCameraPtr sen_cam,
+                     const std::list<FeatureBasePtr>& features_curr,
+                     std::vector<cv::Point2f>& pts_prev, std::vector<cv::Point2f>& pts_curr);
+cv::Mat getCameraProjectionMatrix(const Eigen::Isometry3d& T_inW_ofC, cv::Mat K);
 
 // functions for evaluations
 double getParallax(const Eigen::Vector4d& _pinhole_model, 

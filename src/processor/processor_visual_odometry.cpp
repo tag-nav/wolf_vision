@@ -44,6 +44,15 @@ void ProcessorVisualOdometry::configure(SensorBasePtr _sensor)
 
 void ProcessorVisualOdometry::processCapture(CaptureBasePtr _incoming_ptr)
 {
+    // Check if the current processor (ProcessorVisualOdometry) is the only processor associated with the sensor (camera)
+    // This implies that the odometry results are up-to-scale, so set the flag to true
+    // FIXME: Is this the best way of initializing the flag?
+    if (sen_cam_->getProcessorList().size() == 1)
+    {
+        WOLF_DEBUG("ProcessorVisualOdometry is the standalone processor associated with ", sen_cam_->getName(), ". Hence things are up-to-scale...");
+        is_up_to_scale = true;
+    }
+
     using std::abs;
 
     if (_incoming_ptr == nullptr)
@@ -317,12 +326,12 @@ FrameBasePtr ProcessorVisualOdometry::addKF(int _kf_status)
 
 void ProcessorVisualOdometry::establishFactors()
 {
-    // Function only called when KF is created using incoming
-    // Loop over the snapshot in corresponding to incoming capture. Does 2 things:
-    //     1) for tracks already associated to a landmark, create a KF-Lmk factor between the incoming KF and the landmark.
-    //     2) if the feature track is not associated to a landmark yet and is long enough, create a new landmark
-    //        using triangulation between current and previous KF as a prior. Establish KF-Lmk factors for all KFs then. 
-    //        For bookkeeping, define the landmark id as the track id.
+    // Function is only called when a keyframe (KF) is created using the incoming capture.
+    // Loop over the snapshot corresponding to the incoming capture. This function performs two main tasks:
+    //     1) For tracks already associated with a landmark, create a KF-Lmk factor between the incoming KF and the landmark.
+    //     2) If the feature track is not associated with a landmark yet and is long enough, create a new landmark
+    //        using triangulation between the current and previous KFs as a prior. Establish KF-Lmk factors for all KFs in this case.
+    //        For bookkeeping, define the landmark ID as the track ID.
 
     std::list<FeatureBasePtr> features = track_matrix_.snapshotAsList(incoming_ptr_);
 
@@ -332,17 +341,46 @@ void ProcessorVisualOdometry::establishFactors()
         return;
     }
 
+    // Retrieve the current frame 
+    FrameBasePtr frame_curr = incoming_ptr_->getFrame();
+    // Retrieve the previous frame
+    FrameBasePtr frame_prev = frame_curr->getPreviousFrame();
+
+    // 0) Initialize the current camera pose by essential matrix estimation.
+    {
+        // Retrieve 2D-2D feature matching pairs between the frames
+        std::vector<cv::Point2f> pts_prev, pts_curr;
+        vo_utils::getFeaturePairs(frame_prev, frame_curr, 
+                                  track_matrix_, sen_cam_, 
+                                  features,
+                                  pts_prev, pts_curr);
+        
+        // Estimate the relative pose using epipolar geometry
+        Eigen::Isometry3d T_inC_curr_ofC_prev = vo_utils::getRelativePoseByEpipolarGeometry(pts_prev, pts_curr, Kcv_);
+
+        // Get the transformation from the world coordinate frame to the robot coordinate frame at frame_prev
+        Eigen::Isometry3d T_inW_ofB_prev = vo_utils::getTinW(frame_prev);
+
+        // Calculate the transformation from the world coordinate frame to the robot coordinate frame at frame_curr
+        Eigen::Isometry3d T_inW_ofB_curr = T_inW_ofB_prev * T_inC_curr_ofC_prev.inverse();
+
+        // Set the transformation from the world coordinate frame to the robot coordinate frame at frame_curr
+        vo_utils::setTinW(T_inW_ofB_curr, frame_curr);
+    }
+    
+    std::list<FeatureBasePtr> features_to_triangulate;
+
     for (auto feature_base: features)
     {
         FeaturePointImagePtr feature = std::static_pointer_cast<FeaturePointImage>(feature_base);
 
-        // get a landmark associated to the track of the feature being inspected
+        // Get the landmark associated with the track of the current feature
         LandmarkBasePtr landmark_base = getProblem()->getMap()->getLandmark(feature->trackId());
 
         if (landmark_base) 
         {
-            // 1) create a factor between new KF and assocatiated track landmark
-            //    HYP: assuming the trackid are the same as the landmark ID -> BAD if other types of landmarks involved
+            // 1) For tracks already associated with a landmark, create a KF-Lmk factor between the incoming KF and the landmark.
+            // Note: Assuming the track ID is the same as the landmark ID, which may not hold if other types of landmarks are involved
             LandmarkHpPtr landmark = std::dynamic_pointer_cast<LandmarkHp>(landmark_base);
             FactorBase::emplace<FactorPixelHp>(feature,
                                                feature,
@@ -352,19 +390,29 @@ void ProcessorVisualOdometry::establishFactors()
         }
         else if(track_matrix_.trackSize(feature->trackId()) >= params_visual_odometry_->min_track_length_for_landmark)
         {
-            // 2) create landmark if track is not associated with one and has enough length
-            LandmarkHpPtr landmark = emplaceLandmark(feature);
+            // 2) Bookmark the current feature to create a landmark if the track is not associated with one and has sufficient length
+            features_to_triangulate.push_back(feature_base);
+        }
+    }
 
-            // Add factors from all KFs of this track to the new landmark
-            Track track_over_KFs = track_matrix_.trackAtKeyframes(feature->trackId());
-            for (auto track_at_KF: track_over_KFs)
-            {
-                FactorBase::emplace<FactorPixelHp>(track_at_KF.second,
-                                                   track_at_KF.second,
-                                                   landmark, 
-                                                   shared_from_this(),
-                                                   params_visual_odometry_->apply_loss_function);
-            }
+    WOLF_DEBUG("# of features_to_triangulate: ", features_to_triangulate.size());
+
+    // 2) Create landmarks by performing triangulation
+    std::list<LandmarkHpPtr> landmarks = emplaceLandmarks(frame_prev, frame_curr, 
+                                                          features_to_triangulate);
+
+    // Add factors from all KFs of this track to the new landmark
+    for (const auto& landmark : landmarks)
+    {
+        // Get the track of the landmark at keyframes
+        Track track_over_KFs = track_matrix_.trackAtKeyframes(landmark->trackId());
+        for (auto track_at_KF: track_over_KFs)
+        {
+            FactorBase::emplace<FactorPixelHp>(track_at_KF.second,
+                                               track_at_KF.second,
+                                               landmark, 
+                                               shared_from_this(),
+                                               params_visual_odometry_->apply_loss_function);
         }
     }
 
@@ -372,6 +420,89 @@ void ProcessorVisualOdometry::establishFactors()
 }
 
 
+std::list<LandmarkHpPtr> ProcessorVisualOdometry::emplaceLandmarks(const FrameBasePtr frame_prev, 
+                                                                   const FrameBasePtr frame_curr, 
+                                                                   std::list<FeatureBasePtr> features_curr)
+{
+    /* Emplace a landmark by performing triangulation between the input feature (associated with the current KF) 
+    and the corresponding last feature (associated with the last KF) */
+
+    // Define the transformation from the robot coordinate frame to the camera coordinate frame
+    Eigen::Isometry3d T_inB_ofC = Eigen::Translation3d(frame_curr->getCaptureOf(sen_cam_)->getSensorP()->getState()) *
+                                  Eigen::Quaterniond(frame_curr->getCaptureOf(sen_cam_)->getSensorO()->getState().data());
+
+    // Retrieve 2D-2D feature matching pairs in between the frames
+    std::vector<cv::Point2f> pts_prev, pts_curr;
+    vo_utils::getFeaturePairs(frame_prev, frame_curr, 
+                              track_matrix_, sen_cam_, 
+                              features_curr,
+                              pts_prev, pts_curr);
+
+    // Retrieve the transformation from the world coordinate frame to the robot coordinate frame at frame_prev
+    Eigen::Isometry3d T_inW_ofB_prev = vo_utils::getTinW(frame_prev);
+
+    // Retrieve the transformation from the world coordinate frame to the robot coordinate frame at frame_curr
+    Eigen::Isometry3d T_inW_ofB_curr = vo_utils::getTinW(frame_curr);
+
+    // Retrieve the transformation from the world coordinate frame to the camera coordinate frames
+    Eigen::Isometry3d T_inW_ofC_prev = T_inW_ofB_prev * T_inB_ofC;
+    Eigen::Isometry3d T_inW_ofC_curr = T_inW_ofB_curr * T_inB_ofC;
+
+    cv::Mat P_prev = vo_utils::getCameraProjectionMatrix(T_inW_ofC_prev, Kcv_);
+    cv::Mat P_curr = vo_utils::getCameraProjectionMatrix(T_inW_ofC_curr, Kcv_);
+
+    // Perform triangulation of the pair of 2D image points associated with the respective camera poses
+    cv::Mat pts_inW_cv;
+    cv::triangulatePoints(P_prev, P_curr, pts_prev, pts_curr, pts_inW_cv);
+
+    // Ensure pts_inW_cv has the expected dimensions
+    assert(pts_inW_cv.rows == 4);
+
+    std::list<LandmarkHpPtr> landmarks;
+    int i = 0;
+    for (const auto& feature_base : features_curr) 
+    {
+        FeaturePointImagePtr feature = std::dynamic_pointer_cast<FeaturePointImage>(feature_base);
+
+        double x = pts_inW_cv.at<double>(0, i);
+        double y = pts_inW_cv.at<double>(1, i);
+        double z = pts_inW_cv.at<double>(2, i);
+        double w = pts_inW_cv.at<double>(3, i);
+
+        // Avoid division by zero
+        if (w != 0) {
+            // Convert homogeneous coordinates to 3D
+            Eigen::Vector3d p_inW(x / w, y / w, z / w);
+            
+            // Create a 4D homogeneous point in world coordinates
+            Eigen::Vector4d ph_inW(p_inW(0), p_inW(1), p_inW(2), 1.0);
+
+            // Normalize the homogeneous point (this is the way in which WOLF handles it for some reason)
+            ph_inW.normalize();
+
+            // Emplace the landmark in the map with the 3D position and descriptor
+            LandmarkBasePtr landmark_base = LandmarkBase::emplace<LandmarkHp>(getProblem()->getMap(), ph_inW, 
+                                                                              feature->getKeyPoint().getDescriptor());
+            LandmarkHpPtr landmark = std::dynamic_pointer_cast<LandmarkHp>(landmark_base);
+
+            // Set the IDs for the landmark and feature
+            landmark->setTrackId(feature->trackId());
+            feature->setLandmarkId(landmark->id());
+
+            landmarks.push_back(landmark);
+        } else {
+            // Handle the case where w is zero to avoid invalid landmarks
+            std::cerr << "Warning: Homogeneous coordinate w is zero, skipping this point." << std::endl;
+        }
+
+        i++;
+    }
+
+    return landmarks;
+}
+
+
+/*
 LandmarkHpPtr ProcessorVisualOdometry::emplaceLandmark(FeaturePointImagePtr feature)
 {
     // Taken from processor_bundle_adjustment
@@ -415,7 +546,7 @@ LandmarkHpPtr ProcessorVisualOdometry::emplaceLandmark(FeaturePointImagePtr feat
 
     return landmark;
 }
-
+*/
 
 size_t ProcessorVisualOdometry::populateFeatures() 
 {
@@ -603,7 +734,8 @@ void ProcessorVisualOdometry::extractPointsFromCaptureImage(const CaptureImagePt
         LandmarkHpPtr landmark = std::dynamic_pointer_cast<LandmarkHp>(getProblem()->getMap()->getLandmark(feature->trackId()));
 
         // Ensure the feature and landmark pointers are valid
-        assert(feature != nullptr && landmark != nullptr);
+        if (feature == nullptr || landmark == nullptr) continue;
+        // assert(feature != nullptr && landmark != nullptr);
 
         // Add the 2D feature point to the pts2d vector
         pts2d.emplace_back(feature->getMeasurement());

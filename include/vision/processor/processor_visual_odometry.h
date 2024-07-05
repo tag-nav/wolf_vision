@@ -207,8 +207,9 @@ class ProcessorVisualOdometry : public ProcessorTracker
         cv::Mat Kcv_;
         cv::Mat dcv_;
 
-        // bookeeping
-        TracksMap tracks_map_li_matched_;
+        // Flag indicating if the processor is the standalone processor associated with the camera
+        // If true, the odometry results are up-to-scale
+        bool is_up_to_scale = false;
 
         // flag if the processor is initialized with two keyframes and enough 3D map points
         bool is_initialized = false;
@@ -251,7 +252,9 @@ class ProcessorVisualOdometry : public ProcessorTracker
          * \param FeaturePointImagePtr a pointer to the feature used to create the new landmark
          * \return a pointer to the created landmark
          */
-        LandmarkHpPtr emplaceLandmark(FeaturePointImagePtr);
+        std::list<LandmarkHpPtr> emplaceLandmarks(const FrameBasePtr frame_prev, 
+                                                  const FrameBasePtr frame_curr, 
+                                                  std::list<FeatureBasePtr> features_curr);
 
         // Functions related to feature extraction
         /**

@@ -104,6 +104,154 @@ TracksMap kltTrack(const wolf::ParamsProcessorVisualOdometryPtr _params_vo,
 }
 
 
+// Function to triangulate a 3D point from two 2D image points and camera poses
+Eigen::Vector3d triangulate(const Eigen::Vector2d& pt2d_prev, 
+                            const Eigen::Vector2d& pt2d_curr, 
+                            const Eigen::Isometry3d& T_inC_ofW_prev, 
+                            const Eigen::Isometry3d& T_inC_ofW_curr) 
+{
+    Eigen::Matrix4d A;
+
+    // Convert Isometry3d to Matrix4d
+    Eigen::Matrix4d T_prev = T_inC_ofW_prev.matrix();
+    Eigen::Matrix4d T_curr = T_inC_ofW_curr.matrix();
+
+    // Construct the A matrix for the Direct Linear Transformation (DLT) method
+    A.row(0) = pt2d_prev(0) * T_prev.row(2) - T_prev.row(0);
+    A.row(1) = pt2d_prev(1) * T_prev.row(2) - T_prev.row(1);
+    A.row(2) = pt2d_curr(0) * T_curr.row(2) - T_curr.row(0);
+    A.row(3) = pt2d_curr(1) * T_curr.row(2) - T_curr.row(1);
+
+    // Solve for the homogeneous coordinates of the 3D point
+    Eigen::Vector4d p_homogeneous = A.jacobiSvd(Eigen::ComputeFullV).matrixV().col(3);
+    
+    // Convert from homogeneous coordinates to 3D coordinates
+    Eigen::Vector3d p_inW = p_homogeneous.head<3>() / p_homogeneous(3);
+
+    return p_inW;
+}
+
+
+Eigen::Isometry3d getRelativePoseByEpipolarGeometry(const std::vector<cv::Point2f>& pts_prev,
+                                                    const std::vector<cv::Point2f>& pts_curr,
+                                                    const cv::Mat& K,
+                                                    const double scale)
+{
+    // Find the essential matrix using the given intrinsic camera matrix K
+    cv::Mat E = cv::findEssentialMat(pts_prev, pts_curr, K);
+
+    // Recover the relative pose (rotation and translation) from the essential matrix
+    cv::Mat R_cv, t_cv;
+    cv::recoverPose(E, pts_prev, pts_curr, K, R_cv, t_cv);
+
+    // Convert rotation and translation from OpenCV to Eigen
+    Eigen::Matrix3d R;
+    cv::cv2eigen(R_cv, R);
+    Eigen::Vector3d t;
+    cv::cv2eigen(t_cv, t);
+
+    // Normalize the translation vector to unit length
+    t.normalize();
+
+    // Scale the translation vector
+    t *= scale;
+
+    // Construct the relative transformation as an Isometry3d
+    Eigen::Isometry3d T_inB_ofA = Eigen::Translation3d(t) * Eigen::Quaterniond(R);
+
+    return T_inB_ofA;
+}
+
+
+Eigen::Isometry3d getTinW(const FrameBasePtr frame)
+{
+    Eigen::Isometry3d T_inW = Eigen::Translation3d(frame->getP()->getState()) 
+                            * Eigen::Quaterniond(frame->getO()->getState().data());
+    return T_inW;
+}
+
+
+void setTinW(const Eigen::Isometry3d& T_inW, FrameBasePtr frame)
+{
+    // Update the translation state of frame
+    frame->getP()->setState(T_inW.translation());
+
+    // Extract the rotation part as Quaterniond
+    Eigen::Quaterniond q(T_inW.rotation());
+
+    // Store quaternion components in Eigen::Vector4d
+    Eigen::Vector4d q_vec;
+    q_vec << q.x(), q.y(), q.z(), q.w();
+
+    // Update the orientation state of frame
+    frame->getO()->setState(q_vec);
+
+    return;
+}
+
+
+void getFeaturePairs(const FrameBasePtr frame_prev, const FrameBasePtr frame_curr, 
+                     const TrackMatrix& track_matrix, const SensorCameraPtr sen_cam,
+                     const std::list<FeatureBasePtr>& features_curr,
+                     std::vector<cv::Point2f>& pts_prev, std::vector<cv::Point2f>& pts_curr)
+{
+    pts_prev.clear();
+    pts_curr.clear();
+
+    // Retrieve 2D-2D feature matching pairs in between the frames
+    for (const auto& e : features_curr)
+    {
+        auto feature_curr = std::dynamic_pointer_cast<const FeaturePointImage>(e);
+        if (!feature_curr) continue;  // Skip if the cast fails
+
+        // Retrieve the corresponding feature from the last frame
+        auto feature_prev_base = track_matrix.feature(feature_curr->trackId(), frame_prev->getCaptureOf(sen_cam));
+        auto feature_prev = std::dynamic_pointer_cast<const FeaturePointImage>(feature_prev_base);
+
+        // Ensure the previous feature is not null
+        assert(feature_prev != nullptr);
+
+        // Get 2D keypoints associated with the features from the two frames
+        Eigen::Vector2d pt2d_prev = feature_prev->getMeasurement();
+        Eigen::Vector2d pt2d_curr = feature_curr->getMeasurement();
+
+        pts_prev.push_back(cv::Point2f(pt2d_prev(0), pt2d_prev(1)));
+        pts_curr.push_back(cv::Point2f(pt2d_curr(0), pt2d_curr(1)));
+    }
+
+    return;
+}
+
+
+cv::Mat getCameraProjectionMatrix(const Eigen::Isometry3d& T_inW_ofC, cv::Mat K)
+{
+
+    // Get the pose of the camera frame in the world coordinate system
+    Eigen::Isometry3d T_inC_ofW = T_inW_ofC.inverse();
+
+    // Conversion from Eigen to cv::Mat<3,4>, where the left <3,3> is from rotation component of Eigen::Isometry3d and the right <3,1> is from translation
+    cv::Mat T_inC_ofW_cv = cv::Mat::zeros(3, 4, CV_64F);
+
+    // Fill the matrix with the rotation and translation components
+    Eigen::Matrix3d R = T_inC_ofW.rotation();
+    Eigen::Vector3d t = T_inC_ofW.translation();
+
+    // Copy data from Eigen to OpenCV
+    cv::eigen2cv(R, T_inC_ofW_cv(cv::Rect(0, 0, 3, 3))); // Copy rotation
+    cv::eigen2cv(t, T_inC_ofW_cv(cv::Rect(3, 0, 1, 3))); // Copy translation
+
+    // Ensure K and T_inC_ofW_cv are of the same type
+    if (K.type() != T_inC_ofW_cv.type()) {
+        K.convertTo(K, T_inC_ofW_cv.type());
+    }
+
+    // Matrix multiplication between cv::Mat<3,3> K and cv::Mat<3,4> T
+    cv::Mat Cam = K * T_inC_ofW_cv;
+
+    return Cam;
+}
+
+
 double getParallax(const Eigen::Vector4d& _pinhole_model, 
                    const KeyPointsMap& _mwkps_prev, const KeyPointsMap& _mwkps_curr, 
                    const TracksMap& _tracks_prev_curr) {
