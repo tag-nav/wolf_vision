@@ -134,9 +134,14 @@ Eigen::Vector3d triangulate(const Eigen::Vector2d& pt2d_prev,
 
 Eigen::Isometry3d getRelativePoseByEpipolarGeometry(const std::vector<cv::Point2f>& pts_prev,
                                                     const std::vector<cv::Point2f>& pts_curr,
-                                                    const cv::Mat& K,
+                                                    cv::Mat K,
                                                     const double scale)
 {
+    // Convert K to CV_64F if it is not already
+    if (K.type() != CV_64F) {
+        K.convertTo(K, CV_64F);
+    }
+
     // Find the essential matrix using the given intrinsic camera matrix K
     cv::Mat E = cv::findEssentialMat(pts_prev, pts_curr, K);
 
@@ -223,11 +228,12 @@ void getFeaturePairs(const FrameBasePtr frame_prev, const FrameBasePtr frame_cur
 }
 
 
-cv::Mat getCameraProjectionMatrix(const Eigen::Isometry3d& T_inW_ofC, cv::Mat K)
+cv::Mat getCameraProjectionMatrix(cv::Mat K, const Eigen::Isometry3d& T_inC_ofW)
 {
-
-    // Get the pose of the camera frame in the world coordinate system
-    Eigen::Isometry3d T_inC_ofW = T_inW_ofC.inverse();
+    // Convert K to CV_64F if it is not already
+    if (K.type() != CV_64F) {
+        K.convertTo(K, CV_64F);
+    }
 
     // Conversion from Eigen to cv::Mat<3,4>, where the left <3,3> is from rotation component of Eigen::Isometry3d and the right <3,1> is from translation
     cv::Mat T_inC_ofW_cv = cv::Mat::zeros(3, 4, CV_64F);
@@ -239,11 +245,6 @@ cv::Mat getCameraProjectionMatrix(const Eigen::Isometry3d& T_inW_ofC, cv::Mat K)
     // Copy data from Eigen to OpenCV
     cv::eigen2cv(R, T_inC_ofW_cv(cv::Rect(0, 0, 3, 3))); // Copy rotation
     cv::eigen2cv(t, T_inC_ofW_cv(cv::Rect(3, 0, 1, 3))); // Copy translation
-
-    // Ensure K and T_inC_ofW_cv are of the same type
-    if (K.type() != T_inC_ofW_cv.type()) {
-        K.convertTo(K, T_inC_ofW_cv.type());
-    }
 
     // Matrix multiplication between cv::Mat<3,3> K and cv::Mat<3,4> T
     cv::Mat Cam = K * T_inC_ofW_cv;

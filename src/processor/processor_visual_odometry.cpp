@@ -448,8 +448,9 @@ std::list<LandmarkHpPtr> ProcessorVisualOdometry::emplaceLandmarks(const FrameBa
     Eigen::Isometry3d T_inW_ofC_prev = T_inW_ofB_prev * T_inB_ofC;
     Eigen::Isometry3d T_inW_ofC_curr = T_inW_ofB_curr * T_inB_ofC;
 
-    cv::Mat P_prev = vo_utils::getCameraProjectionMatrix(T_inW_ofC_prev, Kcv_);
-    cv::Mat P_curr = vo_utils::getCameraProjectionMatrix(T_inW_ofC_curr, Kcv_);
+    // Get projection matrices of each frame; i.e., matrices mapping from 3D points in the world coordinate to the 2D points in the image coordinate
+    cv::Mat P_prev = vo_utils::getCameraProjectionMatrix(Kcv_, T_inW_ofC_prev.inverse());
+    cv::Mat P_curr = vo_utils::getCameraProjectionMatrix(Kcv_, T_inW_ofC_curr.inverse());
 
     // Perform triangulation of the pair of 2D image points associated with the respective camera poses
     cv::Mat pts_inW_cv;
@@ -464,11 +465,11 @@ std::list<LandmarkHpPtr> ProcessorVisualOdometry::emplaceLandmarks(const FrameBa
     {
         FeaturePointImagePtr feature = std::dynamic_pointer_cast<FeaturePointImage>(feature_base);
 
-        double x = pts_inW_cv.at<double>(0, i);
-        double y = pts_inW_cv.at<double>(1, i);
-        double z = pts_inW_cv.at<double>(2, i);
-        double w = pts_inW_cv.at<double>(3, i);
-
+        double x = static_cast<double>(pts_inW_cv.at<float>(0, i));
+        double y = static_cast<double>(pts_inW_cv.at<float>(1, i));
+        double z = static_cast<double>(pts_inW_cv.at<float>(2, i));
+        double w = static_cast<double>(pts_inW_cv.at<float>(3, i));
+        
         // Avoid division by zero
         if (w != 0) {
             // Convert homogeneous coordinates to 3D

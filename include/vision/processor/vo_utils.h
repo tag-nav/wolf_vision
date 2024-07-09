@@ -50,7 +50,7 @@ Eigen::Vector3d triangulate(const Eigen::Vector2d& pt2d_prev,
 
 Eigen::Isometry3d getRelativePoseByEpipolarGeometry(const std::vector<cv::Point2f>& pts_prev,
                                                     const std::vector<cv::Point2f>& pts_curr,
-                                                    const cv::Mat& K,
+                                                    cv::Mat K,
                                                     const double scale = 1.0);
 
 // functions related to getter / setters
@@ -60,7 +60,7 @@ void getFeaturePairs(const FrameBasePtr frame_prev, const FrameBasePtr frame_cur
                      const TrackMatrix& track_matrix, const SensorCameraPtr sen_cam,
                      const std::list<FeatureBasePtr>& features_curr,
                      std::vector<cv::Point2f>& pts_prev, std::vector<cv::Point2f>& pts_curr);
-cv::Mat getCameraProjectionMatrix(const Eigen::Isometry3d& T_inW_ofC, cv::Mat K);
+cv::Mat getCameraProjectionMatrix(cv::Mat K, const Eigen::Isometry3d& T_inC_ofW);
 
 // functions for evaluations
 double getParallax(const Eigen::Vector4d& _pinhole_model, 
