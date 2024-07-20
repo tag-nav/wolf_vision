@@ -280,7 +280,8 @@ double evalReprojError(const std::vector<Eigen::Vector3d>& pts3d,
                        const Eigen::Vector4d& K_vec,
                        const Eigen::VectorXd& d_vec,
                        const cv::Mat& img, 
-                       bool visualize) {
+                       bool visualize,
+                       const std::string fname) {
     assert(pts3d.size() == pts2d.size());
     const size_t N = pts3d.size();
     
@@ -303,8 +304,8 @@ double evalReprojError(const std::vector<Eigen::Vector3d>& pts3d,
             cv::Point2d pt3d_proj_cv(pt3d_proj(0), pt3d_proj(1));
 
             // Draw a circle around the keypoint
-            cv::circle(img_vis, pt2d_cv, 2, cv::Scalar(255, 0, 0), 2);  // Blue circle with radius 2 (measured keypoint)
-            cv::circle(img_vis, pt3d_proj_cv, 4, cv::Scalar(0, 0, 255), 2);  // Red circle with radius 4 (projected keypoint)
+            cv::circle(img_vis, pt2d_cv, 4, cv::Scalar(0, 255, 0), 5);  // Blue circle with radius 2 (measured keypoint)
+            cv::circle(img_vis, pt3d_proj_cv, 8, cv::Scalar(0, 0, 255), 3);  // Red circle with radius 4 (projected keypoint)
         }
     }
     err /= N;
@@ -312,6 +313,7 @@ double evalReprojError(const std::vector<Eigen::Vector3d>& pts3d,
     if (visualize) {
         std::cout << "reprojection error: " << err << " (total " << N << " pts.)" << std::endl;
         cv::imshow("Reprojection Visualiation", img_vis);
+        cv::imwrite(fname, img_vis);
         cv::waitKey(-1);
     }
     

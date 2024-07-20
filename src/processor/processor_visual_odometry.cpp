@@ -140,13 +140,13 @@ void ProcessorVisualOdometry::processCapture(CaptureBasePtr _incoming_ptr)
             extractPointsFromCaptureImage(cap_kf_prev, pts3d, pts2d);
             vo_utils::evalReprojError(pts3d, pts2d, 
                                       sen_cam_->getPinholeModel(), sen_cam_->getDistortionVector(), 
-                                      cap_kf_prev->getImage(), true);
+                                      cap_kf_prev->getImage(), true, "/home/jlee/KF1_before.png");
             // KF 2
             CaptureImagePtr cap_kf_curr = std::static_pointer_cast<CaptureImage>(kf_curr->getCaptureOf(sen_cam_));
             extractPointsFromCaptureImage(cap_kf_curr, pts3d, pts2d);
             vo_utils::evalReprojError(pts3d, pts2d, 
                                       sen_cam_->getPinholeModel(), sen_cam_->getDistortionVector(), 
-                                      cap_kf_curr->getImage(), true);
+                                      cap_kf_curr->getImage(), true, "/home/jlee/KF2_before.png");
         }
 
         last_ptr_       = incoming_ptr_;
@@ -177,13 +177,13 @@ void ProcessorVisualOdometry::processCapture(CaptureBasePtr _incoming_ptr)
         extractPointsFromCaptureImage(cap_kf_prev, pts3d, pts2d);
         vo_utils::evalReprojError(pts3d, pts2d, 
                                     sen_cam_->getPinholeModel(), sen_cam_->getDistortionVector(), 
-                                    cap_kf_prev->getImage(), true);
+                                    cap_kf_prev->getImage(), true, "/home/jlee/KF1_after.png");
         // KF 2
         CaptureImagePtr cap_kf_curr = std::static_pointer_cast<CaptureImage>(kf_curr->getCaptureOf(sen_cam_));
         extractPointsFromCaptureImage(cap_kf_curr, pts3d, pts2d);
         vo_utils::evalReprojError(pts3d, pts2d, 
                                     sen_cam_->getPinholeModel(), sen_cam_->getDistortionVector(), 
-                                    cap_kf_curr->getImage(), true);
+                                    cap_kf_curr->getImage(), true, "/home/jlee/KF2_after.png");
 
         exit(-1);
 

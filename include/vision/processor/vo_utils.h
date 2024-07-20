@@ -72,7 +72,8 @@ double evalReprojError(const std::vector<Eigen::Vector3d>& pts3d,
                        const Eigen::Vector4d& K_vec,
                        const Eigen::VectorXd& d_vec,
                        const cv::Mat& img, 
-                       bool visualize=false);
+                       bool visualize=false,
+                       const std::string fname="default.png");
 
 } // namespace vo_utils 
 } // namespace wolf
