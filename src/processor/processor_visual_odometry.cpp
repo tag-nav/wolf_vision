@@ -185,6 +185,22 @@ void ProcessorVisualOdometry::processCapture(CaptureBasePtr _incoming_ptr)
                                     sen_cam_->getPinholeModel(), sen_cam_->getDistortionVector(), 
                                     cap_kf_curr->getImage(), true, "/home/jlee/KF2_after.png");
 
+        // Apply esssential matrix based outlier filtering
+        filterOutliersByEssentialMatrix(kf_prev, kf_curr, sen_cam_, track_matrix_);
+
+        // KF 1
+        CaptureImagePtr cap_kf_prev_filter = std::static_pointer_cast<CaptureImage>(kf_prev->getCaptureOf(sen_cam_));
+        extractPointsFromCaptureImage(cap_kf_prev_filter, pts3d, pts2d);
+        vo_utils::evalReprojError(pts3d, pts2d, 
+                                    sen_cam_->getPinholeModel(), sen_cam_->getDistortionVector(), 
+                                    cap_kf_prev_filter->getImage(), true, "/home/jlee/KF1_after_filtering.png");
+        // KF 2
+        CaptureImagePtr cap_kf_curr_filter = std::static_pointer_cast<CaptureImage>(kf_curr->getCaptureOf(sen_cam_));
+        extractPointsFromCaptureImage(cap_kf_curr_filter, pts3d, pts2d);
+        vo_utils::evalReprojError(pts3d, pts2d, 
+                                    sen_cam_->getPinholeModel(), sen_cam_->getDistortionVector(), 
+                                    cap_kf_curr_filter->getImage(), true, "/home/jlee/KF2_after_filtering.png");
+
         exit(-1);
 
         if (voteForKeyFrame() && permittedKeyFrame())
@@ -350,10 +366,12 @@ void ProcessorVisualOdometry::establishFactors()
     {
         // Retrieve 2D-2D feature matching pairs between the frames
         std::vector<cv::Point2f> pts_prev, pts_curr;
+        std::vector<size_t> track_ids;
         vo_utils::getFeaturePairs(frame_prev, frame_curr, 
                                   track_matrix_, sen_cam_, 
                                   features,
-                                  pts_prev, pts_curr);
+                                  pts_prev, pts_curr,
+                                  track_ids);
         
         // Estimate the relative pose using epipolar geometry
         Eigen::Isometry3d T_inC_curr_ofC_prev = vo_utils::getRelativePoseByEpipolarGeometry(pts_prev, pts_curr, Kcv_);
@@ -433,10 +451,12 @@ std::list<LandmarkHpPtr> ProcessorVisualOdometry::emplaceLandmarks(const FrameBa
 
     // Retrieve 2D-2D feature matching pairs in between the frames
     std::vector<cv::Point2f> pts_prev, pts_curr;
+    std::vector<size_t> track_ids;
     vo_utils::getFeaturePairs(frame_prev, frame_curr, 
                               track_matrix_, sen_cam_, 
                               features_curr,
-                              pts_prev, pts_curr);
+                              pts_prev, pts_curr,
+                              track_ids);
 
     // Retrieve the transformation from the world coordinate frame to the robot coordinate frame at frame_prev
     Eigen::Isometry3d T_inW_ofB_prev = vo_utils::getTinW(frame_prev);
@@ -755,6 +775,57 @@ void ProcessorVisualOdometry::extractPointsFromCaptureImage(const CaptureImagePt
     return;
 }
 
+
+/**
+ * @brief Filters out outliers in feature tracking between two frames using the Essential Matrix and RANSAC.
+ * 
+ * This function retrieves the 2D feature points associated with the current frame and matches them with 
+ * the corresponding points in the previous frame. It then computes the Essential Matrix using RANSAC to 
+ * identify and filter out the outliers from the tracked features.
+ * 
+ * @param frame_prev A pointer to the previous frame containing the tracked features.
+ * @param frame_curr A pointer to the current frame containing the tracked features.
+ * @param sen_cam A pointer to the sensor camera associated with the frames.
+ * @param track_matrix A reference to the track matrix that maintains the tracking information of features across frames.
+ */
+void ProcessorVisualOdometry::filterOutliersByEssentialMatrix(const FrameBasePtr frame_prev, const FrameBasePtr frame_curr, 
+                                                              const SensorCameraPtr sen_cam, TrackMatrix& track_matrix)
+{
+    // Log debug message
+    WOLF_DEBUG("remove outliers in feature tracking ...")
+
+    // Retrieve the list of features associated with the current frame
+    std::list<FeatureBasePtr> features = track_matrix.snapshotAsList(frame_curr->getCaptureOf(sen_cam));
+
+    // Retrieve 2D-2D feature matching pairs between the frames
+    std::vector<cv::Point2f> pts_prev, pts_curr;
+    std::vector<size_t> track_ids;
+    vo_utils::getFeaturePairs(frame_prev, frame_curr, 
+                              track_matrix, sen_cam, 
+                              features,
+                              pts_prev, pts_curr,
+                              track_ids);
+
+    // Compute the Essential Matrix using RANSAC
+    cv::Mat inlierMask;
+    cv::Mat essentialMat = cv::findEssentialMat(pts_prev, pts_curr, Kcv_, cv::RANSAC, 0.999, 1.0, inlierMask);
+
+    // Count the number of inliers
+    int numInliers = cv::countNonZero(inlierMask);
+    WOLF_DEBUG("num. of inliers: ", numInliers, " (total: ", inlierMask.rows, ")")
+
+    // Filter out the outliers
+    for (size_t i = 0; i < pts_curr.size(); i++)
+    {
+        // If the point is marked as an outlier in the inlierMask
+        if (!inlierMask.at<uchar>(i))
+        {
+            // Get the corresponding track ID and remove it from the track matrix
+            size_t track_id = track_ids.at(i);
+            track_matrix.remove(track_id);
+        }
+    }
+}
 
 
 // override functions unused yet

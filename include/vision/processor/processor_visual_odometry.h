@@ -289,6 +289,20 @@ class ProcessorVisualOdometry : public ProcessorTracker
                                            std::vector<Eigen::Vector3d>& pts3d,
                                            std::vector<Eigen::Vector2d>& pts2d);
 
+        /**
+         * @brief Filters out outliers in feature tracking between two frames using the Essential Matrix and RANSAC.
+         * 
+         * This function retrieves the 2D feature points associated with the current frame and matches them with 
+         * the corresponding points in the previous frame. It then computes the Essential Matrix using RANSAC to 
+         * identify and filter out the outliers from the tracked features.
+         * 
+         * @param frame_prev A pointer to the previous frame containing the tracked features.
+         * @param frame_curr A pointer to the current frame containing the tracked features.
+         * @param sen_cam A pointer to the sensor camera associated with the frames.
+         * @param track_matrix A reference to the track matrix that maintains the tracking information of features across frames.
+         */
+        void filterOutliersByEssentialMatrix(const FrameBasePtr frame_prev, const FrameBasePtr frame_curr, 
+                                             const SensorCameraPtr sen_cam, TrackMatrix& track_matrix);
         
         // override functions unused yet
         virtual void postProcess() override;
