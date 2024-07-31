@@ -195,21 +195,41 @@ void setTinW(const Eigen::Isometry3d& T_inW, FrameBasePtr frame)
 }
 
 
+/**
+ * @brief Retrieves 2D feature matching pairs between two frames.
+ * 
+ * This function extracts 2D-2D feature matching pairs between the previous and current frames.
+ * It uses the track matrix to identify corresponding features in the two frames, ensuring that
+ * only valid features are considered. The resulting 2D points and track IDs are stored in the provided vectors.
+ * 
+ * @param frame_prev A pointer to the previous frame containing the tracked features.
+ * @param frame_curr A pointer to the current frame containing the tracked features.
+ * @param track_matrix A reference to the track matrix that maintains the tracking information of features across frames.
+ * @param sen_cam A pointer to the sensor camera associated with the frames.
+ * @param features_curr A list of features associated with the current frame.
+ * @param pts_prev A reference to a vector of cv::Point2f to store the 2D points from the previous frame.
+ * @param pts_curr A reference to a vector of cv::Point2f to store the 2D points from the current frame.
+ * @param track_ids A reference to a vector of size_t to store the track IDs of the matched features.
+ */
 void getFeaturePairs(const FrameBasePtr frame_prev, const FrameBasePtr frame_curr, 
                      const TrackMatrix& track_matrix, const SensorCameraPtr sen_cam,
                      const std::list<FeatureBasePtr>& features_curr,
-                     std::vector<cv::Point2f>& pts_prev, std::vector<cv::Point2f>& pts_curr)
+                     std::vector<cv::Point2f>& pts_prev, std::vector<cv::Point2f>& pts_curr,
+                     std::vector<size_t>& track_ids)
 {
+    // Clear the output vectors
     pts_prev.clear();
     pts_curr.clear();
+    track_ids.clear();
 
-    // Retrieve 2D-2D feature matching pairs in between the frames
+    // Retrieve 2D-2D feature matching pairs between the frames
     for (const auto& e : features_curr)
     {
+        // Cast the current feature to FeaturePointImage type
         auto feature_curr = std::dynamic_pointer_cast<const FeaturePointImage>(e);
         if (!feature_curr) continue;  // Skip if the cast fails
 
-        // Retrieve the corresponding feature from the last frame
+        // Retrieve the corresponding feature from the previous frame using the track matrix
         auto feature_prev_base = track_matrix.feature(feature_curr->trackId(), frame_prev->getCaptureOf(sen_cam));
         auto feature_prev = std::dynamic_pointer_cast<const FeaturePointImage>(feature_prev_base);
 
@@ -220,8 +240,12 @@ void getFeaturePairs(const FrameBasePtr frame_prev, const FrameBasePtr frame_cur
         Eigen::Vector2d pt2d_prev = feature_prev->getMeasurement();
         Eigen::Vector2d pt2d_curr = feature_curr->getMeasurement();
 
+        // Add the 2D points to the output vectors
         pts_prev.push_back(cv::Point2f(pt2d_prev(0), pt2d_prev(1)));
         pts_curr.push_back(cv::Point2f(pt2d_curr(0), pt2d_curr(1)));
+        
+        // Add the track ID to the output vector
+        track_ids.push_back(feature_curr->trackId());
     }
 
     return;

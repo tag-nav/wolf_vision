@@ -59,7 +59,8 @@ void setTinW(const Eigen::Isometry3d& T_inW, FrameBasePtr frame);
 void getFeaturePairs(const FrameBasePtr frame_prev, const FrameBasePtr frame_curr, 
                      const TrackMatrix& track_matrix, const SensorCameraPtr sen_cam,
                      const std::list<FeatureBasePtr>& features_curr,
-                     std::vector<cv::Point2f>& pts_prev, std::vector<cv::Point2f>& pts_curr);
+                     std::vector<cv::Point2f>& pts_prev, std::vector<cv::Point2f>& pts_curr,
+                     std::vector<size_t>& track_ids);
 cv::Mat getCameraProjectionMatrix(cv::Mat K, const Eigen::Isometry3d& T_inC_ofW);
 
 // functions for evaluations
