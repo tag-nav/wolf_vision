@@ -184,12 +184,8 @@ void setTinW(const Eigen::Isometry3d& T_inW, FrameBasePtr frame)
     // Extract the rotation part as Quaterniond
     Eigen::Quaterniond q(T_inW.rotation());
 
-    // Store quaternion components in Eigen::Vector4d
-    Eigen::Vector4d q_vec;
-    q_vec << q.x(), q.y(), q.z(), q.w();
-
     // Update the orientation state of frame
-    frame->getO()->setState(q_vec);
+    frame->getO()->setState(q.coeffs());
 
     return;
 }
@@ -345,6 +341,38 @@ double evalReprojError(const std::vector<Eigen::Vector3d>& pts3d,
 }
 
 
+// Function to convert std::vector<Eigen::Vector2d> to std::vector<cv::Point2f>
+std::vector<cv::Point2f> convertToCvPoint2f(const std::vector<Eigen::Vector2d>& eigenPoints) 
+{
+    std::vector<cv::Point2f> cvPoints;
+    cvPoints.reserve(eigenPoints.size());
+    for (const auto& pt : eigenPoints) {
+        cvPoints.push_back(cv::Point2f(pt.x(), pt.y()));
+    }
+    return cvPoints;
+}
+
+
+// Function to convert std::vector<Eigen::Vector3d> to std::vector<cv::Point3f>
+std::vector<cv::Point3f> convertToCvPoint3f(const std::vector<Eigen::Vector3d>& eigenPoints) 
+{
+    std::vector<cv::Point3f> cvPoints;
+    cvPoints.reserve(eigenPoints.size());
+    for (const auto& pt : eigenPoints) {
+        cvPoints.push_back(cv::Point3f(pt.x(), pt.y(), pt.z()));
+    }
+    return cvPoints;
+}
+
+
+// Function to convert cv::Mat to Eigen::Matrix3d
+Eigen::Matrix3d cvMatToEigen(const cv::Mat& mat) {
+    Eigen::Matrix3d eigenMat;
+    for (int i = 0; i < 3; ++i)
+        for (int j = 0; j < 3; ++j)
+            eigenMat(i, j) = mat.at<double>(i, j);
+    return eigenMat;
+}
 
 } // namespace vo_utils
 } // namespace wolf

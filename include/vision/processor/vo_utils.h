@@ -76,6 +76,11 @@ double evalReprojError(const std::vector<Eigen::Vector3d>& pts3d,
                        bool visualize=false,
                        const std::string fname="default.png");
 
+// functions for data conversion
+std::vector<cv::Point2f> convertToCvPoint2f(const std::vector<Eigen::Vector2d>& eigenPoints);
+std::vector<cv::Point3f> convertToCvPoint3f(const std::vector<Eigen::Vector3d>& eigenPoints);
+Eigen::Matrix3d cvMatToEigen(const cv::Mat& mat);
+
 } // namespace vo_utils 
 } // namespace wolf
 
