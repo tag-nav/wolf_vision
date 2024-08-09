@@ -308,11 +308,8 @@ class ProcessorVisualOdometry : public ProcessorTracker
          * 
          * @param frame_prev A pointer to the previous frame containing the tracked features.
          * @param frame_curr A pointer to the current frame containing the tracked features.
-         * @param sen_cam A pointer to the sensor camera associated with the frames.
-         * @param track_matrix A reference to the track matrix that maintains the tracking information of features across frames.
          */
-        void filterOutliersByEssentialMatrix(const FrameBasePtr frame_prev, const FrameBasePtr frame_curr, 
-                                             const SensorCameraPtr sen_cam, TrackMatrix& track_matrix);
+        void filterOutliersByEssentialMatrix(const FrameBasePtr frame_prev, const FrameBasePtr frame_curr);
         
         /**
          * @brief Estimate the pose of frame by applying PnP with respect to the established map points.

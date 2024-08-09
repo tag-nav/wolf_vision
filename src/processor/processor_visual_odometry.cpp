@@ -148,7 +148,7 @@ void ProcessorVisualOdometry::processCapture(CaptureBasePtr _incoming_ptr)
             FrameBasePtr kf_prev = kf_curr->getPreviousFrame();
 
             // Apply esssential matrix based outlier filtering
-            filterOutliersByEssentialMatrix(kf_prev, kf_curr, sen_cam_, track_matrix_);
+            filterOutliersByEssentialMatrix(kf_prev, kf_curr);
 
             // DEBUG: Compare different frame pose initialization methods: none (i.e., copying the pose of the last frame) and PnP
             CaptureImagePtr cap_kf_curr = std::static_pointer_cast<CaptureImage>(kf_curr->getCaptureOf(sen_cam_));
@@ -798,23 +798,20 @@ void ProcessorVisualOdometry::extractPointsFromCaptureImage(const CaptureImagePt
  * 
  * @param frame_prev A pointer to the previous frame containing the tracked features.
  * @param frame_curr A pointer to the current frame containing the tracked features.
- * @param sen_cam A pointer to the sensor camera associated with the frames.
- * @param track_matrix A reference to the track matrix that maintains the tracking information of features across frames.
  */
-void ProcessorVisualOdometry::filterOutliersByEssentialMatrix(const FrameBasePtr frame_prev, const FrameBasePtr frame_curr, 
-                                                              const SensorCameraPtr sen_cam, TrackMatrix& track_matrix)
+void ProcessorVisualOdometry::filterOutliersByEssentialMatrix(const FrameBasePtr frame_prev, const FrameBasePtr frame_curr)
 {
     // Log debug message
     WOLF_DEBUG("remove outliers in feature tracking ...")
 
     // Retrieve the list of features associated with the current frame
-    std::list<FeatureBasePtr> features = track_matrix.snapshotAsList(frame_curr->getCaptureOf(sen_cam));
+    std::list<FeatureBasePtr> features = track_matrix_.snapshotAsList(frame_curr->getCaptureOf(sen_cam_));
 
     // Retrieve 2D-2D feature matching pairs between the frames
     std::vector<cv::Point2f> pts_prev, pts_curr;
     std::vector<size_t> track_ids;
     vo_utils::getFeaturePairs(frame_prev, frame_curr, 
-                              track_matrix, sen_cam, 
+                              track_matrix_, sen_cam_, 
                               features,
                               pts_prev, pts_curr,
                               track_ids);
@@ -835,7 +832,7 @@ void ProcessorVisualOdometry::filterOutliersByEssentialMatrix(const FrameBasePtr
         {
             // Get the corresponding track ID and remove it from the track matrix
             size_t track_id = track_ids.at(i);
-            track_matrix.remove(track_id);
+            track_matrix_.remove(track_id);
         }
     }
 }
