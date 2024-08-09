@@ -184,6 +184,12 @@ class ProcessorVisualOdometry : public ProcessorTracker
 
         WOLF_PROCESSOR_CREATE(ProcessorVisualOdometry, ParamsProcessorVisualOdometry);
 
+        typedef enum {
+            EM, 
+            PNP,
+            NONE
+        } MethodInitializeFramePose;
+
     protected:
         ParamsProcessorVisualOdometryPtr params_visual_odometry_;
 
@@ -202,6 +208,8 @@ class ProcessorVisualOdometry : public ProcessorTracker
 
         ActiveSearchGrid cell_grid_;
 
+        MethodInitializeFramePose method_init_frame_pose_;
+
     private:
         // camera
         cv::Mat Kcv_;
@@ -213,6 +221,8 @@ class ProcessorVisualOdometry : public ProcessorTracker
 
         // flag if the processor is initialized with two keyframes and enough 3D map points
         bool is_initialized = false;
+
+        size_t num_captures_elapsed = 0;
 
     public:
 
@@ -304,6 +314,21 @@ class ProcessorVisualOdometry : public ProcessorTracker
         void filterOutliersByEssentialMatrix(const FrameBasePtr frame_prev, const FrameBasePtr frame_curr, 
                                              const SensorCameraPtr sen_cam, TrackMatrix& track_matrix);
         
+        /**
+         * @brief Estimate the pose of frame by applying PnP with respect to the established map points.
+         * 
+         * @param frame A pointer to the frame whose pose will be estimated.
+         */
+        void estimatePosebyPnP(const FrameBasePtr frame);
+        
+        /**
+         * @brief Estimate the pose of frame_curr using the Essential Matrix between frame_prev and frame_curr.
+         * 
+         * @param frame_prev A pointer to the previous frame containing the tracked features.
+         * @param frame_curr A pointer to the current frame containing the tracked features.
+         */
+        void estimatePosebyEM(const FrameBasePtr frame_prev, const FrameBasePtr frame_curr);
+
         // override functions unused yet
         virtual void postProcess() override;
         unsigned int processKnown() override;

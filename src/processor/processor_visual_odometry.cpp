@@ -114,6 +114,7 @@ void ProcessorVisualOdometry::processCapture(CaptureBasePtr _incoming_ptr)
             FrameBasePtr kf_curr = addKF(kf_status_);
 
             // Perform initialization of 3D map points and add factors associated with the initialized map points and camera poses.
+            method_init_frame_pose_ = EM;
             establishFactors();
 
             // Update pointers
@@ -122,31 +123,6 @@ void ProcessorVisualOdometry::processCapture(CaptureBasePtr _incoming_ptr)
 
             // set is_initialized to be true
             is_initialized = true;
-
-            // print associated poses
-            WOLF_DEBUG("frame poses before optimization: ")
-            FrameBasePtr kf_prev = kf_curr->getPreviousFrame();
-            WOLF_DEBUG("KF ", kf_prev->id(), ": ", kf_prev->getState(), " @ TS: ", kf_prev->getTimeStamp())
-            WOLF_DEBUG("KF ", kf_curr->id(), ": ", kf_curr->getState(), " @ TS: ", kf_curr->getTimeStamp())
-
-            // add debug function for inspecting reprojection error "before optimization"
-            WOLF_DEBUG("reprojection error before optimization: ")
-
-            std::vector<Eigen::Vector3d> pts3d;
-            std::vector<Eigen::Vector2d> pts2d;
-            
-            // KF 1
-            CaptureImagePtr cap_kf_prev = std::static_pointer_cast<CaptureImage>(kf_prev->getCaptureOf(sen_cam_));
-            extractPointsFromCaptureImage(cap_kf_prev, pts3d, pts2d);
-            vo_utils::evalReprojError(pts3d, pts2d, 
-                                      sen_cam_->getPinholeModel(), sen_cam_->getDistortionVector(), 
-                                      cap_kf_prev->getImage(), true, "/home/jlee/KF1_before.png");
-            // KF 2
-            CaptureImagePtr cap_kf_curr = std::static_pointer_cast<CaptureImage>(kf_curr->getCaptureOf(sen_cam_));
-            extractPointsFromCaptureImage(cap_kf_curr, pts3d, pts2d);
-            vo_utils::evalReprojError(pts3d, pts2d, 
-                                      sen_cam_->getPinholeModel(), sen_cam_->getDistortionVector(), 
-                                      cap_kf_curr->getImage(), true, "/home/jlee/KF2_before.png");
         }
 
         last_ptr_       = incoming_ptr_;
@@ -158,58 +134,77 @@ void ProcessorVisualOdometry::processCapture(CaptureBasePtr _incoming_ptr)
     {
         // normal running condition
 
-        FrameBasePtr kf_curr = last_frame_ptr_;
+        // track 2D feature points (origin->last->incoming)
+        size_t num_tracked_features = trackFeatures();
+        WOLF_INFO("num_tracked_features: ", num_tracked_features)
 
-        // print associated poses
-        WOLF_DEBUG("frame poses after optimization: ")
-        FrameBasePtr kf_prev = kf_curr->getPreviousFrame();
-        WOLF_DEBUG("KF ", kf_prev->id(), ": ", kf_prev->getState(), " @ TS: ", kf_prev->getTimeStamp())
-        WOLF_DEBUG("KF ", kf_curr->id(), ": ", kf_curr->getState(), " @ TS: ", kf_curr->getTimeStamp())
-
-        // add debug function for inspecting reprojection error "before optimization"
-        WOLF_DEBUG("reprojection error after optimization: ")
-
-        std::vector<Eigen::Vector3d> pts3d;
-        std::vector<Eigen::Vector2d> pts2d;
+        num_captures_elapsed ++;
         
-        // KF 1
-        CaptureImagePtr cap_kf_prev = std::static_pointer_cast<CaptureImage>(kf_prev->getCaptureOf(sen_cam_));
-        extractPointsFromCaptureImage(cap_kf_prev, pts3d, pts2d);
-        vo_utils::evalReprojError(pts3d, pts2d, 
-                                    sen_cam_->getPinholeModel(), sen_cam_->getDistortionVector(), 
-                                    cap_kf_prev->getImage(), true, "/home/jlee/KF1_after.png");
-        // KF 2
-        CaptureImagePtr cap_kf_curr = std::static_pointer_cast<CaptureImage>(kf_curr->getCaptureOf(sen_cam_));
-        extractPointsFromCaptureImage(cap_kf_curr, pts3d, pts2d);
-        vo_utils::evalReprojError(pts3d, pts2d, 
-                                    sen_cam_->getPinholeModel(), sen_cam_->getDistortionVector(), 
-                                    cap_kf_curr->getImage(), true, "/home/jlee/KF2_after.png");
-
-        // Apply esssential matrix based outlier filtering
-        filterOutliersByEssentialMatrix(kf_prev, kf_curr, sen_cam_, track_matrix_);
-
-        // KF 1
-        CaptureImagePtr cap_kf_prev_filter = std::static_pointer_cast<CaptureImage>(kf_prev->getCaptureOf(sen_cam_));
-        extractPointsFromCaptureImage(cap_kf_prev_filter, pts3d, pts2d);
-        vo_utils::evalReprojError(pts3d, pts2d, 
-                                    sen_cam_->getPinholeModel(), sen_cam_->getDistortionVector(), 
-                                    cap_kf_prev_filter->getImage(), true, "/home/jlee/KF1_after_filtering.png");
-        // KF 2
-        CaptureImagePtr cap_kf_curr_filter = std::static_pointer_cast<CaptureImage>(kf_curr->getCaptureOf(sen_cam_));
-        extractPointsFromCaptureImage(cap_kf_curr_filter, pts3d, pts2d);
-        vo_utils::evalReprojError(pts3d, pts2d, 
-                                    sen_cam_->getPinholeModel(), sen_cam_->getDistortionVector(), 
-                                    cap_kf_curr_filter->getImage(), true, "/home/jlee/KF2_after_filtering.png");
-
-        exit(-1);
-
         if (voteForKeyFrame() && permittedKeyFrame())
         {
-            // do things with keyframe creation
-        }
+            // We create a keyframe
+            FrameBasePtr kf_curr = addKF(kf_status_);
+            // Retrieve the previous frame
+            FrameBasePtr kf_prev = kf_curr->getPreviousFrame();
 
-        // do else
+            // Apply esssential matrix based outlier filtering
+            filterOutliersByEssentialMatrix(kf_prev, kf_curr, sen_cam_, track_matrix_);
+
+            // DEBUG: Compare different frame pose initialization methods: none (i.e., copying the pose of the last frame) and PnP
+            CaptureImagePtr cap_kf_curr = std::static_pointer_cast<CaptureImage>(kf_curr->getCaptureOf(sen_cam_));
+            std::vector<Eigen::Vector3d> pts3d;
+            std::vector<Eigen::Vector2d> pts2d;
+
+            // Case 1: Take the pose of the last keyframe as the initial guess of the new keyframe
+            method_init_frame_pose_ = NONE;
+            establishFactors();
+            extractPointsFromCaptureImage(cap_kf_curr, pts3d, pts2d);
+            vo_utils::evalReprojError(pts3d, pts2d, 
+                                      sen_cam_->getPinholeModel(), sen_cam_->getDistortionVector(), 
+                                      cap_kf_curr->getImage(), true, "/home/jlee/KF3_before.png");
+
+            // Case 2: Estimate the initial guess of the new keyframe by applying PnP
+            method_init_frame_pose_ = EM;
+            establishFactors();
+            extractPointsFromCaptureImage(cap_kf_curr, pts3d, pts2d);
+            vo_utils::evalReprojError(pts3d, pts2d, 
+                                      sen_cam_->getPinholeModel(), sen_cam_->getDistortionVector(), 
+                                      cap_kf_curr->getImage(), true, "/home/jlee/KF3_before_byEM.png");
+
+            // Case 3: Estimate the initial guess of the new keyframe by applying PnP
+            method_init_frame_pose_ = PNP;
+            establishFactors();
+            extractPointsFromCaptureImage(cap_kf_curr, pts3d, pts2d);
+            vo_utils::evalReprojError(pts3d, pts2d, 
+                                      sen_cam_->getPinholeModel(), sen_cam_->getDistortionVector(), 
+                                      cap_kf_curr->getImage(), true, "/home/jlee/KF3_before_byPnP.png");
+
+            // Update pointers
+            origin_ptr_ = incoming_ptr_;
+            last_frame_ptr_ = kf_curr;
+        }
         
+        // DEBUG: If the last frame is associated to the last capture, print out optimization results for debugging
+        // if (last_frame_ptr_->getCaptureOf(sen_cam_) == last_ptr_ && getProblem()->getTrajectory()->size() == 3) 
+        if (num_captures_elapsed > 3)
+        {
+            FrameBasePtr kf_curr = last_frame_ptr_;
+
+            CaptureImagePtr cap_kf_curr = std::static_pointer_cast<CaptureImage>(kf_curr->getCaptureOf(sen_cam_));
+            std::vector<Eigen::Vector3d> pts3d;
+            std::vector<Eigen::Vector2d> pts2d;
+            
+            extractPointsFromCaptureImage(cap_kf_curr, pts3d, pts2d);
+            vo_utils::evalReprojError(pts3d, pts2d, 
+                                      sen_cam_->getPinholeModel(), sen_cam_->getDistortionVector(), 
+                                      cap_kf_curr->getImage(), true, "/home/jlee/KF3_after.png");
+
+            exit(-1);
+        }
+        
+        last_ptr_       = incoming_ptr_;
+        incoming_ptr_   = nullptr;
+
         return;
     }
     
@@ -278,7 +273,8 @@ bool ProcessorVisualOdometry::voteForKeyFrame() const
     bool vote = false;
     // Simple vote based on the number of features being extracted and tracked util the incoming capture
     // Other rules may take into account number of tracks alive, parallax, etc.
-    vote = vote || incoming_ptr_->getFeatureList().size() < params_visual_odometry_->min_features_for_keyframe;
+    // vote = vote || incoming_ptr_->getFeatureList().size() < params_visual_odometry_->min_features_for_keyframe;
+    vote = vote || num_captures_elapsed == 3;
 
     return vote;
 }
@@ -362,28 +358,42 @@ void ProcessorVisualOdometry::establishFactors()
     // Retrieve the previous frame
     FrameBasePtr frame_prev = frame_curr->getPreviousFrame();
 
-    // 0) Initialize the current camera pose by essential matrix estimation.
+    // 0) Initialize the current camera pose 
+    switch (method_init_frame_pose_)
     {
-        // Retrieve 2D-2D feature matching pairs between the frames
-        std::vector<cv::Point2f> pts_prev, pts_curr;
-        std::vector<size_t> track_ids;
-        vo_utils::getFeaturePairs(frame_prev, frame_curr, 
-                                  track_matrix_, sen_cam_, 
-                                  features,
-                                  pts_prev, pts_curr,
-                                  track_ids);
-        
-        // Estimate the relative pose using epipolar geometry
-        Eigen::Isometry3d T_inC_curr_ofC_prev = vo_utils::getRelativePoseByEpipolarGeometry(pts_prev, pts_curr, Kcv_);
+    // by essential matrix estimation.
+    case EM:
+    {
+        WOLF_DEBUG("Essential Matrix")
+        estimatePosebyEM(frame_prev, frame_curr);
 
+        break;
+    }
+    // by PnP.
+    case PNP:
+    {
+        WOLF_DEBUG("PnP")
+        estimatePosebyPnP(frame_curr);
+
+        break;
+    }
+    case NONE:
+    {
+        WOLF_DEBUG("None")
         // Get the transformation from the world coordinate frame to the robot coordinate frame at frame_prev
         Eigen::Isometry3d T_inW_ofB_prev = vo_utils::getTinW(frame_prev);
 
-        // Calculate the transformation from the world coordinate frame to the robot coordinate frame at frame_curr
-        Eigen::Isometry3d T_inW_ofB_curr = T_inW_ofB_prev * T_inC_curr_ofC_prev.inverse();
-
         // Set the transformation from the world coordinate frame to the robot coordinate frame at frame_curr
-        vo_utils::setTinW(T_inW_ofB_curr, frame_curr);
+        vo_utils::setTinW(T_inW_ofB_prev, frame_curr);
+
+        break;
+    }
+    default:
+    {
+        exit(-1);
+
+        break;
+    }
     }
     
     std::list<FeatureBasePtr> features_to_triangulate;
@@ -416,21 +426,24 @@ void ProcessorVisualOdometry::establishFactors()
     WOLF_DEBUG("# of features_to_triangulate: ", features_to_triangulate.size());
 
     // 2) Create landmarks by performing triangulation
-    std::list<LandmarkHpPtr> landmarks = emplaceLandmarks(frame_prev, frame_curr, 
-                                                          features_to_triangulate);
-
-    // Add factors from all KFs of this track to the new landmark
-    for (const auto& landmark : landmarks)
+    if (features_to_triangulate.size() > 0)
     {
-        // Get the track of the landmark at keyframes
-        Track track_over_KFs = track_matrix_.trackAtKeyframes(landmark->trackId());
-        for (auto track_at_KF: track_over_KFs)
+        std::list<LandmarkHpPtr> landmarks = emplaceLandmarks(frame_prev, frame_curr, 
+                                                            features_to_triangulate);
+
+        // Add factors from all KFs of this track to the new landmark
+        for (const auto& landmark : landmarks)
         {
-            FactorBase::emplace<FactorPixelHp>(track_at_KF.second,
-                                               track_at_KF.second,
-                                               landmark, 
-                                               shared_from_this(),
-                                               params_visual_odometry_->apply_loss_function);
+            // Get the track of the landmark at keyframes
+            Track track_over_KFs = track_matrix_.trackAtKeyframes(landmark->trackId());
+            for (auto track_at_KF: track_over_KFs)
+            {
+                FactorBase::emplace<FactorPixelHp>(track_at_KF.second,
+                                                track_at_KF.second,
+                                                landmark, 
+                                                shared_from_this(),
+                                                params_visual_odometry_->apply_loss_function);
+            }
         }
     }
 
@@ -825,6 +838,107 @@ void ProcessorVisualOdometry::filterOutliersByEssentialMatrix(const FrameBasePtr
             track_matrix.remove(track_id);
         }
     }
+}
+
+
+void ProcessorVisualOdometry::estimatePosebyPnP(const FrameBasePtr frame)
+{
+    // Take a snapshot of the features associated with the current frame
+    FeatureBasePtrList features_base = track_matrix_.snapshotAsList(frame->getCaptureOf(sen_cam_));
+
+    std::vector<Eigen::Vector2d> imgPts2D; // Vector to store 2D feature points in image coordinates (pixels)
+    std::vector<Eigen::Vector3d> mapPts3D; // Vector to store corresponding 3D map points in world coordinates
+
+    // Iterate through the features in the current frame
+    for (const auto& feature_base : features_base) 
+    {
+        // Cast the feature base pointer to a FeaturePointImage pointer
+        FeaturePointImagePtr feature = std::dynamic_pointer_cast<FeaturePointImage>(feature_base);
+        
+        // Retrieve the corresponding landmark from the map using the track ID of the feature
+        LandmarkHpPtr landmark = std::dynamic_pointer_cast<LandmarkHp>(getProblem()->getMap()->getLandmark(feature->trackId()));
+
+        // Ensure both the feature and landmark pointers are valid
+        if (feature == nullptr || landmark == nullptr) continue;
+
+        // Add the 2D feature point to the imgPts2D vector
+        imgPts2D.emplace_back(feature->getMeasurement());
+
+        // Retrieve the 3D position of the landmark in world coordinates
+        Eigen::Vector3d p_inW = landmark->point();
+
+        // Add the 3D map point to the mapPts3D vector
+        mapPts3D.emplace_back(p_inW);
+    }
+    
+    // Convert Eigen vectors to OpenCV types for use in solvePnPRansac
+    std::vector<cv::Point2f> imgPts2D_cv = vo_utils::convertToCvPoint2f(imgPts2D);
+    std::vector<cv::Point3f> mapPts3D_cv = vo_utils::convertToCvPoint3f(mapPts3D);
+    
+    // Solve the Perspective-n-Point (PnP) problem using RANSAC to estimate the camera pose
+    cv::Mat rvec, tvec; // Rotation and translation vectors
+    std::vector<int> inliers; // Vector to store the indices of inlier points
+    cv::solvePnPRansac(mapPts3D_cv, imgPts2D_cv, Kcv_, dcv_, rvec, tvec, false, 100, 10.0, 0.99, inliers);
+
+    WOLF_DEBUG(inliers.size(), " out of ", imgPts2D.size(), " inliers detected for PnP.")
+
+    // Convert the rotation vector (rvec) to a rotation matrix
+    cv::Mat R;
+    cv::Rodrigues(rvec, R);
+
+    // Convert the rotation matrix from OpenCV (cv::Mat) to Eigen::Matrix3d
+    Eigen::Matrix3d eigenR = vo_utils::cvMatToEigen(R);
+
+    // Convert the Eigen::Matrix3d to Eigen::Quaterniond for rotation representation
+    Eigen::Quaterniond R_inC_ofW(eigenR);
+
+    // Convert the translation vector from OpenCV (cv::Mat) to Eigen::Translation3d
+    Eigen::Translation3d t_inC_ofW(tvec.at<double>(0), tvec.at<double>(1), tvec.at<double>(2));
+
+    // Combine the translation and rotation into a single transformation (Isometry) representing the transformation from the camera coordinate frame to the world frame
+    Eigen::Isometry3d T_inC_ofW_estimated = t_inC_ofW * R_inC_ofW;
+    
+    // Define the transformation from the robot's body coordinate frame to the camera coordinate frame
+    Eigen::Isometry3d T_inB_ofC = Eigen::Translation3d(frame->getCaptureOf(sen_cam_)->getSensorP()->getState()) *
+                                  Eigen::Quaterniond(frame->getCaptureOf(sen_cam_)->getSensorO()->getState().data());
+
+    // Calculate the transformation from the world frame to the robot's body frame
+    Eigen::Isometry3d T_inW_ofB_estimated = T_inC_ofW_estimated.inverse() * T_inB_ofC.inverse();
+
+    // Set the transformation from the world coordinate frame to the robot coordinate frame
+    vo_utils::setTinW(T_inW_ofB_estimated, frame);
+}
+
+
+void ProcessorVisualOdometry::estimatePosebyEM(const FrameBasePtr frame_prev, const FrameBasePtr frame_curr) 
+{
+    // Retrieve the list of tracked features
+    std::list<FeatureBasePtr> features = track_matrix_.snapshotAsList(frame_curr->getCaptureOf(sen_cam_));
+
+    // Retrieve 2D-2D feature matching pairs between the frames
+    std::vector<cv::Point2f> pts_prev, pts_curr;
+    std::vector<size_t> track_ids;
+    vo_utils::getFeaturePairs(frame_prev, frame_curr, 
+                              track_matrix_, sen_cam_, 
+                              features,
+                              pts_prev, pts_curr,
+                              track_ids);
+    
+    // Estimate the relative pose using epipolar geometry
+    Eigen::Isometry3d T_inC_curr_ofC_prev = vo_utils::getRelativePoseByEpipolarGeometry(pts_prev, pts_curr, Kcv_);
+
+    // Get the transformation from the world coordinate frame to the previous robot coordinate frame
+    Eigen::Isometry3d T_inW_ofB_prev = vo_utils::getTinW(frame_prev);
+
+    // Define the transformation from the robot coordinate frame to the camera coordinate frame
+    Eigen::Isometry3d T_inB_ofC = Eigen::Translation3d(frame_curr->getCaptureOf(sen_cam_)->getSensorP()->getState()) *
+                                    Eigen::Quaterniond(frame_curr->getCaptureOf(sen_cam_)->getSensorO()->getState().data());
+
+    // Estimate the transformation from the world coordinate frame to the current robot coordinate frame
+    Eigen::Isometry3d T_inW_ofB_curr_estimated = T_inW_ofB_prev * T_inB_ofC * T_inC_curr_ofC_prev.inverse() * T_inB_ofC.inverse();
+
+    // Set the transformation from the world coordinate frame to the current robot coordinate frame
+    vo_utils::setTinW(T_inW_ofB_curr_estimated, frame_curr);
 }
 
 
