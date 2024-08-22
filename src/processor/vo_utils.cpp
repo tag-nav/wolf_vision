@@ -248,6 +248,47 @@ void getFeaturePairs(const FrameBasePtr frame_prev, const FrameBasePtr frame_cur
 }
 
 
+void getFeaturePairs(const CaptureBasePtr capture_prev, const CaptureBasePtr capture_curr, 
+                     const TrackMatrix& track_matrix, const SensorCameraPtr sen_cam,
+                     const std::list<FeatureBasePtr>& features_curr,
+                     std::vector<cv::Point2f>& pts_prev, std::vector<cv::Point2f>& pts_curr,
+                     std::vector<size_t>& track_ids)
+{
+    // Clear the output vectors
+    pts_prev.clear();
+    pts_curr.clear();
+    track_ids.clear();
+
+    // Retrieve 2D-2D feature matching pairs between the frames
+    for (const auto& e : features_curr)
+    {
+        // Cast the current feature to FeaturePointImage type
+        auto feature_curr = std::dynamic_pointer_cast<const FeaturePointImage>(e);
+        if (!feature_curr) continue;  // Skip if the cast fails
+
+        // Retrieve the corresponding feature from the previous frame using the track matrix
+        auto feature_prev_base = track_matrix.feature(feature_curr->trackId(), capture_prev);
+        auto feature_prev = std::dynamic_pointer_cast<const FeaturePointImage>(feature_prev_base);
+
+        // Ensure the previous feature is not null
+        assert(feature_prev != nullptr);
+
+        // Get 2D keypoints associated with the features from the two frames
+        Eigen::Vector2d pt2d_prev = feature_prev->getMeasurement();
+        Eigen::Vector2d pt2d_curr = feature_curr->getMeasurement();
+
+        // Add the 2D points to the output vectors
+        pts_prev.push_back(cv::Point2f(pt2d_prev(0), pt2d_prev(1)));
+        pts_curr.push_back(cv::Point2f(pt2d_curr(0), pt2d_curr(1)));
+        
+        // Add the track ID to the output vector
+        track_ids.push_back(feature_curr->trackId());
+    }
+
+    return;
+}
+
+
 cv::Mat getCameraProjectionMatrix(cv::Mat K, const Eigen::Isometry3d& T_inC_ofW)
 {
     // Convert K to CV_64F if it is not already

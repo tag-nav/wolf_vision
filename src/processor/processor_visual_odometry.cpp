@@ -49,7 +49,7 @@ void ProcessorVisualOdometry::processCapture(CaptureBasePtr _incoming_ptr)
     // FIXME: Is this the best way of initializing the flag?
     if (sen_cam_->getProcessorList().size() == 1)
     {
-        WOLF_DEBUG("ProcessorVisualOdometry is the standalone processor associated with ", sen_cam_->getName(), ". Hence things are up-to-scale...");
+        // WOLF_DEBUG("ProcessorVisualOdometry is the standalone processor associated with ", sen_cam_->getName(), ". Hence things are up-to-scale...");
         is_up_to_scale = true;
     }
 
@@ -95,7 +95,7 @@ void ProcessorVisualOdometry::processCapture(CaptureBasePtr _incoming_ptr)
         // Goal: Find second keyframe and perform initialzation, the process establishing map points and camera poses
         
         // track 2D feature points (origin->last->incoming)
-        size_t num_tracked_features = trackFeatures();
+        size_t num_tracked_features = trackFeatures(false);
         WOLF_INFO("num_tracked_features: ", num_tracked_features)
 
         // TODO: if num_tracked_features goes below threshold, re-create the first KF for different initialization
@@ -107,7 +107,7 @@ void ProcessorVisualOdometry::processCapture(CaptureBasePtr _incoming_ptr)
                                                 capture_origin_->getKeyPoints(), capture_incoming_->getKeyPoints(),
                                                 capture_incoming_->getTracksOrigin());
 
-        WOLF_DEBUG("parallax: ", parallax)
+        // WOLF_DEBUG("parallax: ", parallax)
 
         if (parallax > 3.0) { // if enough parallax, create a keyframe and perform initialization
             // We create a keyframe
@@ -116,6 +116,9 @@ void ProcessorVisualOdometry::processCapture(CaptureBasePtr _incoming_ptr)
             // Perform initialization of 3D map points and add factors associated with the initialized map points and camera poses.
             method_init_frame_pose_ = EM;
             establishFactors();
+
+            // Repopulate features
+            repopulateFeatures();
 
             // Update pointers
             origin_ptr_ = incoming_ptr_;
@@ -133,12 +136,25 @@ void ProcessorVisualOdometry::processCapture(CaptureBasePtr _incoming_ptr)
     else    // otherwise (is_first_KF_created && is_initialized), normal running condition
     {
         // normal running condition
+        
+        // DEBUG: PRINT OUT REPROJECTIONS IF THE LAST CAPTURE IS ASSOCIATED WITH A KEYFRAME
+        CaptureImagePtr capture_kf = std::static_pointer_cast<CaptureImage>(last_frame_ptr_->getCaptureOf(sen_cam_));
+        if (capture_last_ == capture_kf) 
+        {
+            std::vector<Eigen::Vector3d> pts3d;
+            std::vector<Eigen::Vector2d> pts2d;
+            
+            extractPointsFromCaptureImage(capture_kf, pts3d, pts2d);
+
+            std::string fname = "/home/jlee/vision/reproj_cap" + std::to_string(capture_last_->id()) + ".png";
+            vo_utils::evalReprojError(pts3d, pts2d, 
+                                        sen_cam_->getPinholeModel(), sen_cam_->getDistortionVector(), 
+                                        capture_kf->getImage(), true, fname);
+        }
 
         // track 2D feature points (origin->last->incoming)
-        size_t num_tracked_features = trackFeatures();
+        size_t num_tracked_features = trackFeatures(false);
         WOLF_INFO("num_tracked_features: ", num_tracked_features)
-
-        num_captures_elapsed ++;
         
         if (voteForKeyFrame() && permittedKeyFrame())
         {
@@ -147,59 +163,17 @@ void ProcessorVisualOdometry::processCapture(CaptureBasePtr _incoming_ptr)
             // Retrieve the previous frame
             FrameBasePtr kf_prev = kf_curr->getPreviousFrame();
 
-            // Apply esssential matrix based outlier filtering
-            filterOutliersByEssentialMatrix(kf_prev, kf_curr);
-
-            // DEBUG: Compare different frame pose initialization methods: none (i.e., copying the pose of the last frame) and PnP
-            CaptureImagePtr cap_kf_curr = std::static_pointer_cast<CaptureImage>(kf_curr->getCaptureOf(sen_cam_));
-            std::vector<Eigen::Vector3d> pts3d;
-            std::vector<Eigen::Vector2d> pts2d;
-
-            // Case 1: Take the pose of the last keyframe as the initial guess of the new keyframe
-            method_init_frame_pose_ = NONE;
-            establishFactors();
-            extractPointsFromCaptureImage(cap_kf_curr, pts3d, pts2d);
-            vo_utils::evalReprojError(pts3d, pts2d, 
-                                      sen_cam_->getPinholeModel(), sen_cam_->getDistortionVector(), 
-                                      cap_kf_curr->getImage(), true, "/home/jlee/KF3_before.png");
-
-            // Case 2: Estimate the initial guess of the new keyframe by applying PnP
-            method_init_frame_pose_ = EM;
-            establishFactors();
-            extractPointsFromCaptureImage(cap_kf_curr, pts3d, pts2d);
-            vo_utils::evalReprojError(pts3d, pts2d, 
-                                      sen_cam_->getPinholeModel(), sen_cam_->getDistortionVector(), 
-                                      cap_kf_curr->getImage(), true, "/home/jlee/KF3_before_byEM.png");
-
-            // Case 3: Estimate the initial guess of the new keyframe by applying PnP
+            // Perform creation of new 3D map points and add factors associated with camera poses.
             method_init_frame_pose_ = PNP;
             establishFactors();
-            extractPointsFromCaptureImage(cap_kf_curr, pts3d, pts2d);
-            vo_utils::evalReprojError(pts3d, pts2d, 
-                                      sen_cam_->getPinholeModel(), sen_cam_->getDistortionVector(), 
-                                      cap_kf_curr->getImage(), true, "/home/jlee/KF3_before_byPnP.png");
+
+            // Repopulate features
+            repopulateFeatures();
+            // exit(-1);
 
             // Update pointers
             origin_ptr_ = incoming_ptr_;
             last_frame_ptr_ = kf_curr;
-        }
-        
-        // DEBUG: If the last frame is associated to the last capture, print out optimization results for debugging
-        // if (last_frame_ptr_->getCaptureOf(sen_cam_) == last_ptr_ && getProblem()->getTrajectory()->size() == 3) 
-        if (num_captures_elapsed > 3)
-        {
-            FrameBasePtr kf_curr = last_frame_ptr_;
-
-            CaptureImagePtr cap_kf_curr = std::static_pointer_cast<CaptureImage>(kf_curr->getCaptureOf(sen_cam_));
-            std::vector<Eigen::Vector3d> pts3d;
-            std::vector<Eigen::Vector2d> pts2d;
-            
-            extractPointsFromCaptureImage(cap_kf_curr, pts3d, pts2d);
-            vo_utils::evalReprojError(pts3d, pts2d, 
-                                      sen_cam_->getPinholeModel(), sen_cam_->getDistortionVector(), 
-                                      cap_kf_curr->getImage(), true, "/home/jlee/KF3_after.png");
-
-            exit(-1);
         }
         
         last_ptr_       = incoming_ptr_;
@@ -270,11 +244,13 @@ void ProcessorVisualOdometry::preProcess()
 
 bool ProcessorVisualOdometry::voteForKeyFrame() const
 {
-    bool vote = false;
-    // Simple vote based on the number of features being extracted and tracked util the incoming capture
-    // Other rules may take into account number of tracks alive, parallax, etc.
-    // vote = vote || incoming_ptr_->getFeatureList().size() < params_visual_odometry_->min_features_for_keyframe;
-    vote = vote || num_captures_elapsed == 3;
+    // TODO: THIS IS HARD-CODED AS THE DEMO CANNOT READ THE CORRESPONDING VALUE IN THE YAML FOR SOME REASON; NEED TO FIX THIS LATER
+    size_t min_features_for_keyframe = 70;
+
+    std::list<std::shared_ptr<const wolf::FeatureBase>> features = track_matrix_.snapshotAsList(incoming_ptr_);
+    size_t num_tracked_features = features.size();
+
+    bool vote = num_tracked_features < min_features_for_keyframe ? true : false;
 
     return vote;
 }
@@ -364,7 +340,6 @@ void ProcessorVisualOdometry::establishFactors()
     // by essential matrix estimation.
     case EM:
     {
-        WOLF_DEBUG("Essential Matrix")
         estimatePosebyEM(frame_prev, frame_curr);
 
         break;
@@ -372,7 +347,6 @@ void ProcessorVisualOdometry::establishFactors()
     // by PnP.
     case PNP:
     {
-        WOLF_DEBUG("PnP")
         estimatePosebyPnP(frame_curr);
 
         break;
@@ -618,12 +592,78 @@ size_t ProcessorVisualOdometry::populateFeatures()
     capture_incoming_->setTracksPrev(tracks_init);
 
     return capture_incoming_->getKeyPoints().size();
-
-    // TODO: add case for re-population
 }
 
 
-size_t ProcessorVisualOdometry::trackFeatures() 
+size_t ProcessorVisualOdometry::repopulateFeatures()
+{
+    // repopulate features in the **incoming** capture
+
+    // Erase all keypoints previously added to the cell grid
+    cell_grid_.renew();
+
+    // Add last Keypoints that still form valid tracks in the incoming capture
+    // std::list<std::shared_ptr<const wolf::FeatureBase>> features = track_matrix_.snapshotAsList(incoming_ptr_);
+    // size_t num_tracked_features = features.size();
+    for (auto & mwkp : capture_incoming_->getKeyPoints()) 
+    {
+        cell_grid_.hitCell(mwkp.second.getCvKeyPoint());
+    }
+    
+    size_t num_new_features = 0;
+    TracksMap& tracks_origin_incoming = capture_incoming_->getTracksOrigin();
+    TracksMap& tracks_last_incoming = capture_incoming_->getTracksPrev();
+
+    // Detect new KeyPoints; Use the grid to detect new keypoints in empty cells
+    for (int i=0; i < params_visual_odometry_->max_new_features; i++){
+        cv::Rect rect_roi;
+
+        bool is_empty = cell_grid_.pickRoi(rect_roi);
+        if (!is_empty) // for error detection purpose
+        {
+            break;
+        }
+        cv::Mat img_roi(capture_incoming_->getImage(), rect_roi);
+        std::vector<cv::KeyPoint> kps_roi;
+        detector_->detect(img_roi, kps_roi);
+        if (kps_roi.size() > 0){
+            // retain only the best keypoint in each region of interest
+            vo_utils::retainBest(kps_roi, 1);
+
+            // Keypoints are detected in the local coordinates of the region of interest
+            // -> translate to the full image corner coordinate system
+            kps_roi.at(0).pt.x = kps_roi.at(0).pt.x + rect_roi.x;
+            kps_roi.at(0).pt.y = kps_roi.at(0).pt.y + rect_roi.y;
+
+            // update grid with this detection
+            cell_grid_.hitCell(kps_roi.at(0));
+
+            // update the keypoint to be associated with the incoming capture
+            WKeyPoint wkp(kps_roi.at(0));
+            capture_incoming_->addKeyPoint(wkp);
+            
+            // Add tracks for newly populated features
+            // This is to ensure the tracking of origin->last->incoming called by trackFeatures() as a right next step
+            tracks_origin_incoming[wkp.getId()] = wkp.getId();
+            tracks_last_incoming[wkp.getId()] = wkp.getId();
+
+            num_new_features ++;
+        }
+        else
+        {
+            // block this grid's cell so that it is not reused for detection
+            cell_grid_.blockCell(rect_roi);
+        }
+    }
+
+    WOLF_DEBUG("Repopulate features. num_new_features: ", num_new_features)
+
+    // capture_incoming_->setTracksOrigin();
+
+    return num_new_features;
+}
+
+size_t ProcessorVisualOdometry::trackFeatures(bool do_filtering=true) 
 {
     ////////////////////////////////
     // 2D-2D FEATURE TRACKING
@@ -642,12 +682,20 @@ size_t ProcessorVisualOdometry::trackFeatures()
     TracksMap tracks_last_incoming = vo_utils::kltTrack(params_visual_odometry_,
                                                         capture_last_->getImage(), capture_incoming_->getImage(), 
                                                         mwkps_last, mwkps_incoming);
+    
+    // Filter outliers by essential matrix
+    if (do_filtering)
+        filterOutliersByEssentialMatrix(capture_last_, capture_incoming_, mwkps_last, mwkps_incoming, tracks_last_incoming);
 
     // Load TracksMap between origin and last
     TracksMap tracks_origin_last = capture_last_->getTracksOrigin();
 
+    // WOLF_DEBUG("tracks_origin_last.size(): ", tracks_origin_last.size(), " tracks_last_incoming.size(): ", tracks_last_incoming.size());
+
     // Merge tracks to get TracksMap between origin and incoming
     TracksMap tracks_origin_incoming = vo_utils::mergeTracks(tracks_origin_last, tracks_last_incoming);
+
+    WOLF_DEBUG("[tracks_origin_last.size(), tracks_last_incoming.size(), tracks_origin_incoming.size()] : ", tracks_origin_last.size(), tracks_last_incoming.size(), tracks_origin_incoming.size())
 
     // Update captures
     capture_incoming_->addKeyPoints(mwkps_incoming);
@@ -697,7 +745,7 @@ void ProcessorVisualOdometry::updateTrackMatrix()
         }
     }
     
-    WOLF_DEBUG("# of 'continued' feature tracks origin->last->incoming: ", tracks_feature_last_incoming.size())
+    // WOLF_DEBUG("# of 'continued' feature tracks origin->last->incoming: ", tracks_feature_last_incoming.size())
     
     // step 2: update track matrix for the "new" track of last->incoming
     size_t cnt_new_tracks = 0;
@@ -720,7 +768,7 @@ void ProcessorVisualOdometry::updateTrackMatrix()
         }
     }
     
-    WOLF_DEBUG("# of 'new' feature tracks last->incoming: ", cnt_new_tracks)
+    // WOLF_DEBUG("# of 'new' feature tracks last->incoming: ", cnt_new_tracks)
     
     return;
 }
@@ -838,6 +886,63 @@ void ProcessorVisualOdometry::filterOutliersByEssentialMatrix(const FrameBasePtr
 }
 
 
+void ProcessorVisualOdometry::filterOutliersByEssentialMatrix(CaptureImagePtr capture_prev, CaptureImagePtr capture_curr, 
+                                                              const KeyPointsMap& wkpts_prev, const KeyPointsMap& wkpts_curr, 
+                                                              TracksMap& tracks_prev_curr)
+{
+    // Log debug message
+    WOLF_DEBUG("remove outliers in feature tracking ...")
+
+    // Retrieve 2D-2D feature matching pairs between the frames
+    std::vector<cv::Point2f> pts_prev, pts_curr;
+    std::vector<size_t> prev_ids;
+    for (const auto& track : tracks_prev_curr)
+    {
+        Eigen::Vector2d pt2d_prev = wkpts_prev.at(track.first).getEigenKeyPoint();
+        Eigen::Vector2d pt2d_curr = wkpts_curr.at(track.second).getEigenKeyPoint();
+
+        pts_prev.push_back(cv::Point2f(pt2d_prev(0), pt2d_prev(1)));
+        pts_curr.push_back(cv::Point2f(pt2d_curr(0), pt2d_curr(1)));
+        prev_ids.push_back(track.first);
+    }
+
+    WOLF_DEBUG("pts_prev.size(): ", pts_prev.size(), "  pts_curr.size(): ", pts_curr.size())
+
+    // Compute the Essential Matrix using RANSAC
+    cv::Mat inlierMask;
+    cv::Mat essentialMat = cv::findEssentialMat(pts_prev, pts_curr, Kcv_, cv::RANSAC, 0.999, 1.0, inlierMask);
+
+    // Count the number of inliers
+    int numInliers = cv::countNonZero(inlierMask);
+    WOLF_DEBUG("num. of inliers: ", numInliers, " (total: ", inlierMask.rows, ")")
+
+    WOLF_DEBUG("tracks_prev_curr.size() before: ", tracks_prev_curr.size())
+
+    // Filter out the outliers
+    for (size_t i = 0; i < pts_curr.size(); i++)
+    {
+        // If the point is marked as an outlier in the inlierMask
+        if (!inlierMask.at<uchar>(i))
+        {
+            // Get the corresponding KeyPoint ID in KeyPointsMap wkpts_prev
+            size_t prev_id = prev_ids.at(i);
+            size_t curr_id = tracks_prev_curr.at(prev_id);
+
+            // remove the track corresponding to prev_id, curr_id pair in TracksMap tracks_prev_curr
+            tracks_prev_curr.erase(prev_id);
+
+            // remove id
+            capture_prev->removeKeyPoint(prev_id);
+            capture_curr->removeKeyPoint(curr_id);
+            
+        }
+    }
+
+    WOLF_DEBUG("tracks_prev_curr.size() after: ", tracks_prev_curr.size())
+}
+
+
+
 void ProcessorVisualOdometry::estimatePosebyPnP(const FrameBasePtr frame)
 {
     // Take a snapshot of the features associated with the current frame
@@ -877,7 +982,35 @@ void ProcessorVisualOdometry::estimatePosebyPnP(const FrameBasePtr frame)
     std::vector<int> inliers; // Vector to store the indices of inlier points
     cv::solvePnPRansac(mapPts3D_cv, imgPts2D_cv, Kcv_, dcv_, rvec, tvec, false, 100, 10.0, 0.99, inliers);
 
-    WOLF_DEBUG(inliers.size(), " out of ", imgPts2D.size(), " inliers detected for PnP.")
+    WOLF_DEBUG(inliers.size(), " out of ", features_base.size(), " inliers detected for PnP.")
+
+    // Add outlier rejection
+    std::vector<int> all_idxs;
+    for (int i = 0; i < features_base.size(); i++)
+        all_idxs.push_back(i);
+
+    std::vector<int> outliers;
+    std::set_difference(
+        all_idxs.begin(), all_idxs.end(),
+        inliers.begin(), inliers.end(),
+        std::back_inserter(outliers)
+    );
+
+    int cnt = 0;
+    int idx = 0;
+    for (const auto& feature_base : features_base) 
+    {
+        // Check if the current index is an outlier index and if outliers is not empty
+        if (!outliers.empty() && idx == outliers.front())
+        {
+            track_matrix_.remove(feature_base);
+            outliers.erase(outliers.begin()); // Remove the first element from outliers
+
+            cnt ++;
+        }
+
+        idx++;
+    }
 
     // Convert the rotation vector (rvec) to a rotation matrix
     cv::Mat R;

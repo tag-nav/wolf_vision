@@ -222,8 +222,6 @@ class ProcessorVisualOdometry : public ProcessorTracker
         // flag if the processor is initialized with two keyframes and enough 3D map points
         bool is_initialized = false;
 
-        size_t num_captures_elapsed = 0;
-
     public:
 
         /**
@@ -272,11 +270,16 @@ class ProcessorVisualOdometry : public ProcessorTracker
          */
         size_t populateFeatures();
 
+        /**
+         * \brief Repopulates features in the incoming capture.
+         */
+        size_t repopulateFeatures();
+
         // Functions related to feature tracking
         /**
          * \brief Tracks features from origin to last to incoming.
          */        
-        size_t trackFeatures();
+        size_t trackFeatures(bool do_filtering);
 
         /**
          * \brief Updates the member variable (TrackMatrix track_matrix_) for managing the feature tracking status.
@@ -310,6 +313,10 @@ class ProcessorVisualOdometry : public ProcessorTracker
          * @param frame_curr A pointer to the current frame containing the tracked features.
          */
         void filterOutliersByEssentialMatrix(const FrameBasePtr frame_prev, const FrameBasePtr frame_curr);
+
+        void filterOutliersByEssentialMatrix(CaptureImagePtr capture_prev, CaptureImagePtr capture_curr, 
+                                             const KeyPointsMap& wkpts_prev, const KeyPointsMap& wkpts_curr, 
+                                             TracksMap& tracks_prev_curr);
         
         /**
          * @brief Estimate the pose of frame by applying PnP with respect to the established map points.
